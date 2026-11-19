@@ -153,3 +153,11 @@ export async function seedSolved(page: Page, tickets: TicketInfo[]) {
   );
   await page.reload();
 }
+
+/** Every ticket in every season, in folder order (seasons are added over time). */
+export function allSeasonTickets(): TicketInfo[] {
+  return readdirSync(SEASONS_DIR)
+    .filter((d) => statSync(join(SEASONS_DIR, d)).isDirectory())
+    .sort()
+    .flatMap((d) => seasonTickets(d));
+}

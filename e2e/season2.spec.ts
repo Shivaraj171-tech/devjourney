@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { load } from "js-yaml";
 import { expect, test, type Page } from "@playwright/test";
 import {
+  allSeasonTickets,
   answerQuiz,
   openQuizTab,
   readProgress,
@@ -188,7 +189,7 @@ test("every Season 2 ticket can be played in the browser", async ({ page }) => {
 
   await page.goto("/");
   const all = [...season1, ...season2];
-  await expect(page.locator("[data-testid^=room-]")).toHaveCount(all.length);
+  await expect(page.locator("[data-testid^=room-]")).toHaveCount(allSeasonTickets().length);
   for (const t of all) {
     await expect(page.getByTestId(`room-${t.id}`)).toHaveAttribute("data-state", "done");
   }

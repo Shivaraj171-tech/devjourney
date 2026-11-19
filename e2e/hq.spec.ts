@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { seasonTickets, trackPageErrors } from "./helpers";
+import { allSeasonTickets, seasonTickets, trackPageErrors } from "./helpers";
 
 const tickets = seasonTickets();
 const season2 = seasonTickets("s02-week-two");
@@ -10,7 +10,7 @@ test("HQ shows every room with only room 1 open (Floor 2 locked)", async ({ page
   await expect(page.getByRole("heading", { name: /Welcome to your first day/ })).toBeVisible();
 
   const rooms = page.locator("[data-testid^=room-]");
-  await expect(rooms).toHaveCount(tickets.length + season2.length);
+  await expect(rooms).toHaveCount(allSeasonTickets().length);
   expect(tickets).toHaveLength(10);
   for (const t of season2) {
     await expect(page.getByTestId(`room-${t.id}`)).toHaveAttribute("data-state", "locked");
