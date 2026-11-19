@@ -6,10 +6,19 @@ No accounts, no setup: Python runs in your browser (Pyodide), and progress is sa
 
 ## What's in it
 
-- **Startup HQ**: the home screen. Your office floor is the progress map: each ticket is a room that unlocks once the previous one is merged. A phone mock-up of the Orbit Orders app lights up features as you ship them.
-- **Ticket workspace**: a story from a teammate, a 2-minute concept lesson (📘 Learn), a VS Code-style editor (Monaco), "Run tests" as CI checks with plain-language error explanations, a "Done when" checklist, staged hints (each costs a little XP), and a short quiz after merging.
-- **Game layer**: XP, ranks (Intern → Senior), a forgiving daily streak (one missed day is bridged), badges, and an office leaderboard against fictional teammates (including Sam, the rival new hire).
-- **Content**: Season 1 "Your First Week" (10 tickets). See `content/` and the format in [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md).
+- **Startup HQ**: the home screen. Each season is a floor of the office and each ticket is a room that unlocks once the previous one is done. A phone mock-up of the Orbit Orders app lights up features as you ship them.
+- **Ticket workspace**: a story from a teammate, a 2-minute concept lesson (📘 Learn), a VS Code-style editor (Monaco), "Run tests" as CI checks with plain-language error explanations and a 📍 file/line pointer, a "Done when" checklist, staged hints (each costs a little XP), and a short quiz after merging.
+- **Ticket types**: `bug`, `feature`, `read` (answer questions about unfamiliar code), `review` (click the lines with problems in a teammate's or AI's pull request; false alarms cost XP) and `incident` (production is down: logs, a countdown and a speed bonus).
+- **Game layer**: XP, ranks (Intern → Trusted Intern → Junior Developer, the promotion lands at the end of Month One), a forgiving daily streak (one missed day is bridged), 9 badges, a daily 2-minute warm-up, a skill tree of everything you've learned, and an office leaderboard against fictional teammates (including Sam, the rival new hire, and Byte, the AI assistant).
+- **Content** (`content/`, format in [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) section 4, every format checked by `scripts/validate_content.py`):
+
+  | Floor | Season | Tickets | Concepts |
+  |---|---|---|---|
+  | 1 | Your First Week | 10 | strings, numbers, conditionals, loops, lists, dictionaries, reading code, None, functions, mutable shared data |
+  | 2 | Week Two: The AI Pair | 5 | code review, side effects, tracebacks, boolean logic, reviewing diffs |
+  | 3 | Month One: Going Live | 6 | classes, JSON, writing tests, security, performance, refactoring |
+
+  Plus 40 daily warm-ups (`content/warmups/`).
 - **Research**: competitor analysis in [`docs/research/competitors.md`](docs/research/competitors.md).
 
 ## Run it
@@ -40,7 +49,7 @@ That serves `out/` at http://localhost:3000.
 | `npm run validate-content` | Every ticket: starter fails its tests, solution passes, metadata/hints/quiz/lesson valid, codebase evolves ticket to ticket (needs `pip install pyyaml`) |
 | `python3 -m unittest discover -s scripts/tests` | Tests for the Python test runner and the content validator |
 | `npm run test:unit` | Game rules, error explanations, checklist parsing |
-| `npm run e2e` | Playwright end-to-end: plays through every ticket in a real browser |
+| `npm run e2e` | Playwright end-to-end: plays every ticket of every season in a real browser (Python in Pyodide) |
 | `npm run lint` | ESLint |
 
 ## How it works
