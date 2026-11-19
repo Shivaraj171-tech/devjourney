@@ -13,6 +13,10 @@ For each ticket it checks:
   6. The tests PASS against solution/.
   7. Evolving codebase: every file in solution(N) appears unchanged in starter(N+1).
 
+Daily warm-ups (content/warmups/*.yaml, optional) are checked too: required
+fields, unique ids, `after` names a real ticket id, the code compiles and is
+3-10 lines, 2-4 choices and a valid 0-based answer index.
+
 Tickets with `type: read` are different: the questions ARE the task. They need
 starter/ (the code to read) and a questions.yaml with at least 3 questions;
 tests/ and solution/ are optional and checks 5-6 are skipped. For check 7 the
@@ -56,6 +60,14 @@ ALLOWED = {
     "level": {"intern", "junior", "mid", "senior"},
     "track": {"foundations", "building", "debugging", "reading", "systems", "ai"},
 }
+
+
+WARMUP_CONCEPTS = {
+    "strings", "numbers", "conditionals", "loops", "lists", "dictionaries",
+    "None", "functions", "mutable-shared-data", "reading-code",
+}
+WARMUP_STRING_FIELDS = ["id", "title", "concept", "after", "code", "question", "explain"]
+MIN_WARMUP_LINES, MAX_WARMUP_LINES = 3, 10
 
 
 def run_ticket_tests(code_dir, tests_dir):
@@ -298,11 +310,93 @@ def validate_season(season_dir):
     return report
 
 
+def check_warmup(path, ticket_ids):
+    """Check one warm-up file. Returns (warm-up id or None, list of error strings)."""
+    name = path.name
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return None, [f"{name}: not valid YAML: {exc}"]
+    if not isinstance(data, dict):
+        return None, [f"{name}: must be a mapping of fields"]
+
+    errors = []
+    for field in WARMUP_STRING_FIELDS:
+        if not is_nonempty_str(data.get(field)):
+            errors.append(f"{name}: '{field}' is missing or empty")
+    warmup_id = data.get("id") if is_nonempty_str(data.get("id")) else None
+    if warmup_id and warmup_id != path.stem:
+        errors.append(f"{name}: id {warmup_id!r} should match the file name {path.stem!r}")
+    concept = data.get("concept")
+    if is_nonempty_str(concept) and concept not in WARMUP_CONCEPTS:
+        errors.append(f"{name}: concept {concept!r} is not one of {sorted(WARMUP_CONCEPTS)}")
+    after = data.get("after")
+    if is_nonempty_str(after) and after not in ticket_ids:
+        errors.append(f"{name}: after {after!r} is not a ticket id")
+
+    code = data.get("code")
+    if is_nonempty_str(code):
+        lines = len(code.strip("\n").splitlines())
+        if not MIN_WARMUP_LINES <= lines <= MAX_WARMUP_LINES:
+            errors.append(f"{name}: code has {lines} lines, needs {MIN_WARMUP_LINES}-{MAX_WARMUP_LINES}")
+        try:
+            compile(code, name, "exec")
+        except SyntaxError as exc:
+            errors.append(f"{name}: code has a syntax error: {exc.msg} (line {exc.lineno})")
+
+    choices = data.get("choices")
+    if not isinstance(choices, list) or not all(is_nonempty_str(c) for c in choices):
+        errors.append(f"{name}: 'choices' must be a list of non-empty strings")
+        return warmup_id, errors
+    if not MIN_CHOICES <= len(choices) <= MAX_CHOICES:
+        errors.append(f"{name}: has {len(choices)} choices, needs {MIN_CHOICES}-{MAX_CHOICES}")
+    if len({c.strip() for c in choices}) != len(choices):
+        errors.append(f"{name}: choices must all be different")
+    answer = data.get("answer")
+    if not isinstance(answer, int) or isinstance(answer, bool):
+        errors.append(f"{name}: 'answer' must be a whole number (0-based index)")
+    elif not 0 <= answer < len(choices):
+        errors.append(f"{name}: answer {answer} is out of range for {len(choices)} choices")
+    return warmup_id, errors
+
+
+def validate_warmups(warmups_dir, ticket_ids):
+    """Check every warm-up file. Returns a list of error strings."""
+    errors, seen = [], {}
+    files = sorted(warmups_dir.glob("*.yaml"))
+    if not files:
+        return ["warmups/ has no .yaml files"]
+    for path in files:
+        warmup_id, file_errors = check_warmup(path, ticket_ids)
+        errors += file_errors
+        if warmup_id in seen:
+            errors.append(f"{path.name}: id {warmup_id!r} is also used by {seen[warmup_id]}")
+        elif warmup_id:
+            seen[warmup_id] = path.name
+    return errors
+
+
+def all_ticket_ids(seasons_root):
+    """Every ticket id found in any season's ticket.yaml files."""
+    ids = set()
+    for ticket_yaml in seasons_root.glob("*/tickets/*/ticket.yaml"):
+        try:
+            meta = yaml.safe_load(ticket_yaml.read_text(encoding="utf-8"))
+        except yaml.YAMLError:
+            continue
+        if isinstance(meta, dict) and isinstance(meta.get("id"), str):
+            ids.add(meta["id"])
+    return ids
+
+
 def validate_content(content_dir):
     report = {}
     seasons_root = Path(content_dir) / "seasons"
     for season_dir in sorted(p for p in seasons_root.iterdir() if p.is_dir()):
         report.update(validate_season(season_dir))
+    warmups_dir = Path(content_dir) / "warmups"
+    if warmups_dir.is_dir():
+        report["warmups"] = validate_warmups(warmups_dir, all_ticket_ids(seasons_root))
     return report
 
 

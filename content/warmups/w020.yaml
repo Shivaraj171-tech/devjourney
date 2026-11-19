@@ -1,0 +1,14 @@
+id: w020
+title: "Arguments in the wrong order"
+concept: functions
+after: s01-t09
+code: |
+  def price_after_discount(subtotal_cents, discount_cents):
+      return subtotal_cents - discount_cents
+
+  # a $20.00 order with a $3.00 discount
+  print(price_after_discount(300, 2000))
+question: "What does this print?"
+choices: ["1700", "2300", "-1700", "It crashes"]
+answer: 2
+explain: "Arguments are matched by position, so subtotal_cents is 300 and discount_cents is 2000. 300 - 2000 is -1700."

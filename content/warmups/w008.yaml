@@ -1,0 +1,17 @@
+id: w008
+title: "Which label wins?"
+concept: conditionals
+after: s01-t03
+code: |
+  def delivery_label(minutes):
+      if minutes > 10:
+          return "Soon"
+      elif minutes > 30:
+          return "Running late"
+      return "Almost there"
+
+  print(delivery_label(45))
+question: "What does this print?"
+choices: ["Soon", "Running late", "Almost there"]
+answer: 0
+explain: "Python uses the first branch whose condition is True, and 45 > 10 already is. The > 30 check needs to come first."

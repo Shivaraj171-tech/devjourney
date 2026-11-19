@@ -1,0 +1,12 @@
+id: w012
+title: "What's in the cart?"
+concept: lists
+after: s01-t05
+code: |
+  cart = ["margherita", "lemonade", "garlic_bread"]
+  cart.append("tiramisu")
+  print(len(cart), cart[1])
+question: "What does this print?"
+choices: ["4 margherita", "3 lemonade", "4 lemonade", "4 tiramisu"]
+answer: 2
+explain: "append adds to the end, making 4 items. Positions start at 0, so cart[1] is the second item."

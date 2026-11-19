@@ -1,0 +1,15 @@
+id: w017
+title: "No delivery note"
+concept: None
+after: s01-t08
+code: |
+  def find_note(order):
+      """Return the delivery note, or None if there isn't one."""
+      return order.get("note")
+
+  note = find_note({"customer": "Sam"})
+  print(note is None)
+question: "What does this print?"
+choices: ["False", "True", "It crashes with KeyError"]
+answer: 1
+explain: ".get() without a default gives back None for a missing key instead of crashing. So note is None and the check prints True."

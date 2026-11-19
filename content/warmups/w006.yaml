@@ -1,0 +1,12 @@
+id: w006
+title: "Quantity from a text box"
+concept: numbers
+after: s01-t02
+code: |
+  # the customer typed 2 into the quantity box
+  qty = "2"
+  print(qty * 3)
+question: "What does this print?"
+choices: ["6", "222", "It crashes", "23"]
+answer: 1
+explain: "\"2\" is text, not a number, and multiplying text by 3 repeats it. Turn it into a number first with int(qty)."

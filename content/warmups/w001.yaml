@@ -1,0 +1,12 @@
+id: w001
+title: "Two receipts, one letter apart"
+concept: strings
+after: s01-t01
+code: |
+  item = "lemonade"
+  print(f"1 x {item}")
+  print("1 x {item}")
+question: "What is printed on the second line?"
+choices: ["1 x lemonade", "1 x item", "1 x {item}", "Nothing, it crashes"]
+answer: 2
+explain: "Only the first string has the f prefix. Without it, {item} is printed exactly as written."

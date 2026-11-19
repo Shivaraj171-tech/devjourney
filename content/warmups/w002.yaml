@@ -1,0 +1,12 @@
+id: w002
+title: "Gluing words together"
+concept: strings
+after: s01-t01
+code: |
+  first = "Garlic"
+  second = "bread"
+  print(first + second)
+question: "What does this print?"
+choices: ["Garlic bread", "Garlicbread", "Garlic + bread", "It crashes"]
+answer: 1
+explain: "+ joins strings exactly as they are and never adds a space for you. You'd need first + \" \" + second."

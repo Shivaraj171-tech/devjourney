@@ -1,0 +1,16 @@
+id: w019
+title: "Functions inside functions"
+concept: functions
+after: s01-t09
+code: |
+  def with_fee(cents):
+      return cents + 399
+
+  def label(cents):
+      return f"${cents / 100:.2f}"
+
+  print(label(with_fee(1000)))
+question: "What does this print?"
+choices: ["$10.00", "$13.99", "$3.99", "$1399.00"]
+answer: 1
+explain: "The inner call runs first: with_fee(1000) returns 1399. Then label turns 1399 cents into \"$13.99\"."

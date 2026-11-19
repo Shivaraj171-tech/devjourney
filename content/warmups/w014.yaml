@@ -1,0 +1,13 @@
+id: w014
+title: "Price update"
+concept: dictionaries
+after: s01-t06
+code: |
+  menu = {"margherita": 1250, "lemonade": 299}
+  menu["lemonade"] = 349
+  menu["tiramisu"] = 550
+  print(len(menu), menu["lemonade"])
+question: "What does this print?"
+choices: ["3 349", "3 299", "4 349", "2 349"]
+answer: 0
+explain: "Assigning to an existing key replaces its value, and a new key adds a new pair. So there are 3 items and lemonade is now 349."

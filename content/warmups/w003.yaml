@@ -1,0 +1,12 @@
+id: w003
+title: "Pick the right thank-you"
+concept: strings
+after: s01-t01
+code: |
+  def thank_you(name):
+      """Should return e.g. "Thanks for ordering, Ana!"."""
+      return "Thanks for ordering, {name}!"
+question: "thank_you(\"Ana\") returns the wrong text. Which replacement return line fixes it?"
+choices: ["return \"Thanks for ordering, {Ana}!\"", "return f\"Thanks for ordering, name!\"", "return f\"Thanks for ordering, {name}!\""]
+answer: 2
+explain: "You need both the f prefix and the variable name inside curly braces. Writing {Ana} would look for a variable called Ana."

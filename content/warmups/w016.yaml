@@ -1,0 +1,17 @@
+id: w016
+title: "Loyalty points"
+concept: reading-code
+after: s01-t07
+code: |
+  def loyalty_points(subtotal_cents, is_member):
+      """Points a customer earns for an order."""
+      if not is_member:
+          return 0
+      points = subtotal_cents // 100
+      if subtotal_cents >= 3000:
+          points = points * 2
+      return points
+question: "What does loyalty_points(3500, True) return?"
+choices: ["35", "0", "3500", "70"]
+answer: 3
+explain: "A member gets 3500 // 100 = 35 points, and orders of $30.00 or more double them to 70."

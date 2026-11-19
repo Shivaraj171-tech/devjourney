@@ -1,0 +1,16 @@
+id: w007
+title: "Minimum order check"
+concept: conditionals
+after: s01-t03
+code: |
+  MIN_ORDER = 1000  # cents ($10.00)
+
+  def can_checkout(subtotal_cents):
+      """Orders of $10.00 or more can check out."""
+      if subtotal_cents > MIN_ORDER:
+          return True
+      return False
+question: "Which call gives the WRONG answer according to the docstring?"
+choices: ["can_checkout(500)", "can_checkout(1000)", "can_checkout(1500)"]
+answer: 1
+explain: "An order of exactly $10.00 should be allowed, but 1000 > 1000 is False. The other two calls are correct."

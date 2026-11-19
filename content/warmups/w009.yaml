@@ -1,0 +1,16 @@
+id: w009
+title: "Is the kitchen open?"
+concept: conditionals
+after: s01-t03
+code: |
+  def is_open(hour):
+      """The kitchen is open from 11:00 until 21:59."""
+      if hour >= 11 or hour < 22:
+          return True
+      return False
+
+  print(is_open(3))
+question: "What does is_open(3) print?"
+choices: ["False", "True", "It crashes"]
+answer: 1
+explain: "or only needs one side to be True, and 3 < 22 is True. The rule needs and, so both sides must be True."

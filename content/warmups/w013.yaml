@@ -1,0 +1,12 @@
+id: w013
+title: "Where did the cart go?"
+concept: lists
+after: s01-t05
+code: |
+  cart = ["margherita"]
+  cart = cart.append("lemonade")
+  print(cart)
+question: "What does this print?"
+choices: ["None", "['margherita', 'lemonade']", "['lemonade']", "['margherita']"]
+answer: 0
+explain: "append changes the list and returns None, and that None is then stored in cart. Call cart.append(...) on its own line instead."

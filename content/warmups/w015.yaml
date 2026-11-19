@@ -1,0 +1,12 @@
+id: w015
+title: "Is it on the menu?"
+concept: dictionaries
+after: s01-t06
+code: |
+  menu = {"margherita": 1250, "lemonade": 299}
+  print("lemonade" in menu)
+  print(299 in menu)
+question: "What is printed on the second line?"
+choices: ["True", "False", "It crashes"]
+answer: 1
+explain: "in checks a dictionary's keys, not its values. 299 is a value, so the answer is False."

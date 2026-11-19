@@ -1,0 +1,13 @@
+id: w021
+title: "Two names, one cart"
+concept: mutable-shared-data
+after: s01-t10
+code: |
+  sam_cart = [1250]
+  ana_cart = sam_cart
+  ana_cart.append(299)
+  print(sam_cart)
+question: "What does this print?"
+choices: ["[1250]", "[1250, 299]", "[299]", "[1250, 1250, 299]"]
+answer: 1
+explain: "ana_cart = sam_cart doesn't copy the list; both names point at the same one. Adding through either name changes it for both."

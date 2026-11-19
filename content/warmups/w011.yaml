@@ -1,0 +1,16 @@
+id: w011
+title: "The forgetful total"
+concept: loops
+after: s01-t04
+code: |
+  def cart_total(prices):
+      for price in prices:
+          total = 0
+          total = total + price
+      return total
+
+  print(cart_total([1250, 450, 299]))
+question: "What does this print?"
+choices: ["1999", "0", "1250", "299"]
+answer: 3
+explain: "total is reset to 0 on every pass through the loop, so only the last price survives. Set it to 0 once, before the loop."

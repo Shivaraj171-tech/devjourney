@@ -376,6 +376,93 @@ class ConceptTests(TempDirTestCase):
         self.assertEqual(vc.check_ticket_meta(t), [])
 
 
+GOOD_WARMUP = """\
+id: w001
+title: "Spot the off-by-one"
+concept: loops
+after: s99-t01
+code: |
+  def total(prices):
+      result = 0
+      for i in range(1, len(prices)):
+          result += prices[i]
+      return result
+question: "What does total([5, 10, 20]) return?"
+choices: ["35", "30", "15", "It crashes"]
+answer: 1
+explain: "range(1, ...) skips index 0."
+"""
+
+
+class WarmupTests(TempDirTestCase):
+    IDS = {"s99-t01"}
+
+    def check(self, text, name="w001.yaml"):
+        path = self.tmp / name
+        path.write_text(text, encoding="utf-8")
+        return vc.check_warmup(path, self.IDS)[1]
+
+    def assert_flagged(self, errors, fragment):
+        self.assertTrue(any(fragment in e for e in errors), errors)
+
+    def test_good_warmup_has_no_errors(self):
+        self.assertEqual(self.check(GOOD_WARMUP), [])
+
+    def test_missing_field_is_flagged(self):
+        self.assert_flagged(self.check(GOOD_WARMUP.replace('explain: "range(1, ...) skips index 0."\n', "")),
+                            "'explain' is missing or empty")
+
+    def test_unknown_after_ticket_is_flagged(self):
+        self.assert_flagged(self.check(GOOD_WARMUP.replace("after: s99-t01", "after: s99-t42")),
+                            "after 's99-t42' is not a ticket id")
+
+    def test_unknown_concept_is_flagged(self):
+        self.assert_flagged(self.check(GOOD_WARMUP.replace("concept: loops", "concept: recursion")),
+                            "concept 'recursion'")
+
+    def test_code_syntax_error_is_flagged(self):
+        self.assert_flagged(self.check(GOOD_WARMUP.replace("def total(prices):", "def total(prices)")),
+                            "syntax error")
+
+    def test_code_too_short_is_flagged(self):
+        text = GOOD_WARMUP.replace(
+            "  def total(prices):\n      result = 0\n      for i in range(1, len(prices)):\n"
+            "          result += prices[i]\n      return result\n", "  x = 1\n")
+        self.assert_flagged(self.check(text), "code has 1 lines")
+
+    def test_answer_out_of_range_is_flagged(self):
+        self.assert_flagged(self.check(GOOD_WARMUP.replace("answer: 1", "answer: 4")), "out of range")
+
+    def test_too_many_choices_is_flagged(self):
+        text = GOOD_WARMUP.replace('"It crashes"]', '"It crashes", "0"]')
+        self.assert_flagged(self.check(text), "needs 2-4")
+
+    def test_id_must_match_file_name(self):
+        self.assert_flagged(self.check(GOOD_WARMUP, name="w002.yaml"), "should match the file name")
+
+    def test_duplicate_ids_are_flagged(self):
+        d = self.tmp / "warmups"
+        d.mkdir()
+        (d / "w001.yaml").write_text(GOOD_WARMUP, encoding="utf-8")
+        (d / "w002.yaml").write_text(GOOD_WARMUP, encoding="utf-8")
+        errors = vc.validate_warmups(d, self.IDS)
+        self.assertIn("w002.yaml: id 'w001' is also used by w001.yaml", errors)
+
+    def test_warmups_are_part_of_content_validation(self):
+        season = self.tmp / "seasons" / "s99"
+        write(season / "season.yaml", "id: s99\ntitle: T\nintro: I\ntickets: [t01]\n")
+        make_ticket(season / "tickets", "t01")
+        (self.tmp / "warmups").mkdir()
+        (self.tmp / "warmups" / "w001.yaml").write_text(GOOD_WARMUP, encoding="utf-8")
+        self.assertEqual(vc.validate_content(self.tmp)["warmups"], [])
+
+    def test_warmups_folder_is_optional(self):
+        season = self.tmp / "seasons" / "s99"
+        write(season / "season.yaml", "id: s99\ntitle: T\nintro: I\ntickets: [t01]\n")
+        make_ticket(season / "tickets", "t01")
+        self.assertNotIn("warmups", vc.validate_content(self.tmp))
+
+
 class EvolutionTests(TempDirTestCase):
     def test_next_starter_built_from_previous_solution_is_ok(self):
         t1 = make_ticket(self.tmp, "t01")

@@ -1,0 +1,16 @@
+id: w010
+title: "Spot the off-by-one"
+concept: loops
+after: s01-t04
+code: |
+  def total(prices):
+      result = 0
+      for i in range(1, len(prices)):
+          result += prices[i]
+      return result
+
+  print(total([5, 10, 20]))
+question: "total([5, 10, 20]) should be 35. What does it print?"
+choices: ["35", "30", "15", "It crashes"]
+answer: 1
+explain: "range(1, ...) starts at index 1, so prices[0] (5) is skipped: 10 + 20 = 30."

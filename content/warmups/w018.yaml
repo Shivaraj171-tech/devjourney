@@ -1,0 +1,14 @@
+id: w018
+title: "The tip that vanished"
+concept: None
+after: s01-t08
+code: |
+  def add_tip(total_cents):
+      total_cents + 200
+
+  result = add_tip(1500)
+  print(result)
+question: "What does this print?"
+choices: ["1700", "1500", "None", "It crashes"]
+answer: 2
+explain: "The function works out 1700 but never returns it. A function without a return statement gives back None."
