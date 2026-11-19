@@ -125,3 +125,66 @@ export function leaderboard(you: { name: string; xp: number }, daysSinceStart: n
   return [...teammates(daysSinceStart), { name: you.name, role: "You", avatar: "⭐", xp: you.xp, isYou: true }]
     .sort((a, b) => b.xp - a.xp);
 }
+
+// ---------- Review & incident tickets ----------
+// Kept in their own section so they don't touch the rules above.
+
+/** XP lost for each line flagged in a review that isn't a real problem. */
+export const FALSE_ALARM_COST = 10;
+/** Extra XP for fixing an incident before its timer runs out. */
+export const INCIDENT_SPEED_BONUS = 50;
+
+/** XP breakdown with the extra rows review and incident tickets can have. */
+export type TicketXp = SolveXp & { falseAlarmPenalty?: number; speedBonus?: number };
+
+/** Hint penalty used everywhere: HINT_COST each, never more than 60% of the base. */
+function hintPenaltyFor(base: number, hintsUsed: number): number {
+  return Math.min(hintsUsed * HINT_COST, Math.round(base * 0.6));
+}
+
+/**
+ * XP for a finished code review: the level's base, minus FALSE_ALARM_COST for every
+ * distinct line wrongly flagged (across all submits), minus hints. Never below 0,
+ * so flagging every line "just in case" earns nothing.
+ */
+export function reviewXp(level: Level, falseAlarms: number, hintsUsed: number): TicketXp {
+  const base = BASE_XP[level];
+  const hintPenalty = hintPenaltyFor(base, hintsUsed);
+  const falseAlarmPenalty = Math.min(falseAlarms * FALSE_ALARM_COST, base - hintPenalty);
+  return { base, hintPenalty, falseAlarmPenalty, firstRunBonus: 0, total: base - hintPenalty - falseAlarmPenalty };
+}
+
+/** Seconds left on an incident timer (negative once it has run out). */
+export function incidentSecondsLeft(startedAtMs: number, nowMs: number, limitMinutes: number): number {
+  return Math.floor((startedAtMs + limitMinutes * 60_000 - nowMs) / 1000);
+}
+
+/** Speed bonus for an incident: INCIDENT_SPEED_BONUS if fixed within the time limit, else 0. */
+export function incidentBonus(startedAtMs: number, solvedAtMs: number, limitMinutes: number): number {
+  return solvedAtMs - startedAtMs <= limitMinutes * 60_000 ? INCIDENT_SPEED_BONUS : 0;
+}
+
+/** XP for fixing an incident: the normal solve XP plus the speed bonus. */
+export function incidentXp(level: Level, hintsUsed: number, runs: number, speedBonus: number): TicketXp {
+  const xp = solveXp(level, hintsUsed, runs);
+  return { ...xp, speedBonus, total: xp.total + speedBonus };
+}
+
+/** Result of checking a review: which flags hit real issues, and which were false alarms. */
+export type ReviewCheck = { found: number[]; falseAlarms: string[]; passed: boolean };
+
+/**
+ * Compare flagged lines ("path:line" keys) with the PR's real issues.
+ * `found` lists the indexes of issues that were flagged (on their line or one of their alsoLines).
+ */
+export function checkReview(
+  flags: string[],
+  issues: { file: string; line: number; alsoLines: number[] }[],
+): ReviewCheck {
+  const flagged = new Set(flags);
+  const issueKeys = issues.map((i) => [i.line, ...i.alsoLines].map((l) => `${i.file}:${l}`));
+  const found = issueKeys.flatMap((keys, idx) => (keys.some((k) => flagged.has(k)) ? [idx] : []));
+  const allIssueKeys = new Set(issueKeys.flat());
+  const falseAlarms = flags.filter((f) => !allIssueKeys.has(f));
+  return { found, falseAlarms, passed: found.length === issues.length };
+}

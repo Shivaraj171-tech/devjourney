@@ -16,10 +16,11 @@ export default async function TicketPage({ params }: PageProps<"/ticket/[id]">) 
   const { id } = await params;
   const ticket = getTicket(id);
   if (!ticket) notFound();
-  const siblings = allTickets().filter((t) => t.seasonId === ticket.seasonId);
-  const index = siblings.findIndex((t) => t.id === ticket.id);
-  const prev = siblings[index - 1];
-  const next = siblings[index + 1];
+  // One long story: the first ticket of a season unlocks after the last ticket of the season before.
+  const ordered = allTickets();
+  const index = ordered.findIndex((t) => t.id === ticket.id);
+  const prev = ordered[index - 1];
+  const next = ordered[index + 1];
   return (
     <TicketWorkspace
       ticket={ticket}

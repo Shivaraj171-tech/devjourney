@@ -1,11 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useEffect } from "react";
-import type { SolveXp } from "@/lib/game/rules";
+import type { TicketType } from "@/lib/content/types";
+import type { TicketXp } from "@/lib/game/rules";
 
 type Props = {
-  xp: SolveXp;
+  xp: TicketXp;
   isRead: boolean;
+  /** The ticket type, for the review/incident wording. */
+  variant?: TicketType;
   hasQuiz: boolean;
   nextTicket: { id: string; title: string } | null;
   onQuiz: () => void;
@@ -14,7 +17,17 @@ type Props = {
 
 const CONFETTI = ["🎉", "✨", "🚀", "⭐", "🍕", "🎊"];
 
-export default function SolvedModal({ xp, isRead, hasQuiz, nextTicket, onQuiz, onClose }: Props) {
+const VARIANT_TEXT: Partial<Record<TicketType, { icon: string; title: string; blurb: string }>> = {
+  review: { icon: "🔍", title: "Review submitted!", blurb: "You caught the bugs before they reached customers. That's what good reviewers do." },
+  incident: { icon: "🧯", title: "Incident resolved!", blurb: "Production is back up. Leo can finally answer the support queue." },
+};
+
+export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, onQuiz, onClose }: Props) {
+  const text = (variant && VARIANT_TEXT[variant]) ?? {
+    icon: isRead ? "📖" : "🟣",
+    title: isRead ? "Ticket closed!" : "PR merged!",
+    blurb: isRead ? "You understood code you didn't write. That's a real superpower." : "All checks green. Customers will never know it was broken.",
+  };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -35,15 +48,15 @@ export default function SolvedModal({ xp, isRead, hasQuiz, nextTicket, onQuiz, o
         ))}
       </div>
       <div className="relative w-full max-w-md rounded-2xl border border-emerald-500/40 bg-slate-900 p-6 text-center shadow-2xl shadow-emerald-500/10">
-        <div className="text-5xl">{isRead ? "📖" : "🟣"}</div>
-        <h2 className="mt-3 text-2xl font-bold text-white">{isRead ? "Ticket closed!" : "PR merged!"}</h2>
-        <p className="mt-1 text-slate-400">
-          {isRead ? "You understood code you didn't write. That's a real superpower." : "All checks green. Customers will never know it was broken."}
-        </p>
+        <div className="text-5xl">{text.icon}</div>
+        <h2 className="mt-3 text-2xl font-bold text-white">{text.title}</h2>
+        <p className="mt-1 text-slate-400">{text.blurb}</p>
         <div className="mt-5 space-y-1 rounded-xl bg-slate-950/70 p-4 text-left font-mono text-sm">
           <Row label="Ticket XP" value={`+${xp.base}`} />
           {xp.hintPenalty > 0 && <Row label="Hints used" value={`−${xp.hintPenalty}`} className="text-amber-300" />}
+          {!!xp.falseAlarmPenalty && <Row label="False alarms" value={`−${xp.falseAlarmPenalty}`} className="text-amber-300" />}
           {xp.firstRunBonus > 0 && <Row label="🎯 First-run bonus" value={`+${xp.firstRunBonus}`} className="text-cyan-300" />}
+          {!!xp.speedBonus && <Row label="⚡ Speed bonus" value={`+${xp.speedBonus}`} className="text-cyan-300" />}
           <div className="my-1 border-t border-slate-800" />
           <Row label="Total" value={`+${xp.total} XP`} className="font-bold text-emerald-300" />
         </div>

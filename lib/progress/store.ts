@@ -23,6 +23,14 @@ export type TicketProgress = {
   /** How many questions were answered right on the first try (set when the quiz is done). */
   quizFirstTryCorrect: number;
   quizXp: number;
+  /** Review tickets: lines currently flagged ("path:line"). */
+  reviewFlags?: string[];
+  /** Review tickets: the flags from the last "Submit review". */
+  reviewSubmitted?: string[];
+  /** Review tickets: every distinct wrongly flagged line ever submitted (costs XP). */
+  reviewFalseAlarms?: string[];
+  /** Incident tickets: when the learner first opened it (ISO). Persisted so a reload doesn't reset the timer. */
+  incidentStartedAt?: string;
 };
 
 export type Progress = {
@@ -168,5 +176,42 @@ export const actions = {
   },
   resetAll() {
     update(() => fresh());
+  },
+};
+
+// ---------- review & incident tickets ----------
+
+/** Like updateTicket, but doesn't count as activity for the streak (e.g. just opening a page). */
+function patchTicket(id: string, fn: (t: TicketProgress) => TicketProgress) {
+  update((p) => ({ ...p, tickets: { ...p.tickets, [id]: fn({ ...emptyTicket(), ...p.tickets[id] }) } }));
+}
+
+export const reviewActions = {
+  /** Flag or unflag one line ("path:line"). */
+  toggleFlag(id: string, key: string) {
+    patchTicket(id, (t) => {
+      const flags = t.reviewFlags ?? [];
+      return { ...t, reviewFlags: flags.includes(key) ? flags.filter((f) => f !== key) : [...flags, key] };
+    });
+  },
+  /**
+   * Submit the current flags. `falseAlarms` are the wrong flags in this submit; they are
+   * remembered (each line once). If `passed`, the ticket is solved with `xpFor(totalFalseAlarms, hintsUsed)`.
+   */
+  submit(id: string, falseAlarms: string[], passed: boolean, xpFor: (falseAlarms: number, hintsUsed: number) => number) {
+    updateTicket(id, (t) => {
+      const allFalse = [...new Set([...(t.reviewFalseAlarms ?? []), ...falseAlarms])];
+      const next = { ...t, reviewSubmitted: [...(t.reviewFlags ?? [])], reviewFalseAlarms: allFalse };
+      if (t.solved || !passed) return next;
+      return { ...next, solved: true, solvedAt: new Date().toISOString(), solveXp: xpFor(allFalse.length, t.hintsUsed) };
+    });
+  },
+};
+
+export const incidentActions = {
+  /** Start the incident clock the first time the ticket is opened (no-op afterwards). */
+  start(id: string) {
+    if (getSnapshot().tickets[id]?.incidentStartedAt) return;
+    patchTicket(id, (t) => (t.incidentStartedAt ? t : { ...t, incidentStartedAt: new Date().toISOString() }));
   },
 };

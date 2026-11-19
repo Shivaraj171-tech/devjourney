@@ -1,0 +1,273 @@
+"use client";
+// Code review tickets: read a pull request, click the lines that have problems,
+// then submit the review. Wrong flags are "false alarms" and cost a little XP.
+import { useMemo, useState } from "react";
+import Markdown from "./Markdown";
+import type { Review, Ticket } from "@/lib/content/types";
+import { checkReview, FALSE_ALARM_COST, reviewXp, type TicketXp } from "@/lib/game/rules";
+import { reviewActions, type TicketProgress } from "@/lib/progress/store";
+import { changedLines } from "@/lib/review/diff";
+
+type Props = {
+  ticket: Ticket & { review: Review };
+  tp: TicketProgress;
+  onSolved: (xp: TicketXp) => void;
+};
+
+export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
+  const review = ticket.review;
+  const prPaths = review.files.map((f) => f.path);
+  const codebasePaths = Object.keys(ticket.starter).filter(
+    (p) => !prPaths.includes(p) && (!p.endsWith("__init__.py") || ticket.starter[p].trim()),
+  );
+  const [activeFile, setActiveFile] = useState(prPaths[0]);
+  const prFile = review.files.find((f) => f.path === activeFile);
+
+  const flags = tp.reviewFlags ?? [];
+  const last = tp.reviewSubmitted ? checkReview(tp.reviewSubmitted, review.issues) : null;
+  const solved = tp.solved;
+
+  function submit() {
+    const check = checkReview(flags, review.issues);
+    const totalFalseAlarms = new Set([...(tp.reviewFalseAlarms ?? []), ...check.falseAlarms]).size;
+    reviewActions.submit(ticket.id, check.falseAlarms, check.passed, (fa, hints) => reviewXp(ticket.level, fa, hints).total);
+    if (check.passed && !solved) onSolved(reviewXp(ticket.level, totalFalseAlarms, tp.hintsUsed));
+  }
+
+  return (
+    <section className="flex min-h-[600px] min-w-0 flex-col gap-3 lg:min-h-0" data-testid="review-panel">
+      {/* ---------- PR header ---------- */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-300">⇄ Open pull request</span>
+          <span className="text-slate-400">
+            <b className="text-slate-200">{review.author}</b> wants to merge {review.files.length} file{review.files.length === 1 ? "" : "s"} into{" "}
+            <code className="text-cyan-300">main</code>
+          </span>
+        </div>
+        <h2 className="mt-2 text-lg font-bold text-white">{review.title}</h2>
+        <Markdown text={review.description} className="mt-1 text-sm text-slate-300" />
+      </div>
+
+      {/* ---------- files ---------- */}
+      <div className="flex min-h-[380px] flex-1 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e1e1e]">
+        <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-800 bg-slate-950 px-2">
+          {prPaths.map((path) => (
+            <FileTab key={path} path={path} active={activeFile === path} onClick={() => setActiveFile(path)}>
+              <span className={path in ticket.starter ? "text-amber-300" : "text-emerald-300"}>
+                {path in ticket.starter ? "M" : "A"}
+              </span>{" "}
+              {path}
+            </FileTab>
+          ))}
+          <span className="shrink-0 px-2 text-[11px] tracking-wide text-slate-600 uppercase">codebase</span>
+          {codebasePaths.map((path) => (
+            <FileTab key={path} path={path} active={activeFile === path} onClick={() => setActiveFile(path)} muted>
+              🔒 {path}
+            </FileTab>
+          ))}
+        </div>
+        <div className="min-h-0 flex-1 overflow-auto">
+          {prFile ? (
+            <PrFileView
+              path={prFile.path}
+              text={prFile.text}
+              before={ticket.starter[prFile.path]}
+              review={review}
+              flags={flags}
+              last={last}
+              solved={solved}
+              onToggle={(key) => reviewActions.toggleFlag(ticket.id, key)}
+            />
+          ) : (
+            <CodeLines text={ticket.starter[activeFile] ?? ""} />
+          )}
+        </div>
+        {prFile && (
+          <div className="border-t border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-500">
+            {solved
+              ? "Review finished. These are the problems that were in this PR."
+              : "Click a line to flag it as a problem (click again to unflag). Lines marked + are new in this PR."}
+          </div>
+        )}
+      </div>
+
+      {/* ---------- submit + verdict ---------- */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Your review</div>
+          <span className="text-sm text-slate-400" data-testid="flag-count">
+            🚩 {flags.length} line{flags.length === 1 ? "" : "s"} flagged
+          </span>
+          {!solved && (
+            <button
+              data-testid="submit-review"
+              onClick={submit}
+              disabled={flags.length === 0}
+              className="ml-auto rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+            >
+              Submit review
+            </button>
+          )}
+        </div>
+        <Verdict review={review} last={last} solved={solved} onJump={setActiveFile} />
+      </div>
+    </section>
+  );
+}
+
+function FileTab({ path, active, muted, onClick, children }: { path: string; active: boolean; muted?: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      title={muted ? `${path} (unchanged, for context)` : `${path} (changed in this PR)`}
+      className={`shrink-0 border-b-2 px-3 py-2 font-mono text-xs ${
+        active ? "border-cyan-400 text-white" : `border-transparent ${muted ? "text-slate-500" : "text-slate-300"} hover:text-white`
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** File text split into lines, without the empty "line" after a final newline. */
+function splitLines(text: string): string[] {
+  const lines = text.split("\n");
+  if (lines.length > 1 && lines[lines.length - 1] === "") lines.pop();
+  return lines;
+}
+
+/** Plain read-only, line-numbered code (codebase files in a review). */
+function CodeLines({ text }: { text: string }) {
+  return (
+    <pre className="py-3 font-mono text-[13px] leading-6 text-slate-300">
+      {splitLines(text).map((line, i) => (
+        <div key={i} className="flex">
+          <span className="w-12 shrink-0 pr-3 text-right text-slate-600 select-none">{i + 1}</span>
+          <span className="pr-4 whitespace-pre">{line}</span>
+        </div>
+      ))}
+    </pre>
+  );
+}
+
+type ViewProps = {
+  path: string;
+  text: string;
+  before: string | undefined;
+  review: Review;
+  flags: string[];
+  last: ReturnType<typeof checkReview> | null;
+  solved: boolean;
+  onToggle: (key: string) => void;
+};
+
+/** A PR file: every line is a toggle button for flagging it. */
+function PrFileView({ path, text, before, review, flags, last, solved, onToggle }: ViewProps) {
+  const added = useMemo(() => changedLines(before, text), [before, text]);
+  const lines = splitLines(text);
+  const issueAt = (n: number) =>
+    review.issues.findIndex((i) => i.file === path && (i.line === n || i.alsoLines.includes(n)));
+
+  return (
+    <div className="py-3 font-mono text-[13px] leading-6" data-testid="pr-file">
+      {lines.map((line, i) => {
+        const n = i + 1;
+        const key = `${path}:${n}`;
+        const blank = line.trim() === ""; // nothing to flag on an empty line
+        const flagged = flags.includes(key);
+        const issue = issueAt(n);
+        const revealed = issue >= 0 && (solved || (last?.found.includes(issue) ?? false));
+        const falseAlarm = flagged && !solved && (last?.falseAlarms.includes(key) ?? false);
+        const explainHere = revealed && review.issues[issue].line === n;
+        const tone = revealed
+          ? "bg-emerald-500/15"
+          : falseAlarm
+            ? "bg-amber-500/15"
+            : flagged
+              ? "bg-red-500/20"
+              : added.has(n)
+                ? "bg-emerald-400/[0.06]"
+                : "";
+        return (
+          <div key={n}>
+            <button
+              type="button"
+              data-line={n}
+              aria-pressed={flagged}
+              aria-label={`Line ${n}${flagged ? ", flagged" : ""}${falseAlarm ? ", false alarm" : ""}${revealed ? ", real problem" : ""}`}
+              disabled={solved || (blank && !flagged)}
+              onClick={() => onToggle(key)}
+              className={`group flex w-full text-left ${tone} ${solved || blank ? "cursor-default" : "hover:bg-violet-500/15"} focus-visible:outline focus-visible:outline-violet-400`}
+            >
+              <span className="w-8 shrink-0 text-center select-none">
+                {revealed ? "✅" : falseAlarm ? "⚠️" : flagged ? "🚩" : blank ? null : <span className="text-transparent group-hover:text-slate-500">⚑</span>}
+              </span>
+              <span className="w-10 shrink-0 pr-2 text-right text-slate-600 select-none">{n}</span>
+              <span className={`w-4 shrink-0 select-none ${added.has(n) ? "text-emerald-400" : "text-transparent"}`}>+</span>
+              <span className="pr-4 whitespace-pre text-slate-200">{line}</span>
+            </button>
+            {falseAlarm && (
+              <div className="ml-[5.5rem] mb-1 font-sans text-xs text-amber-300">
+                False alarm: this line looks fine (−{FALSE_ALARM_COST} XP). Unflag it and keep looking.
+              </div>
+            )}
+            {explainHere && (
+              <div className="mr-4 mb-2 ml-[5.5rem] rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 font-sans text-sm whitespace-normal text-emerald-100">
+                <Markdown text={review.issues[issue].explain} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Verdict({ review, last, solved, onJump }: { review: Review; last: ReturnType<typeof checkReview> | null; solved: boolean; onJump: (path: string) => void }) {
+  const total = review.issues.length;
+  if (solved) {
+    return (
+      <div data-testid="review-verdict" className="mt-3 space-y-2">
+        <p className="text-sm font-semibold text-emerald-300">
+          ✅ Review complete: you caught {total === 1 ? "the problem" : `all ${total} problems`} in {review.author}&apos;s PR.
+        </p>
+        <ul className="space-y-1.5 text-sm">
+          {review.issues.map((issue, i) => (
+            <li key={i} className="rounded-lg bg-slate-950/60 p-2.5 text-slate-300">
+              <button onClick={() => onJump(issue.file)} className="font-mono text-xs text-cyan-300 hover:underline">
+                {issue.file}:{issue.line}
+              </button>
+              <Markdown text={issue.explain} className="mt-1" />
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  if (!last) {
+    return (
+      <p className="mt-2 text-sm text-slate-500">
+        There {total === 1 ? "is 1 real problem" : `are ${total} real problems`} in this PR. Flag the line where each one is, then submit.
+      </p>
+    );
+  }
+  const missing = total - last.found.length;
+  return (
+    <div data-testid="review-verdict" className="mt-3 space-y-1 text-sm">
+      <p className={missing === 0 ? "font-semibold text-emerald-300" : "font-semibold text-amber-300"}>
+        You found {last.found.length} of {total} problem{total === 1 ? "" : "s"}.
+      </p>
+      {last.falseAlarms.length > 0 && (
+        <p className="text-amber-200">
+          ⚠️ {last.falseAlarms.length} flagged line{last.falseAlarms.length === 1 ? " was a false alarm" : "s were false alarms"} (marked in the code).
+        </p>
+      )}
+      {missing > 0 && (
+        <p className="text-slate-400">
+          {missing === 1 ? "One problem is" : `${missing} problems are`} still hiding. Compare each line with what the docstrings promise, then submit again.
+        </p>
+      )}
+    </div>
+  );
+}

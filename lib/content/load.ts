@@ -2,7 +2,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { load as parseYaml } from "js-yaml";
-import type { Question, Season, Ticket } from "./types";
+import type { Question, Review, Season, Ticket } from "./types";
 
 const CONTENT_DIR = join(process.cwd(), "content", "seasons");
 
@@ -55,6 +55,8 @@ type TicketYaml = {
   estimated_minutes: number;
   tests_visible: boolean;
   files_editable: string[];
+  /** incident tickets only (default 15) */
+  time_limit_minutes?: number;
 };
 
 function loadTicket(seasonId: string, dir: string, slug: string, number: number): Ticket {
@@ -82,6 +84,33 @@ function loadTicket(seasonId: string, dir: string, slug: string, number: number)
     questions,
     starter: readTree(join(dir, "starter")),
     tests: readTree(join(dir, "tests")),
+    ...(meta.type === "review" ? { review: loadReview(dir) } : {}),
+    ...(meta.type === "incident"
+      ? { incident: { logs: readText(join(dir, "logs.txt")), timeLimitMinutes: meta.time_limit_minutes ?? 15 } }
+      : {}),
+  };
+}
+
+type ReviewYaml = {
+  title: string;
+  author: string;
+  description: string;
+  files: string[];
+  issues: { file: string; line: number; also_lines?: number[]; explain: string }[];
+  merged?: boolean;
+};
+
+/** review.yaml describes the PR; the changed files themselves live in pr/. */
+function loadReview(dir: string): Review {
+  const meta = readYaml<ReviewYaml>(join(dir, "review.yaml"));
+  const pr = readTree(join(dir, "pr"));
+  return {
+    title: meta.title,
+    author: meta.author,
+    description: meta.description,
+    files: meta.files.map((path) => ({ path, text: pr[path] ?? "" })),
+    issues: meta.issues.map((i) => ({ file: i.file, line: i.line, alsoLines: i.also_lines ?? [], explain: i.explain })),
+    merged: meta.merged ?? false,
   };
 }
 
