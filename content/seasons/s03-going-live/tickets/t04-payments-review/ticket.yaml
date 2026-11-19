@@ -1,0 +1,10 @@
+id: s03-t04
+title: "Review: card payments"
+type: review
+level: junior
+track: systems
+concepts: [functions, strings, code-review, security]
+new_concept: security
+estimated_minutes: 12
+tests_visible: false
+files_editable: []

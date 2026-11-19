@@ -1,0 +1,11 @@
+id: s03-t05
+title: "Lunch rush slowdown"
+type: incident
+level: junior
+track: systems
+concepts: [lists, loops, classes, performance]
+new_concept: performance
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/kitchen.py]
+time_limit_minutes: 15

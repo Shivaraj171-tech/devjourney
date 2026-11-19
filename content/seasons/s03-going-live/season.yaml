@@ -1,0 +1,15 @@
+id: s03
+title: "Month One: Going Live"
+intro: |
+  Two weeks in, and the investors loved the demo. This month Orbit Orders goes
+  live for real customers: real orders, real payments, real lunch rushes.
+  That means the code has to grow up. Orders need a proper shape, they need to
+  survive a server restart, and the team needs tests it can trust. Maya has
+  planned the month, and Byte has promised to be careful (mostly).
+tickets:
+  - t01-order-class
+  - t02-lost-orders
+  - t03-guard-the-boundary
+  - t04-payments-review
+  - t05-lunch-rush
+  - t06-launch-receipts
