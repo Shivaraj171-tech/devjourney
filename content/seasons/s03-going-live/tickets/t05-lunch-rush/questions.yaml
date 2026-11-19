@@ -1,0 +1,22 @@
+questions:
+  - prompt: "With the old code, roughly what happens to the work when the number of orders doubles?"
+    choices:
+      - "It doubles"
+      - "It roughly quadruples, because twice the orders are each checked against a list that's twice as long"
+      - "It stays the same"
+    answer: 1
+    explain: "The logs show it: 1200 orders took 1240ms, 2400 took 4960ms. A loop with a list search inside it grows with orders × sent ids."
+  - prompt: "Why build the set before the loop, not inside it?"
+    choices:
+      - "set() only works outside loops"
+      - "set(sent_ids) reads the whole list, so doing it for every order is as slow as the original"
+      - "It makes no difference"
+    answer: 1
+    explain: "Building the set is one pass over the list. Do it once and every check afterwards is instant; do it per order and you're back to re-reading the list every time."
+  - prompt: "Why do the tests count 'looks' instead of timing the code with a clock?"
+    choices:
+      - "Timings change from computer to computer and run to run, but the amount of work is the same every time"
+      - "Python has no clock"
+      - "Counting is always faster than timing"
+    answer: 0
+    explain: "A timing test can pass on a fast laptop and fail on a busy one. Counting the work makes the test reliable, which is what you want from CI."

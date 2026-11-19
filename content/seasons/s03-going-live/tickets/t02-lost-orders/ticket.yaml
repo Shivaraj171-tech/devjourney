@@ -1,0 +1,10 @@
+id: s03-t02
+title: "Orders vanish after a restart"
+type: bug
+level: junior
+track: systems
+concepts: [dictionaries, classes, strings, json]
+new_concept: json
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/storage.py]

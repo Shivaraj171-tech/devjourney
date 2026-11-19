@@ -1,0 +1,36 @@
+title: "Card payments at checkout"
+author: "Byte 🤖"
+description: |
+  Payments are ready for launch! 💳 New module `app/payments.py`:
+
+  - `payment_log_line`: one log line per payment, so support can trace problems.
+  - `build_charge`: the request we send to the payment provider. I used the total the app sends us, so we never disagree with what the customer saw on screen.
+  - `receipt_line`: the last line of the receipt, with the card masked.
+  - `order_history_query`: the database query for the new *Your past orders* screen.
+
+  All functions are short and have docstrings. Thank you for reviewing! 🤖
+files: [app/payments.py]
+issues:
+  - file: app/payments.py
+    line: 19
+    explain: >-
+      **The full card number goes into the logs.** Logs are read by lots of people (support, on-call developers,
+      log tools) and kept for months, so anyone who can read them could copy customers' cards. Never log secrets
+      like card numbers or passwords. Byte even wrote `mask_card` a few lines up: the log should use
+      `mask_card(card_number)`, just like the receipt does.
+  - file: app/payments.py
+    line: 27
+    also_lines: [30]
+    explain: >-
+      **It trusts the price the phone app sends.** Anyone can send our server a modified request, so a
+      "total" of 1 cent for a $40 order would be charged as 1 cent. The server must work out the amount itself
+      from data it trusts: `order.subtotal() + delivery_fee(order.subtotal())`, as the docstring says. (Notice
+      that `delivery_fee` is imported but never used: a hint that something was skipped.)
+  - file: app/payments.py
+    line: 42
+    explain: >-
+      **User input is pasted straight into a database query (SQL injection).** A customer named
+      `x' OR '1'='1` turns the query into "give me *every* customer's orders". Never build queries by gluing
+      text together; use the database's placeholders, e.g. `("SELECT ... WHERE customer = ?", (customer,))`,
+      so the name is always treated as data, never as part of the command.
+merged: false

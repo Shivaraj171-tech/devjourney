@@ -1,0 +1,10 @@
+id: s03-t06
+title: "One total to rule them all"
+type: feature
+level: junior
+track: building
+concepts: [functions, classes, writing-tests, refactoring]
+new_concept: refactoring
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/receipts.py]

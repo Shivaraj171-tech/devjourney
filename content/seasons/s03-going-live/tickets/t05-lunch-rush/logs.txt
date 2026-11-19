@@ -1,0 +1,15 @@
+2026-11-19 09:30:02 INFO  web-1  GET /kitchen/new-orders orders=40 sent=38 -> 2 new, 3ms
+2026-11-19 10:30:01 INFO  web-1  GET /kitchen/new-orders orders=150 sent=147 -> 3 new, 21ms
+2026-11-19 11:30:04 INFO  web-1  GET /kitchen/new-orders orders=600 sent=590 -> 10 new, 310ms
+2026-11-19 11:30:05 INFO  web-2  POST /checkout customer=ana.k items=2 -> 200 OK in 352ms
+2026-11-19 12:00:03 INFO  web-1  GET /kitchen/new-orders orders=1200 sent=1180 -> 20 new, 1240ms
+2026-11-19 12:00:04 WARN  web-1  slow request: GET /kitchen/new-orders took 1240ms (limit 500ms)
+2026-11-19 12:15:02 INFO  web-1  GET /kitchen/new-orders orders=2400 sent=2350 -> 50 new, 4960ms
+2026-11-19 12:15:02 WARN  web-1  slow request: GET /kitchen/new-orders took 4960ms (limit 500ms)
+2026-11-19 12:15:07 WARN  web-2  POST /checkout customer=tom.r items=4 waited 4.8s for a free worker
+2026-11-19 12:15:09 ERROR web-2  POST /checkout customer=lee.p items=1 -> 504 Gateway Timeout after 5000ms
+2026-11-19 12:15:10 WARN  alerts checkout p95 latency 4.9s (threshold 1s), paging on-call developer
+2026-11-19 12:15:31 INFO  profiler web-1  GET /kitchen/new-orders: 98% of time spent on ONE line:
+2026-11-19 12:15:31 INFO  profiler web-1    app/kitchen.py, line 17, in orders_to_send
+2026-11-19 12:15:31 INFO  profiler web-1      if order.order_id not in sent_ids:
+2026-11-19 12:15:31 INFO  profiler web-1    that line ran 2,400 times and compared ids 2,879,925 times

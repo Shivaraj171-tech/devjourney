@@ -1,0 +1,22 @@
+questions:
+  - prompt: "In order.add_item(450), what is self inside add_item?"
+    choices:
+      - "The number 450"
+      - "The Order object called order"
+      - "The Order class itself, shared by every order"
+    answer: 1
+    explain: "Python passes the object before the dot as the first argument, self. The 450 arrives as price_cents."
+  - prompt: "sam = Order(1001, \"Sam\") and ana = Order(1002, \"Ana\"). After sam.add_item(1250), what is ana.item_count()?"
+    choices:
+      - "0, because each object has its own items list"
+      - "1, because both orders come from the same class"
+      - "It crashes, because ana has no items"
+    answer: 0
+    explain: "__init__ makes a fresh list for every new order (items=None, the fix from your first week), so Sam's item never shows up in Ana's order."
+  - prompt: "Why is order.subtotal() better than every screen adding up order[\"items\"] itself?"
+    choices:
+      - "It runs faster"
+      - "The maths lives in one place, so a fix there reaches every screen"
+      - "Dictionaries can't hold lists"
+    answer: 1
+    explain: "Keeping data and the code that uses it together gives you one source of truth. That's the main reason classes exist."

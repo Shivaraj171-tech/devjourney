@@ -1,0 +1,22 @@
+questions:
+  - prompt: "Which single test catches Byte's bug (> instead of >= at 2500 cents)?"
+    choices:
+      - "assert delivery_fee(4000) == 0"
+      - "assert delivery_fee(2500) == 0"
+      - "assert delivery_fee(1000) == 399"
+    answer: 1
+    explain: "With >, only an order of exactly 2500 cents gets the wrong fee. 4000 and 1000 give the same answer with > and >=, so those tests stay green."
+  - prompt: "Why does CI also run your tests against broken versions of delivery_fee?"
+    choices:
+      - "To check that your tests can actually fail when the code is wrong"
+      - "To make the tests run faster"
+      - "Because the real delivery_fee is broken"
+    answer: 0
+    explain: "A test that passes no matter what protects nothing. Seeing it fail on a broken version proves it would sound the alarm. (This idea is called mutation testing.)"
+  - prompt: "What happens when an assert's condition is True?"
+    choices:
+      - "It prints the message"
+      - "Nothing: the code carries on and the test passes"
+      - "It raises an AssertionError"
+    answer: 1
+    explain: "assert is silent when things are fine. It only raises an AssertionError, with your message, when the condition is False."

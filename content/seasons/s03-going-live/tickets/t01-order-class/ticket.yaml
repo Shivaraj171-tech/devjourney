@@ -1,0 +1,10 @@
+id: s03-t01
+title: "Give orders a class"
+type: feature
+level: junior
+track: building
+concepts: [functions, lists, dictionaries, classes]
+new_concept: classes
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/order.py]

@@ -1,0 +1,22 @@
+questions:
+  - prompt: "What's the goal of a refactoring?"
+    choices:
+      - "Add a new feature as quickly as possible"
+      - "Improve how the code is organised while keeping what it does the same"
+      - "Make the code shorter, even if the results change"
+    answer: 1
+    explain: "Refactoring changes the shape, not the behaviour. Here the one behaviour change (the SMS discount) was a bug fix that the single order_total made obvious."
+  - prompt: "Why did the SMS show $27.99 when the email showed $22.40?"
+    choices:
+      - "The SMS used a different promo code table"
+      - "Each message had its own copy of the total maths, and the SMS copy left out the discount"
+      - "Text messages can't show discounts"
+    answer: 1
+    explain: "Copy-pasted code drifts apart. With one order_total, every message gets the same answer, including any future pricing changes."
+  - prompt: "How can a test check that receipt_email really calls order_total?"
+    choices:
+      - "It can't: tests only see the result"
+      - "Swap order_total for a fake that returns a special value, and check the email shows it"
+      - "Count the lines in receipts.py"
+    answer: 1
+    explain: "That's what the last check does: it replaces order_total with a fake that always says $42.42. Any message that still does its own maths won't show $42.42."
