@@ -1,38 +1,52 @@
-# DevJourney (working name)
+# DevJourney: Orbit Orders HQ (working name)
 
-A learn-to-code platform where you join a fictional startup (**Orbit Orders**, a small food-ordering app) as a junior developer and grow through one evolving codebase by solving tickets: bugs, features, incidents, code reviews and code-reading tasks.
+Learn to code by getting hired. You join **Orbit Orders**, a small (fictional) food-delivery startup, as a junior developer, and grow **one real codebase** by closing 10–15 minute tickets: bugs, features, code-reading tasks, code reviews and production incidents.
 
-See [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) for the full vision, scope, content format and milestones.
+No accounts, no setup: Python runs in your browser (Pyodide), and progress is saved in your browser.
 
-## Status
+## What's in it
 
-Milestone 1 is done: Season 1 tickets t01–t03 plus the content validator. Next up is Milestone 2, the in-browser Pyodide runner.
-Tech stack is **not locked in yet**. The suggested stack is Next.js + TypeScript + Tailwind, Monaco and Pyodide, and it still needs confirmation.
+- **Startup HQ**: the home screen. Your office floor is the progress map: each ticket is a room that unlocks once the previous one is merged. A phone mock-up of the Orbit Orders app lights up features as you ship them.
+- **Ticket workspace**: a story from a teammate, a 2-minute concept lesson (📘 Learn), a VS Code-style editor (Monaco), "Run tests" as CI checks with plain-language error explanations, a "Done when" checklist, staged hints (each costs a little XP), and a short quiz after merging.
+- **Game layer**: XP, ranks (Intern → Senior), a forgiving daily streak (one missed day is bridged), badges, and an office leaderboard against fictional teammates (including Sam, the rival new hire).
+- **Content**: Season 1 "Your First Week" (10 tickets). See `content/` and the format in [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md).
+- **Research**: competitor analysis in [`docs/research/competitors.md`](docs/research/competitors.md).
 
-## Try it (Milestone 1)
+## Run it
 
-Requires Python 3 and PyYAML (`pip install pyyaml`).
-
-Validate all content (every starter must fail its tests, every solution must pass):
-
-```bash
-python3 scripts/validate_content.py
-```
-
-Run the tests for the runner and the validator:
+Requires Node 20+ and Python 3 (Python is only for the content tools).
 
 ```bash
-python3 -m unittest discover -s scripts/tests -v
+npm install
 ```
-
-Solve a ticket yourself: copy a ticket's `starter/` somewhere, edit it, then run its tests against your copy:
-
 ```bash
-python3 lib/runner/test_runner.py path/to/your/copy content/seasons/s01-first-week/tickets/t01-welcome/tests
+npm run dev
 ```
+Then open http://localhost:3000.
 
-## Layout
+Production build (fully static site in `out/`, deployable to any static host):
+```bash
+npm run build
+```
+```bash
+npm start
+```
+That serves `out/` at http://localhost:3000.
 
-- `content/` — seasons and tickets (format in `docs/PROJECT_BRIEF.md`, section 4)
-- `lib/runner/test_runner.py` — stdlib-only test runner. Ticket tests are plain `test_*` functions using `assert`, so pytest is not needed. The plan is to reuse this file in Pyodide later.
-- `scripts/validate_content.py` — content validator
+## Tests and checks
+
+| Command | What it checks |
+|---|---|
+| `npm run validate-content` | Every ticket: starter fails its tests, solution passes, metadata/hints/quiz/lesson valid, codebase evolves ticket to ticket (needs `pip install pyyaml`) |
+| `python3 -m unittest discover -s scripts/tests` | Tests for the Python test runner and the content validator |
+| `npm run test:unit` | Game rules, error explanations, checklist parsing |
+| `npm run e2e` | Playwright end-to-end: plays through every ticket in a real browser |
+| `npm run lint` | ESLint |
+
+## How it works
+
+- `content/`: seasons and tickets (story, lesson, starter code, tests, reference solution, hints, quiz). Read at build time; the reference solution is never sent to the browser.
+- `lib/runner/test_runner.py`: a tiny stdlib-only test runner (plain `assert` tests, no pytest). Used by the validator **and** inside the browser.
+- `public/runner-worker.js`: web worker that loads Pyodide and runs a ticket's tests on the learner's code. Infinite loops are stopped by a timeout that restarts the worker.
+- `scripts/copy-assets.mjs`: copies Pyodide and Monaco from `node_modules` into `public/` (self-hosted, no CDN). Runs automatically before `dev` and `build`.
+- `lib/progress/store.ts`: progress in `localStorage`. `lib/game/rules.ts`: XP, ranks, streaks, badges, leaderboard.
