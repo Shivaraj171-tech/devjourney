@@ -105,7 +105,7 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
             <h2 className="text-xl font-bold text-white">🏢 Floor 1 · {season.title}</h2>
             <Markdown text={season.intro} className="mt-1 max-w-3xl text-sm text-slate-400" />
           </div>
-          <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" data-testid="office-map">
+          <ol className="grid grid-cols-2 gap-3 lg:grid-cols-5" data-testid="office-map">
             {season.tickets.map((t, i) => {
               const tp = ticketProgress(progress, t.id);
               const prevSolved = i === 0 || ticketProgress(progress, season.tickets[i - 1].id).solved;

@@ -322,6 +322,50 @@ class ReadTicketTests(TempDirTestCase):
         self.assertEqual({k: v for k, v in report.items() if v}, {})
 
 
+class ConceptTests(TempDirTestCase):
+    def check(self, text):
+        path = self.tmp / "concept.md"
+        path.write_text(text, encoding="utf-8")
+        return vc.check_concept(path)
+
+    def test_good_concept_has_no_errors(self):
+        text = "**Loops**\n\nA loop repeats.\n\n```python\nfor i in range(2):\n    print(i)  # 0, 1\n```\n\n**Watch out:** off by one.\n"
+        self.assertEqual(self.check(text), [])
+
+    def test_empty_concept_is_flagged(self):
+        self.assertEqual(self.check("  \n\n"), ["concept.md is empty"])
+
+    def test_missing_title_line_is_flagged(self):
+        errors = self.check("# Loops\n\nA loop repeats.\n")
+        self.assertTrue(any("must start with a **Title** line" in e for e in errors), errors)
+
+    def test_bold_inside_a_sentence_is_not_a_title(self):
+        errors = self.check("Loops are **great** things.\n")
+        self.assertTrue(any("**Title**" in e for e in errors), errors)
+
+    def test_python_syntax_error_is_flagged(self):
+        errors = self.check("**Loops**\n\n```python\nfor i in range(2)\n    print(i)\n```\n")
+        self.assertTrue(any("python block 1 has a syntax error" in e for e in errors), errors)
+
+    def test_only_python_blocks_are_compiled(self):
+        self.assertEqual(self.check("**Loops**\n\n```\nthis is not python (\n```\n"), [])
+
+    def test_second_block_is_checked_too(self):
+        text = "**X**\n\n```python\nx = 1\n```\n\n```python\nx = = 2\n```\n"
+        errors = self.check(text)
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn("python block 2", errors[0])
+
+    def test_concept_is_checked_on_tickets(self):
+        t = make_ticket(self.tmp, "t01")
+        (t / "concept.md").write_text("no title here\n", encoding="utf-8")
+        self.assertTrue(any("concept.md" in e for e in vc.check_ticket_meta(t)))
+
+    def test_concept_is_optional(self):
+        t = make_ticket(self.tmp, "t01")
+        self.assertEqual(vc.check_ticket_meta(t), [])
+
+
 class EvolutionTests(TempDirTestCase):
     def test_next_starter_built_from_previous_solution_is_ok(self):
         t1 = make_ticket(self.tmp, "t01")

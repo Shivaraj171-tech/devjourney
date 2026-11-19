@@ -7,6 +7,8 @@ For each ticket it checks:
   3. hints.md has at least one hint (hints are separated by a line "---").
   4. questions.yaml (optional "check your understanding" quiz) is well formed:
      2-4 choices per question, answer is a valid 0-based index, explain present.
+  4b. concept.md (optional "Learn" lesson) is non-empty, starts with a
+     **Title** line, and every ```python block is valid Python syntax.
   5. The tests FAIL against starter/ (otherwise there is nothing to do).
   6. The tests PASS against solution/.
   7. Evolving codebase: every file in solution(N) appears unchanged in starter(N+1).
@@ -24,6 +26,7 @@ Requires PyYAML.
 """
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -143,6 +146,27 @@ def check_questions(path, min_questions=1):
     return errors
 
 
+PYTHON_BLOCK = re.compile(r"^```python[ \t]*\n(.*?)^```[ \t]*$", re.MULTILINE | re.DOTALL)
+TITLE_LINE = re.compile(r"^\*\*[^*].*\*\*$")
+
+
+def check_concept(path):
+    """Check a concept.md lesson. Returns a list of error strings."""
+    text = path.read_text(encoding="utf-8")
+    if not text.strip():
+        return ["concept.md is empty"]
+    errors = []
+    first_line = text.strip().splitlines()[0].strip()
+    if not TITLE_LINE.match(first_line):
+        errors.append(f"concept.md must start with a **Title** line, got {first_line!r}")
+    for i, match in enumerate(PYTHON_BLOCK.finditer(text), start=1):
+        try:
+            compile(match.group(1), f"concept.md block {i}", "exec")
+        except SyntaxError as exc:
+            errors.append(f"concept.md: python block {i} has a syntax error: {exc.msg} (line {exc.lineno})")
+    return errors
+
+
 def check_ticket_meta(ticket_dir):
     """Check files, ticket.yaml, hints and questions. Returns a list of error strings."""
     errors = []
@@ -188,6 +212,8 @@ def check_ticket_meta(ticket_dir):
         errors.append("tests/ has no test_*.py files")
     if questions_file.is_file():
         errors += check_questions(questions_file, MIN_READ_QUESTIONS if is_read else 1)
+    if (ticket_dir / "concept.md").is_file():
+        errors += check_concept(ticket_dir / "concept.md")
     return errors
 
 
