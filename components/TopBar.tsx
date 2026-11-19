@@ -14,17 +14,17 @@ export default function TopBar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-4 px-4">
+      <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-3 sm:gap-4 sm:px-4">
         <Link href="/" className="flex items-center gap-2 font-bold text-white">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-cyan-400 text-lg">🛰️</span>
           <span className="hidden sm:inline">Orbit Orders <span className="font-normal text-slate-400">HQ</span></span>
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
-          <Link href="/" className="rounded-md px-3 py-1.5 text-slate-300 hover:bg-slate-800 hover:text-white">Office</Link>
-          <Link href="/skills" className="rounded-md px-3 py-1.5 text-slate-300 hover:bg-slate-800 hover:text-white">Skills</Link>
-          <Link href="/leaderboard" className="rounded-md px-3 py-1.5 text-slate-300 hover:bg-slate-800 hover:text-white">Leaderboard</Link>
+        <nav className="flex items-center gap-0.5 text-sm sm:gap-1">
+          <Link href="/" className="rounded-md px-2 py-1.5 text-slate-300 sm:px-3 hover:bg-slate-800 hover:text-white">Office</Link>
+          <Link href="/skills" className="rounded-md px-2 py-1.5 text-slate-300 sm:px-3 hover:bg-slate-800 hover:text-white">Skills</Link>
+          <Link href="/leaderboard" className="rounded-md px-2 py-1.5 text-slate-300 sm:px-3 hover:bg-slate-800 hover:text-white">Leaderboard</Link>
         </nav>
-        <div className="ml-auto flex items-center gap-3 text-sm">
+        <div className="ml-auto flex items-center gap-2 text-sm sm:gap-3">
           <span title="Daily streak" className="rounded-full bg-orange-500/10 px-2.5 py-1 font-semibold text-orange-300">
             🔥 {streak}
           </span>
