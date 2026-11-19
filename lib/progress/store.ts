@@ -3,7 +3,7 @@
 // Every read/write is wrapped in try/catch: storage can be missing or blocked
 // (private windows, disabled site data) and the app must still work.
 import { useSyncExternalStore } from "react";
-import { dayKey } from "../game/rules";
+import { dayKey, WARMUP_XP } from "../game/rules";
 
 const KEY = "devjourney:progress:v1";
 
@@ -30,6 +30,8 @@ export type Progress = {
   playerName: string;
   startedAt: string; // ISO date
   activeDays: string[]; // YYYY-MM-DD
+  /** Daily warm-ups by day (YYYY-MM-DD): which one, and whether the first pick was right. */
+  warmups?: Record<string, { id: string; correct: boolean }>;
   /** True once the "how it works" intro has been dismissed. */
   onboarded?: boolean;
   tickets: Record<string, TicketProgress>;
@@ -118,7 +120,9 @@ export function ticketProgress(p: Progress, id: string): TicketProgress {
 }
 
 export function totalXp(p: Progress): number {
-  return Object.values(p.tickets).reduce((sum, t) => sum + t.solveXp + t.quizXp, 0);
+  const tickets = Object.values(p.tickets).reduce((sum, t) => sum + t.solveXp + t.quizXp, 0);
+  const warmups = Object.values(p.warmups ?? {}).filter((w) => w.correct).length * WARMUP_XP;
+  return tickets + warmups;
 }
 
 export function daysSinceStart(p: Progress, now: Date): number {
@@ -163,6 +167,15 @@ export const actions = {
         return { ...next, solved: true, solvedAt: new Date().toISOString(), solveXp };
       }
       return next;
+    });
+  },
+  /** Record today's warm-up answer (first answer only); counts as an active day. */
+  answerWarmup(id: string, correct: boolean) {
+    update((p) => {
+      const today = dayKey(new Date());
+      if (p.warmups?.[today]) return p;
+      const activeDays = p.activeDays.includes(today) ? p.activeDays : [...p.activeDays, today];
+      return { ...p, activeDays, warmups: { ...p.warmups, [today]: { id, correct } } };
     });
   },
   finishOnboarding() {

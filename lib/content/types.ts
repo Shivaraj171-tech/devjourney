@@ -38,6 +38,20 @@ export type Ticket = {
   tests: Record<string, string>;
 };
 
+/** A 2-minute daily code-reading challenge (content/warmups/*.yaml). */
+export type Warmup = {
+  id: string;
+  title: string;
+  concept: string;
+  /** Ticket id that must be solved first (it introduced the concept). */
+  after: string;
+  code: string;
+  question: string;
+  choices: string[];
+  answer: number;
+  explain: string;
+};
+
 export type Season = {
   id: string;
   slug: string;

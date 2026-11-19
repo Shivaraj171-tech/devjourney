@@ -137,6 +137,33 @@ export const BADGES: { id: string; emoji: string; title: string; description: st
     } },
 ];
 
+// ---------- Daily warm-up ----------
+export const WARMUP_XP = 10;
+
+/** Small stable hash so everyone gets the same pick on the same day. */
+function hash(text: string): number {
+  let h = 0;
+  for (const ch of text) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return h;
+}
+
+/**
+ * Today's warm-up: only concepts you've already met (its `after` ticket is
+ * solved), preferring ones you haven't done yet. Deterministic per day.
+ */
+export function pickWarmup<W extends { id: string; after: string }>(
+  warmups: W[],
+  solvedTicketIds: Set<string>,
+  doneWarmupIds: Set<string>,
+  day: string,
+): W | null {
+  const eligible = warmups.filter((w) => solvedTicketIds.has(w.after));
+  if (eligible.length === 0) return null;
+  const fresh = eligible.filter((w) => !doneWarmupIds.has(w.id));
+  const pool = fresh.length > 0 ? fresh : eligible;
+  return pool[hash(day) % pool.length];
+}
+
 // ---------- Office leaderboard ----------
 // There are no accounts yet, so you compete with your (fictional) teammates.
 // Sam, the other new hire, keeps learning every day you've been at the company.

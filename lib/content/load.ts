@@ -2,7 +2,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { load as parseYaml } from "js-yaml";
-import type { Question, Season, Ticket } from "./types";
+import type { Question, Season, Ticket, Warmup } from "./types";
 
 const CONTENT_DIR = join(process.cwd(), "content", "seasons");
 
@@ -104,6 +104,16 @@ export function loadSeasons(): Season[] {
   }
   cache = seasons;
   return seasons;
+}
+
+/** All daily warm-ups (content/warmups/*.yaml), sorted by id. */
+export function loadWarmups(): Warmup[] {
+  const dir = join(process.cwd(), "content", "warmups");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".yaml"))
+    .sort()
+    .map((f) => readYaml<Warmup>(join(dir, f)));
 }
 
 export function allTickets(): Ticket[] {

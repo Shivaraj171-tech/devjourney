@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { useIsClient } from "@/lib/useIsClient";
 import AppPreview from "./AppPreview";
+import DailyWarmup from "./DailyWarmup";
 import Markdown from "./Markdown";
 import Onboarding from "./Onboarding";
 import { BADGES, currentStreak, leaderboard, rankFor, type BadgeContext } from "@/lib/game/rules";
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
-import type { TicketType } from "@/lib/content/types";
+import type { TicketType, Warmup } from "@/lib/content/types";
 
 export type TicketSummary = {
   id: string;
@@ -27,7 +28,7 @@ export type SeasonSummary = { id: string; title: string; intro: string; tickets:
 
 const ROOM_ICON: Record<TicketType, string> = { bug: "🐛", feature: "✨", incident: "🚨", review: "🔍", read: "📖" };
 
-export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
+export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; warmups: Warmup[] }) {
   const progress = useProgress();
   const xp = totalXp(progress);
   const { rank } = rankFor(xp);
@@ -103,6 +104,8 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
         <Stat label="Tickets merged" value={`${solved.length}/${allTickets.length}`} />
         <Stat label="Day streak" value={`🔥 ${streak}`} />
       </section>
+
+      {now && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={new Set(solved.map((t) => t.id))} now={now} />}
 
       {/* ---------- office floor map ---------- */}
       {seasons.map((season) => (

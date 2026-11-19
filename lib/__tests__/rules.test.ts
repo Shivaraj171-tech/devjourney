@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { currentStreak, dayKey, leaderboard, quizXp, rankFor, readTicketXp, solveXp } from "../game/rules.ts";
+import { currentStreak, dayKey, leaderboard, pickWarmup, quizXp, rankFor, readTicketXp, solveXp } from "../game/rules.ts";
 
 function daysAgo(today: Date, ...offsets: number[]) {
   return offsets.map((o) => {
@@ -62,4 +62,20 @@ test("leaderboard includes you, sorted by XP", () => {
   const board = leaderboard({ name: "Ana", xp: 500 }, 0);
   assert.ok(board.some((b) => b.isYou && b.name === "Ana"));
   for (let i = 1; i < board.length; i++) assert.ok(board[i - 1].xp >= board[i].xp);
+});
+
+test("pickWarmup: only unlocked concepts, prefers unseen, stable per day", () => {
+  const w = [
+    { id: "w1", after: "s01-t01" },
+    { id: "w2", after: "s01-t01" },
+    { id: "w3", after: "s01-t05" },
+  ];
+  assert.equal(pickWarmup(w, new Set(), new Set(), "2026-11-19"), null);
+  const solved = new Set(["s01-t01"]);
+  const pick = pickWarmup(w, solved, new Set(), "2026-11-19")!;
+  assert.ok(["w1", "w2"].includes(pick.id));
+  assert.equal(pickWarmup(w, solved, new Set(), "2026-11-19")!.id, pick.id); // stable
+  const other = pick.id === "w1" ? "w2" : "w1";
+  assert.equal(pickWarmup(w, solved, new Set([pick.id]), "2026-11-19")!.id, other); // unseen first
+  assert.ok(pickWarmup(w, solved, new Set(["w1", "w2"]), "2026-11-19")); // falls back to repeats
 });

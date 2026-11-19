@@ -1,5 +1,5 @@
 import HQ, { type SeasonSummary } from "@/components/HQ";
-import { loadSeasons } from "@/lib/content/load";
+import { loadSeasons, loadWarmups } from "@/lib/content/load";
 
 export default function Home() {
   // Only send what the office map needs to the browser (no code, no tests).
@@ -19,5 +19,5 @@ export default function Home() {
       seasonId: t.seasonId,
     })),
   }));
-  return <HQ seasons={seasons} />;
+  return <HQ seasons={seasons} warmups={loadWarmups()} />;
 }
