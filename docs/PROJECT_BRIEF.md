@@ -99,8 +99,16 @@ tests_visible: true
 files_editable: [app/greeting.py]
 ```
 
+### Ticket-type extras
+- `read`: no tests/solution needed; `questions.yaml` (3+ questions) is the task.
+- `review`: `starter/` is the codebase before the PR; `pr/` holds the PR's changed files as full file text after the change; `review.yaml` has `title`, `author`, `description`, `files` (paths in `pr/`, display order), `issues` (`file`, 1-based `line`, optional `also_lines`, `explain`) and optional `merged` (default false). No tests/solution needed. XP = base − 10 per distinct false-alarm line − hints.
+- `incident`: like a bug ticket, plus `logs.txt` (shown in the Logs panel). Optional `time_limit_minutes` in `ticket.yaml` (default 15) sets the speed-bonus timer; the timer never blocks.
+- Full details and checks: the docstring of `scripts/validate_content.py`.
+
 ### Evolving codebase rule
 - Codebase for ticket N+1 = reference solution of ticket N (plus any new files).
+- A `read` ticket's result is its `starter/`; a `review` ticket's result is its `starter/`, plus `pr/` on top if `merged: true`.
+- The chain continues across seasons in order: the first ticket of season K+1 starts from the last ticket of season K (checked by the validator).
 - MVP: store a full `starter/` snapshot per ticket.
 - Later: a script that checks `solution(N)` + changes == `starter(N+1)`.
 
