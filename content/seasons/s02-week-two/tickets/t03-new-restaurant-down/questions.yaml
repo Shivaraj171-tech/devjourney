@@ -1,0 +1,22 @@
+questions:
+  - prompt: "In a Python traceback, where do you find the actual error message?"
+    choices:
+      - "On the first line, under 'Traceback (most recent call last)'"
+      - "On the last line, e.g. 'ZeroDivisionError: division by zero'"
+      - "Tracebacks don't include the error message, only file names"
+    answer: 1
+    explain: "Tracebacks list the calls oldest-first, so the error type and message are at the bottom, right under the line that failed."
+  - prompt: "rating_label already had an 'if len(ratings) == 0' check. Why did it still crash?"
+    choices:
+      - "len() doesn't work on empty lists"
+      - "The check came after average_rating(ratings) was called, so the division ran first"
+      - "'New!' is not a valid return value"
+    answer: 1
+    explain: "Code runs top to bottom. The guard has to come before the work it protects, or the crash happens before Python ever reaches the check."
+  - prompt: "Other restaurants were fine. Why only Noodle Nook?"
+    choices:
+      - "It was the only restaurant with no ratings yet, so len(ratings) was 0"
+      - "Its name contains a space"
+      - "It had too many ratings"
+    answer: 0
+    explain: "The logs show ratings=0 when it launched. Dividing by len([]) is dividing by zero, which only happens for brand-new restaurants."

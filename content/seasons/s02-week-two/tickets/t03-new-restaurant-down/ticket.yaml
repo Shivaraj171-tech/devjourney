@@ -1,0 +1,11 @@
+id: s02-t03
+title: "Checkout is down for Noodle Nook"
+type: incident
+level: junior
+track: debugging
+concepts: [lists, conditionals, functions, tracebacks]
+new_concept: tracebacks
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/ratings.py]
+time_limit_minutes: 15

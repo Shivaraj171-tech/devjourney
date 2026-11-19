@@ -108,16 +108,23 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
       {now && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={new Set(solved.map((t) => t.id))} now={now} />}
 
       {/* ---------- office floor map ---------- */}
-      {seasons.map((season) => (
-        <section key={season.id} className="space-y-4">
+      {seasons.map((season, floor) => {
+        // A floor opens once the floor below is finished: its first room needs the last room of the previous season.
+        const prevSeason = seasons[floor - 1];
+        const floorOpen = !prevSeason || prevSeason.tickets.every((t) => ticketProgress(progress, t.id).solved);
+        return (
+        <section key={season.id} className="space-y-4" data-testid={`floor-${floor + 1}`} data-state={floorOpen ? "open" : "locked"}>
           <div>
-            <h2 className="text-xl font-bold text-white">🏢 Floor 1 · {season.title}</h2>
+            <h2 className="text-xl font-bold text-white">
+              🏢 Floor {floor + 1} · {season.title}
+              {!floorOpen && <span className="ml-2 text-sm font-normal text-slate-500">🔒 Opens when you finish Floor {floor}</span>}
+            </h2>
             <Markdown text={season.intro} className="mt-1 max-w-3xl text-sm text-slate-400" />
           </div>
           <ol className="grid grid-cols-2 gap-3 lg:grid-cols-5" data-testid="office-map">
             {season.tickets.map((t, i) => {
               const tp = ticketProgress(progress, t.id);
-              const prevSolved = i === 0 || ticketProgress(progress, season.tickets[i - 1].id).solved;
+              const prevSolved = i === 0 ? floorOpen : ticketProgress(progress, season.tickets[i - 1].id).solved;
               const state = tp.solved ? "done" : prevSolved ? "open" : "locked";
               const isCurrent = current?.id === t.id;
               const body = (
@@ -155,7 +162,8 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
             })}
           </ol>
         </section>
-      ))}
+        );
+      })}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <AppPreview solved={new Set(solved.map((t) => t.id))} />

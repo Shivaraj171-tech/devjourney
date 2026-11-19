@@ -12,6 +12,8 @@ For each ticket it checks:
   5. The tests FAIL against starter/ (otherwise there is nothing to do).
   6. The tests PASS against solution/.
   7. Evolving codebase: every file in solution(N) appears unchanged in starter(N+1).
+     This also spans season boundaries, in order: the first ticket of a season
+     continues from the last ticket of the season before it.
 
 Daily warm-ups (content/warmups/*.yaml, optional) are checked too: required
 fields, unique ids, `after` names a real ticket id, the code compiles and is
@@ -21,6 +23,30 @@ Tickets with `type: read` are different: the questions ARE the task. They need
 starter/ (the code to read) and a questions.yaml with at least 3 questions;
 tests/ and solution/ are optional and checks 5-6 are skipped. For check 7 the
 code is unchanged by a read ticket, so its starter/ counts as its solution.
+
+Tickets with `type: review` ask the learner to review a pull request. They need
+starter/ (the codebase before the PR), pr/ (the PR's changed files, as full file
+text after the change) and review.yaml:
+
+    title: "Add rider tips"           # PR title
+    author: "Byte 🤖"
+    description: |                     # the PR description (Markdown)
+      ...
+    files: [app/tips.py]               # every file in pr/, in display order
+    issues:                            # the real problems (at least 1)
+      - file: app/tips.py
+        line: 17                       # 1-based line in pr/app/tips.py
+        also_lines: [16]               # optional: nearby lines that also count
+        explain: "..."
+    merged: true                       # optional (default false): the PR is merged
+                                       # as-is, so the next ticket's code includes it
+
+tests/ and solution/ are optional and checks 5-6 are skipped. For check 7 the
+review ticket's result is its starter/, plus pr/ on top when `merged: true`.
+
+Tickets with `type: incident` work like bug tickets (starter fails, solution
+passes) and also need logs.txt (the production logs shown in the Logs panel).
+ticket.yaml may set `time_limit_minutes` (1-60, default 15) for the speed bonus.
 
 Usage:
     python3 scripts/validate_content.py [content_dir]
@@ -42,6 +68,9 @@ RUNNER = REPO_ROOT / "lib" / "runner" / "test_runner.py"
 TEST_TIMEOUT_SECONDS = 10
 MIN_CHOICES, MAX_CHOICES = 2, 4
 MIN_READ_QUESTIONS = 3
+MAX_INCIDENT_MINUTES = 60
+# Ticket types without tests to run: the quiz (read) or the review (review) is the task.
+NO_TEST_TYPES = {"read", "review"}
 
 REQUIRED_FIELDS = {
     "id": str,
@@ -194,15 +223,21 @@ def check_ticket_meta(ticket_dir):
         return [f"ticket.yaml is not valid YAML: {exc}"]
     if not isinstance(meta, dict):
         return ["ticket.yaml must be a mapping of fields"]
-    is_read = meta.get("type") == "read"
+    ticket_type = meta.get("type")
+    is_read = ticket_type == "read"
+    has_tests = ticket_type not in NO_TEST_TYPES
 
-    folders = ["starter"] if is_read else ["starter", "tests", "solution"]
+    folders = {"read": ["starter"], "review": ["starter", "pr"]}.get(ticket_type, ["starter", "tests", "solution"])
     for name in folders:
         if not (ticket_dir / name).is_dir():
             errors.append(f"missing {name}/ folder")
     questions_file = ticket_dir / "questions.yaml"
     if is_read and not questions_file.is_file():
         errors.append("missing questions.yaml (required for read tickets)")
+    if ticket_type == "review" and not (ticket_dir / "review.yaml").is_file():
+        errors.append("missing review.yaml (required for review tickets)")
+    if ticket_type == "incident" and not (ticket_dir / "logs.txt").is_file():
+        errors.append("missing logs.txt (required for incident tickets)")
     if errors:
         return errors
 
@@ -220,12 +255,100 @@ def check_ticket_meta(ticket_dir):
 
     if not read_hints(ticket_dir / "hints.md"):
         errors.append("hints.md has no hints")
-    if not is_read and not list((ticket_dir / "tests").glob("test_*.py")):
+    if has_tests and not list((ticket_dir / "tests").glob("test_*.py")):
         errors.append("tests/ has no test_*.py files")
     if questions_file.is_file():
         errors += check_questions(questions_file, MIN_READ_QUESTIONS if is_read else 1)
     if (ticket_dir / "concept.md").is_file():
         errors += check_concept(ticket_dir / "concept.md")
+    if ticket_type == "review":
+        errors += check_review(ticket_dir)
+    if ticket_type == "incident":
+        errors += check_incident(ticket_dir, meta)
+    return errors
+
+
+def check_incident(ticket_dir, meta):
+    """logs.txt must have content; time_limit_minutes (optional) must be 1-60."""
+    errors = []
+    if not (ticket_dir / "logs.txt").read_text(encoding="utf-8").strip():
+        errors.append("logs.txt is empty")
+    if "time_limit_minutes" in meta:
+        limit = meta["time_limit_minutes"]
+        if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= MAX_INCIDENT_MINUTES:
+            errors.append(f"ticket.yaml: 'time_limit_minutes' must be a whole number from 1 to {MAX_INCIDENT_MINUTES}")
+    return errors
+
+
+def check_review(ticket_dir):
+    """Check review.yaml against pr/ (format in the module docstring). Returns error strings."""
+    try:
+        data = yaml.safe_load((ticket_dir / "review.yaml").read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return [f"review.yaml is not valid YAML: {exc}"]
+    if not isinstance(data, dict):
+        return ["review.yaml must be a mapping of fields"]
+
+    errors = []
+    for field in ["title", "author", "description"]:
+        if not is_nonempty_str(data.get(field)):
+            errors.append(f"review.yaml: '{field}' is missing or empty")
+    if "merged" in data and not isinstance(data["merged"], bool):
+        errors.append("review.yaml: 'merged' must be true or false")
+
+    files = data.get("files")
+    if not isinstance(files, list) or not files or not all(is_nonempty_str(f) for f in files):
+        return errors + ["review.yaml: 'files' must be a non-empty list of paths in pr/"]
+    pr_dir = ticket_dir / "pr"
+    on_disk = files_in(pr_dir)
+    lines = {}  # path -> list of lines
+    for rel in files:
+        if rel not in on_disk:
+            errors.append(f"review.yaml: file {rel} does not exist in pr/")
+            continue
+        text = on_disk[rel].read_text(encoding="utf-8")
+        lines[rel] = text.splitlines()
+        starter_file = ticket_dir / "starter" / rel
+        if starter_file.is_file() and starter_file.read_text(encoding="utf-8") == text:
+            errors.append(f"pr/{rel} is identical to starter/{rel} (the PR must change it)")
+        if rel.endswith(".py"):
+            try:
+                compile(text, rel, "exec")
+            except SyntaxError as exc:
+                errors.append(f"pr/{rel} is not valid Python: line {exc.lineno}: {exc.msg}")
+    for rel in sorted(set(on_disk) - set(files)):
+        errors.append(f"pr/{rel} is not listed in review.yaml 'files'")
+
+    issues = data.get("issues")
+    if not isinstance(issues, list) or not issues:
+        return errors + ["review.yaml: 'issues' must be a non-empty list"]
+    seen = {}
+    for n, issue in enumerate(issues, start=1):
+        where = f"review.yaml: issue {n}"
+        if not isinstance(issue, dict):
+            errors.append(f"{where} must be a mapping")
+            continue
+        if not is_nonempty_str(issue.get("explain")):
+            errors.append(f"{where}: 'explain' is missing or empty")
+        rel = issue.get("file")
+        if rel not in files:
+            errors.append(f"{where}: file {rel!r} is not one of the PR files {files}")
+            continue
+        also = issue.get("also_lines", [])
+        if not isinstance(also, list):
+            errors.append(f"{where}: 'also_lines' must be a list of line numbers")
+            also = []
+        for line in [issue.get("line")] + also:
+            if not isinstance(line, int) or isinstance(line, bool):
+                errors.append(f"{where}: line {line!r} must be a whole number")
+            elif rel in lines and not 1 <= line <= len(lines[rel]):
+                errors.append(f"{where}: line {line} is outside {rel} (1-{len(lines[rel])})")
+            elif rel in lines and not lines[rel][line - 1].strip():
+                errors.append(f"{where}: line {line} of {rel} is blank")
+            elif (rel, line) in seen:
+                errors.append(f"{where}: {rel}:{line} is already used by issue {seen[(rel, line)]}")
+            else:
+                seen[(rel, line)] = n
     return errors
 
 
@@ -255,14 +378,44 @@ def files_in(folder):
             if p.is_file() and "__pycache__" not in p.parts}
 
 
-def check_evolution(prev_dir, next_dir):
-    """Every file in solution(prev) must appear unchanged in starter(next).
+def resulting_code(ticket_dir):
+    """The codebase a ticket leaves behind, as (label, {path: file}).
 
-    A read ticket doesn't change the code, so its starter/ counts as its solution.
+    - read: unchanged, so its starter/
+    - review: its starter/, plus the PR's files (pr/) if review.yaml says `merged: true`
+    - everything else: its solution/
+    Returns (label, None) if the folder it needs is missing.
+    """
+    ticket_type = load_ticket_type(ticket_dir)
+    if ticket_type not in NO_TEST_TYPES:
+        folder = ticket_dir / "solution"
+        return "solution", files_in(folder) if folder.is_dir() else None
+    if not (ticket_dir / "starter").is_dir():
+        return "starter", None
+    files = files_in(ticket_dir / "starter")
+    if ticket_type == "review" and review_is_merged(ticket_dir) and (ticket_dir / "pr").is_dir():
+        files.update(files_in(ticket_dir / "pr"))
+        return "starter+pr", files
+    return "starter", files
+
+
+def review_is_merged(ticket_dir):
+    try:
+        data = yaml.safe_load((ticket_dir / "review.yaml").read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return False
+    return isinstance(data, dict) and data.get("merged") is True
+
+
+def check_evolution(prev_dir, next_dir):
+    """Every file in the code prev_dir leaves behind must appear unchanged in starter(next).
+
+    Usually that is solution(prev). See resulting_code() for read and review tickets.
     """
     errors = []
-    source = "starter" if load_ticket_type(prev_dir) == "read" else "solution"
-    prev_files = files_in(prev_dir / source)
+    source, prev_files = resulting_code(prev_dir)
+    if prev_files is None:
+        return errors
     next_files = files_in(next_dir / "starter")
     for rel, path in sorted(prev_files.items()):
         if rel not in next_files:
@@ -272,8 +425,23 @@ def check_evolution(prev_dir, next_dir):
     return errors
 
 
-def validate_season(season_dir):
-    """Returns a dict {label: [errors]} for the season and each of its tickets."""
+def season_ticket_order(season_dir):
+    """Ticket folder names in the order season.yaml lists them ([] if unreadable)."""
+    try:
+        season = yaml.safe_load((season_dir / "season.yaml").read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError):
+        return []
+    if not isinstance(season, dict):
+        return []
+    return season.get("tickets") or []
+
+
+def validate_season(season_dir, prev=None):
+    """Returns a dict {label: [errors]} for the season and each of its tickets.
+
+    prev is the last ticket folder of the previous season (if any), so the
+    evolving-codebase check continues across the season boundary.
+    """
     report = {}
     season_file = season_dir / "season.yaml"
     if not season_file.is_file():
@@ -291,7 +459,6 @@ def validate_season(season_dir):
         season_errors.append(f"ticket folder {name} is not listed in season.yaml")
     report[season_dir.name] = season_errors
 
-    prev = None
     for name in order:
         ticket_dir = tickets_root / name
         label = f"{season_dir.name}/{name}"
@@ -300,10 +467,9 @@ def validate_season(season_dir):
             prev = None
             continue
         errors = check_ticket_meta(ticket_dir)
-        if not errors and load_ticket_type(ticket_dir) != "read":
+        if not errors and load_ticket_type(ticket_dir) not in NO_TEST_TYPES:
             errors += check_ticket_tests(ticket_dir)
-        prev_source = "starter" if prev is not None and load_ticket_type(prev) == "read" else "solution"
-        if prev is not None and (prev / prev_source).is_dir() and (ticket_dir / "starter").is_dir():
+        if prev is not None and (ticket_dir / "starter").is_dir():
             errors += check_evolution(prev, ticket_dir)
         report[label] = errors
         prev = ticket_dir
@@ -390,10 +556,15 @@ def all_ticket_ids(seasons_root):
 
 
 def validate_content(content_dir):
+    """Validate every season in folder-name order, chaining the codebase from one season to the next."""
     report = {}
     seasons_root = Path(content_dir) / "seasons"
+    prev = None
     for season_dir in sorted(p for p in seasons_root.iterdir() if p.is_dir()):
-        report.update(validate_season(season_dir))
+        report.update(validate_season(season_dir, prev))
+        order = season_ticket_order(season_dir)
+        last = season_dir / "tickets" / order[-1] if order else None
+        prev = last if last is not None and last.is_dir() else None
     warmups_dir = Path(content_dir) / "warmups"
     if warmups_dir.is_dir():
         report["warmups"] = validate_warmups(warmups_dir, all_ticket_ids(seasons_root))

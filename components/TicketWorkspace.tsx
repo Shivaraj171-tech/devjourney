@@ -3,13 +3,15 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CodeEditor from "./CodeEditor";
 import HintPanel from "./HintPanel";
+import IncidentPanel from "./IncidentPanel";
 import Markdown from "./Markdown";
 import Quiz from "./Quiz";
+import ReviewPanel from "./ReviewPanel";
 import SolvedModal from "./SolvedModal";
 import TestResults from "./TestResults";
 import { listChecks } from "@/lib/content/checks";
 import type { Ticket } from "@/lib/content/types";
-import { quizXp, readTicketXp, solveXp, type SolveXp } from "@/lib/game/rules";
+import { incidentBonus, incidentXp, quizXp, readTicketXp, solveXp, type TicketXp } from "@/lib/game/rules";
 import { actions, ticketProgress, useProgress } from "@/lib/progress/store";
 import { PythonRunner } from "@/lib/runner/client";
 import { useIsClient } from "@/lib/useIsClient";
@@ -35,6 +37,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const progress = useProgress();
   const tp = ticketProgress(progress, ticket.id);
   const isRead = ticket.type === "read";
+  const review = ticket.review;
+  const noRunner = isRead || !!review; // read and review tickets have no tests to run
   // Progress only exists in the browser; until then we don't know if it's locked.
   const isClient = useIsClient();
   const locked = prevTicketId !== null && !ticketProgress(progress, prevTicketId).solved;
@@ -58,8 +62,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const runnerRef = useRef<PythonRunner | null>(null);
   const [pythonState, setPythonState] = useState<"loading" | "ready" | "failed">("loading");
   useEffect(() => {
-    // Don't download Python for read tickets, locked tickets, or the static HTML.
-    if (isRead || locked || !isClient) return;
+    // Don't download Python for read/review tickets, locked tickets, or the static HTML.
+    if (noRunner || locked || !isClient) return;
     const runner = new PythonRunner();
     runnerRef.current = runner;
     runner.warmUp().then(
@@ -67,11 +71,21 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
       () => setPythonState("failed"),
     );
     return () => runner.dispose();
-  }, [isRead, locked, isClient]);
+  }, [noRunner, locked, isClient]);
 
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
-  const [celebrate, setCelebrate] = useState<SolveXp | null>(null);
+  const [celebrate, setCelebrate] = useState<TicketXp | null>(null);
+
+  // XP for getting every check green. Incidents add a speed bonus if fixed in time.
+  const passXp = useCallback(
+    (runs: number, hints: number): TicketXp => {
+      if (!ticket.incident || !tp.incidentStartedAt) return solveXp(ticket.level, hints, runs);
+      const bonus = incidentBonus(new Date(tp.incidentStartedAt).getTime(), Date.now(), ticket.incident.timeLimitMinutes);
+      return incidentXp(ticket.level, hints, runs, bonus);
+    },
+    [ticket, tp.incidentStartedAt],
+  );
   const [tab, setTab] = useState<Tab>("ticket");
 
   const runTests = useCallback(async () => {
@@ -90,21 +104,21 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
     }
     const wasSolved = tp.solved;
     const runsAfter = tp.runs + 1;
-    actions.recordRun(ticket.id, res.passed, (runs, hints) => solveXp(ticket.level, hints, runs).total);
-    if (res.passed && !wasSolved) setCelebrate(solveXp(ticket.level, tp.hintsUsed, runsAfter));
-  }, [running, ticket, tp]);
+    actions.recordRun(ticket.id, res.passed, (runs, hints) => passXp(runs, hints).total);
+    if (res.passed && !wasSolved) setCelebrate(passXp(runsAfter, tp.hintsUsed));
+  }, [running, ticket, tp, passXp]);
 
   // Ctrl/Cmd + Enter runs the tests.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !isRead) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !noRunner) {
         e.preventDefault();
         runTests();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [runTests, isRead]);
+  }, [runTests, noRunner]);
 
   const quizUnlocked = isRead || tp.solved;
   const hasQuiz = ticket.questions.length > 0;
@@ -180,6 +194,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                 <div className="font-semibold text-white">Your task</div>
                 {isRead ? (
                   <p className="mt-1 text-slate-400">Read the code on the right, then answer the questions in the <b>Quiz</b> tab. No code changes needed.</p>
+                ) : review ? (
+                  <p className="mt-1 text-slate-400">Review the pull request on the right. Click every line that has a real problem, then press <b>Submit review</b>. Flagging fine code costs a little XP.</p>
                 ) : (
                   <>
                     <p className="mt-1 text-slate-400">
@@ -240,8 +256,12 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
         )}
       </aside>
 
-      {/* ---------- right: IDE + checks ---------- */}
+      {/* ---------- right: pull request (review tickets) or IDE + checks ---------- */}
+      {review ? (
+        <ReviewPanel ticket={{ ...ticket, review }} tp={tp} onSolved={setCelebrate} />
+      ) : (
       <section className="flex min-h-[600px] flex-col gap-3 lg:min-h-0">
+        {ticket.incident && <IncidentPanel ticketId={ticket.id} incident={ticket.incident} tp={tp} />}
         <div className="flex min-h-[380px] flex-1 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e1e1e]">
           <div className="flex flex-wrap items-center border-b border-slate-800 bg-slate-950 px-2">
             <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
@@ -302,11 +322,13 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           </div>
         )}
       </section>
+      )}
 
       {celebrate && (
         <SolvedModal
           xp={celebrate}
           isRead={isRead}
+          variant={ticket.type}
           hasQuiz={hasQuiz && !isRead}
           nextTicket={nextTicket}
           onQuiz={() => {

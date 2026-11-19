@@ -87,7 +87,7 @@ test.describe("phone viewport", () => {
 
   test("HQ has no horizontal overflow", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByTestId("office-map")).toBeVisible();
+    await expect(page.getByTestId("office-map").first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   });
 });

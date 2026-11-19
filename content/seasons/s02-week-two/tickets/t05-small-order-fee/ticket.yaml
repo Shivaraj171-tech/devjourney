@@ -1,0 +1,10 @@
+id: s02-t05
+title: "Review: the small-order fee"
+type: review
+level: junior
+track: ai
+concepts: [conditionals, functions, code-review, reviewing-diffs]
+new_concept: reviewing-diffs
+estimated_minutes: 12
+tests_visible: false
+files_editable: []

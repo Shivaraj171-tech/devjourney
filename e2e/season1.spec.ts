@@ -75,7 +75,10 @@ test("every Season 1 ticket can be solved in the browser", async ({ page }) => {
   for (const t of tickets) {
     await expect(page.getByTestId(`room-${t.id}`)).toHaveAttribute("data-state", "done");
   }
-  await expect(page.getByText("Season complete!")).toBeVisible();
+  // Season 1 done: Floor 2 opens and "Continue" points at its first ticket.
+  const s2first = seasonTickets("s02-week-two")[0];
+  await expect(page.getByTestId(`room-${s2first.id}`)).toHaveAttribute("data-state", "open");
+  await expect(page.getByTestId("continue")).toHaveAttribute("href", new RegExp(`/ticket/${s2first.id}/?$`));
   await expect(page.getByTestId("onboarding")).toHaveCount(0);
   await expect(page.getByText(`${tickets.length}/${tickets.length} features shipped`)).toBeVisible();
   const xpText = await page.getByTestId("xp-total").textContent();

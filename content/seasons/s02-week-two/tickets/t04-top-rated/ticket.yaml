@@ -1,0 +1,10 @@
+id: s02-t04
+title: "Finish the Top rated badge"
+type: feature
+level: junior
+track: building
+concepts: [lists, conditionals, functions, boolean-logic]
+new_concept: boolean-logic
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/badges.py]
