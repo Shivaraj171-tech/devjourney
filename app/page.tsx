@@ -17,6 +17,7 @@ export default function Home() {
       hasQuiz: t.questions.length > 0,
       questionCount: t.questions.length,
       seasonId: t.seasonId,
+      timeLimitMinutes: t.incident?.timeLimitMinutes,
     })),
   }));
   return <HQ seasons={seasons} warmups={loadWarmups()} />;

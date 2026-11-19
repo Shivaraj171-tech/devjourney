@@ -8,7 +8,7 @@ import AppPreview from "./AppPreview";
 import DailyWarmup from "./DailyWarmup";
 import Markdown from "./Markdown";
 import Onboarding from "./Onboarding";
-import { BADGES, currentStreak, leaderboard, rankFor, type BadgeContext } from "@/lib/game/rules";
+import { BADGES, currentStreak, incidentBonus, leaderboard, rankFor, type BadgeContext } from "@/lib/game/rules";
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
 import type { TicketType, Warmup } from "@/lib/content/types";
 
@@ -21,6 +21,8 @@ export type TicketSummary = {
   estimatedMinutes: number;
   hasQuiz: boolean;
   questionCount: number;
+  /** Incident tickets only. */
+  timeLimitMinutes?: number;
   seasonId: string;
 };
 
@@ -53,6 +55,11 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
         runs: tp.runs,
         seasonId: t.seasonId,
         quizPerfect: tp.quizDone && t.questionCount > 0 && tp.quizFirstTryCorrect === t.questionCount,
+        falseAlarms: tp.reviewFalseAlarms?.length ?? 0,
+        beatTheClock:
+          t.timeLimitMinutes !== undefined && !!tp.incidentStartedAt && !!tp.solvedAt
+            ? incidentBonus(Date.parse(tp.incidentStartedAt), Date.parse(tp.solvedAt), t.timeLimitMinutes) > 0
+            : false,
       };
     }),
   };

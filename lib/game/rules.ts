@@ -109,6 +109,10 @@ export type SolvedInfo = {
   runs: number;
   quizPerfect: boolean;
   seasonId: string;
+  /** Review tickets: number of wrongly flagged lines. */
+  falseAlarms?: number;
+  /** Incident tickets: fixed within the time limit. */
+  beatTheClock?: boolean;
 };
 
 export type BadgeContext = {
@@ -128,6 +132,10 @@ export const BADGES: { id: string; emoji: string; title: string; description: st
     earned: (c) => c.solved.some((s) => s.quizPerfect) },
   { id: "bug-squasher", emoji: "🐛", title: "Bug Squasher", description: "Fix 5 bugs.",
     earned: (c) => c.solved.filter((s) => s.type === "bug").length >= 5 },
+  { id: "eagle-eye", emoji: "🦅", title: "Eagle Eye", description: "Finish a code review with no false alarms.",
+    earned: (c) => c.solved.some((s) => s.type === "review" && s.falseAlarms === 0) },
+  { id: "firefighter", emoji: "🧯", title: "Firefighter", description: "Fix a production incident before the clock runs out.",
+    earned: (c) => c.solved.some((s) => s.type === "incident" && s.beatTheClock === true) },
   { id: "on-fire", emoji: "🔥", title: "On Fire", description: "Keep a 3-day streak.",
     earned: (c) => c.streak >= 3 },
   { id: "week-one", emoji: "🏆", title: "Survived Week One", description: "Finish Season 1.",

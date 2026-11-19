@@ -79,3 +79,14 @@ test("pickWarmup: only unlocked concepts, prefers unseen, stable per day", () =>
   assert.equal(pickWarmup(w, solved, new Set([pick.id]), "2026-11-19")!.id, other); // unseen first
   assert.ok(pickWarmup(w, solved, new Set(["w1", "w2"]), "2026-11-19")); // falls back to repeats
 });
+
+test("badges: Eagle Eye and Firefighter", async () => {
+  const { BADGES } = await import("../game/rules.ts");
+  const get = (id: string) => BADGES.find((b) => b.id === id)!;
+  const base = { hintsUsed: 0, runs: 1, quizPerfect: false, seasonId: "s02" };
+  const ctx = (solved: object[]) => ({ streak: 0, seasonTicketCounts: {}, solved: solved as never });
+  assert.equal(get("eagle-eye").earned(ctx([{ ...base, type: "review", falseAlarms: 1 }])), false);
+  assert.equal(get("eagle-eye").earned(ctx([{ ...base, type: "review", falseAlarms: 0 }])), true);
+  assert.equal(get("firefighter").earned(ctx([{ ...base, type: "incident", beatTheClock: false }])), false);
+  assert.equal(get("firefighter").earned(ctx([{ ...base, type: "incident", beatTheClock: true }])), true);
+});

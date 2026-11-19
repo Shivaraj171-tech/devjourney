@@ -154,7 +154,11 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">{TYPE_BADGE[ticket.type]}</span>
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">⏱ ~{ticket.estimatedMinutes} min</span>
             <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-cyan-300">New: {ticket.newConcept}</span>
-            {tp.solved && <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-300">✔ Merged</span>}
+            {tp.solved && (
+              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-300">
+                {review ? "✔ Reviewed" : isRead ? "✔ Done" : ticket.type === "incident" ? "✔ Resolved" : "✔ Merged"}
+              </span>
+            )}
           </div>
           <h1 className="mt-2 text-lg font-bold text-white">
             <span className="text-slate-500">#{ticket.number}</span> {ticket.title}
@@ -193,9 +197,9 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
                 <div className="font-semibold text-white">Your task</div>
                 {isRead ? (
-                  <p className="mt-1 text-slate-400">Read the code on the right, then answer the questions in the <b>Quiz</b> tab. No code changes needed.</p>
+                  <p className="mt-1 text-slate-400">Read the code in the editor, then answer the questions in the <b>Quiz</b> tab. No code changes needed.</p>
                 ) : review ? (
-                  <p className="mt-1 text-slate-400">Review the pull request on the right. Click every line that has a real problem, then press <b>Submit review</b>. Flagging fine code costs a little XP.</p>
+                  <p className="mt-1 text-slate-400">Review the pull request in the code panel. Click every line that has a real problem, then press <b>Submit review</b>. Flagging fine code costs a little XP.</p>
                 ) : (
                   <>
                     <p className="mt-1 text-slate-400">
