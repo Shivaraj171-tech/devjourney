@@ -28,8 +28,8 @@ export default function TopBar() {
           <span title="Daily streak" className="rounded-full bg-orange-500/10 px-2.5 py-1 font-semibold text-orange-300">
             🔥 {streak}
           </span>
-          <div className="hidden min-w-40 sm:block" title={next ? `${next.minXp - xp} XP to ${next.title}` : "Max rank"}>
-            <div className="flex justify-between text-xs">
+          <div className="hidden min-w-48 sm:block" title={next ? `${next.minXp - xp} XP to ${next.title}` : "Max rank"}>
+            <div className="flex justify-between gap-3 text-xs whitespace-nowrap">
               <span className="text-slate-300">{rank.emoji} {rank.title}</span>
               <span className="font-mono text-cyan-300" data-testid="xp-total">{xp} XP</span>
             </div>
