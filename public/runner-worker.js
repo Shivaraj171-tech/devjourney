@@ -1,0 +1,73 @@
+// Web worker that runs a ticket's tests on the learner's code with Pyodide.
+// Runs off the main thread so the page stays responsive; if learner code loops
+// forever, the page simply terminates this worker and starts a new one.
+//
+// Messages in:  { type: "run", id, files: {path: text}, tests: {path: text} }
+// Messages out: { type: "ready" }
+//               { type: "result", id, result }   (result = test_runner.run_tests JSON)
+//               { type: "error", id, message }
+
+import { loadPyodide } from "/pyodide/pyodide.mjs";
+
+const SETUP = `
+import json, sys, shutil, importlib
+from pathlib import Path
+
+sys.path.insert(0, "/runner")
+import test_runner
+
+WORKSPACE = Path("/workspace")
+
+def _is_learner_module(name, mod):
+    if name.startswith("_ticket_tests_"):
+        return True
+    paths = [getattr(mod, "__file__", None) or ""]
+    paths += list(getattr(mod, "__path__", None) or [])
+    return any(str(p).startswith(str(WORKSPACE)) for p in paths)
+
+def run_payload(payload_json):
+    payload = json.loads(payload_json)
+    if WORKSPACE.exists():
+        shutil.rmtree(WORKSPACE)
+    for folder, files in (("code", payload["files"]), ("tests", payload["tests"])):
+        for rel, text in files.items():
+            path = WORKSPACE / folder / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+    # Forget modules from the previous run so edited code is re-imported.
+    for name, mod in list(sys.modules.items()):
+        if _is_learner_module(name, mod):
+            del sys.modules[name]
+    importlib.invalidate_caches()
+    return json.dumps(test_runner.run_tests(str(WORKSPACE / "code"), str(WORKSPACE / "tests")))
+`;
+
+async function init() {
+  const pyodide = await loadPyodide({ indexURL: "/pyodide/" });
+  const runnerSource = await (await fetch("/runner/test_runner.py")).text();
+  // Write the runner file from Python itself (avoids depending on FS APIs).
+  pyodide.runPython(
+    `from pathlib import Path\nPath("/runner").mkdir(exist_ok=True)\nPath("/runner/test_runner.py").write_text(${JSON.stringify(runnerSource)})`
+  );
+  pyodide.runPython(SETUP);
+  return pyodide;
+}
+
+const ready = init();
+ready.then(
+  () => self.postMessage({ type: "ready" }),
+  (err) => self.postMessage({ type: "error", id: null, message: `Python failed to load: ${err}` })
+);
+
+self.onmessage = async (event) => {
+  const { type, id, files, tests } = event.data;
+  if (type !== "run") return;
+  try {
+    const pyodide = await ready;
+    const payload = JSON.stringify(JSON.stringify({ files, tests }));
+    const resultJson = pyodide.runPython(`run_payload(${payload})`);
+    self.postMessage({ type: "result", id, result: JSON.parse(resultJson) });
+  } catch (err) {
+    self.postMessage({ type: "error", id, message: String(err) });
+  }
+};

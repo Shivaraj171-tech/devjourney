@@ -1,0 +1,10 @@
+id: s01-t07
+title: "Where is the discount calculated?"
+type: read
+level: junior
+track: reading
+concepts: [conditionals, dictionaries, reading-code]
+new_concept: reading-code
+estimated_minutes: 10
+tests_visible: true
+files_editable: []

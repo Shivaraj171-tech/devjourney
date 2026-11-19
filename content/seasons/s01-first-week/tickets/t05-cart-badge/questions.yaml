@@ -1,0 +1,16 @@
+questions:
+  - prompt: "After cart = [1250] and then cart.append(299), what is cart?"
+    choices:
+      - "[299, 1250]"
+      - "[1250, 299]"
+      - "[1549]"
+      - "[1250] (append only returns a new list)"
+    answer: 1
+    explain: "append adds the value to the end of the same list. It doesn't add the numbers together or make a copy."
+  - prompt: "Why doesn't add_item need a return statement?"
+    choices:
+      - "Python returns the last line of every function automatically"
+      - "It does need one; without return the item is lost"
+      - "append changes the cart list that was passed in, so the caller already sees the new item"
+    answer: 2
+    explain: "Lists can be changed in place. The test's cart and the function's cart are the same list, so the change shows up outside the function too."

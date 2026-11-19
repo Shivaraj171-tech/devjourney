@@ -1,0 +1,10 @@
+id: s01-t04
+title: "The free lemonade nobody asked for"
+type: bug
+level: intern
+track: foundations
+concepts: [numbers, loops]
+new_concept: loops
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/cart.py]

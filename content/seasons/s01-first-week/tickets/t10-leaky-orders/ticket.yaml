@@ -1,0 +1,10 @@
+id: s01-t10
+title: "Whose fries are these?"
+type: bug
+level: junior
+track: debugging
+concepts: [lists, dictionaries, none, functions, mutable-shared-data]
+new_concept: mutable-shared-data
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/orders.py]

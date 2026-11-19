@@ -5,9 +5,16 @@ For each ticket it checks:
   2. ticket.yaml has the required fields with allowed values, and every
      file in files_editable exists in starter/.
   3. hints.md has at least one hint (hints are separated by a line "---").
-  4. The tests FAIL against starter/ (otherwise there is nothing to do).
-  5. The tests PASS against solution/.
-  6. Evolving codebase: every file in solution(N) appears unchanged in starter(N+1).
+  4. questions.yaml (optional "check your understanding" quiz) is well formed:
+     2-4 choices per question, answer is a valid 0-based index, explain present.
+  5. The tests FAIL against starter/ (otherwise there is nothing to do).
+  6. The tests PASS against solution/.
+  7. Evolving codebase: every file in solution(N) appears unchanged in starter(N+1).
+
+Tickets with `type: read` are different: the questions ARE the task. They need
+starter/ (the code to read) and a questions.yaml with at least 3 questions;
+tests/ and solution/ are optional and checks 5-6 are skipped. For check 7 the
+code is unchanged by a read ticket, so its starter/ counts as its solution.
 
 Usage:
     python3 scripts/validate_content.py [content_dir]
@@ -26,6 +33,8 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RUNNER = REPO_ROOT / "lib" / "runner" / "test_runner.py"
 TEST_TIMEOUT_SECONDS = 10
+MIN_CHOICES, MAX_CHOICES = 2, 4
+MIN_READ_QUESTIONS = 3
 
 REQUIRED_FIELDS = {
     "id": str,
@@ -76,15 +85,70 @@ def read_hints(path):
     return [h for h in hints if h]
 
 
+def load_ticket_type(ticket_dir):
+    """Return the ticket's `type` from ticket.yaml, or None if it can't be read."""
+    try:
+        meta = yaml.safe_load((ticket_dir / "ticket.yaml").read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return None
+    return meta.get("type") if isinstance(meta, dict) else None
+
+
+def is_nonempty_str(value):
+    return isinstance(value, str) and value.strip() != ""
+
+
+def check_questions(path, min_questions=1):
+    """Check a questions.yaml file. Returns a list of error strings.
+
+    Format:
+        questions:
+          - prompt: "..."
+            choices: ["...", "..."]   # 2-4 choices
+            answer: 1                 # 0-based index into choices
+            explain: "..."
+    """
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return [f"questions.yaml is not valid YAML: {exc}"]
+    if not isinstance(data, dict) or not isinstance(data.get("questions"), list):
+        return ["questions.yaml must have a 'questions' list"]
+
+    questions = data["questions"]
+    errors = []
+    if len(questions) < min_questions:
+        errors.append(f"questions.yaml needs at least {min_questions} question(s), has {len(questions)}")
+    for i, q in enumerate(questions, start=1):
+        where = f"questions.yaml: question {i}"
+        if not isinstance(q, dict):
+            errors.append(f"{where} must be a mapping")
+            continue
+        for field in ["prompt", "explain"]:
+            if not is_nonempty_str(q.get(field)):
+                errors.append(f"{where}: '{field}' is missing or empty")
+        choices = q.get("choices")
+        if not isinstance(choices, list) or not all(is_nonempty_str(c) for c in choices):
+            errors.append(f"{where}: 'choices' must be a list of non-empty strings")
+            continue
+        if not MIN_CHOICES <= len(choices) <= MAX_CHOICES:
+            errors.append(f"{where}: has {len(choices)} choices, needs {MIN_CHOICES}-{MAX_CHOICES}")
+        if len({c.strip() for c in choices}) != len(choices):
+            errors.append(f"{where}: choices must all be different")
+        answer = q.get("answer")
+        if not isinstance(answer, int) or isinstance(answer, bool):
+            errors.append(f"{where}: 'answer' must be a whole number (0-based index)")
+        elif not 0 <= answer < len(choices):
+            errors.append(f"{where}: answer {answer} is out of range for {len(choices)} choices")
+    return errors
+
+
 def check_ticket_meta(ticket_dir):
-    """Check files and ticket.yaml. Returns a list of error strings."""
+    """Check files, ticket.yaml, hints and questions. Returns a list of error strings."""
     errors = []
     for name in ["ticket.yaml", "story.md", "hints.md"]:
         if not (ticket_dir / name).is_file():
             errors.append(f"missing {name}")
-    for name in ["starter", "tests", "solution"]:
-        if not (ticket_dir / name).is_dir():
-            errors.append(f"missing {name}/ folder")
     if errors:
         return errors
 
@@ -94,6 +158,17 @@ def check_ticket_meta(ticket_dir):
         return [f"ticket.yaml is not valid YAML: {exc}"]
     if not isinstance(meta, dict):
         return ["ticket.yaml must be a mapping of fields"]
+    is_read = meta.get("type") == "read"
+
+    folders = ["starter"] if is_read else ["starter", "tests", "solution"]
+    for name in folders:
+        if not (ticket_dir / name).is_dir():
+            errors.append(f"missing {name}/ folder")
+    questions_file = ticket_dir / "questions.yaml"
+    if is_read and not questions_file.is_file():
+        errors.append("missing questions.yaml (required for read tickets)")
+    if errors:
+        return errors
 
     for field, kind in REQUIRED_FIELDS.items():
         if field not in meta:
@@ -109,8 +184,10 @@ def check_ticket_meta(ticket_dir):
 
     if not read_hints(ticket_dir / "hints.md"):
         errors.append("hints.md has no hints")
-    if not list((ticket_dir / "tests").glob("test_*.py")):
+    if not is_read and not list((ticket_dir / "tests").glob("test_*.py")):
         errors.append("tests/ has no test_*.py files")
+    if questions_file.is_file():
+        errors += check_questions(questions_file, MIN_READ_QUESTIONS if is_read else 1)
     return errors
 
 
@@ -141,15 +218,19 @@ def files_in(folder):
 
 
 def check_evolution(prev_dir, next_dir):
-    """Every file in solution(prev) must appear unchanged in starter(next)."""
+    """Every file in solution(prev) must appear unchanged in starter(next).
+
+    A read ticket doesn't change the code, so its starter/ counts as its solution.
+    """
     errors = []
-    prev_files = files_in(prev_dir / "solution")
+    source = "starter" if load_ticket_type(prev_dir) == "read" else "solution"
+    prev_files = files_in(prev_dir / source)
     next_files = files_in(next_dir / "starter")
     for rel, path in sorted(prev_files.items()):
         if rel not in next_files:
-            errors.append(f"{rel} from {prev_dir.name}/solution is missing in starter/")
+            errors.append(f"{rel} from {prev_dir.name}/{source} is missing in starter/")
         elif path.read_bytes() != next_files[rel].read_bytes():
-            errors.append(f"{rel} differs from {prev_dir.name}/solution")
+            errors.append(f"{rel} differs from {prev_dir.name}/{source}")
     return errors
 
 
@@ -181,9 +262,10 @@ def validate_season(season_dir):
             prev = None
             continue
         errors = check_ticket_meta(ticket_dir)
-        if not errors:
+        if not errors and load_ticket_type(ticket_dir) != "read":
             errors += check_ticket_tests(ticket_dir)
-        if prev is not None and (prev / "solution").is_dir() and (ticket_dir / "starter").is_dir():
+        prev_source = "starter" if prev is not None and load_ticket_type(prev) == "read" else "solution"
+        if prev is not None and (prev / prev_source).is_dir() and (ticket_dir / "starter").is_dir():
             errors += check_evolution(prev, ticket_dir)
         report[label] = errors
         prev = ticket_dir

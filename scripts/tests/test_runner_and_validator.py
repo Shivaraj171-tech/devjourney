@@ -63,6 +63,38 @@ def make_ticket(root, name, starter_code=BUGGY, solution_code=FIXED, yaml_text=G
     return t
 
 
+def question(prompt="Q?", choices=("a", "b", "c"), answer=1, explain="Because."):
+    """One question as YAML text (indented as a list item under 'questions:')."""
+    lines = [f"  - prompt: {prompt!r}", "    choices:"]
+    lines += [f"      - {c!r}" for c in choices]
+    lines += [f"    answer: {answer}", f"    explain: {explain!r}"]
+    return "\n".join(lines) + "\n"
+
+
+def questions_yaml(*qs):
+    return "questions:\n" + "".join(qs)
+
+
+READ_YAML = GOOD_YAML.replace("type: bug", "type: read").replace(
+    "files_editable: [app/calc.py]", "files_editable: []")
+
+
+def make_read_ticket(root, name, code=FIXED, questions=None, with_tests=False):
+    """A read ticket: starter/ + questions.yaml, no tests/ or solution/ by default."""
+    t = root / name
+    write(t / "ticket.yaml", READ_YAML)
+    write(t / "story.md", "Read this code.\n")
+    write(t / "hints.md", "start with the docstrings\n")
+    write(t / "starter" / "app" / "__init__.py", "")
+    write(t / "starter" / "app" / "calc.py", code)
+    if questions is None:
+        questions = questions_yaml(question(), question(), question())
+    (t / "questions.yaml").write_text(questions, encoding="utf-8")
+    if with_tests:
+        write(t / "tests" / "test_calc.py", TEST_FILE)
+    return t
+
+
 class TempDirTestCase(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
@@ -172,6 +204,122 @@ class TicketValidationTests(TempDirTestCase):
     def test_read_hints_splits_on_separator(self):
         write(self.tmp / "hints.md", "one\n---\ntwo\nlines\n---\nthree\n")
         self.assertEqual(vc.read_hints(self.tmp / "hints.md"), ["one", "two\nlines", "three"])
+
+
+class QuestionsTests(TempDirTestCase):
+    def check(self, text, min_questions=1):
+        path = self.tmp / "questions.yaml"
+        path.write_text(text, encoding="utf-8")
+        return vc.check_questions(path, min_questions)
+
+    def assert_flagged(self, errors, fragment):
+        self.assertTrue(any(fragment in e for e in errors), errors)
+
+    def test_good_questions_have_no_errors(self):
+        self.assertEqual(self.check(questions_yaml(question(), question(choices=("x", "y"), answer=0))), [])
+
+    def test_answer_out_of_range_is_flagged(self):
+        self.assert_flagged(self.check(questions_yaml(question(answer=3))), "answer 3 is out of range")
+
+    def test_negative_answer_is_flagged(self):
+        self.assert_flagged(self.check(questions_yaml(question(answer=-1))), "out of range")
+
+    def test_answer_must_be_a_number(self):
+        self.assert_flagged(self.check(questions_yaml(question(answer="'b'"))), "'answer' must be a whole number")
+        self.assert_flagged(self.check(questions_yaml(question(answer="true"))), "'answer' must be a whole number")
+
+    def test_too_few_choices_is_flagged(self):
+        self.assert_flagged(self.check(questions_yaml(question(choices=("only",), answer=0))), "needs 2-4")
+
+    def test_too_many_choices_is_flagged(self):
+        self.assert_flagged(self.check(questions_yaml(question(choices=("a", "b", "c", "d", "e")))), "needs 2-4")
+
+    def test_duplicate_choices_are_flagged(self):
+        self.assert_flagged(self.check(questions_yaml(question(choices=("a", "a")))), "must all be different")
+
+    def test_missing_explain_is_flagged(self):
+        text = questions_yaml(question()).replace("    explain: 'Because.'\n", "")
+        self.assert_flagged(self.check(text), "'explain' is missing or empty")
+
+    def test_empty_prompt_is_flagged(self):
+        self.assert_flagged(self.check(questions_yaml(question(prompt=""))), "'prompt' is missing or empty")
+
+    def test_missing_questions_list_is_flagged(self):
+        self.assert_flagged(self.check("prompt: hi\n"), "must have a 'questions' list")
+
+    def test_invalid_yaml_is_flagged(self):
+        self.assert_flagged(self.check("questions: [\n"), "not valid YAML")
+
+    def test_minimum_number_of_questions(self):
+        self.assert_flagged(self.check(questions_yaml(question()), min_questions=3), "at least 3 question(s), has 1")
+
+    def test_questions_are_checked_on_normal_tickets(self):
+        t = make_ticket(self.tmp, "t01")
+        (t / "questions.yaml").write_text(questions_yaml(question(answer=7)), encoding="utf-8")
+        self.assert_flagged(vc.check_ticket_meta(t), "out of range")
+
+    def test_questions_are_optional_on_normal_tickets(self):
+        t = make_ticket(self.tmp, "t01")
+        self.assertFalse((t / "questions.yaml").exists())
+        self.assertEqual(vc.check_ticket_meta(t), [])
+
+
+class ReadTicketTests(TempDirTestCase):
+    def test_read_ticket_without_tests_or_solution_is_valid(self):
+        t = make_read_ticket(self.tmp, "t01")
+        self.assertEqual(vc.check_ticket_meta(t), [])
+
+    def test_read_ticket_needs_questions_file(self):
+        t = make_read_ticket(self.tmp, "t01")
+        (t / "questions.yaml").unlink()
+        self.assertIn("missing questions.yaml (required for read tickets)", vc.check_ticket_meta(t))
+
+    def test_read_ticket_needs_three_questions(self):
+        t = make_read_ticket(self.tmp, "t01", questions=questions_yaml(question(), question()))
+        errors = vc.check_ticket_meta(t)
+        self.assertTrue(any("at least 3 question(s), has 2" in e for e in errors), errors)
+
+    def test_read_ticket_needs_starter(self):
+        t = make_read_ticket(self.tmp, "t01")
+        shutil.rmtree(t / "starter")
+        self.assertIn("missing starter/ folder", vc.check_ticket_meta(t))
+
+    def test_non_read_ticket_still_needs_tests_and_solution(self):
+        t = make_ticket(self.tmp, "t01")
+        shutil.rmtree(t / "solution")
+        self.assertIn("missing solution/ folder", vc.check_ticket_meta(t))
+
+    def test_season_skips_test_runs_for_read_ticket(self):
+        # The read ticket's starter would "already pass" its tests; that's fine for a read ticket.
+        season = self.tmp / "seasons" / "s99"
+        write(season / "season.yaml", "id: s99\ntitle: T\nintro: I\ntickets: [t01]\n")
+        make_read_ticket(season / "tickets", "t01", with_tests=True)
+        self.assertEqual(vc.validate_content(self.tmp)["s99/t01"], [])
+
+    def test_read_ticket_starter_counts_as_its_solution(self):
+        t1 = make_read_ticket(self.tmp, "t01", code=BUGGY)
+        t2 = make_ticket(self.tmp, "t02")  # starter has BUGGY calc.py, unchanged from t01
+        self.assertEqual(vc.check_evolution(t1, t2), [])
+
+    def test_changing_code_after_read_ticket_is_flagged(self):
+        t1 = make_read_ticket(self.tmp, "t01", code=BUGGY)
+        t2 = make_ticket(self.tmp, "t02", starter_code=FIXED)
+        self.assertEqual(vc.check_evolution(t1, t2), ["app/calc.py differs from t01/starter"])
+
+    def test_season_with_read_ticket_in_the_middle(self):
+        season = self.tmp / "seasons" / "s99"
+        write(season / "season.yaml", "id: s99\ntitle: T\nintro: I\ntickets: [t01, t02, t03]\n")
+        tickets = season / "tickets"
+        make_ticket(tickets, "t01", starter_code=BUGGY, solution_code=FIXED)
+        make_read_ticket(tickets, "t02", code=FIXED)
+        make_ticket(tickets, "t03", starter_code=FIXED,
+                    extra_starter={"app/more.py": "Y = 2\n"})
+        # t03's starter must not "already pass", so give it its own failing test.
+        write(tickets / "t03" / "tests" / "test_more.py",
+              "from app.more import Y\n\ndef test_y():\n    assert Y == 3, f'got {Y}'\n")
+        write(tickets / "t03" / "solution" / "app" / "more.py", "Y = 3\n")
+        report = vc.validate_content(self.tmp)
+        self.assertEqual({k: v for k, v in report.items() if v}, {})
 
 
 class EvolutionTests(TempDirTestCase):

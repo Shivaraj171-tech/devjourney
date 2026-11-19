@@ -1,0 +1,29 @@
+questions:
+  - prompt: "Which function works out how many cents come off an order?"
+    choices:
+      - "discount_percent"
+      - "discount_amount"
+      - "PROMO_CODES"
+    answer: 1
+    explain: "discount_amount takes the subtotal and the code and returns the cents to subtract. discount_percent only looks up the percentage, and PROMO_CODES is a dictionary, not a function."
+  - prompt: "What does discount_amount(1000, \"WELCOME10\") return?"
+    choices:
+      - "0, because $10.00 is under the $15.00 minimum for promo codes"
+      - "100, because WELCOME10 is 10% off"
+      - "900, the new price after the discount"
+    answer: 0
+    explain: "1000 is less than MIN_SUBTOTAL_FOR_PROMO (1500), so the function returns 0 before it even looks at the code."
+  - prompt: "A customer types the code in lowercase: \"orbit20\". What discount do they get on a $30.00 order (3000 cents)?"
+    choices:
+      - "No discount: the dictionary keys are uppercase, so lowercase codes don't work"
+      - "It crashes with a KeyError"
+      - "600 cents off, because the code is uppercased before it's looked up"
+    answer: 2
+    explain: "discount_percent calls code.upper() first, so \"orbit20\" becomes \"ORBIT20\" (20%). 3000 * 20 // 100 is 600."
+  - prompt: "What happens with a code that doesn't exist, like \"PIZZA\"?"
+    choices:
+      - "It raises a KeyError, like the Order again bug"
+      - "The discount is 0, because .get() falls back to 0 for unknown keys"
+      - "The customer gets the smallest discount, 10%"
+    answer: 1
+    explain: "PROMO_CODES.get(code, 0) returns the second argument, 0, when the key isn't in the dictionary, so no crash and no discount."

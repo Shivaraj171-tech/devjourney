@@ -1,0 +1,15 @@
+questions:
+  - prompt: "Why did discount_percent(None) crash?"
+    choices:
+      - "\"None\" is not one of the keys in PROMO_CODES"
+      - "None is not a string, so it has no .upper() method"
+      - "None counts as 0, and you can't uppercase a number"
+    answer: 1
+    explain: "None is its own special value meaning \"nothing\". Calling a string method like .upper() on it raises AttributeError."
+  - prompt: "What is the usual way to check whether a variable is None?"
+    choices:
+      - "if code == \"None\":"
+      - "if code.upper() == None:"
+      - "if code is None:"
+    answer: 2
+    explain: "Use `is None`. Comparing with the string \"None\" checks for the four letters N-o-n-e, and calling .upper() first would crash all over again."

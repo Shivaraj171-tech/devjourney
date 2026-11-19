@@ -1,0 +1,10 @@
+id: s01-t05
+title: "Add to cart (for real this time)"
+type: feature
+level: intern
+track: building
+concepts: [loops, lists]
+new_concept: lists
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/cart_actions.py]

@@ -1,0 +1,15 @@
+questions:
+  - prompt: "With subtotal_cents = 2500, which condition is True?"
+    choices:
+      - "subtotal_cents > 2500"
+      - "subtotal_cents >= 2500"
+      - "Both of them"
+    answer: 1
+    explain: "2500 is not greater than 2500, but it is greater than or equal to it. That one character was the whole bug."
+  - prompt: "Why do the tests check 2499 and 2500 instead of just a big order like 4000?"
+    choices:
+      - "Python can't compare numbers bigger than 2500"
+      - "4000 would make the tests run too slowly"
+      - "Bugs often hide right at the edge where the rule changes, so it's worth testing both sides of it"
+    answer: 2
+    explain: "These are called edge cases. A big order like 4000 is free with both > and >=, so only a test right at the boundary catches the mistake."

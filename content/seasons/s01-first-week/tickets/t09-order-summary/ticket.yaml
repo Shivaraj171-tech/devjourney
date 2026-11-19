@@ -1,0 +1,10 @@
+id: s01-t09
+title: "Show me the total"
+type: feature
+level: junior
+track: building
+concepts: [lists, none, functions]
+new_concept: functions
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/summary.py]

@@ -1,0 +1,15 @@
+questions:
+  - prompt: "Why does order_summary call cart_subtotal and delivery_fee instead of repeating their code?"
+    choices:
+      - "Because Python doesn't allow loops inside order_summary"
+      - "Calling functions makes the code run faster"
+      - "So each rule lives in one place: fix or change it once and every caller gets the update"
+    answer: 2
+    explain: "Reusing small, tested functions means the free-delivery rule, for example, can't end up different on the summary screen than in the rest of the app."
+  - prompt: "In discount = discount_amount(subtotal, promo_code), what ends up in discount?"
+    choices:
+      - "The function discount_amount itself"
+      - "The value that discount_amount returns for that subtotal and code"
+      - "The text \"discount_amount(subtotal, promo_code)\""
+    answer: 1
+    explain: "The brackets call the function. It runs with those inputs, and whatever it returns is stored in the variable."

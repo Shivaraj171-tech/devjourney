@@ -1,0 +1,15 @@
+questions:
+  - prompt: "Why does Orbit Orders store prices in cents (1250) instead of dollars (12.50)?"
+    choices:
+      - "Python can't store numbers with a decimal point"
+      - "Cents take up less memory than dollars"
+      - "Whole numbers avoid the small rounding errors that decimal numbers can have"
+    answer: 2
+    explain: "Decimal (float) numbers can be slightly off, like 0.1 + 0.2 giving 0.30000000000000004. Whole cents are always exact."
+  - prompt: "What does 1250 / 10 give, and why was the menu wrong?"
+    choices:
+      - "12.5, so the menu was actually right"
+      - "125.0, because dividing by 10 instead of 100 leaves the price 10 times too big"
+      - "1.25, because dividing by 10 makes the price too small"
+    answer: 1
+    explain: "1250 / 10 is 125.0. There are 100 cents in a dollar, so you need to divide by 100 to get 12.5."

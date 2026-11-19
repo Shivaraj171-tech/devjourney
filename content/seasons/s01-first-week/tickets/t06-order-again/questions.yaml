@@ -1,0 +1,15 @@
+questions:
+  - prompt: "With menu = {\"lemonade\": 299}, what happens when you run menu[\"garlic_bread\"]?"
+    choices:
+      - "It gives 0"
+      - "It gives None"
+      - "Python raises a KeyError and the program stops"
+    answer: 2
+    explain: "Square-bracket lookup only works for keys that exist. For a missing key, Python raises KeyError instead of guessing a value."
+  - prompt: "What does \"garlic_bread\" in menu check?"
+    choices:
+      - "Whether any price in the menu equals \"garlic_bread\""
+      - "Whether \"garlic_bread\" is one of the dictionary's keys"
+      - "Whether the word appears anywhere in the item names, even as part of a longer name"
+    answer: 1
+    explain: "For a dictionary, `in` checks the keys. It's a safe way to ask \"is this on the menu?\" before looking it up."

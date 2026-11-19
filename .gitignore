@@ -1,9 +1,32 @@
+# dependencies
 node_modules/
+.pnp
+.pnp.*
+
+# next.js build output
 .next/
 out/
-dist/
+next-env.d.ts
+*.tsbuildinfo
+
+# Pyodide files copied from node_modules at install time
+public/pyodide/
+
+# python
 __pycache__/
 *.pyc
 .venv/
-.env*
+
+# testing
+/coverage
+test-results/
+playwright-report/
+
+# misc
 .DS_Store
+*.pem
+.env*
+.vercel
+npm-debug.log*
+public/monaco/
+public/runner/

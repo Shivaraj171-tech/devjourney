@@ -1,0 +1,16 @@
+questions:
+  - prompt: "Why did the greeting show the literal text {name}?"
+    choices:
+      - "The name variable was empty"
+      - "The string was missing the f prefix, so Python didn't fill in {name}"
+      - "greet() was never called"
+    answer: 1
+    explain: "Only f-strings replace {name} with the variable's value. Without the f, the curly braces are just ordinary characters."
+  - prompt: "With name = \"Sam\", what does f\"Hi, {name}!\" give you?"
+    choices:
+      - "\"Hi, {name}!\""
+      - "\"Hi, name!\""
+      - "\"Hi, Sam!\""
+      - "An error, because name needs quotes inside the braces"
+    answer: 2
+    explain: "Inside an f-string, {name} is replaced by the value of the variable name, which is \"Sam\"."

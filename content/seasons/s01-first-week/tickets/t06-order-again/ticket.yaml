@@ -1,0 +1,10 @@
+id: s01-t06
+title: "Order again? KeyError."
+type: bug
+level: intern
+track: debugging
+concepts: [loops, lists, dictionaries]
+new_concept: dictionaries
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/reorder.py]

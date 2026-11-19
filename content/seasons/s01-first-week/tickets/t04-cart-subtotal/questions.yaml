@@ -1,0 +1,15 @@
+questions:
+  - prompt: "Which numbers does range(3) produce?"
+    choices:
+      - "0, 1, 2"
+      - "1, 2, 3"
+      - "0, 1, 2, 3"
+    answer: 0
+    explain: "range(3) starts at 0 and stops just before 3. That's three numbers, one for each index of a 3-item list."
+  - prompt: "Why did the buggy loop skip the last item?"
+    choices:
+      - "Python lists start at 1, so prices[0] was missing"
+      - "total was reset to 0 inside the loop"
+      - "range(len(prices) - 1) stops one index too early, so the last price was never added"
+    answer: 2
+    explain: "Subtracting 1 meant the loop never reached the last index. This kind of 'off by one' mistake is one of the most common bugs in any language."

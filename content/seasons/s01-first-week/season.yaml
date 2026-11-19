@@ -9,3 +9,10 @@ tickets:
   - t01-welcome
   - t02-menu-prices
   - t03-free-delivery
+  - t04-cart-subtotal
+  - t05-cart-badge
+  - t06-order-again
+  - t07-find-the-discount
+  - t08-no-promo-crash
+  - t09-order-summary
+  - t10-leaky-orders
