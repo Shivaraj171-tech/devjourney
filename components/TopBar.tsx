@@ -21,6 +21,7 @@ export default function TopBar() {
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <Link href="/" className="rounded-md px-3 py-1.5 text-slate-300 hover:bg-slate-800 hover:text-white">Office</Link>
+          <Link href="/skills" className="rounded-md px-3 py-1.5 text-slate-300 hover:bg-slate-800 hover:text-white">Skills</Link>
           <Link href="/leaderboard" className="rounded-md px-3 py-1.5 text-slate-300 hover:bg-slate-800 hover:text-white">Leaderboard</Link>
         </nav>
         <div className="ml-auto flex items-center gap-3 text-sm">
