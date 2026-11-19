@@ -126,3 +126,30 @@ export async function readProgress(page: Page) {
 function escapeRe(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+/**
+ * Mark tickets as solved (with their quizzes done) in localStorage, then reload.
+ * Use it to start a test further along the story, e.g. at Season 2.
+ */
+export async function seedSolved(page: Page, tickets: TicketInfo[]) {
+  await page.goto("/");
+  await page.evaluate(
+    ({ key, list }) => {
+      const now = new Date().toISOString();
+      const ticketsState: Record<string, unknown> = {};
+      for (const t of list) {
+        ticketsState[t.id] = {
+          code: {}, runs: 1, hintsUsed: 0, solved: true, solvedAt: now, solveXp: 100,
+          quizFirstPick: Array.from({ length: t.questions }, () => 0), quizDone: true,
+          quizFirstTryCorrect: t.questions, quizXp: 0,
+        };
+      }
+      window.localStorage.setItem(
+        key,
+        JSON.stringify({ version: 1, playerName: "You", startedAt: now, activeDays: [], onboarded: true, tickets: ticketsState }),
+      );
+    },
+    { key: PROGRESS_KEY, list: tickets.map((t) => ({ id: t.id, questions: t.questions.length })) },
+  );
+  await page.reload();
+}
