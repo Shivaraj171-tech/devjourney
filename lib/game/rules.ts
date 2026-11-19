@@ -32,10 +32,13 @@ export function readTicketXp(level: Level, correctFirstTry: number, total: numbe
 
 // ---------- Ranks ----------
 export const RANKS = [
+  // Thresholds follow the story: clearing Seasons 1-3 ("Month One") is roughly
+  // 3,000-3,500 XP, which is when Maya promotes you to Junior Developer.
   { id: "intern", title: "Intern", minXp: 0, emoji: "🌱" },
-  { id: "junior", title: "Junior Developer", minXp: 600, emoji: "💻" },
-  { id: "mid", title: "Developer", minXp: 2000, emoji: "🚀" },
-  { id: "senior", title: "Senior Developer", minXp: 5000, emoji: "🧠" },
+  { id: "trusted-intern", title: "Trusted Intern", minXp: 700, emoji: "🌿" },
+  { id: "junior", title: "Junior Developer", minXp: 2800, emoji: "💻" },
+  { id: "mid", title: "Developer", minXp: 7000, emoji: "🚀" },
+  { id: "senior", title: "Senior Developer", minXp: 15000, emoji: "🧠" },
 ] as const;
 
 export type Rank = (typeof RANKS)[number];
@@ -178,10 +181,10 @@ export function pickWarmup<W extends { id: string; after: string }>(
 export type Teammate = { name: string; role: string; avatar: string; xp: number; isYou?: boolean };
 
 export function teammates(daysSinceStart: number): Teammate[] {
-  const samXp = Math.min(120 + daysSinceStart * 85, 1800);
+  const samXp = Math.min(150 + daysSinceStart * 90, 3200);
   return [
-    { name: "Maya", role: "Tech Lead", avatar: "👩🏾‍💻", xp: 6400 },
-    { name: "Byte", role: "Office Robot", avatar: "🤖", xp: 950 },
+    { name: "Maya", role: "Tech Lead", avatar: "👩🏾‍💻", xp: 16400 },
+    { name: "Byte", role: "AI Assistant", avatar: "🤖", xp: 2200 },
     { name: "Sam", role: "New Hire (your rival)", avatar: "🧑‍🎓", xp: samXp },
     { name: "Leo", role: "Customer Support", avatar: "🎧", xp: 340 },
     { name: "Priya", role: "Marketing", avatar: "📣", xp: 220 },

@@ -1,0 +1,14 @@
+id: w033
+title: "What survives JSON?"
+concept: json
+after: s03-t02
+code: |
+  import json
+
+  saved = json.dumps({1001: "Sam"})
+  loaded = json.loads(saved)
+  print(1001 in loaded, "1001" in loaded)
+question: "What does this print?"
+choices: ["True False", "False True", "True True", "False False"]
+answer: 1
+explain: "JSON object keys are always text, so the number 1001 comes back as the string \"1001\". Convert keys back with int() when loading."

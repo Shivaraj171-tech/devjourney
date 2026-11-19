@@ -96,6 +96,8 @@ WARMUP_CONCEPTS = {
     "None", "functions", "mutable-shared-data", "reading-code",
     # Season 2
     "code-review", "side-effects", "tracebacks", "boolean-logic", "reviewing-diffs",
+    # Season 3
+    "classes", "json", "writing-tests", "security", "performance", "refactoring",
 }
 WARMUP_STRING_FIELDS = ["id", "title", "concept", "after", "code", "question", "explain"]
 MIN_WARMUP_LINES, MAX_WARMUP_LINES = 3, 10

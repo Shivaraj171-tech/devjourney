@@ -1,0 +1,17 @@
+id: w038
+title: "Double the orders"
+concept: performance
+after: s03-t05
+code: |
+  n = 4
+  orders = list(range(n))
+  sent = list(range(n))
+  checks = 0
+  for order in orders:
+      for s in sent:
+          checks += 1
+  print(checks)
+question: "With n = 4 this prints 16. What does it print with n = 8?"
+choices: ["32", "64", "16", "24"]
+answer: 1
+explain: "A loop inside a loop does n x n checks, so doubling n makes it 4 times the work. That's why such code gets slow as lists grow."

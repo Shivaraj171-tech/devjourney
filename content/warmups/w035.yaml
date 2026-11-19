@@ -1,0 +1,12 @@
+id: w035
+title: "Which test catches it?"
+concept: writing-tests
+after: s03-t03
+code: |
+  def can_checkout(subtotal_cents):
+      """Orders of $10.00 or more can check out."""
+      return subtotal_cents > 1000
+question: "This function has a bug. Which test would catch it (pass on correct code, fail on this)?"
+choices: ["assert can_checkout(1500) == True", "assert can_checkout(500) == False", "assert can_checkout(1000) == True", "assert can_checkout(0) == False"]
+answer: 2
+explain: "Only the exact $10.00 boundary behaves differently with > and >=. The other tests pass on both versions, so they can't catch the bug."

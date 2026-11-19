@@ -1,0 +1,13 @@
+id: w036
+title: "A very strange customer name"
+concept: security
+after: s03-t04
+code: |
+  def orders_query(customer):
+      return "SELECT * FROM orders WHERE customer = '" + customer + "'"
+
+  print(orders_query("x' OR '1'='1"))
+question: "It prints SELECT * FROM orders WHERE customer = 'x' OR '1'='1'. What does that query ask the database for?"
+choices: ["Only the orders of a customer literally named x' OR '1'='1", "Every customer's orders, because '1'='1' is always true", "Nothing: the database rejects names with quotes"]
+answer: 1
+explain: "The quotes in the name end the text early, so OR '1'='1' becomes part of the command (SQL injection). Use the database's placeholders instead of gluing text together."

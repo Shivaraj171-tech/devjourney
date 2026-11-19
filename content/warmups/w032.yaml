@@ -1,0 +1,19 @@
+id: w032
+title: "The status that never changed"
+concept: classes
+after: s03-t01
+code: |
+  class Order:
+      def __init__(self, customer):
+          self.customer = customer
+          self.status = "new"
+
+      def mark_ready(self):
+          status = "ready"
+  order = Order("Ana")
+  order.mark_ready()
+  print(order.status)
+question: "What does this print?"
+choices: ["ready", "new", "None", "It crashes"]
+answer: 1
+explain: "status = \"ready\" only makes a local variable inside the method. To change the order itself, it must be self.status = \"ready\"."

@@ -2,7 +2,8 @@
 // "The app you're building": a phone mock-up of Orbit Orders. Each merged
 // ticket switches on (or repairs) the part of the app it touched, so progress
 // is something you can see, not just a counter.
-// Season 1 only for now; the mapping is keyed by ticket id.
+// The mapping is keyed by ticket id; tickets that don't change what customers
+// see (reviews, tests, refactors) aren't listed.
 import type { ReactNode } from "react";
 
 type Props = { solved: Set<string> };
@@ -18,15 +19,21 @@ function Feature({ on, label, children }: { on: boolean; label: string; children
   );
 }
 
+/** Ticket ids that switch on something visible in the app. */
+const FEATURE_TICKETS = [
+  "s01-t01", "s01-t02", "s01-t03", "s01-t04", "s01-t05", "s01-t06", "s01-t08", "s01-t09", "s01-t10",
+  "s02-t02", "s02-t03", "s02-t04", "s03-t02", "s03-t05", "s03-t06",
+];
+
 export default function AppPreview({ solved }: Props) {
-  const has = (n: number) => solved.has(`s01-t${String(n).padStart(2, "0")}`);
-  const shipped = Array.from({ length: 10 }, (_, i) => has(i + 1)).filter(Boolean).length;
+  const has = (n: number, season = 1) => solved.has(`s0${season}-t${String(n).padStart(2, "0")}`);
+  const shipped = FEATURE_TICKETS.filter((id) => solved.has(id)).length;
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
       <div className="flex items-baseline justify-between">
         <h2 className="text-lg font-bold text-white">📱 The app you&apos;re building</h2>
-        <span className="text-xs text-slate-400">{shipped}/10 features shipped</span>
+        <span className="text-xs text-slate-400">{shipped}/{FEATURE_TICKETS.length} features shipped</span>
       </div>
       <p className="mt-1 text-sm text-slate-400">Every ticket you merge fixes or adds a piece of the real Orbit Orders app.</p>
 
@@ -37,6 +44,17 @@ export default function AppPreview({ solved }: Props) {
             <span className="font-bold text-violet-700">🛰️ Orbit Orders</span>
             <Feature on={has(5)} label="cart badge">
               <span className="rounded-full bg-violet-600 px-2 py-0.5 text-xs font-bold text-white">🛒 3</span>
+            </Feature>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <Feature on={has(3, 2)} label="Noodle Nook back online">
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px]">🍜 Noodle Nook · open</span>
+            </Feature>
+            <Feature on={has(4, 2)} label="Top rated badge">
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] text-amber-800">⭐ Top rated</span>
+            </Feature>
+            <Feature on={has(5, 3)} label="fast checkout at lunch rush">
+              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] text-sky-800">⚡ Fast checkout</span>
             </Feature>
           </div>
           <Feature on={has(1)} label="greeting by name">
@@ -63,6 +81,14 @@ export default function AppPreview({ solved }: Props) {
               <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-500">🏷️ Promo code</span>
             </Feature>
           </div>
+          <Feature on={has(2, 2)} label="rider tips">
+            <div className="flex items-center gap-1 text-[11px]">
+              <span className="text-slate-500">Tip your rider:</span>
+              {["10%", "15%", "20%"].map((t) => (
+                <span key={t} className={`rounded-md border px-1.5 py-0.5 ${t === "15%" ? "border-violet-500 bg-violet-50 text-violet-700" : "border-slate-300"}`}>{t}</span>
+              ))}
+            </div>
+          </Feature>
           <Feature on={has(4) && has(9)} label="checkout summary">
             <div className="rounded-lg bg-slate-100 p-2 font-mono text-xs">
               <div className="flex justify-between"><span>Subtotal</span><span>$27.99</span></div>
@@ -71,6 +97,14 @@ export default function AppPreview({ solved }: Props) {
               <div className="mt-1 flex justify-between border-t border-slate-300 pt-1 font-bold"><span>Total</span><span>$22.40</span></div>
             </div>
           </Feature>
+          <div className="flex gap-2">
+            <Feature on={has(2, 3)} label="order tracking survives restarts">
+              <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600">📦 Track order #1001</span>
+            </Feature>
+            <Feature on={has(6, 3)} label="SMS receipts">
+              <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600">📱 SMS receipt</span>
+            </Feature>
+          </div>
           <Feature on={has(10)} label="separate orders per customer">
             <span className="block w-full rounded-lg bg-violet-600 py-1.5 text-center text-xs font-bold text-white">Place order</span>
           </Feature>

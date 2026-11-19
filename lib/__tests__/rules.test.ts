@@ -28,9 +28,10 @@ test("quiz and read-ticket XP", () => {
 
 test("rankFor thresholds and progress", () => {
   assert.equal(rankFor(0).rank.id, "intern");
-  assert.equal(rankFor(599).rank.id, "intern");
-  assert.equal(rankFor(600).rank.id, "junior");
-  assert.equal(rankFor(300).progress, 0.5);
+  assert.equal(rankFor(699).rank.id, "intern");
+  assert.equal(rankFor(700).rank.id, "trusted-intern");
+  assert.equal(rankFor(2800).rank.id, "junior");
+  assert.equal(rankFor(350).progress, 0.5);
   assert.equal(rankFor(99999).next, null);
 });
 

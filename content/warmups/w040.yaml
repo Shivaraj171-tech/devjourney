@@ -1,0 +1,14 @@
+id: w040
+title: "Same behaviour, one place"
+concept: refactoring
+after: s03-t06
+code: |
+  def email_total(subtotal, discount, fee):
+      return f"Email: {subtotal - discount + fee}"
+
+  def sms_total(subtotal, discount, fee):
+      return f"SMS: {subtotal + fee}"
+question: "You move the maths into one helper, total(subtotal, discount, fee), for both messages. Which helper keeps email_total's behaviour exactly?"
+choices: ["def total(subtotal, discount, fee): return subtotal + fee", "def total(subtotal, discount, fee): return subtotal - (discount + fee)", "def total(subtotal, discount, fee): return subtotal - discount + fee"]
+answer: 2
+explain: "A refactor must give the same results as before, so the helper copies email_total's maths exactly. Notice sms_total forgot the discount: sharing one helper fixes that copy too."

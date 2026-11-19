@@ -1,0 +1,19 @@
+id: w031
+title: "Ask the order"
+concept: classes
+after: s03-t01
+code: |
+  class Order:
+      def __init__(self, customer, items):
+          self.customer = customer
+          self.items = items
+
+      def subtotal(self):
+          return sum(self.items)
+
+  order = Order("Sam", [1250, 450])
+  print(order.subtotal())
+question: "What does this print?"
+choices: ["1700", "[1250, 450]", "Sam", "It crashes: subtotal() was called without self"]
+answer: 0
+explain: "Python passes the order in as self automatically, so self.items is [1250, 450]. Their sum is 1700."

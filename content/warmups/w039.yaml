@@ -1,0 +1,17 @@
+id: w039
+title: "How in searches a list"
+concept: performance
+after: s03-t05
+code: |
+  # roughly what "105 in sent_ids" does for a list
+  sent_ids = [101, 102, 103, 104, 105]
+  looks = 0
+  for sent in sent_ids:
+      looks += 1
+      if sent == 105:
+          break
+  print(looks)
+question: "How many items did it look at (what does it print)?"
+choices: ["1", "105", "5", "0"]
+answer: 2
+explain: "in on a list checks items one by one, so finding the last one means looking at all 5. A set jumps straight to the answer however big it gets."

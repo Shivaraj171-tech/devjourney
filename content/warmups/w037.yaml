@@ -1,0 +1,16 @@
+id: w037
+title: "What goes in the log?"
+concept: security
+after: s03-t04
+code: |
+  def mask_card(card_number):
+      return "**** " + card_number[-4:]
+
+  def log_payment(card_number, amount_cents):
+      return f"paid {amount_cents} with card {card_number}"
+
+  print(log_payment("4242424242424242", 1999))
+question: "Which review comment is right?"
+choices: ["mask_card shows too many digits", "amount_cents should be logged as a string", "Looks fine: logs are only read by our own team", "log_payment writes the full card number into the logs; it should use mask_card"]
+answer: 3
+explain: "The printed log line contains all 16 digits, and logs are widely read and kept for months. Secrets like card numbers must never be logged in full."

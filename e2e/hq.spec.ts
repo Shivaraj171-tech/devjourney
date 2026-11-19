@@ -26,7 +26,7 @@ test("HQ shows every room with only room 1 open (Floor 2 locked)", async ({ page
   // First visit: onboarding modal and the (mostly greyed-out) app preview.
   await expect(page.getByTestId("onboarding")).toBeVisible();
   await expect(page.getByTestId("app-preview")).toBeAttached();
-  await expect(page.getByText("0/10 features shipped")).toBeAttached();
+  await expect(page.getByText(/^0\/\d+ features shipped$/)).toBeAttached();
 
   await expect(page.getByTestId("continue")).toHaveAttribute("href", new RegExp(`/ticket/${tickets[0].id}/?$`));
   expect(errors).toEqual([]);

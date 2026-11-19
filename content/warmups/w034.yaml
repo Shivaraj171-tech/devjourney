@@ -1,0 +1,13 @@
+id: w034
+title: "Python in, JSON out"
+concept: json
+after: s03-t02
+code: |
+  import json
+
+  order = {"customer": "Ana", "paid": True, "note": None}
+  print(json.dumps(order))
+question: "What does this print?"
+choices: ["{'customer': 'Ana', 'paid': True, 'note': None}", "{\"customer\": \"Ana\", \"paid\": True, \"note\": None}", "{\"customer\": \"Ana\", \"paid\": true, \"note\": null}", "{\"customer\": \"Ana\", \"paid\": \"True\", \"note\": \"\"}"]
+answer: 2
+explain: "JSON uses double quotes, lowercase true/false, and null for None. json.dumps translates each Python value into its JSON spelling."
