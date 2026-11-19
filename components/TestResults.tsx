@@ -1,12 +1,16 @@
 "use client";
-import { explainResult } from "@/lib/runner/explain";
+import { explainResult, findLocation } from "@/lib/runner/explain";
 import type { RunResult } from "@/lib/runner/types";
 
 const ICON = { pass: "✅", fail: "❌", error: "💥" } as const;
 
 /** Turns `test_exactly_25_dollars_is_free` into "exactly 25 dollars is free". */
-function prettyName(name: string, file: string) {
-  if (name === "(import)") return `Couldn't load the code for ${file}. Check for a typo or syntax error.`;
+function prettyName(name: string, file: string, traceback: string) {
+  if (name === "(import)") {
+    // Point at the learner's file when the error is in their code, not the check's file.
+    const where = findLocation(traceback)?.file ?? file;
+    return `Couldn't load ${where}. Check for a typo or syntax error.`;
+  }
   return name.replace(/^test_/, "").replace(/_/g, " ");
 }
 
@@ -40,7 +44,7 @@ export default function TestResults({ result, running }: { result: RunResult | n
             <div className="flex items-start gap-2">
               <span>{ICON[r.status]}</span>
               <div className="min-w-0 flex-1">
-                <div className={r.status === "pass" ? "text-slate-300" : "text-white"}>{prettyName(r.name, r.file)}</div>
+                <div className={r.status === "pass" ? "text-slate-300" : "text-white"}>{prettyName(r.name, r.file, r.traceback)}</div>
                 {r.status !== "pass" && <Explained result={r} />}
                 {r.output && (
                   <pre className="mt-1.5 overflow-x-auto rounded bg-black/40 p-2 text-xs text-slate-300">
@@ -68,7 +72,7 @@ function Explained({ result }: { result: RunResult["results"][number] }) {
   const e = explainResult(result);
   return (
     <div className="mt-1 space-y-1">
-      {e && (
+      {e && (e.summary || e.location) && (
         <p className="text-xs text-slate-300" data-testid="explanation">
           {e.location && (
             <span className="mr-1.5 rounded bg-amber-500/15 px-1.5 py-0.5 font-mono text-amber-200">

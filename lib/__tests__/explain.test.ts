@@ -33,3 +33,8 @@ test("listChecks reads test function names", () => {
   const checks = listChecks({ "test_d.py": "def helper():\n    pass\n\ndef test_exactly_25_is_free():\n    pass\n" });
   assert.deepEqual(checks, [{ file: "test_d.py", name: "test_exactly_25_is_free", label: "exactly 25 is free" }]);
 });
+
+test("custom assertion messages skip the generic line", () => {
+  const custom = explainResult({ ...base, status: "fail", message: "Your tests didn't notice this bug: never free", traceback: "" });
+  assert.equal(custom!.summary, "");
+});

@@ -51,7 +51,10 @@ export function explainResult(r: TestResult): Explanation | null {
   if (r.status === "pass") return null;
   const location = findLocation(r.traceback);
   if (r.status === "fail") {
-    return { summary: "The code ran, but gave a different answer than expected.", location };
+    // A custom assertion message (e.g. "Your tests didn't notice this bug") already
+    // explains itself; the generic line only helps for "expected X, got Y" style ones.
+    const generic = !r.message || /expected|got|should/i.test(r.message);
+    return { summary: generic ? "The code ran, but gave a different answer than expected." : "", location };
   }
   for (const [pattern, explain] of EXPLAIN) {
     const m = r.message.match(pattern);

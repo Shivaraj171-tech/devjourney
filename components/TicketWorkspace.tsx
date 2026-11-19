@@ -351,12 +351,14 @@ function AcceptanceChecklist({ tests, result, solved }: { tests: Record<string, 
   const checks = listChecks(tests);
   if (checks.length === 0) return null;
   const status = new Map(result?.results.map((r) => [`${r.file}:${r.name}`, r.status]) ?? []);
+  // If code failed to load, no individual check ran: show them all as failing.
+  const loadFailed = result?.results.some((r) => r.name === "(import)") ?? false;
   return (
     <div className="mt-3">
       <div className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Done when</div>
       <ul className="mt-1 space-y-1" data-testid="acceptance-checklist">
         {checks.map((c) => {
-          const s = solved && !result ? "pass" : status.get(`${c.file}:${c.name}`);
+          const s = solved && !result ? "pass" : (status.get(`${c.file}:${c.name}`) ?? (loadFailed ? "error" : undefined));
           return (
             <li key={`${c.file}:${c.name}`} className="flex gap-2 text-slate-300">
               <span>{s === "pass" ? "✅" : s ? "❌" : "⬜"}</span>
