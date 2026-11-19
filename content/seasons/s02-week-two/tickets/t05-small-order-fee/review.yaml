@@ -1,0 +1,16 @@
+title: "Add a $1.50 small-order fee"
+author: "Byte 🤖"
+description: |
+  Per Maya's request, orders under $10.00 now pay a $1.50 small-order fee, shown as its own line in the checkout summary.
+  New function `small_order_fee` in `app/delivery.py`, plus the new line and total in `order_summary`.
+  While I was in there I also tidied up `delivery_fee` a little. Lines marked + are new or changed. Thank you for reviewing! 🤖
+files: [app/delivery.py, app/summary.py]
+issues:
+  - file: app/delivery.py
+    line: 11
+    explain: >-
+      **A "tidy-up" brought back an old bug.** Byte changed `>=` to `>`, so an order of exactly $25.00 pays the $3.99
+      delivery fee again, even though the docstring (and Priya's campaign) promise free delivery at $25.00 *or more*.
+      It's the very bug you fixed in your first week! Small, unrelated changes in a PR deserve as much attention as
+      the main feature, because nobody is looking for bugs there.
+merged: false

@@ -1,0 +1,15 @@
+questions:
+  - prompt: "What does True and False evaluate to?"
+    choices:
+      - "True"
+      - "False"
+      - "It raises an error"
+    answer: 1
+    explain: "and is only True when both sides are True. One False side makes the whole thing False."
+  - prompt: "Why must len(ratings) >= 5 come BEFORE average_rating(ratings) in the and?"
+    choices:
+      - "It doesn't matter, the order of an and never changes anything"
+      - "and stops at the first False, so for an empty list average_rating is never called and can't divide by zero"
+      - "Python only allows len() on the left side of and"
+    answer: 1
+    explain: "This is called short-circuiting. With the cheap, safe check first, the risky one only runs when it's safe."
