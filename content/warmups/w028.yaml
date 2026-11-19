@@ -1,0 +1,14 @@
+id: w028
+title: "Free dessert for everyone?"
+concept: boolean-logic
+after: s02-t04
+code: |
+  def free_dessert(is_member, subtotal_cents):
+      """Members get free dessert on orders of $30.00 or more."""
+      return is_member or subtotal_cents >= 3000
+
+  print(free_dessert(True, 1200))
+question: "What does this print?"
+choices: ["True", "False", "It crashes"]
+answer: 0
+explain: "or only needs one side to be True, and is_member is True. The rule needs both, so it should use and."

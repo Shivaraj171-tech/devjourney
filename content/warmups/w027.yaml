@@ -1,0 +1,14 @@
+id: w027
+title: "What is the KeyError telling you?"
+concept: tracebacks
+after: s02-t03
+code: |
+  def checkout(order):
+      fee = 399
+      return order["subtotal"] + fee
+
+  print(checkout({"customer": "Sam", "total": 1250}))
+question: "This crashes with KeyError: 'subtotal'. What does that tell you?"
+choices: ["The order dictionary has no key called \"subtotal\"", "The variable subtotal was never created", "The subtotal is 0", "The delivery fee is wrong"]
+answer: 0
+explain: "A KeyError names the dictionary key that was missing. This order uses \"total\", so the caller and checkout disagree about the key name."

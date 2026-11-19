@@ -1,0 +1,14 @@
+id: w026
+title: "Read the last line"
+concept: tracebacks
+after: s02-t03
+code: |
+  def average(ratings):
+      return sum(ratings) / len(ratings)
+
+  print(average([4, 5]))
+  print(average([]))
+question: "The first print works. What is the last line of the traceback from the second one?"
+choices: ["IndexError: list index out of range", "TypeError: unsupported operand type(s) for /: 'int' and 'list'", "ZeroDivisionError: division by zero", "No traceback: it prints 0"]
+answer: 2
+explain: "An empty list has sum 0 and length 0, and 0 / 0 is a division by zero. The last line of a traceback always names the error."

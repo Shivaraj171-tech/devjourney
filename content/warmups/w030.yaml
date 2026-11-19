@@ -1,0 +1,14 @@
+id: w030
+title: "One character in a diff"
+concept: reviewing-diffs
+after: s02-t05
+code: |
+  def can_deliver(distance_km):
+      """We deliver up to and including 10 km."""
+      # -    return distance_km <= 10
+      # +    return distance_km < 10
+      return distance_km < 10
+question: "A PR changed the line shown in the comments (- old, + new). Who is affected by the change?"
+choices: ["A customer exactly 10 km away", "A customer 5 km away", "A customer 12 km away", "Nobody, it's just a tidy-up"]
+answer: 0
+explain: "Only the exact limit changes: 10 <= 10 is True but 10 < 10 is False. Small edits in a diff deserve the same check as new code."

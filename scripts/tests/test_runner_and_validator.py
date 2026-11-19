@@ -420,6 +420,10 @@ class WarmupTests(TempDirTestCase):
         self.assert_flagged(self.check(GOOD_WARMUP.replace("concept: loops", "concept: recursion")),
                             "concept 'recursion'")
 
+    def test_season_two_concepts_are_allowed(self):
+        for concept in ["code-review", "side-effects", "tracebacks", "boolean-logic", "reviewing-diffs"]:
+            self.assertEqual(self.check(GOOD_WARMUP.replace("concept: loops", f"concept: {concept}")), [], concept)
+
     def test_code_syntax_error_is_flagged(self):
         self.assert_flagged(self.check(GOOD_WARMUP.replace("def total(prices):", "def total(prices)")),
                             "syntax error")

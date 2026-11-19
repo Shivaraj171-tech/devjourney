@@ -1,0 +1,16 @@
+id: w024
+title: "The bag that keeps coming back"
+concept: side-effects
+after: s02-t02
+code: |
+  def total_with_bag(prices):
+      prices.append(10)  # 10-cent paper bag
+      return sum(prices)
+
+  cart = [500, 300]
+  total_with_bag(cart)
+  print(total_with_bag(cart))
+question: "What does the last line print?"
+choices: ["810", "820", "800", "It crashes"]
+answer: 1
+explain: "Each call appends another 10 to the same cart list, so the second call adds two bags. Working out a total shouldn't change the cart."

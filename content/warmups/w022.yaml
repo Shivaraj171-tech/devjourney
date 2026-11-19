@@ -1,0 +1,14 @@
+id: w022
+title: "Does it match the docstring?"
+concept: code-review
+after: s02-t01
+code: |
+  def free_drink(item_count):
+      """Orders with 3 or more items get a free drink."""
+      return item_count > 3
+
+  print(free_drink(3))
+question: "You're reviewing this function. What does it print, and is that right?"
+choices: ["True, which matches the docstring", "False, but the docstring says 3 items should get a free drink", "False, which matches the docstring", "It crashes"]
+answer: 1
+explain: "3 > 3 is False, yet the docstring promises a free drink at 3 or more. Plugging in the exact limit is how a reviewer catches this."

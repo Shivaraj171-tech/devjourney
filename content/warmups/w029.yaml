@@ -1,0 +1,14 @@
+id: w029
+title: "Safe thanks to and"
+concept: boolean-logic
+after: s02-t04
+code: |
+  ratings = []
+  if len(ratings) > 0 and sum(ratings) / len(ratings) >= 4.5:
+      print("Top rated")
+  else:
+      print("Not yet")
+question: "What does this print?"
+choices: ["Top rated", "ZeroDivisionError: division by zero", "Not yet"]
+answer: 2
+explain: "and stops at the first False, so the division never runs for an empty list. That's called short-circuiting."

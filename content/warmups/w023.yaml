@@ -1,0 +1,14 @@
+id: w023
+title: "Bug or no bug?"
+concept: code-review
+after: s02-t01
+code: |
+  def service_fee(subtotal_cents):
+      """Return a 5% service fee in cents, rounded down."""
+      return subtotal_cents * 5 // 100
+
+  print(service_fee(1999))
+question: "Which review comment is right?"
+choices: ["Bug: it should multiply by 0.05 instead", "Bug: it should divide by 5", "Looks correct: it prints 99, which is 5% of $19.99 rounded down", "Bug: // crashes for odd numbers"]
+answer: 2
+explain: "5% of 1999 is 99.95, and rounding down gives 99, exactly as the docstring says. Good reviewers flag real problems only."

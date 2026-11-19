@@ -1,0 +1,16 @@
+id: w025
+title: "Two receipts or one?"
+concept: side-effects
+after: s02-t02
+code: |
+  def add_tip_line(lines, tip):
+      lines.append(f"Tip: {tip}")
+      return lines
+
+  receipt = ["Pizza: 1250"]
+  with_tip = add_tip_line(receipt, 150)
+  print(len(receipt))
+question: "What does this print?"
+choices: ["1", "2", "3", "It crashes"]
+answer: 1
+explain: "append changed the receipt list itself, so receipt and with_tip are the same list with 2 lines. Returning the list doesn't make a copy."
