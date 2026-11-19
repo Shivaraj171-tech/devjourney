@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useIsClient } from "@/lib/useIsClient";
 import { currentStreak, rankFor } from "@/lib/game/rules";
 import { totalXp, useProgress } from "@/lib/progress/store";
 
@@ -9,8 +9,8 @@ export default function TopBar() {
   const xp = totalXp(progress);
   const { rank, next, progress: pct } = rankFor(xp);
   // Streak depends on today's date, so compute it only in the browser.
-  const [streak, setStreak] = useState(0);
-  useEffect(() => setStreak(currentStreak(progress.activeDays, new Date())), [progress.activeDays]);
+  const isClient = useIsClient();
+  const streak = isClient ? currentStreak(progress.activeDays, new Date()) : 0;
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/90 backdrop-blur">

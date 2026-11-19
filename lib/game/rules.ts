@@ -57,15 +57,47 @@ export function dayKey(d: Date): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
-/** Consecutive active days ending today (or yesterday, so a streak isn't lost before you play). */
+/**
+ * Consecutive active days ending today (or yesterday, so a streak isn't lost
+ * before you've played today).
+ *
+ * Forgiving: a single missed day is bridged by a "day off" (streak freeze).
+ * You start with 1, earn another every 7 streak days, and hold at most 2.
+ * Two missed days in a row always end the streak.
+ */
+export const MAX_FREEZES = 2;
+
 export function currentStreak(activeDays: string[], today: Date): number {
   const days = new Set(activeDays);
   const cursor = new Date(today);
   if (!days.has(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+
+  // Walk backwards from the oldest day so freezes are earned before they're spent.
+  const walked: boolean[] = [];
+  const probe = new Date(cursor);
+  while (true) {
+    const active = days.has(dayKey(probe));
+    if (!active) {
+      const before = new Date(probe);
+      before.setDate(before.getDate() - 1);
+      if (!days.has(dayKey(before)) || walked.length === 0) break; // 2 missed in a row, or nothing yet
+    }
+    walked.push(active);
+    probe.setDate(probe.getDate() - 1);
+  }
+  walked.reverse(); // oldest first
+
   let streak = 0;
-  while (days.has(dayKey(cursor))) {
-    streak++;
-    cursor.setDate(cursor.getDate() - 1);
+  let freezes = 1;
+  for (const active of walked) {
+    if (active) {
+      streak++;
+      if (streak % 7 === 0) freezes = Math.min(freezes + 1, MAX_FREEZES);
+    } else if (freezes > 0) {
+      freezes--;
+    } else {
+      streak = 0; // the gap couldn't be bridged: count only days after it
+    }
   }
   return streak;
 }

@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "python3 -m http.server 3000 -d out",
     "lint": "eslint",
-    "validate-content": "python3 scripts/validate_content.py"
+    "validate-content": "python3 scripts/validate_content.py",
+    "e2e": "playwright test --trace off",
+    "test:unit": "node --experimental-strip-types --test lib/__tests__/*.test.ts"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -21,6 +23,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",

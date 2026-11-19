@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { leaderboard, rankFor, type Teammate } from "@/lib/game/rules";
+import { leaderboard, rankFor } from "@/lib/game/rules";
+import { useIsClient } from "@/lib/useIsClient";
 import { daysSinceStart, totalXp, useProgress } from "@/lib/progress/store";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -8,10 +8,7 @@ const MEDALS = ["🥇", "🥈", "🥉"];
 export default function Leaderboard() {
   const progress = useProgress();
   const xp = totalXp(progress);
-  const [board, setBoard] = useState<Teammate[]>([]);
-  useEffect(() => {
-    setBoard(leaderboard({ name: progress.playerName, xp }, daysSinceStart(progress, new Date())));
-  }, [progress, xp]);
+  const board = useIsClient() ? leaderboard({ name: progress.playerName, xp }, daysSinceStart(progress, new Date())) : [];
 
   const myIndex = board.findIndex((b) => b.isYou);
   const above = myIndex > 0 ? board[myIndex - 1] : null;
@@ -24,7 +21,7 @@ export default function Leaderboard() {
       </p>
       {above && (
         <p className="mt-4 rounded-xl border border-violet-500/30 bg-violet-500/10 p-3 text-sm text-violet-100">
-          You're <b>{above.xp - xp + 1} XP</b> away from passing {above.avatar} {above.name}. That's about one ticket!
+          You&apos;re <b>{above.xp - xp + 1} XP</b> away from passing {above.avatar} {above.name}. That&apos;s about one ticket!
         </p>
       )}
       <ol className="mt-6 space-y-2" data-testid="leaderboard">

@@ -2,7 +2,8 @@
 // Startup HQ: the home screen. Your office floor is the progress map: each
 // ticket is a room that unlocks once the previous one is merged.
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useIsClient } from "@/lib/useIsClient";
 import Markdown from "./Markdown";
 import { BADGES, currentStreak, leaderboard, rankFor, type BadgeContext } from "@/lib/game/rules";
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
@@ -30,8 +31,7 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
   const { rank } = rankFor(xp);
 
   // Date-dependent values are computed after mount (static HTML has no "today").
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => setNow(new Date()), []);
+  const now = useIsClient() ? new Date() : null;
   const streak = now ? currentStreak(progress.activeDays, now) : 0;
 
   const allTickets = seasons.flatMap((s) => s.tickets);
@@ -66,7 +66,7 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
             {solved.length === 0 ? "Welcome to your first day! 👋" : `Welcome back, ${progress.playerName === "You" ? "dev" : progress.playerName}!`}
           </h1>
           <p className="mt-3 text-slate-300">
-            You're the newest developer at a tiny food-delivery startup. No disconnected puzzles here: every ticket
+            You&apos;re the newest developer at a tiny food-delivery startup. No disconnected puzzles here: every ticket
             you close fixes or grows <b className="text-white">one real app</b>. Short tasks, real bugs, and your teammates are counting on you.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -173,7 +173,7 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
             <h2 className="text-lg font-bold text-white">🏆 Office leaderboard</h2>
             <Link href="/leaderboard" className="text-sm text-cyan-300 hover:underline">See all →</Link>
           </div>
-          {myPlace > 0 && <p className="mt-1 text-sm text-slate-400">You're #{myPlace} in the office.</p>}
+          {myPlace > 0 && <p className="mt-1 text-sm text-slate-400">You&apos;re #{myPlace} in the office.</p>}
           <ol className="mt-3 space-y-1.5">
             {board.slice(0, 5).map((p, i) => (
               <li key={p.name + p.role} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${p.isYou ? "bg-violet-500/20 text-white" : "bg-slate-950/50 text-slate-300"}`}>

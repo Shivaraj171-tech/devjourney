@@ -1,4 +1,5 @@
 "use client";
+import { explainResult } from "@/lib/runner/explain";
 import type { RunResult } from "@/lib/runner/types";
 
 const ICON = { pass: "✅", fail: "❌", error: "💥" } as const;
@@ -40,9 +41,7 @@ export default function TestResults({ result, running }: { result: RunResult | n
               <span>{ICON[r.status]}</span>
               <div className="min-w-0 flex-1">
                 <div className={r.status === "pass" ? "text-slate-300" : "text-white"}>{prettyName(r.name, r.file)}</div>
-                {r.status !== "pass" && (
-                  <div className="mt-1 font-mono text-xs break-words text-amber-200">{r.message}</div>
-                )}
+                {r.status !== "pass" && <Explained result={r} />}
                 {r.output && (
                   <pre className="mt-1.5 overflow-x-auto rounded bg-black/40 p-2 text-xs text-slate-300">
                     <span className="text-slate-500"># printed output{"\n"}</span>
@@ -61,6 +60,25 @@ export default function TestResults({ result, running }: { result: RunResult | n
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function Explained({ result }: { result: RunResult["results"][number] }) {
+  const e = explainResult(result);
+  return (
+    <div className="mt-1 space-y-1">
+      {e && (
+        <p className="text-xs text-slate-300" data-testid="explanation">
+          {e.location && (
+            <span className="mr-1.5 rounded bg-amber-500/15 px-1.5 py-0.5 font-mono text-amber-200">
+              📍 {e.location.file} line {e.location.line}
+            </span>
+          )}
+          {e.summary}
+        </p>
+      )}
+      <div className="font-mono text-xs break-words text-amber-200">{result.message}</div>
     </div>
   );
 }

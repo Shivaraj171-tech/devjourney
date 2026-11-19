@@ -35,7 +35,7 @@ export default function HintPanel({ hints, revealed, solved, onReveal }: Props) 
           {!solved && <span className="text-amber-300"> (−{HINT_COST} XP)</span>}
         </button>
       ) : (
-        <p className="text-xs text-slate-500">That's every hint. You've got this!</p>
+        <p className="text-xs text-slate-500">That&apos;s every hint. You&apos;ve got this!</p>
       )}
     </div>
   );

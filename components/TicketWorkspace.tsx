@@ -7,6 +7,7 @@ import Markdown from "./Markdown";
 import Quiz from "./Quiz";
 import SolvedModal from "./SolvedModal";
 import TestResults from "./TestResults";
+import { listChecks } from "@/lib/content/checks";
 import type { Ticket } from "@/lib/content/types";
 import { quizXp, readTicketXp, solveXp, type SolveXp } from "@/lib/game/rules";
 import { actions, ticketProgress, useProgress } from "@/lib/progress/store";
@@ -163,9 +164,12 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                 {isRead ? (
                   <p className="mt-1 text-slate-400">Read the code on the right, then answer the questions in the <b>Quiz</b> tab. No code changes needed.</p>
                 ) : (
-                  <p className="mt-1 text-slate-400">
-                    Edit <code className="text-amber-200">{ticket.filesEditable.join(", ")}</code> until every check passes. Then take the quick quiz for bonus XP.
-                  </p>
+                  <>
+                    <p className="mt-1 text-slate-400">
+                      Edit <code className="text-amber-200">{ticket.filesEditable.join(", ")}</code> until every check passes. Then take the quick quiz for bonus XP.
+                    </p>
+                    <AcceptanceChecklist tests={ticket.tests} result={result} solved={tp.solved} />
+                  </>
                 )}
               </div>
               {isRead && hasQuiz && (
@@ -283,6 +287,29 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           onClose={() => setCelebrate(null)}
         />
       )}
+    </div>
+  );
+}
+
+/** "Done when" list built from the ticket's test names, ticked from the latest run. */
+function AcceptanceChecklist({ tests, result, solved }: { tests: Record<string, string>; result: RunResult | null; solved: boolean }) {
+  const checks = listChecks(tests);
+  if (checks.length === 0) return null;
+  const status = new Map(result?.results.map((r) => [`${r.file}:${r.name}`, r.status]) ?? []);
+  return (
+    <div className="mt-3">
+      <div className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Done when</div>
+      <ul className="mt-1 space-y-1" data-testid="acceptance-checklist">
+        {checks.map((c) => {
+          const s = solved && !result ? "pass" : status.get(`${c.file}:${c.name}`);
+          return (
+            <li key={`${c.file}:${c.name}`} className="flex gap-2 text-slate-300">
+              <span>{s === "pass" ? "✅" : s ? "❌" : "⬜"}</span>
+              <span>{c.label}</span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
