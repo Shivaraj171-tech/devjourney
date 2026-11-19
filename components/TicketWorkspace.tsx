@@ -12,6 +12,7 @@ import type { Ticket } from "@/lib/content/types";
 import { quizXp, readTicketXp, solveXp, type SolveXp } from "@/lib/game/rules";
 import { actions, ticketProgress, useProgress } from "@/lib/progress/store";
 import { PythonRunner } from "@/lib/runner/client";
+import { useIsClient } from "@/lib/useIsClient";
 import type { RunResult } from "@/lib/runner/types";
 
 type Props = {
@@ -34,6 +35,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const progress = useProgress();
   const tp = ticketProgress(progress, ticket.id);
   const isRead = ticket.type === "read";
+  // Progress only exists in the browser; until then we don't know if it's locked.
+  const isClient = useIsClient();
   const locked = prevTicketId !== null && !ticketProgress(progress, prevTicketId).solved;
 
   // ----- files -----
@@ -55,7 +58,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const runnerRef = useRef<PythonRunner | null>(null);
   const [pythonState, setPythonState] = useState<"loading" | "ready" | "failed">("loading");
   useEffect(() => {
-    if (isRead) return;
+    // Don't download Python for read tickets, locked tickets, or the static HTML.
+    if (isRead || locked || !isClient) return;
     const runner = new PythonRunner();
     runnerRef.current = runner;
     runner.warmUp().then(
@@ -63,7 +67,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
       () => setPythonState("failed"),
     );
     return () => runner.dispose();
-  }, [isRead]);
+  }, [isRead, locked, isClient]);
 
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -104,6 +108,10 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
 
   const quizUnlocked = isRead || tp.solved;
   const hasQuiz = ticket.questions.length > 0;
+
+  if (!isClient) {
+    return <div className="p-8 text-center text-slate-500">Opening ticket…</div>;
+  }
 
   if (locked) {
     return (
@@ -235,7 +243,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
       {/* ---------- right: IDE + checks ---------- */}
       <section className="flex min-h-[600px] flex-col gap-3 lg:min-h-0">
         <div className="flex min-h-[380px] flex-1 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e1e1e]">
-          <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-800 bg-slate-950 px-2">
+          <div className="flex flex-wrap items-center border-b border-slate-800 bg-slate-950 px-2">
+            <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
             {[...codeFiles, ...testFiles.map((t) => `tests/${t}`)].map((path) => {
               const canEdit = !isRead && editable.has(path);
               return (
@@ -252,6 +261,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                 </button>
               );
             })}
+            </div>
             <div className="ml-auto flex shrink-0 items-center gap-2 py-1.5 pl-2">
               {!isRead && editable.has(activeFile) && (
                 <button
@@ -281,6 +291,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               value={fileText(activeFile)}
               readOnly={isRead || !editable.has(activeFile)}
               onChange={(v) => actions.saveCode(ticket.id, activeFile, v)}
+              onRun={isRead ? undefined : runTests}
             />
           </div>
         </div>

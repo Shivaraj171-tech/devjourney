@@ -160,6 +160,16 @@ class RunnerTests(TempDirTestCase):
         self.assertFalse(result["passed"])
         self.assertIn("timed out", result["error"])
 
+    def test_exit_in_learner_code_is_an_error_not_a_crash(self):
+        result = self.run_code("import sys\n\ndef double(x):\n    sys.exit(1)\n")
+        self.assertNotIn("error", result)  # runner itself didn't crash
+        self.assertEqual({r["status"] for r in result["results"]}, {"error"})
+        self.assertIn("SystemExit", result["results"][0]["message"])
+
+    def test_exit_at_import_time_is_reported(self):
+        result = self.run_code("raise SystemExit(1)\n")
+        self.assertEqual(result["results"][0]["name"], "(import)")
+
     def test_no_tests_is_not_a_pass(self):
         result = self.run_code(FIXED, tests="x = 1\n")
         self.assertFalse(result["passed"])

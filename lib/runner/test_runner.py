@@ -58,7 +58,7 @@ def run_tests(code_dir, tests_dir):
             try:
                 with contextlib.redirect_stdout(printed):
                     module = _load_module(test_file, module_name)
-            except Exception as exc:  # noqa: BLE001 - learner code can raise anything
+            except BaseException as exc:  # noqa: BLE001 - learner code can raise anything, even SystemExit
                 results.append({
                     "file": test_file.name,
                     "name": "(import)",
@@ -82,7 +82,7 @@ def run_tests(code_dir, tests_dir):
                 except AssertionError as exc:
                     result.update(status="fail", message=str(exc) or "assertion failed",
                                   traceback=_short_traceback(exc))
-                except Exception as exc:  # noqa: BLE001
+                except BaseException as exc:  # noqa: BLE001 - includes SystemExit from exit()
                     result.update(status="error", message=f"{type(exc).__name__}: {exc}",
                                   traceback=_short_traceback(exc))
                 result["output"] = printed.getvalue()

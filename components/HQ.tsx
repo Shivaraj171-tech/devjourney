@@ -33,7 +33,8 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
   const { rank } = rankFor(xp);
 
   // Date-dependent values are computed after mount (static HTML has no "today").
-  const now = useIsClient() ? new Date() : null;
+  const isClient = useIsClient();
+  const now = isClient ? new Date() : null;
   const streak = now ? currentStreak(progress.activeDays, now) : 0;
 
   const allTickets = seasons.flatMap((s) => s.tickets);
@@ -57,6 +58,11 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
 
   const board = now ? leaderboard({ name: progress.playerName, xp }, daysSinceStart(progress, now)) : [];
   const myPlace = board.findIndex((b) => b.isYou) + 1;
+
+  // Progress lives in the browser: avoid flashing "first day" to returning players.
+  if (!isClient) {
+    return <div className="p-8 text-center text-slate-500">Opening the office…</div>;
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">

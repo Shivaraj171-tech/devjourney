@@ -42,6 +42,7 @@ const EXPLAIN: [RegExp, (m: RegExpMatchArray) => string][] = [
   [/^IndexError: (.*)/, () => "The code asked for a position that doesn't exist in the list. Remember lists start at 0 and end at len - 1."],
   [/^ZeroDivisionError/, () => "The code divided by zero. What should happen when there's nothing to divide by?"],
   [/^ValueError: (.*)/, () => "A value has the right type but a bad content (for example, int('abc'))."],
+  [/^SystemExit/, () => "The code called exit(), which stops the whole program. Return a value from the function instead."],
   [/^RecursionError/, () => "A function kept calling itself and never stopped."],
   [/^ImportError|^ModuleNotFoundError/, () => "Python couldn't find a file or function being imported. Check the names match exactly."],
 ];
