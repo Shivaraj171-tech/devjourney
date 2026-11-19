@@ -20,7 +20,7 @@ type Props = {
   nextTicket: { id: string; title: string } | null;
 };
 
-type Tab = "ticket" | "hints" | "quiz";
+type Tab = "ticket" | "learn" | "hints" | "quiz";
 
 const TYPE_BADGE: Record<string, string> = {
   bug: "🐛 Bug",
@@ -139,9 +139,10 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           </h1>
         </div>
         <div className="flex border-b border-slate-800 text-sm" role="tablist">
-          {(["ticket", "hints", "quiz"] as Tab[]).map((t) => {
+          {(["ticket", "learn", "hints", "quiz"] as Tab[]).map((t) => {
             if (t === "quiz" && !hasQuiz) return null;
-            const label = t === "ticket" ? "📨 Ticket" : t === "hints" ? `💡 Hints (${tp.hintsUsed}/${ticket.hints.length})` : quizUnlocked ? "🧠 Quiz" : "🔒 Quiz";
+            if (t === "learn" && !ticket.concept) return null;
+            const label = t === "ticket" ? "📨 Ticket" : t === "learn" ? "📘 Learn" : t === "hints" ? `💡 Hints (${tp.hintsUsed}/${ticket.hints.length})` : quizUnlocked ? "🧠 Quiz" : "🔒 Quiz";
             return (
               <button
                 key={t}
@@ -159,6 +160,14 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           {tab === "ticket" && (
             <div className="space-y-4">
               <Markdown text={ticket.story} />
+              {ticket.concept && (
+                <button
+                  onClick={() => setTab("learn")}
+                  className="w-full rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-left text-sm text-cyan-100 hover:bg-cyan-500/20"
+                >
+                  📘 New to <b>{ticket.newConcept}</b>? Read the 2-minute lesson first →
+                </button>
+              )}
               <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
                 <div className="font-semibold text-white">Your task</div>
                 {isRead ? (
@@ -177,6 +186,15 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                   Start the questions →
                 </button>
               )}
+            </div>
+          )}
+          {tab === "learn" && ticket.concept && (
+            <div className="space-y-4">
+              <p className="text-xs text-slate-500">New concept for this ticket. Read it first if it&apos;s unfamiliar (free, no XP cost).</p>
+              <Markdown text={ticket.concept} />
+              <button onClick={() => setTab("ticket")} className="w-full rounded-lg border border-slate-700 py-2 text-sm text-slate-300 hover:bg-slate-800">
+                ← Back to the ticket
+              </button>
             </div>
           )}
           {tab === "hints" && (

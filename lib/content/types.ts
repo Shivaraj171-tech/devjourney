@@ -29,6 +29,8 @@ export type Ticket = {
   testsVisible: boolean;
   filesEditable: string[];
   story: string;
+  /** Short lesson on the ticket's new concept (concept.md), if any. */
+  concept: string | null;
   hints: string[];
   questions: Question[];
   /** path -> file contents. The reference solution is never sent to the browser. */

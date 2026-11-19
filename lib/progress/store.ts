@@ -30,6 +30,8 @@ export type Progress = {
   playerName: string;
   startedAt: string; // ISO date
   activeDays: string[]; // YYYY-MM-DD
+  /** True once the "how it works" intro has been dismissed. */
+  onboarded?: boolean;
   tickets: Record<string, TicketProgress>;
 };
 
@@ -162,6 +164,9 @@ export const actions = {
       }
       return next;
     });
+  },
+  finishOnboarding() {
+    update((p) => ({ ...p, onboarded: true }));
   },
   setName(name: string) {
     update((p) => ({ ...p, playerName: name.trim().slice(0, 24) || "You" }));

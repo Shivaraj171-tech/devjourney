@@ -4,7 +4,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useIsClient } from "@/lib/useIsClient";
+import AppPreview from "./AppPreview";
 import Markdown from "./Markdown";
+import Onboarding from "./Onboarding";
 import { BADGES, currentStreak, leaderboard, rankFor, type BadgeContext } from "@/lib/game/rules";
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
 import type { TicketType } from "@/lib/content/types";
@@ -58,6 +60,7 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+      {now && !progress.onboarded && solved.length === 0 && <Onboarding />}
       {/* ---------- hero ---------- */}
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-violet-950 via-slate-900 to-cyan-950 p-6 sm:p-8">
         <div className="relative z-10 max-w-2xl">
@@ -145,11 +148,12 @@ export default function HQ({ seasons }: { seasons: SeasonSummary[] }) {
         </section>
       ))}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <AppPreview solved={new Set(solved.map((t) => t.id))} />
         {/* ---------- badges ---------- */}
         <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
           <h2 className="text-lg font-bold text-white">🏅 Badges</h2>
-          <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <ul className="mt-3 grid grid-cols-2 gap-2">
             {BADGES.map((b) => {
               const earned = b.earned(badgeCtx);
               return (

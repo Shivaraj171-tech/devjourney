@@ -78,6 +78,7 @@ function loadTicket(seasonId: string, dir: string, slug: string, number: number)
     testsVisible: meta.tests_visible,
     filesEditable: meta.files_editable ?? [],
     story: readText(join(dir, "story.md")),
+    concept: existsSync(join(dir, "concept.md")) ? readText(join(dir, "concept.md")) : null,
     hints: splitHints(readText(join(dir, "hints.md"))),
     questions,
     starter: readTree(join(dir, "starter")),

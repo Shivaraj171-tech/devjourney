@@ -1,6 +1,6 @@
 // Tiny Markdown renderer for our own story/hint text.
-// Supports paragraphs, line breaks, **bold**, *italic* and `code`. That's all
-// the content uses; a full Markdown library isn't needed yet.
+// Supports paragraphs, line breaks, **bold**, *italic*, `code` and fenced
+// ``` code blocks. That's all the content uses; a full Markdown library isn't needed yet.
 import { Fragment, type ReactNode } from "react";
 
 function inline(text: string, keyPrefix: string): ReactNode[] {
@@ -30,20 +30,40 @@ function inline(text: string, keyPrefix: string): ReactNode[] {
   return out;
 }
 
+/** Split text into prose and ``` fenced code blocks. */
+function blocks(text: string): { code: boolean; body: string }[] {
+  const out: { code: boolean; body: string }[] = [];
+  const parts = text.trim().split(/^```[^\n]*\n?/m);
+  // Even parts are prose, odd parts are code (between opening and closing fences).
+  parts.forEach((body, i) => out.push({ code: i % 2 === 1, body: i % 2 === 1 ? body.replace(/\n$/, "") : body }));
+  return out;
+}
+
 export default function Markdown({ text, className = "" }: { text: string; className?: string }) {
-  const paragraphs = text.trim().split(/\n\s*\n/);
   return (
     <div className={`space-y-3 leading-relaxed ${className}`}>
-      {paragraphs.map((para, p) => (
-        <p key={p}>
-          {para.split("\n").map((line, l) => (
-            <Fragment key={l}>
-              {l > 0 && <br />}
-              {inline(line, `${p}-${l}`)}
-            </Fragment>
-          ))}
-        </p>
-      ))}
+      {blocks(text).map((block, b) =>
+        block.code ? (
+          <pre key={b} className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 font-mono text-[13px] leading-snug text-slate-200">
+            {block.body}
+          </pre>
+        ) : (
+          block.body
+            .trim()
+            .split(/\n\s*\n/)
+            .filter(Boolean)
+            .map((para, p) => (
+              <p key={`${b}-${p}`}>
+                {para.split("\n").map((line, l) => (
+                  <Fragment key={l}>
+                    {l > 0 && <br />}
+                    {inline(line, `${b}-${p}-${l}`)}
+                  </Fragment>
+                ))}
+              </p>
+            ))
+        ),
+      )}
     </div>
   );
 }
