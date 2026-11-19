@@ -1,0 +1,10 @@
+id: s01-t02
+title: "Why is a pizza $125?"
+type: bug
+level: intern
+track: foundations
+concepts: [variables, strings, numbers]
+new_concept: numbers
+estimated_minutes: 10
+tests_visible: true
+files_editable: [app/menu.py]

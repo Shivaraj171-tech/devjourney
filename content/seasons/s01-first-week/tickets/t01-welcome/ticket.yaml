@@ -1,0 +1,10 @@
+id: s01-t01
+title: "Welcome aboard: fix the greeting"
+type: bug
+level: intern
+track: foundations
+concepts: [variables, strings]
+new_concept: strings
+estimated_minutes: 10
+tests_visible: true
+files_editable: [app/greeting.py]

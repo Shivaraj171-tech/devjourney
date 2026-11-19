@@ -1,0 +1,11 @@
+id: s01
+title: "Your First Week"
+intro: |
+  Welcome to Orbit Orders! We're a small team building a food-ordering app,
+  and as of today you're our newest junior developer. Your first week is all
+  about getting comfortable in the codebase: small fixes, real users, real impact.
+  Your tech lead, Maya, has already queued up a few tickets for you.
+tickets:
+  - t01-welcome
+  - t02-menu-prices
+  - t03-free-delivery

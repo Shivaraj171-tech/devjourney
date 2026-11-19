@@ -1,0 +1,10 @@
+id: s01-t03
+title: "Free delivery... almost"
+type: bug
+level: intern
+track: foundations
+concepts: [variables, numbers, conditionals]
+new_concept: conditionals
+estimated_minutes: 10
+tests_visible: true
+files_editable: [app/delivery.py]
