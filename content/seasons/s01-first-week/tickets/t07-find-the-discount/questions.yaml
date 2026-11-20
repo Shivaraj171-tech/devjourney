@@ -27,3 +27,10 @@ questions:
       - "The customer gets the smallest discount, 10%"
     answer: 1
     explain: "PROMO_CODES.get(code, 0) returns the second argument, 0, when the key isn't in the dictionary, so no crash and no discount."
+  - prompt: "Byte sums up promo.py as: \"discount_amount gives 10% off every order.\" How should you treat that summary?"
+    choices:
+      - "Check it against the code: it's wrong, because there's a $15.00 minimum and the percent depends on the code"
+      - "Use it: it's quicker than reading the code"
+      - "Never ask an AI to explain code"
+    answer: 0
+    explain: "AI summaries are a useful start but can skip details like early returns. Check the claims against the code before you rely on them."

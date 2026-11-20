@@ -13,3 +13,10 @@ questions:
       - "The text \"discount_amount(subtotal, promo_code)\""
     answer: 1
     explain: "The brackets call the function. It runs with those inputs, and whatever it returns is stored in the variable."
+  - prompt: "Byte autocompletes `total = subtotal + discount + delivery`. What's the quickest check?"
+    choices:
+      - "Compare with the docstring's worked example: the total should be $22.40"
+      - "Check the line for typos"
+      - "Trust it: it uses all the right variable names"
+    answer: 0
+    explain: "With that line the example comes out as $33.58, not $22.40. Right names with the wrong maths is a classic AI mistake."

@@ -13,3 +13,10 @@ questions:
       - "if code is None:"
     answer: 2
     explain: "Use `is None`. Comparing with the string \"None\" checks for the four letters N-o-n-e, and calling .upper() first would crash all over again."
+  - prompt: "Byte suggests adding `if code == \"\": return 0` to fix the crash. Does it fix BUG-108?"
+    choices:
+      - "Yes: an empty promo box is an empty string"
+      - "No: the app sends None, not \"\", so .upper() would still crash"
+      - "Yes: None and \"\" are the same thing in Python"
+    answer: 1
+    explain: "None == \"\" is False, so the check never runs for None. Check the AI's fix against the actual error message and the actual value."

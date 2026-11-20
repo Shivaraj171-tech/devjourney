@@ -13,3 +13,10 @@ questions:
       - "Whether the word appears anywhere in the item names, even as part of a longer name"
     answer: 1
     explain: "For a dictionary, `in` checks the keys. It's a safe way to ask \"is this on the menu?\" before looking it up."
+  - prompt: "Byte suggests `cart.append(menu.get(name))` to stop the KeyError. What should you check before accepting?"
+    choices:
+      - "Only whether the crash is gone"
+      - "What ends up in the cart for a removed item: here it would be None instead of being skipped"
+      - "Whether the new line is shorter than the old one"
+    answer: 1
+    explain: "The crash does go away, but the cart becomes [1250, None, 299]. An AI fix can swap a loud bug for a quiet one, so check the result, not just the error."

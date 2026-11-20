@@ -1,10 +1,11 @@
 id: s02
 title: "Week Two: The AI Pair"
 intro: |
-  Big news on Monday: Orbit Orders has given Byte, the office robot, a new job.
-  Byte is now an AI coding assistant, and it writes code *fast*. Not always right,
-  but fast. This week you'll review Byte's pull requests, fix what slips through,
-  and keep production alive when things go wrong. Reading and checking code is
+  Big news on Monday: Byte, the office robot that did our autocomplete last week,
+  has been promoted to full AI pair programmer. It now writes whole features and
+  opens its own pull requests, *fast*. Not always right, but fast. This week
+  you'll review Byte's pull requests, fix what slips through, and keep
+  production alive when things go wrong. Reading and checking code is
   now half the job, so let's get good at it.
 tickets:
   - t01-byte-tips

@@ -16,3 +16,5 @@ print(total)  # 15
 ```
 
 **Watch out:** "Off by one" mistakes are very common in loops: starting or stopping one step too early or too late. If the last (or first) item seems to be ignored, check exactly where your loop starts and stops.
+
+**AI check:** when an AI writes a loop, check where the range starts and stops, and try it on a 2-item list.

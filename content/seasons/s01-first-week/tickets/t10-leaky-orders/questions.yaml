@@ -13,3 +13,10 @@ questions:
       - "items = [] runs on every call, so each order gets its own brand-new list"
     answer: 2
     explain: "The line inside the function runs each time create_order is called, creating a fresh empty list for every new order."
+  - prompt: "An AI writes `def create_order(customer, items=[])` and one quick test passes. Why isn't one test enough?"
+    choices:
+      - "One passing test proves a function is correct"
+      - "The bug only shows from the second call without items, so test two new orders in a row"
+      - "Default values only break with very big orders"
+    answer: 1
+    explain: "The shared list is empty on the first call, so the first test always looks fine. Testing two orders in a row exposes the leak."

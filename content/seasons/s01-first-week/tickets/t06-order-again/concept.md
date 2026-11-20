@@ -15,3 +15,5 @@ print(stock["kiwis"])           # KeyError: 'kiwis'
 `key in my_dict` checks whether a key exists. `.get(key, default)` gives back the default instead of failing when the key is missing.
 
 **Watch out:** Square-bracket lookup on a missing key stops the whole program with a `KeyError`. When data can change over time (like a menu), don't assume every key you knew about yesterday is still there.
+
+**AI check:** when an AI looks something up with `[ ]`, ask "what if the key isn't there?", and check what happens then.

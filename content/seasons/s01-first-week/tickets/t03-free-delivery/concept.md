@@ -15,3 +15,5 @@ if age >= 18:
 The comparison operators are `>` (greater than), `>=` (greater than or equal to), `<`, `<=`, `==` (equal to) and `!=` (not equal to).
 
 **Watch out:** Most conditional bugs happen right at the boundary. When a rule says "X or more" or "up to X", test the exact value X, not just numbers far above or below it.
+
+**AI check:** for every `>` or `<` an AI writes, ask "or equal?" and try the exact limit.

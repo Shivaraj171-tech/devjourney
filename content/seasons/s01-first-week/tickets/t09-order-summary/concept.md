@@ -22,3 +22,5 @@ print(price_label(500))  # 550 cents
 `price_label` doesn't repeat the tax maths. It calls `add_tax` and stores the returned value in `total`.
 
 **Watch out:** Pass each function the inputs it expects, in the right order. And a value only comes out of a function if it is returned; a function with no `return` gives back `None`.
+
+**AI check:** when an AI glues functions together, check each call gets the right inputs, then compare with a worked example.

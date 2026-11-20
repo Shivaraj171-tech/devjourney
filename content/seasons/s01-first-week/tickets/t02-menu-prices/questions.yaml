@@ -13,3 +13,10 @@ questions:
       - "1.25, because dividing by 10 makes the price too small"
     answer: 1
     explain: "1250 / 10 is 125.0. There are 100 cents in a dollar, so you need to divide by 100 to get 12.5."
+  - prompt: "Byte's autocomplete offers `dollars = cents / 10`. Which check catches the problem fastest?"
+    choices:
+      - "Check that the code runs without an error"
+      - "Ask Byte whether it's sure"
+      - "Plug in a price you already know: 1250 cents should come out as $12.50"
+    answer: 2
+    explain: "A worked example with a known answer catches wrong units instantly (you'd get $125.00). The code runs fine, and Byte would probably say yes."

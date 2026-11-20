@@ -13,3 +13,10 @@ questions:
       - "Bugs often hide right at the edge where the rule changes, so it's worth testing both sides of it"
     answer: 2
     explain: "These are called edge cases. A big order like 4000 is free with both > and >=, so only a test right at the boundary catches the mistake."
+  - prompt: "An AI writes `if subtotal_cents > 2500:` for \"free delivery at $25 or more\". Which amount should you test first?"
+    choices:
+      - "4000, a big order"
+      - "2500, exactly the limit"
+      - "0, an empty cart"
+    answer: 1
+    explain: "4000 and 0 give the right fee with both > and >=. Only the exact limit shows whether the AI picked the right comparison."

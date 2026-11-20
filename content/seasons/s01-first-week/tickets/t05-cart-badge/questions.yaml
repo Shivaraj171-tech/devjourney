@@ -14,3 +14,10 @@ questions:
       - "append changes the cart list that was passed in, so the caller already sees the new item"
     answer: 2
     explain: "Lists can be changed in place. The test's cart and the function's cart are the same list, so the change shows up outside the function too."
+  - prompt: "Byte offers to fill in both functions at once. What should you do before telling Sofia it's done?"
+    choices:
+      - "Nothing: if Byte wrote it, it's done"
+      - "Ask Byte to write tests too, and skip running them"
+      - "Run the tests, and read each line until you could explain what it does"
+    answer: 2
+    explain: "You own any code you accept. Passing tests show it works, and understanding it means you can debug it later."

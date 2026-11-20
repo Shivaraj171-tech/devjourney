@@ -27,3 +27,5 @@ print(add_coffee())  # ['coffee']
 ```
 
 **Watch out:** The bug only appears from the *second* call on, so a single quick test can look perfectly fine.
+
+**AI check:** if an AI writes `=[]` or `={}` in a `def` line, stop and use the `None` pattern instead.
