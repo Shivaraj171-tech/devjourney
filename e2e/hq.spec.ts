@@ -37,7 +37,8 @@ test("leaderboard renders and includes the player", async ({ page }) => {
   await page.goto("/leaderboard/");
   await expect(page.getByRole("heading", { name: /Office leaderboard/ })).toBeVisible();
   const board = page.getByTestId("leaderboard");
-  await expect(board.getByText("(you)")).toBeVisible();
+  // The player's row says "You" once (not "You (you)").
+  await expect(board.locator("[data-you]")).toHaveText("You");
   await expect(board.locator("li")).not.toHaveCount(0);
   expect(errors).toEqual([]);
 });

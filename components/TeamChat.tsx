@@ -50,7 +50,7 @@ export default function TeamChat({ seasons, progress, streak, now }: Props) {
     <section className="rounded-2xl border border-slate-800 bg-slate-900/60" aria-labelledby="team-chat-title" data-testid="team-chat">
       <div className="flex items-center justify-between border-b border-slate-800 px-4 py-2.5">
         <h2 id="team-chat-title" className="font-mono text-sm font-bold text-white">
-          <span className="text-slate-500">#</span>orbit-team
+          <span className="text-slate-400">#</span>orbit-team
         </h2>
         <span className="flex items-center gap-1.5 text-xs text-slate-400">
           <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden />5 online
@@ -73,7 +73,7 @@ export default function TeamChat({ seasons, progress, streak, now }: Props) {
               </span>
               <div className="min-w-0">
                 <div className="text-xs">
-                  <b className="text-white">{who.name}</b> <span className="text-slate-500">{who.role}</span>
+                  <b className="text-white">{who.name}</b> <span className="text-slate-400">{who.role}</span>
                 </div>
                 <p className="text-sm break-words text-slate-300">{m.text}</p>
                 {m.link && (

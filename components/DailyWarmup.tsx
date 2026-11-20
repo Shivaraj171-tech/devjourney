@@ -21,22 +21,22 @@ export default function DailyWarmup({ warmups, progress, solvedTicketIds, now }:
   if (warmups.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5" data-testid="daily-warmup">
+    <section id="warm-up" className="scroll-mt-20 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5" data-testid="daily-warmup">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg font-bold text-white">☕ Daily warm-up</h2>
-        <span className="text-xs text-amber-200/80">2 minutes · keeps your 🔥 streak · +{WARMUP_XP} XP if right first try</span>
+        <span className="text-xs text-amber-200">2 minutes · keeps your 🔥 streak · +{WARMUP_XP} XP if right first try</span>
       </div>
       {!warmup ? (
         <p className="mt-2 text-sm text-slate-400">Merge your first ticket to unlock daily warm-ups.</p>
       ) : (
-        <div className="mt-3 grid gap-4 md:grid-cols-2">
-          <div>
+        <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="min-w-0">
             <div className="text-sm font-semibold text-white">{warmup.title}</div>
             <pre className="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 font-mono text-[13px] leading-snug text-slate-200">
               {warmup.code.trimEnd()}
             </pre>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm text-slate-200">{warmup.question}</p>
             <div className="mt-2 space-y-1.5">
               {shuffledOrder(warmup.choices.length, warmup.id).map((i) => {
@@ -67,7 +67,7 @@ export default function DailyWarmup({ warmups, progress, solvedTicketIds, now }:
             {(doneToday || picked !== null) && (
               <p className="mt-2 text-xs text-slate-300">
                 {(doneToday ? doneToday.correct : picked === warmup.answer) ? "✔ Nice! " : "Not quite. "}
-                {warmup.explain} <span className="text-slate-500">Come back tomorrow for a new one.</span>
+                {warmup.explain} <span className="text-slate-400">Come back tomorrow for a new one.</span>
               </p>
             )}
           </div>
