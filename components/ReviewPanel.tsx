@@ -1,7 +1,7 @@
 "use client";
 // Code review tickets: read a pull request, click the lines that have problems,
 // then submit the review. Wrong flags are "false alarms" and cost a little XP.
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Markdown from "./Markdown";
 import type { Review, Ticket } from "@/lib/content/types";
 import { checkReview, FALSE_ALARM_COST, reviewXp, type TicketXp } from "@/lib/game/rules";
@@ -12,9 +12,11 @@ type Props = {
   ticket: Ticket & { review: Review };
   tp: TicketProgress;
   onSolved: (xp: TicketXp) => void;
+  /** Extra buttons for the review bar, e.g. the hints button. Rendered at the right end. */
+  actions?: ReactNode;
 };
 
-export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
+export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
   const review = ticket.review;
   const prPaths = review.files.map((f) => f.path);
   const codebasePaths = Object.keys(ticket.starter).filter(
@@ -26,6 +28,8 @@ export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
   const flags = tp.reviewFlags ?? [];
   const last = tp.reviewSubmitted ? checkReview(tp.reviewSubmitted, review.issues) : null;
   const solved = tp.solved;
+  const total = review.issues.length;
+  const found = solved ? total : (last?.found.length ?? 0);
 
   function submit() {
     const check = checkReview(flags, review.issues);
@@ -35,7 +39,7 @@ export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
   }
 
   return (
-    <section className="flex min-h-[600px] min-w-0 flex-col gap-3 lg:min-h-0" data-testid="review-panel">
+    <section className="flex min-h-[600px] min-w-0 flex-1 flex-col gap-3 lg:min-h-0" data-testid="review-panel">
       {/* ---------- PR header ---------- */}
       <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
         <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -60,13 +64,33 @@ export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
               {path}
             </FileTab>
           ))}
-          <span className="shrink-0 px-2 text-[11px] tracking-wide text-slate-600 uppercase">codebase</span>
+          <span className="shrink-0 px-2 text-[11px] tracking-wide text-slate-400 uppercase">codebase</span>
           {codebasePaths.map((path) => (
             <FileTab key={path} path={path} active={activeFile === path} onClick={() => setActiveFile(path)} muted>
               🔒 {path}
             </FileTab>
           ))}
         </div>
+        {prFile && (
+          <div
+            data-testid="review-instructions"
+            className={`flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-3 py-2 text-sm ${
+              solved ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100" : "border-violet-500/30 bg-violet-500/10 text-violet-50"
+            }`}
+          >
+            <span className="font-semibold">
+              {solved ? "✅ Review finished. These are the problems that were in this PR." : "👆 Tap a line to flag it 🚩"}
+            </span>
+            <span className="rounded-full bg-slate-950/60 px-2 py-0.5 text-xs font-semibold tabular-nums">
+              {found}/{total} found
+            </span>
+            {!solved && (
+              <span className="text-xs text-slate-300">
+                Tap again to unflag.{prFile.path in ticket.starter ? "" : " Every line in this file is new."}
+              </span>
+            )}
+          </div>
+        )}
         <div className="min-h-0 flex-1 overflow-auto">
           {prFile ? (
             <PrFileView
@@ -83,11 +107,14 @@ export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
             <CodeLines text={ticket.starter[activeFile] ?? ""} />
           )}
         </div>
-        {prFile && (
-          <div className="border-t border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-500">
-            {solved
-              ? "Review finished. These are the problems that were in this PR."
-              : "Click a line to flag it as a problem (click again to unflag). Lines marked + are new in this PR; red − lines were removed."}
+        {prFile && !solved && (
+          <div className="border-t border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-400">
+            Lines marked <span className="text-emerald-300">+</span> are new in this PR
+            {prFile.path in ticket.starter && removedLines(ticket.starter[prFile.path], prFile.text).size > 0 ? (
+              <>; red <span className="text-red-300">−</span> lines were removed.</>
+            ) : (
+              "."
+            )}
           </div>
         )}
       </div>
@@ -95,8 +122,8 @@ export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
       {/* ---------- submit + verdict ---------- */}
       <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Your review</div>
-          <span className="text-sm text-slate-400" data-testid="flag-count">
+          <div className="text-xs font-semibold tracking-wide text-slate-400 uppercase">Your review</div>
+          <span className="text-sm text-slate-300" data-testid="flag-count">
             🚩 {flags.length} line{flags.length === 1 ? "" : "s"} flagged
           </span>
           {!solved && (
@@ -109,6 +136,7 @@ export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
               Submit review
             </button>
           )}
+          {actions && <div className={solved ? "ml-auto" : ""}>{actions}</div>}
         </div>
         <Verdict review={review} last={last} solved={solved} onJump={setActiveFile} />
       </div>
@@ -122,13 +150,19 @@ function FileTab({ path, active, muted, onClick, children }: { path: string; act
       onClick={onClick}
       title={muted ? `${path} (unchanged, for context)` : `${path} (changed in this PR)`}
       className={`shrink-0 border-b-2 px-3 py-2 font-mono text-xs ${
-        active ? "border-cyan-400 text-white" : `border-transparent ${muted ? "text-slate-500" : "text-slate-300"} hover:text-white`
+        active ? "border-cyan-400 text-white" : `border-transparent ${muted ? "text-slate-400" : "text-slate-300"} hover:text-white`
       }`}
     >
       {children}
     </button>
   );
 }
+
+/**
+ * Long lines wrap instead of running off the right edge (on a phone the bug
+ * itself was cut off). Wrapped parts get a hanging indent so they read as one line.
+ */
+const WRAP = "min-w-0 flex-1 pr-4 pl-[4ch] -indent-[4ch] whitespace-pre-wrap [overflow-wrap:anywhere]";
 
 /** File text split into lines, without the empty "line" after a final newline. */
 function splitLines(text: string): string[] {
@@ -143,8 +177,8 @@ function CodeLines({ text }: { text: string }) {
     <pre className="py-3 font-mono text-[13px] leading-6 text-slate-300">
       {splitLines(text).map((line, i) => (
         <div key={i} className="flex">
-          <span className="w-12 shrink-0 pr-3 text-right text-slate-600 select-none">{i + 1}</span>
-          <span className="pr-4 whitespace-pre">{line}</span>
+          <span className="w-12 shrink-0 pr-3 text-right text-slate-400 select-none">{i + 1}</span>
+          <span className={WRAP}>{line}</span>
         </div>
       ))}
     </pre>
@@ -165,13 +199,15 @@ type ViewProps = {
 /** A PR file: every line is a toggle button for flagging it. */
 function PrFileView({ path, text, before, review, flags, last, solved, onToggle }: ViewProps) {
   const added = useMemo(() => changedLines(before, text), [before, text]);
+  // A brand-new file is all "+": tinting every line green would only be noise.
+  const isNewFile = before === undefined;
   const removed = useMemo(() => removedLines(before, text), [before, text]);
   const lines = splitLines(text);
   const issueAt = (n: number) =>
     review.issues.findIndex((i) => i.file === path && (i.line === n || i.alsoLines.includes(n)));
 
   return (
-    <div className="py-3 font-mono text-[13px] leading-6" data-testid="pr-file">
+    <div className="py-3 font-mono text-xs leading-6 sm:text-[13px]" data-testid="pr-file">
       {lines.map((line, i) => {
         const n = i + 1;
         const key = `${path}:${n}`;
@@ -187,7 +223,7 @@ function PrFileView({ path, text, before, review, flags, last, solved, onToggle 
             ? "bg-amber-500/15"
             : flagged
               ? "bg-red-500/20"
-              : added.has(n)
+              : added.has(n) && !isNewFile
                 ? "bg-emerald-400/[0.06]"
                 : "";
         return (
@@ -203,11 +239,14 @@ function PrFileView({ path, text, before, review, flags, last, solved, onToggle 
               className={`group flex w-full text-left ${tone} ${solved || blank ? "cursor-default" : "hover:bg-violet-500/15"} focus-visible:outline focus-visible:outline-violet-400`}
             >
               <span className="w-8 shrink-0 text-center select-none">
-                {revealed ? "✅" : falseAlarm ? "⚠️" : flagged ? "🚩" : blank ? null : <span className="text-transparent group-hover:text-slate-500">⚑</span>}
+                {revealed ? "✅" : falseAlarm ? "⚠️" : flagged ? "🚩" : blank || solved ? null : (
+                  // A flag on every line says "these are tappable" before anyone hovers.
+                  <span aria-hidden className="text-slate-500 group-hover:text-violet-300">⚑</span>
+                )}
               </span>
-              <span className="w-10 shrink-0 pr-2 text-right text-slate-600 select-none">{n}</span>
+              <span className="w-10 shrink-0 pr-2 text-right text-slate-400 select-none">{n}</span>
               <span className={`w-4 shrink-0 select-none ${added.has(n) ? "text-emerald-400" : "text-transparent"}`}>+</span>
-              <span className="pr-4 whitespace-pre text-slate-200">{line}</span>
+              <span className={`${WRAP} text-slate-200`}>{line}</span>
             </button>
             {falseAlarm && (
               <div className="ml-[5.5rem] mb-1 font-sans text-xs text-amber-300">
@@ -237,7 +276,7 @@ function RemovedLines({ lines }: { lines: string[] | undefined }) {
           <span className="w-8 shrink-0" />
           <span className="w-10 shrink-0" />
           <span className="w-4 shrink-0 text-red-400">−</span>
-          <span className="pr-4 whitespace-pre line-through decoration-red-400/40">{line}</span>
+          <span className={`${WRAP} line-through decoration-red-400/40`}>{line}</span>
         </div>
       ))}
     </>
@@ -267,7 +306,7 @@ function Verdict({ review, last, solved, onJump }: { review: Review; last: Retur
   }
   if (!last) {
     return (
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-2 text-sm text-slate-300">
         There {total === 1 ? "is 1 real problem" : `are ${total} real problems`} in this PR. Flag the line where each one is, then submit.
       </p>
     );

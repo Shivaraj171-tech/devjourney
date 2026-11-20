@@ -88,7 +88,7 @@ export default function MergeJuice({ earned }: { earned: number }) {
         >
           <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${Math.round(pct * 100)}%` }} />
         </div>
-        <div className="mt-1 text-[11px] text-slate-500">
+        <div className="mt-1 text-[11px] text-slate-400">
           {next && toNext !== null ? `${toNext} XP to ${next.emoji} ${next.title}` : "Top rank. The office looks up to you."}
         </div>
       </div>

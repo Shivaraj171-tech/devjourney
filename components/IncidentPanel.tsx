@@ -6,7 +6,13 @@ import type { Incident } from "@/lib/content/types";
 import { incidentSecondsLeft, INCIDENT_SPEED_BONUS } from "@/lib/game/rules";
 import { incidentActions, type TicketProgress } from "@/lib/progress/store";
 
-type Props = { ticketId: string; incident: Incident; tp: TicketProgress };
+type Props = {
+  ticketId: string;
+  incident: Incident;
+  tp: TicketProgress;
+  /** Phone: start with the logs folded so the banner and the goal both fit the first screen. */
+  logsOpenAtStart?: boolean;
+};
 
 function clock(totalSeconds: number): string {
   const s = Math.max(0, totalSeconds);
@@ -21,7 +27,7 @@ function logTone(line: string): string {
   return "text-slate-400";
 }
 
-export default function IncidentPanel({ ticketId, incident, tp }: Props) {
+export default function IncidentPanel({ ticketId, incident, tp, logsOpenAtStart = true }: Props) {
   // Start the clock the first time the ticket is opened; the start time is saved in progress.
   useEffect(() => incidentActions.start(ticketId), [ticketId]);
 
@@ -33,7 +39,7 @@ export default function IncidentPanel({ ticketId, incident, tp }: Props) {
     return () => clearInterval(timer);
   }, [tp.solved]);
 
-  const [showLogs, setShowLogs] = useState(true);
+  const [showLogs, setShowLogs] = useState(logsOpenAtStart);
   const started = tp.incidentStartedAt ? new Date(tp.incidentStartedAt).getTime() : null;
   const limit = incident.timeLimitMinutes;
 
@@ -90,7 +96,7 @@ export default function IncidentPanel({ ticketId, incident, tp }: Props) {
       </div>
       {showLogs && (
         <div>
-          <div className="border-t border-red-500/20 px-4 pt-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">Logs · production</div>
+          <div className="border-t border-red-500/20 px-4 pt-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">Logs · production</div>
           <pre data-testid="incident-logs" className="max-h-56 overflow-auto px-4 pt-1 pb-3 font-mono text-xs leading-5">
             {incident.logs.trimEnd().split("\n").map((line, i) => (
               <div key={i} className={`whitespace-pre ${logTone(line)}`}>

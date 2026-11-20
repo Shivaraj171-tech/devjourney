@@ -1,23 +1,34 @@
 "use client";
+// The ticket page.
+//
+// Desktop (≥1024px): two columns. Left, the brief: goal first ("Your task" +
+// "Done when"), then Byte's suggestion, the story (2 lines + Read more) and the
+// 2-minute lesson. Right, the editor with a feedback strip (Run · check pill ·
+// hints) and the CI checks (or the debugger) under it.
+//
+// Phone (<1024px): the same pieces as a 3-step flow (Brief / Code / Checks)
+// with Run in a sticky bottom bar. Running switches to Checks.
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import AskByte from "./AskByte";
 import ByteSuggestionCard from "./ByteSuggestion";
 import CodeEditor from "./CodeEditor";
 import DebuggerPanel from "./DebuggerPanel";
-import HintPanel from "./HintPanel";
+import { HintsButton } from "./HintPanel";
 import IncidentPanel from "./IncidentPanel";
 import Markdown from "./Markdown";
 import Quiz from "./Quiz";
 import ReviewPanel from "./ReviewPanel";
 import SolvedModal from "./SolvedModal";
-import TestResults from "./TestResults";
+import Tabs, { tabPanelProps, type TabItem } from "./Tabs";
+import TestResults, { CheckPill } from "./TestResults";
 import { listChecks } from "@/lib/content/checks";
 import type { Ticket } from "@/lib/content/types";
-import { incidentBonus, incidentXp, quizXp, readTicketXp, solveXp, type TicketXp } from "@/lib/game/rules";
+import { checkReview, incidentBonus, incidentXp, quizXp, readTicketXp, solveXp, type TicketXp } from "@/lib/game/rules";
 import { actions, byteActions, ticketProgress, useProgress } from "@/lib/progress/store";
 import { PythonRunner } from "@/lib/runner/client";
 import { useIsClient } from "@/lib/useIsClient";
+import { DESKTOP_QUERY, useMediaQuery } from "@/lib/useMediaQuery";
 import type { RunResult, TestResult, TraceResult } from "@/lib/runner/types";
 
 type Props = {
@@ -26,7 +37,10 @@ type Props = {
   nextTicket: { id: string; title: string } | null;
 };
 
-type Tab = "ticket" | "learn" | "hints" | "quiz" | "byte";
+/** Left-pane tabs. The lesson and the hints are no longer tabs (see the brief and the run bar). */
+type Tab = "ticket" | "quiz" | "byte";
+/** Phone steps. On review tickets "code" is the pull request. */
+type Step = "brief" | "code" | "checks";
 
 /** A recorded step-through of one check, and the code it was recorded on. */
 type DebugSession = { trace: TraceResult; files: Record<string, string> };
@@ -39,6 +53,12 @@ const TYPE_BADGE: Record<string, string> = {
   read: "📖 Code reading",
 };
 
+const passCount = (r: RunResult) => r.results.filter((x) => x.status === "pass").length;
+
+/** On a phone only the current step shows; on desktop everything does. */
+const stepClass = (visible: boolean, display: "flex" | "block" = "flex") =>
+  display === "flex" ? (visible ? "flex lg:flex" : "hidden lg:flex") : visible ? "block lg:block" : "hidden lg:block";
+
 export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Props) {
   const progress = useProgress();
   const tp = ticketProgress(progress, ticket.id);
@@ -47,14 +67,20 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const noRunner = isRead || !!review; // read and review tickets have no tests to run
   // Progress only exists in the browser; until then we don't know if it's locked.
   const isClient = useIsClient();
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const locked = prevTicketId !== null && !ticketProgress(progress, prevTicketId).solved;
 
   // ----- files -----
   const editable = useMemo(() => new Set(ticket.filesEditable), [ticket.filesEditable]);
   const codeFiles = Object.keys(ticket.starter).filter((p) => !p.endsWith("__init__.py") || ticket.starter[p].trim());
   const testFiles = ticket.testsVisible ? Object.keys(ticket.tests) : [];
+  const allFiles = [...codeFiles, ...testFiles.map((t) => `tests/${t}`)];
+  // Editable files first, so "which file do I fix?" is never scrolled out of view.
+  const editableFiles = isRead ? [] : ticket.filesEditable.filter((p) => allFiles.includes(p));
+  const otherFiles = allFiles.filter((p) => !editableFiles.includes(p));
   const firstFile = ticket.filesEditable[0] ?? codeFiles[0];
   const [activeFile, setActiveFile] = useState<string>(firstFile);
+  const [showOtherFiles, setShowOtherFiles] = useState(false);
 
   const fileText = useCallback(
     (path: string) => {
@@ -81,6 +107,9 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
 
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
+  // Checks passing per completed run, for the "+1 since last run" chip.
+  const [passHistory, setPassHistory] = useState<number[]>([]);
+  const previousPassed = result && !result.error && passHistory.length > 1 ? passHistory[passHistory.length - 2] : undefined;
   const [celebrate, setCelebrate] = useState<TicketXp | null>(null);
 
   // XP for getting every check green. Incidents add a speed bonus if fixed in time.
@@ -93,6 +122,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
     [ticket, tp.incidentStartedAt],
   );
   const [tab, setTab] = useState<Tab>("ticket");
+  const [step, setStep] = useState<Step>("brief");
 
   // ----- step-through debugger -----
   const [debug, setDebug] = useState<DebugSession | null>(null);
@@ -112,8 +142,10 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
     setRunning(true);
     setDebug(null);
     setTraceError(null);
+    setStep("checks"); // phone: show the results, not the keyboard
     const files = { ...ticket.starter, ...tp.code };
     const res = await runner.run(files, ticket.tests);
+    if (!res.error) setPassHistory((h) => [...h, passCount(res)]);
     setResult(res);
     setRunning(false);
     if (res.error) {
@@ -124,7 +156,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
     const runsAfter = tp.runs + 1;
     actions.recordRun(ticket.id, res.passed, (runs, hints) => passXp(runs, hints).total);
     if (res.passed && !wasSolved) setCelebrate(passXp(runsAfter, tp.hintsUsed));
-  }, [running, tracing, ticket, tp, passXp, restartPython]);
+  }, [running, tracing, ticket, tp, passXp, restartPython, setCelebrate]);
 
   /** Move the debugger to a step, and show the file that step is in. */
   const goToStep = useCallback(
@@ -152,6 +184,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
         return;
       }
       setDebug({ trace: out.trace, files });
+      setStep("code"); // phone: the highlighted line is in the editor
       goToStep(out.trace, 0);
     },
     [running, tracing, ticket, tp.code, goToStep, restartPython],
@@ -173,9 +206,10 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
 
   const quizUnlocked = isRead || tp.solved;
   const hasQuiz = ticket.questions.length > 0;
+  const checks = useMemo(() => listChecks(ticket.tests), [ticket.tests]);
 
   if (!isClient) {
-    return <div className="p-8 text-center text-slate-500">Opening ticket…</div>;
+    return <div className="p-8 text-center text-slate-400">Opening ticket…</div>;
   }
 
   if (locked) {
@@ -196,10 +230,111 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
     );
   }
 
+  // ----- left-pane tabs: only what's useful right now -----
+  const tabs: TabItem<Tab>[] = [{ id: "ticket", label: "📨 Ticket" }];
+  // The quiz is part of the "after merge" flow (read tickets: it *is* the task).
+  if (hasQuiz && quizUnlocked) tabs.push({ id: "quiz", label: tp.quizDone ? "🧠 Quiz ✓" : "🧠 Quiz" });
+  // On review tickets the prompt card could hint at the bug, so it opens after the review.
+  if (ticket.byte?.prompt && !(review && !tp.solved)) tabs.push({ id: "byte", label: "💬 Ask Byte" });
+  const activeTab: Tab = tabs.some((t) => t.id === tab) ? tab : "ticket";
+  const openQuiz = () => {
+    setTab("quiz");
+    setStep("brief");
+  };
+
+  // ----- phone steps -----
+  const steps: TabItem<Step>[] = [{ id: "brief", label: "1 · Brief" }];
+  if (review) steps.push({ id: "code", label: "2 · Pull request" });
+  else {
+    steps.push({ id: "code", label: "2 · Code" });
+    if (!isRead) {
+      const passed = result && !result.error ? (result.passed ? checks.length : passCount(result)) : null;
+      steps.push({ id: "checks", label: <>3 · Checks{passed !== null && <span className="ml-1 tabular-nums opacity-80">{passed}/{checks.length}</span>}</> });
+    }
+  }
+  const phoneStep: Step = steps.some((s) => s.id === step) ? step : "brief";
+  const stepPanel = (id: Step) => (isDesktop ? {} : tabPanelProps("step", id));
+
+  const hints = (placement: "up" | "down") => (
+    <HintsButton placement={placement} hints={ticket.hints} revealed={tp.hintsUsed} solved={tp.solved} onReveal={() => actions.revealHint(ticket.id)} />
+  );
+  const incident = ticket.incident && <IncidentPanel ticketId={ticket.id} incident={ticket.incident} tp={tp} logsOpenAtStart={isDesktop} />;
+
+  // ----- "Your task": the first thing in the brief -----
+  let task: ReactNode;
+  if (isRead) {
+    task = (
+      <>
+        <p className="mt-1 text-slate-300">Read the code, then answer the questions. No code changes needed.</p>
+        {hasQuiz && (
+          <div className="mt-3 flex items-center gap-2">
+            <button onClick={openQuiz} className="flex-1 rounded-lg bg-violet-600 py-2 font-semibold text-white hover:bg-violet-500">
+              {tp.quizDone ? "See your answers →" : "Start the questions →"}
+            </button>
+            {hints("down")}
+          </div>
+        )}
+      </>
+    );
+  } else if (review) {
+    const total = review.issues.length;
+    const found = tp.solved ? total : tp.reviewSubmitted ? checkReview(tp.reviewSubmitted, review.issues).found.length : 0;
+    task = (
+      <>
+        <p className="mt-1 text-slate-300">
+          Review {review.author}&apos;s pull request. Tap every line that has a real problem, then press <b className="text-white">Submit review</b>. Flagging fine
+          code costs a little XP.
+        </p>
+        <p className="mt-2 text-sm font-semibold text-violet-200" data-testid="review-progress">
+          🚩 {found}/{total} problem{total === 1 ? "" : "s"} found
+        </p>
+      </>
+    );
+  } else {
+    task = (
+      <>
+        <p className="mt-1 text-slate-300">
+          Edit{" "}
+          {editableFiles.map((p, i) => (
+            <span key={p}>
+              {i > 0 && ", "}
+              <code className="text-amber-200">{p}</code>
+            </span>
+          ))}{" "}
+          until every check passes.
+        </p>
+        <AcceptanceChecklist checks={checks} result={result} solved={tp.solved} />
+      </>
+    );
+  }
+
   return (
-    <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)] gap-3 p-3 lg:h-[calc(100vh-3.5rem)] lg:grid-cols-[400px_minmax(0,1fr)]">
-      {/* ---------- left: ticket / hints / quiz ---------- */}
-      <aside className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+    <div
+      className={`ticket-page mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)] content-start gap-3 p-3 lg:h-[calc(100vh-3.5rem)] lg:grid-cols-[400px_minmax(0,1fr)] lg:content-stretch ${
+        noRunner ? "" : "pb-24 lg:pb-3"
+      }`}
+    >
+      {/* ---------- phone: Brief / Code / Checks ---------- */}
+      <div className="sticky top-14 z-20 -mx-3 -mt-3 border-b border-slate-800 bg-slate-950/95 px-3 py-2 backdrop-blur lg:hidden">
+        <Tabs
+          tabs={steps}
+          active={phoneStep}
+          onChange={setStep}
+          idPrefix="step"
+          label="Ticket steps"
+          className="flex gap-1 rounded-xl bg-slate-900 p-1"
+          tabClassName={(on) =>
+            `flex-1 rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap ${on ? "bg-violet-600 text-white shadow" : "text-slate-300 hover:text-white"}`
+          }
+        />
+      </div>
+
+      {/* ---------- left: the brief ---------- */}
+      <aside
+        {...stepPanel("brief")}
+        aria-label="Ticket brief"
+        className={`${stepClass(phoneStep === "brief")} min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70`}
+      >
         <div className="border-b border-slate-800 p-4">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">{TYPE_BADGE[ticket.type]}</span>
@@ -212,33 +347,60 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
             )}
           </div>
           <h1 className="mt-2 text-lg font-bold text-white">
-            <span className="text-slate-500">#{ticket.number}</span> {ticket.title}
+            <span className="text-slate-400">#{ticket.number}</span> {ticket.title}
           </h1>
         </div>
-        <div className={`flex overflow-x-auto border-b border-slate-800 ${ticket.byte?.prompt ? "text-[13px]" : "text-sm"}`} role="tablist">
-          {(["ticket", "learn", "hints", "quiz", "byte"] as Tab[]).map((t) => {
-            if (t === "quiz" && !hasQuiz) return null;
-            if (t === "learn" && !ticket.concept) return null;
-            // On review tickets the prompt card could hint at the bug, so it opens after the review.
-            if (t === "byte" && (!ticket.byte?.prompt || (review && !tp.solved))) return null;
-            const label = t === "byte" ? "💬 Ask Byte" : t === "ticket" ? "📨 Ticket" : t === "learn" ? "📘 Learn" : t === "hints" ? `💡 Hints (${tp.hintsUsed}/${ticket.hints.length})` : quizUnlocked ? "🧠 Quiz" : "🔒 Quiz";
-            return (
-              <button
-                key={t}
-                role="tab"
-                aria-selected={tab === t}
-                onClick={() => setTab(t)}
-                className={`flex-1 ${ticket.byte?.prompt ? "px-2" : "px-3"} py-2.5 whitespace-nowrap ${tab === t ? "border-b-2 border-violet-400 text-white" : "text-slate-400 hover:text-white"}`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4 text-slate-300">
-          {tab === "ticket" && (
+        {tabs.length > 1 && (
+          <Tabs
+            tabs={tabs}
+            active={activeTab}
+            onChange={setTab}
+            idPrefix="pane"
+            label="Ticket sections"
+            className="flex border-b border-slate-800 text-sm"
+            tabClassName={(on) =>
+              `flex-1 border-b-2 px-3 py-2.5 whitespace-nowrap ${on ? "border-violet-400 text-white" : "border-transparent text-slate-300 hover:text-white"}`
+            }
+          />
+        )}
+        <div {...(tabs.length > 1 ? tabPanelProps("pane", activeTab) : {})} className="min-h-0 flex-1 overflow-y-auto p-4 text-slate-300">
+          {activeTab === "ticket" && (
             <div className="space-y-4">
-              <Markdown text={ticket.story} />
+              {/* Phone: the incident banner and its clock belong to the brief, so the urgency lands first. */}
+              {!isDesktop && incident}
+
+              {/* 1. The goal, always first. */}
+              <section data-testid="ticket-goal" aria-labelledby="goal-title" className="rounded-xl border border-violet-400/30 bg-slate-950/70 p-3 text-sm">
+                <h2 id="goal-title" className="font-semibold text-white">
+                  🎯 Your task
+                </h2>
+                {task}
+                {tp.solved && !isRead && hasQuiz && !tp.quizDone && (
+                  <button onClick={openQuiz} className="mt-3 w-full rounded-lg border border-violet-400/50 py-2 font-semibold text-violet-100 hover:bg-violet-500/15">
+                    🧠 Lock it in: take the 1-minute quiz →
+                  </button>
+                )}
+                {!review && !isDesktop && (
+                  <button
+                    data-testid="goto-code"
+                    onClick={() => setStep("code")}
+                    className="mt-3 w-full rounded-lg border border-slate-600 py-2 font-semibold text-slate-100 hover:bg-slate-800"
+                  >
+                    Open the code →
+                  </button>
+                )}
+                {review && !isDesktop && (
+                  <button
+                    data-testid="goto-code"
+                    onClick={() => setStep("code")}
+                    className="mt-3 w-full rounded-lg bg-violet-600 py-2 font-semibold text-white hover:bg-violet-500"
+                  >
+                    Open the pull request →
+                  </button>
+                )}
+              </section>
+
+              {/* 2. Byte's suggestion, right under the goal. */}
               {ticket.byte?.suggestion && !noRunner && (
                 <ByteSuggestionCard
                   ticketId={ticket.id}
@@ -246,76 +408,48 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                   tp={tp}
                   currentText={fileText(ticket.byte.suggestion.file)}
                   autocomplete={ticket.seasonId === "s01"}
-                  onApplied={setActiveFile}
+                  onApplied={(path) => {
+                    setActiveFile(path);
+                    setStep("code");
+                  }}
                 />
               )}
-              {ticket.concept && (
-                <button
-                  onClick={() => setTab("learn")}
-                  className="w-full rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-left text-sm text-cyan-100 hover:bg-cyan-500/20"
-                >
-                  📘 New to <b>{ticket.newConcept}</b>? Read the 2-minute lesson first →
-                </button>
-              )}
-              <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
-                <div className="font-semibold text-white">Your task</div>
-                {isRead ? (
-                  <p className="mt-1 text-slate-400">Read the code in the editor, then answer the questions in the <b>Quiz</b> tab. No code changes needed.</p>
-                ) : review ? (
-                  <p className="mt-1 text-slate-400">Review the pull request in the code panel. Click every line that has a real problem, then press <b>Submit review</b>. Flagging fine code costs a little XP.</p>
-                ) : (
-                  <>
-                    <p className="mt-1 text-slate-400">
-                      Edit <code className="text-amber-200">{ticket.filesEditable.join(", ")}</code> until every check passes. Then take the quick quiz for bonus XP.
-                    </p>
-                    <AcceptanceChecklist tests={ticket.tests} result={result} solved={tp.solved} />
-                  </>
-                )}
-              </div>
-              {isRead && hasQuiz && (
-                <button onClick={() => setTab("quiz")} className="w-full rounded-lg bg-violet-600 py-2 font-semibold text-white hover:bg-violet-500">
-                  Start the questions →
-                </button>
-              )}
+
+              {/*
+                3. Task-format widgets go here (e.g. "predict the output", "commit to a
+                judgement before you run"). Render them as self-contained components
+                that take `ticket` and `tp`, between Byte's card and the story.
+              */}
+
+              {/* 4. The story, folded to two lines. */}
+              <Story text={ticket.story} />
+
+              {/* 5. The lesson, folded. */}
+              {ticket.concept && <Lesson concept={ticket.concept} newConcept={ticket.newConcept} />}
             </div>
           )}
-          {tab === "learn" && ticket.concept && (
-            <div className="space-y-4">
-              <p className="text-xs text-slate-500">New concept for this ticket. Read it first if it&apos;s unfamiliar (free, no XP cost).</p>
-              <Markdown text={ticket.concept} />
-              <button onClick={() => setTab("ticket")} className="w-full rounded-lg border border-slate-700 py-2 text-sm text-slate-300 hover:bg-slate-800">
-                ← Back to the ticket
-              </button>
-            </div>
-          )}
-          {tab === "byte" && ticket.byte?.prompt && (
+          {activeTab === "byte" && ticket.byte?.prompt && (
             <AskByte card={ticket.byte.prompt} record={tp.bytePrompt} onPick={(i, best) => byteActions.pickPrompt(ticket.id, i, best)} />
           )}
-          {tab === "hints" && (
-            <HintPanel hints={ticket.hints} revealed={tp.hintsUsed} solved={tp.solved} onReveal={() => actions.revealHint(ticket.id)} />
+          {activeTab === "quiz" && (
+            <Quiz
+              seed={ticket.id}
+              questions={ticket.questions}
+              firstPicks={tp.quizFirstPick}
+              done={tp.quizDone}
+              intro={isRead ? "Answer every question correctly to close this ticket." : "Lock in what you just fixed. Each answer right on the first try is +15 XP."}
+              onAnswer={(i, c) => actions.answerQuestion(ticket.id, i, c, ticket.questions.length)}
+              onComplete={(firstTry) => {
+                if (isRead) {
+                  const xp = readTicketXp(ticket.level, firstTry, ticket.questions.length, tp.hintsUsed);
+                  actions.finishQuiz(ticket.id, quizXp(0), firstTry, xp);
+                  setCelebrate({ base: xp, hintPenalty: 0, firstRunBonus: 0, total: xp });
+                } else {
+                  actions.finishQuiz(ticket.id, quizXp(firstTry), firstTry);
+                }
+              }}
+            />
           )}
-          {tab === "quiz" &&
-            (quizUnlocked ? (
-              <Quiz
-                seed={ticket.id}
-                questions={ticket.questions}
-                firstPicks={tp.quizFirstPick}
-                done={tp.quizDone}
-                intro={isRead ? "Answer every question correctly to close this ticket." : "Check your understanding. Each answer right on the first try is +15 XP."}
-                onAnswer={(i, c) => actions.answerQuestion(ticket.id, i, c, ticket.questions.length)}
-                onComplete={(firstTry) => {
-                  if (isRead) {
-                    const xp = readTicketXp(ticket.level, firstTry, ticket.questions.length, tp.hintsUsed);
-                    actions.finishQuiz(ticket.id, quizXp(0), firstTry, xp);
-                    setCelebrate({ base: xp, hintPenalty: 0, firstRunBonus: 0, total: xp });
-                  } else {
-                    actions.finishQuiz(ticket.id, quizXp(firstTry), firstTry);
-                  }
-                }}
-              />
-            ) : (
-              <p className="text-sm text-slate-400">🔒 Get all checks passing to unlock the quiz.</p>
-            ))}
         </div>
         {tp.solved && nextTicket && (
           <Link
@@ -329,87 +463,119 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
 
       {/* ---------- right: pull request (review tickets) or IDE + checks ---------- */}
       {review ? (
-        <ReviewPanel ticket={{ ...ticket, review }} tp={tp} onSolved={setCelebrate} />
+        <div {...stepPanel("code")} className={`${stepClass(phoneStep === "code")} min-h-0 min-w-0 flex-col`}>
+          <ReviewPanel ticket={{ ...ticket, review }} tp={tp} onSolved={setCelebrate} actions={hints("up")} />
+        </div>
       ) : (
-      <section className="flex min-h-[600px] flex-col gap-3 lg:min-h-0">
-        {ticket.incident && <IncidentPanel ticketId={ticket.id} incident={ticket.incident} tp={tp} />}
-        <div className="flex min-h-[380px] flex-1 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e1e1e]">
-          <div className="flex flex-wrap items-center border-b border-slate-800 bg-slate-950 px-2">
-            <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
-            {[...codeFiles, ...testFiles.map((t) => `tests/${t}`)].map((path) => {
-              const canEdit = !isRead && editable.has(path);
-              return (
-                <button
-                  key={path}
-                  onClick={() => setActiveFile(path)}
-                  className={`shrink-0 border-b-2 px-3 py-2 font-mono text-xs ${
-                    activeFile === path ? "border-cyan-400 text-white" : "border-transparent text-slate-400 hover:text-white"
-                  }`}
-                  title={canEdit ? "You can edit this file" : "Read-only"}
-                >
-                  {canEdit ? "✏️ " : "🔒 "}
-                  {path}
-                </button>
-              );
-            })}
-            </div>
-            <div className="ml-auto flex shrink-0 items-center gap-2 py-1.5 pl-2">
+        <section className="flex min-h-0 min-w-0 flex-col gap-3">
+          {isDesktop && incident}
+          <div
+            {...stepPanel("code")}
+            className={`${stepClass(phoneStep === "code")} h-[calc(100dvh-13rem)] min-h-[320px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e1e1e] lg:h-auto lg:min-h-[380px] lg:flex-1`}
+          >
+            <div className="flex items-center border-b border-slate-800 bg-slate-950 px-2">
+              <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+                {[...editableFiles, ...otherFiles.filter((p) => isRead || editableFiles.length === 0 || showOtherFiles || p === activeFile)].map((path) => {
+                  const canEdit = editableFiles.includes(path);
+                  return (
+                    <button
+                      key={path}
+                      data-testid="file-tab"
+                      data-editable={canEdit}
+                      onClick={() => setActiveFile(path)}
+                      aria-pressed={activeFile === path}
+                      className={`shrink-0 border-b-2 px-3 py-2 font-mono text-xs ${
+                        activeFile === path ? "border-cyan-400 text-white" : `border-transparent ${canEdit ? "text-amber-100" : "text-slate-400"} hover:text-white`
+                      }`}
+                      title={canEdit ? "You can edit this file" : "Read-only"}
+                    >
+                      {canEdit ? "✏️ " : "🔒 "}
+                      {path}
+                    </button>
+                  );
+                })}
+                {!isRead && editableFiles.length > 0 && otherFiles.length > 0 && (
+                  <button
+                    data-testid="toggle-other-files"
+                    onClick={() => setShowOtherFiles((v) => !v)}
+                    aria-expanded={showOtherFiles}
+                    className="shrink-0 rounded-md px-2 py-1 text-xs whitespace-nowrap text-slate-300 hover:bg-slate-800 hover:text-white"
+                  >
+                    {showOtherFiles ? "Hide read-only files" : `🔒 +${otherFiles.length} read-only file${otherFiles.length === 1 ? "" : "s"}`}
+                  </button>
+                )}
+              </div>
               {!isRead && editable.has(activeFile) && (
                 <button
                   onClick={() => {
                     if (confirm("Reset your changes to this ticket's starting code?")) actions.resetCode(ticket.id);
                   }}
-                  className="rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-white"
+                  className="ml-1 shrink-0 rounded-md px-2 py-1 text-xs text-slate-300 hover:bg-slate-800 hover:text-white"
                 >
                   ↺ Reset
                 </button>
               )}
-              {!isRead && (
-                <button
-                  data-testid="run-tests"
-                  onClick={runTests}
-                  disabled={running || pythonState !== "ready"}
-                  className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
-                >
-                  {pythonState === "loading" ? "Starting Python…" : pythonState === "failed" ? "Python failed to load" : running ? "Running…" : "▶ Run tests"}
-                </button>
-              )}
+            </div>
+            <div className="min-h-0 flex-1">
+              <CodeEditor
+                path={`file:///${ticket.id}/${activeFile}`}
+                value={fileText(activeFile)}
+                readOnly={isRead || !editable.has(activeFile)}
+                onChange={(v) => actions.saveCode(ticket.id, activeFile, v)}
+                onRun={isRead ? undefined : runTests}
+                highlightLine={debugStep && debugStep.file === activeFile ? debugStep.line : undefined}
+                compact={!isDesktop}
+              />
             </div>
           </div>
-          <div className="min-h-0 flex-1">
-            <CodeEditor
-              path={`file:///${ticket.id}/${activeFile}`}
-              value={fileText(activeFile)}
-              readOnly={isRead || !editable.has(activeFile)}
-              onChange={(v) => actions.saveCode(ticket.id, activeFile, v)}
-              onRun={isRead ? undefined : runTests}
-              highlightLine={debugStep && debugStep.file === activeFile ? debugStep.line : undefined}
-            />
-          </div>
-        </div>
-        {!isRead && debug && (
-          <div className="max-h-[55%] min-h-[220px] overflow-y-auto rounded-2xl border border-violet-500/40 bg-slate-900/70 p-4">
-            <DebuggerPanel
-              trace={debug.trace}
-              position={debugPos}
-              onPosition={(pos) => goToStep(debug.trace, pos)}
-              onClose={() => setDebug(null)}
-              stale={debugStale}
-            />
-          </div>
-        )}
-        {!isRead && !debug && (
-          <div className="max-h-[40%] min-h-[140px] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <div className="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">CI checks</div>
-            {traceError && (
-              <div data-testid="trace-error" className="mb-2 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
-                ⚠️ Couldn&apos;t step through that check: {traceError}
-              </div>
-            )}
-            <TestResults result={result} running={running} onStepThrough={pythonState === "ready" ? stepThrough : undefined} tracing={tracing} />
-          </div>
-        )}
-      </section>
+
+          {/* Run · progress · hints. Phone: a sticky bottom bar. Desktop: a strip under the editor. */}
+          {!isRead && (
+            <div
+              data-testid="run-bar"
+              className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-slate-800 bg-slate-950/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur lg:static lg:z-auto lg:rounded-2xl lg:border lg:bg-slate-900/70 lg:py-2 lg:backdrop-blur-none"
+            >
+              <button
+                data-testid="run-tests"
+                onClick={runTests}
+                disabled={running || pythonState !== "ready"}
+                className="shrink-0 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
+              >
+                {pythonState === "loading" ? "Starting Python…" : pythonState === "failed" ? "Python failed to load" : running ? "Running…" : "▶ Run tests"}
+              </button>
+              <CheckPill total={checks.length} result={result} previousPassed={previousPassed} />
+              <div className="ml-auto">{hints("up")}</div>
+            </div>
+          )}
+
+          {!isRead && debug && (
+            <div
+              className={`${stepClass(phoneStep === "code" || phoneStep === "checks", "block")} max-h-[55%] min-h-[220px] overflow-y-auto rounded-2xl border border-violet-500/40 bg-slate-900/70 p-4 max-lg:max-h-none`}
+            >
+              <DebuggerPanel
+                trace={debug.trace}
+                position={debugPos}
+                onPosition={(pos) => goToStep(debug.trace, pos)}
+                onClose={() => setDebug(null)}
+                stale={debugStale}
+              />
+            </div>
+          )}
+          {!isRead && !debug && (
+            <div
+              {...stepPanel("checks")}
+              className={`${stepClass(phoneStep === "checks", "block")} max-h-[40%] min-h-[140px] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900/70 p-4 max-lg:max-h-none`}
+            >
+              <h2 className="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">CI checks</h2>
+              {traceError && (
+                <div data-testid="trace-error" className="mb-2 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+                  ⚠️ Couldn&apos;t step through that check: {traceError}
+                </div>
+              )}
+              <TestResults result={result} running={running} onStepThrough={pythonState === "ready" ? stepThrough : undefined} tracing={tracing} />
+            </div>
+          )}
+        </section>
       )}
 
       {celebrate && (
@@ -421,7 +587,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           nextTicket={nextTicket}
           onQuiz={() => {
             setCelebrate(null);
-            setTab("quiz");
+            openQuiz();
           }}
           onClose={() => setCelebrate(null)}
         />
@@ -430,22 +596,79 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   );
 }
 
+/** The ticket's story, folded to about two lines with "Read more". */
+function Story({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section aria-labelledby="story-title">
+      <h2 id="story-title" className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+        📨 The story
+      </h2>
+      <div
+        id="ticket-story"
+        data-testid="ticket-story"
+        data-open={open}
+        className={open ? "" : "max-h-[3.3rem] overflow-hidden [mask-image:linear-gradient(to_bottom,black_45%,transparent)]"}
+      >
+        <Markdown text={text} />
+      </div>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls="ticket-story"
+        className="mt-1 text-sm font-semibold text-cyan-300 hover:text-cyan-200"
+      >
+        {open ? "Show less ▲" : "Read more ▼"}
+      </button>
+    </section>
+  );
+}
+
+/** "📘 2-min lesson": the new concept, folded until asked for. */
+function Lesson({ concept, newConcept }: { concept: string; newConcept: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="rounded-xl border border-cyan-500/30 bg-cyan-500/5" data-testid="lesson">
+      <h2>
+        <button
+          data-testid="lesson-toggle"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls="ticket-lesson"
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-cyan-50 hover:bg-cyan-500/10"
+        >
+          <span aria-hidden>📘</span>
+          <span className="flex-1">
+            2-min lesson: <b>{newConcept}</b>
+          </span>
+          <span aria-hidden className="text-xs text-cyan-200">{open ? "▲" : "▼"}</span>
+        </button>
+      </h2>
+      {open && (
+        <div id="ticket-lesson" className="space-y-3 border-t border-cyan-500/20 px-3 pt-2 pb-3">
+          <p className="text-xs text-slate-400">New concept for this ticket. Free to read, no XP cost.</p>
+          <Markdown text={concept} />
+        </div>
+      )}
+    </section>
+  );
+}
+
 /** "Done when" list built from the ticket's test names, ticked from the latest run. */
-function AcceptanceChecklist({ tests, result, solved }: { tests: Record<string, string>; result: RunResult | null; solved: boolean }) {
-  const checks = listChecks(tests);
+function AcceptanceChecklist({ checks, result, solved }: { checks: ReturnType<typeof listChecks>; result: RunResult | null; solved: boolean }) {
   if (checks.length === 0) return null;
   const status = new Map(result?.results.map((r) => [`${r.file}:${r.name}`, r.status]) ?? []);
   // If code failed to load, no individual check ran: show them all as failing.
   const loadFailed = result?.results.some((r) => r.name === "(import)") ?? false;
   return (
     <div className="mt-3">
-      <div className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Done when</div>
+      <h3 className="text-xs font-semibold tracking-wide text-slate-400 uppercase">Done when</h3>
       <ul className="mt-1 space-y-1" data-testid="acceptance-checklist">
         {checks.map((c) => {
           const s = solved && !result ? "pass" : (status.get(`${c.file}:${c.name}`) ?? (loadFailed ? "error" : undefined));
           return (
-            <li key={`${c.file}:${c.name}`} className="flex gap-2 text-slate-300">
-              <span>{s === "pass" ? "✅" : s ? "❌" : "⬜"}</span>
+            <li key={`${c.file}:${c.name}`} className="flex gap-2 text-slate-200">
+              <span aria-label={s === "pass" ? "passing" : s ? "failing" : "not run yet"}>{s === "pass" ? "✅" : s ? "❌" : "⬜"}</span>
               <span>{c.label}</span>
             </li>
           );

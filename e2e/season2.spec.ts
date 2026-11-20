@@ -204,6 +204,8 @@ test.describe("phone viewport", () => {
     await seedSolved(page, season1);
     const t = season2.find((x) => x.type === "review")!;
     await page.goto(ticketUrl(t.id));
+    // On a phone the pull request is step 2 (after the brief).
+    await page.getByRole("tab", { name: /Pull request/ }).click();
     await expect(page.getByTestId("review-panel")).toBeVisible();
     await expect(page.getByTestId("pr-file")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);

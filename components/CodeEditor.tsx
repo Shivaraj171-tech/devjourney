@@ -21,9 +21,11 @@ type Props = {
   onRun?: () => void;
   /** Debugger: highlight this line (1-based) as the one that runs next. */
   highlightLine?: number;
+  /** Phone: wrap long lines and use a slimmer gutter, so code never scrolls sideways. */
+  compact?: boolean;
 };
 
-export default function CodeEditor({ path, value, readOnly, onChange, onRun, highlightLine }: Props) {
+export default function CodeEditor({ path, value, readOnly, onChange, onRun, highlightLine, compact = false }: Props) {
   // onMount runs once, so keep the latest onRun in a ref.
   const onRunRef = useRef(onRun);
   useEffect(() => {
@@ -88,7 +90,11 @@ export default function CodeEditor({ path, value, readOnly, onChange, onRun, hig
       loading={<div className="p-4 text-sm text-slate-400">Loading editor…</div>}
       options={{
         readOnly,
-        fontSize: 15,
+        fontSize: compact ? 14 : 15,
+        wordWrap: compact ? "on" : "off",
+        wrappingIndent: "indent",
+        lineNumbersMinChars: compact ? 3 : 5,
+        folding: !compact,
         minimap: { enabled: false },
         scrollBeyondLastLine: false,
         tabSize: 4,

@@ -39,14 +39,16 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
   }
   if (!result) {
     return (
-      <p className="text-sm text-slate-500">
-        Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 text-slate-300">Run tests</kbd> (or Ctrl/⌘ + Enter) to check your fix.
-        <br />
-        <span className="text-slate-600">
-          Tip: add <code className="text-slate-400">print(...)</code> anywhere in your code to see what&apos;s going on. Whatever it prints shows up
+      <div className="space-y-1.5 text-sm text-slate-300">
+        <p>
+          Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 text-slate-200">▶ Run tests</kbd> to check your fix
+          <span className="pointer-coarse:hidden"> (or Ctrl/⌘ + Enter)</span>.
+        </p>
+        <p className="text-slate-400">
+          Tip: add <code className="text-slate-200">print(...)</code> anywhere in your code to see what&apos;s going on. Whatever it prints shows up
           under each check as &quot;# printed output&quot;.
-        </span>
-      </p>
+        </p>
+      </div>
     );
   }
   if (result.error) {
@@ -94,7 +96,7 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
                 {r.status !== "pass" && <Explained result={r} />}
                 {r.output && (
                   <pre className="mt-1.5 overflow-x-auto rounded bg-black/40 p-2 text-xs text-slate-300">
-                    <span className="text-slate-500"># printed output{"\n"}</span>
+                    <span className="text-slate-400"># printed output{"\n"}</span>
                     {r.output}
                   </pre>
                 )}
@@ -129,6 +131,42 @@ function Explained({ result }: { result: RunResult["results"][number] }) {
         </p>
       )}
       <div className="font-mono text-xs break-words text-amber-200">{result.message}</div>
+    </div>
+  );
+}
+
+/**
+ * "●●○○ 2/4 ✓  +1 since last run": a compact progress pill that sits next to Run,
+ * so the result of a run shows where the learner is looking.
+ */
+export function CheckPill({ total, result, previousPassed }: { total: number; result: RunResult | null; previousPassed?: number }) {
+  if (total === 0) return null;
+  const ran = !!result && !result.error;
+  const passed = ran ? (result.passed ? total : result.results.filter((r) => r.status === "pass").length) : 0;
+  const delta = ran && previousPassed !== undefined ? passed - previousPassed : 0;
+  const done = ran && result.passed;
+  const tone = done ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-200" : ran ? "border-amber-400/40 bg-amber-500/10 text-amber-100" : "border-slate-700 bg-slate-900 text-slate-300";
+  const label = ran
+    ? `${passed} of ${total} checks passing${delta > 0 ? `, ${delta} more than last run` : delta < 0 ? `, ${-delta} fewer than last run` : ""}`
+    : `${total} checks, not run yet`;
+  return (
+    <div data-testid="check-pill" role="status" aria-label={label} title={label} className={`flex shrink-0 items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-semibold tabular-nums ${tone}`}>
+      {total <= 8 && (
+        <span aria-hidden className="flex gap-0.5">
+          {Array.from({ length: total }, (_, i) => (
+            <span key={i} className={`h-2 w-2 rounded-full ${i < passed ? (done ? "bg-emerald-400" : "bg-amber-300") : "bg-slate-600"}`} />
+          ))}
+        </span>
+      )}
+      <span aria-hidden>
+        {ran ? `${passed}/${total}` : `0/${total}`}
+        {done ? " ✓" : ""}
+      </span>
+      {delta !== 0 && (
+        <span aria-hidden data-testid="check-delta" className={`rounded-full px-1.5 py-px ${delta > 0 ? "bg-emerald-500/20 text-emerald-200" : "bg-red-500/20 text-red-200"}`}>
+          {delta > 0 ? `+${delta}` : delta} <span className="hidden sm:inline">since last run</span>
+        </span>
+      )}
     </div>
   );
 }
