@@ -1,0 +1,10 @@
+id: s05-t01
+title: "The tip box that never complains"
+type: bug
+level: junior
+track: debugging
+concepts: [strings, functions, tracebacks, try-except]
+new_concept: try-except
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/tip_box.py]

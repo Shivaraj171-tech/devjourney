@@ -1,0 +1,17 @@
+id: w050
+title: "Ties go A-Z"
+concept: tuples-and-sorting
+after: s05-t05
+code: |
+  pairs = [("tea", 2), ("soup", 5), ("cake", 5)]
+
+  def by_rank(pair):
+      dish, count = pair
+      return (-count, dish)
+
+  top = sorted(pairs, key=by_rank)
+  print(top[0][0], top[-1][0])
+question: "What does this print?"
+choices: ["cake tea", "soup tea", "tea cake", "cake soup"]
+answer: 0
+explain: "The keys are (-2, 'tea'), (-5, 'soup') and (-5, 'cake'). -5 is smallest, and between the two -5 keys 'cake' comes before 'soup'. So the order is cake, soup, tea: top[0] is cake and top[-1] is tea."

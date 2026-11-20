@@ -181,6 +181,8 @@ WARMUP_CONCEPTS = {
     "classes", "json", "writing-tests", "security", "performance", "refactoring",
     # Season 4
     "verifying-ai-claims", "test-first-verification", "hallucinated-apis", "regressions", "specs-and-context",
+    # Season 5
+    "try-except", "while-loops", "string-methods", "nested-data", "tuples-and-sorting", "scope-creep",
 }
 WARMUP_STRING_FIELDS = ["id", "title", "concept", "after", "code", "question", "explain"]
 MIN_WARMUP_LINES, MAX_WARMUP_LINES = 3, 10

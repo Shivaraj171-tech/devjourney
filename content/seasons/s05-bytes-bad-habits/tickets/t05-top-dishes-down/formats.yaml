@@ -1,0 +1,25 @@
+break_it:
+  - says: "Second try at top_dishes: sorted by count, biggest first, as (dish, count) pairs. Tested on margherita and lemonade, perfect!"
+    code: |
+      def by_count(pair):
+          return pair[1]
+
+      def top_dishes(counts, n=3):
+          return sorted(counts.items(), key=by_count, reverse=True)[:n]
+    spec: >-
+      `top_dishes(counts, n)` returns the `n` most ordered dishes as `(dish, count)` tuples, most
+      ordered first. Dishes with the same count go in A-Z order.
+    call: "top_dishes({input})"
+    input_hint: "counts, n (e.g. {\"margherita\": 41, \"lemonade\": 30}, 2)"
+    helpers: |
+      def spec_ok(counts, n, top):
+          ranked = sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))
+          return top == ranked[:n]
+    check: "spec_ok({input}, result)"
+    normal_input: "{\"margherita\": 41, \"lemonade\": 30}, 2"
+    example_input: "{\"tea\": 5, \"soup\": 5}, 2"
+    miss: "Byte gets that one right. Read the spec's last sentence: what happens when two dishes have the same count?"
+    explain: >-
+      Python's sort keeps tied items in the order they arrived, even with `reverse=True`, so two dishes
+      with the same count come out in dictionary order, not A-Z. A key that returns a tuple,
+      `(-count, dish)`, settles ties by name.

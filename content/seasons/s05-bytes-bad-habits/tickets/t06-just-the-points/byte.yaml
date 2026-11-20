@@ -1,0 +1,52 @@
+# Correct: after Maya's review Byte trims its own draft to the request. Check it against the request, not the old draft.
+suggestion:
+  file: app/loyalty.py
+  find: "WEEKEND_DAYS = (\"Sat\", \"Sun\")\nWEEKEND_MULTIPLIER = 2\nWELCOME_BONUS = 50\ncustomers_seen = []\n\n\ndef points_message(order, promo_code=None, weekday=\"Mon\"):\n    \"\"\"The line on the confirmation screen, e.g. 'You earned 22 points!'.\"\"\"\n    points = loyalty_points(order, promo_code)\n    # Improvement 1: double points at the weekend!\n    if weekday in WEEKEND_DAYS:\n        points = points * WEEKEND_MULTIPLIER\n    # Improvement 2: a welcome bonus on every customer's first order\n    if order.customer not in customers_seen:\n        customers_seen.append(order.customer)\n        points = points + WELCOME_BONUS\n    # Improvement 3: more excitement for big orders\n    if points >= 100:\n        return f\"WOW! You earned {points} points! 🚀\"\n    return f\"You earned {points} points!\""
+  replace: "def points_message(order, promo_code=None):\n    \"\"\"The line on the confirmation screen, e.g. 'You earned 22 points!'.\"\"\"\n    points = loyalty_points(order, promo_code)\n    return f\"You earned {points} points!\""
+  correct: true
+  why:
+    choices:
+      - "It's right: it shows exactly the points loyalty_points gives, in Priya's words, and nothing else."
+      - "It's right: shorter code is always better, so the version with fewer lines wins."
+      - "It's wrong: removing the welcome bonus breaks Priya's spec for new customers."
+    answer: 0
+  says: "Maya's right, I got carried away. 🙈 Here's only what Priya asked for: the points from loyalty_points, in her words. The extras can be their own tickets."
+  explain: >-
+    Correct. Priya asked for the points we already give, shown as 'You earned N points!', and that's
+    all this does. The welcome bonus was never in her request (so removing it breaks nothing she
+    asked for), and the customers_seen list made the same order earn different points depending on
+    who had ordered before. Fewer lines isn't the reason it's right: matching the request is.
+prompt:
+  goal: "Ask Byte for the points line, and only the points line."
+  options:
+    - prompt: "Add a loyalty points message to the confirmation screen. Make it fun and engaging, customers love rewards!"
+      response_code: |
+        def points_message(order, promo_code=None, streak_days=0):
+            points = loyalty_points(order, promo_code)
+            points = points + streak_days * 5
+            return f"🎉 Amazing! You earned {points} points! 🎉"
+      verdict: vague
+      feedback: >-
+        "Make it fun" is an open invitation, and Byte takes it: a streak bonus and new wording nobody
+        agreed. Vague goals are where scope creep starts.
+    - prompt: "Write points_message and add double points at weekends too, Priya will love it and it boosts sales."
+      response_code: |
+        def points_message(order, promo_code=None, weekday="Mon"):
+            points = loyalty_points(order, promo_code)
+            if weekday in ("Sat", "Sun"):
+                points = points * 2
+            return f"You earned {points} points!"
+      verdict: wrong
+      feedback: >-
+        This time the scope creep is yours: you asked for a rule Priya never agreed to. If an extra is a
+        good idea, it gets its own ticket and Priya decides.
+    - prompt: "In app/loyalty.py, write points_message(order, promo_code=None). Return 'You earned N points!' with N from loyalty_points(order, promo_code). No other changes."
+      response_code: |
+        def points_message(order, promo_code=None):
+            points = loyalty_points(order, promo_code)
+            return f"You earned {points} points!"
+      verdict: good
+      feedback: >-
+        The file, the function, the exact output, where the number comes from, and "no other changes".
+        Byte's answer is two lines you can review in ten seconds. Small, reviewable changes.
+  best: 2

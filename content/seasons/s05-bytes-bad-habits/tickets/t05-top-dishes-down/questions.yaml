@@ -1,0 +1,22 @@
+questions:
+  - prompt: "The traceback ends with `ValueError: too many values to unpack (expected 2)` on `for dish, count in top_dishes(counts):`. What was the loop really getting?"
+    choices:
+      - "A count stored as text, like '30', instead of a number"
+      - "Plain dish names, like 'margherita', instead of (dish, count) pairs"
+      - "An empty dictionary, because nobody had ordered anything yet"
+    answer: 1
+    explain: "Unpacking into two names needs exactly two parts. A string is a sequence of letters, so 'margherita' has 10 parts: too many. The logged counts are all whole numbers, and the dictionary isn't empty, so Byte's story doesn't fit the evidence."
+  - prompt: "Byte tries `sorted(counts.items(), key=by_count, reverse=True)`, with by_count returning pair[1]. Which counts show that it breaks the A-Z rule for ties?"
+    choices:
+      - "{\"soup\": 5, \"tea\": 5}"
+      - "{\"tea\": 5, \"soup\": 5}"
+      - "{\"tea\": 2, \"soup\": 5}"
+    answer: 1
+    explain: "Python's sort keeps tied items in the order they came in, even with reverse=True. {\"soup\": 5, \"tea\": 5} happens to be in A-Z order already, so it looks right; {\"tea\": 5, \"soup\": 5} comes out tea first. With no tie, the A-Z rule never comes up."
+  - prompt: "What does `sorted([(\"b\", 1), (\"a\", 1), (\"c\", 3)], key=by_rank)` give, if by_rank returns (-count, dish)?"
+    choices:
+      - "[('c', 3), ('a', 1), ('b', 1)]"
+      - "[('c', 3), ('b', 1), ('a', 1)]"
+      - "[('a', 1), ('b', 1), ('c', 3)]"
+    answer: 0
+    explain: "The keys are (-1, 'b'), (-1, 'a') and (-3, 'c'). -3 is the smallest, so c comes first; then the two -1 keys tie and are compared by name, a before b."

@@ -1,0 +1,10 @@
+id: s05-t06
+title: "Just the points, please"
+type: feature
+level: junior
+track: ai
+concepts: [functions, mutable-shared-data, code-review, scope-creep]
+new_concept: scope-creep
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/loyalty.py]

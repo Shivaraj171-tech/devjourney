@@ -1,0 +1,11 @@
+id: s05-t05
+title: "Top dishes took down the home screen"
+type: incident
+level: junior
+track: debugging
+concepts: [lists, dictionaries, functions, tracebacks, tuples-and-sorting]
+new_concept: tuples-and-sorting
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/top_dishes.py]
+time_limit_minutes: 15

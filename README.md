@@ -24,8 +24,9 @@ No accounts, no setup: Python runs in your browser (Pyodide), and progress is sa
   | 2 | Week Two: The AI Pair | 5 | code review, side effects, tracebacks, boolean logic, reviewing diffs |
   | 3 | Month One: Going Live | 6 | classes, JSON, writing tests, security, performance, refactoring |
   | 4 | Month Two: Working with Byte | 5 | verifying AI claims, testing AI code first, hallucinated APIs, regressions, giving AI context |
+  | 5 | Month Three: Byte's Bad Habits | 6 | try/except done right, while loops, slicing and string methods, nested data, tuples and sorting, scope creep (AI habits: swallowing errors, invented parameters, editing the test, explaining an error wrongly, unrequested extras) |
 
-  Plus 45 daily warm-ups (`content/warmups/`).
+  Plus 51 daily warm-ups (`content/warmups/`).
 - **Research**: competitor analysis in [`docs/research/competitors.md`](docs/research/competitors.md).
 
 ## Run it

@@ -1,0 +1,38 @@
+# Prompt card: how you ask decides whether Byte invents an option.
+prompt:
+  goal: "Ask Byte to rewrite `allergy_list` so it really works."
+  options:
+    - prompt: "Rewrite allergy_list as a clean, Pythonic one-liner that handles all the messy spacing customers type, using split's neatest options."
+      response_code: |
+        def allergy_list(text):
+            return text.lower().split(",", strip=True, skip_empty=True)
+      verdict: wrong
+      feedback: >-
+        "Use split's neatest options" invites Byte to reach for options, and it invents another one.
+        Asking for a one-liner made it worse: Byte squeezes the work into a call that doesn't exist.
+    - prompt: "allergy_list crashes. Can you fix it?"
+      response_code: |
+        def allergy_list(text):
+            try:
+                return text.lower().split(",", strip=True)
+            except TypeError:
+                return []
+      verdict: vague
+      feedback: >-
+        With no error message and no example, Byte hides the crash instead of finding it: now EVERY
+        customer's allergies quietly become an empty list. That's the swallow-everything habit again.
+    - prompt: "allergy_list raises TypeError: split() got an unexpected keyword argument 'strip'. Rewrite it with only real str methods: 'Nuts, dairy ,  GLUTEN' -> ['nuts', 'dairy', 'gluten'], '' -> []."
+      response_code: |
+        def allergy_list(text):
+            allergies = []
+            for part in text.lower().split(","):
+                part = part.strip()
+                if part:
+                    allergies.append(part)
+            return allergies
+      verdict: good
+      feedback: >-
+        The real error, a rule ("only real str methods") and two examples, the empty one included.
+        Byte's answer splits on commas, strips each part and skips empty ones. Every method in it
+        exists, and you can check each one in a second.
+  best: 2

@@ -1,0 +1,31 @@
+parsons:
+  - goal: >-
+      Riders carry at most 4 items per bag. `bags_needed(items)` returns how many bags an order
+      of `items` items needs: take 4 items away for every bag, while there are items left.
+      Two of the lines are Byte's slips: leave them out.
+    lines:
+      - "def bags_needed(items):"
+      - "    bags = 0"
+      - "    while items > 0:"
+      - "        items = items - 4"
+      - "        bags = bags + 1"
+      - "    return bags"
+    distractors:
+      - line: "    while items >= 0:"
+        replaces: 2
+        explain: >-
+          With `>= 0` the loop runs once more when the items reach exactly 0, so 8 items need 3 bags
+          and an empty order needs 1. Keep going only while there are items LEFT: `> 0`.
+      - line: "    bags = 1"
+        replaces: 1
+        explain: >-
+          Starting at 1 counts a bag before any items are packed, so every answer is one too big and an
+          empty order still gets a bag. Start counting at 0.
+    check: |
+      assert bags_needed(8) == 2, bags_needed(8)
+      assert bags_needed(9) == 3, bags_needed(9)
+      assert bags_needed(1) == 1, bags_needed(1)
+      assert bags_needed(0) == 0, bags_needed(0)
+    explain: >-
+      A start (`bags = 0`), a step that moves towards the end (`items = items - 4`) and a condition
+      that the step eventually makes false (`items > 0`): every while loop needs all three.

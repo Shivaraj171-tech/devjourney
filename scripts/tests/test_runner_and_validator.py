@@ -433,6 +433,11 @@ class WarmupTests(TempDirTestCase):
                         "regressions", "specs-and-context"]:
             self.assertEqual(self.check(GOOD_WARMUP.replace("concept: loops", f"concept: {concept}")), [], concept)
 
+    def test_season_five_concepts_are_allowed(self):
+        for concept in ["try-except", "while-loops", "string-methods", "nested-data",
+                        "tuples-and-sorting", "scope-creep"]:
+            self.assertEqual(self.check(GOOD_WARMUP.replace("concept: loops", f"concept: {concept}")), [], concept)
+
     def test_code_syntax_error_is_flagged(self):
         self.assert_flagged(self.check(GOOD_WARMUP.replace("def total(prices):", "def total(prices)")),
                             "syntax error")

@@ -1,0 +1,18 @@
+# Wrong: Byte's fix follows Byte's own (wrong) explanation of the traceback.
+suggestion:
+  file: app/top_dishes.py
+  find: "    for dish, count in top_dishes(counts):\n        parts.append(f\"{dish} ({count})\")"
+  replace: "    for row in top_dishes(counts):\n        try:\n            dish, count = row\n        except ValueError:\n            continue  # skip bad rows from the kitchen tablet\n        parts.append(f\"{dish} ({count})\")"
+  correct: false
+  why:
+    choices:
+      - "It's right: skipping bad rows is the safe fix, the banner just shows the good ones."
+      - "It's wrong: try/except can't catch a ValueError raised inside a for loop."
+      - "It's wrong: the error is about unpacking plain names, so every row gets skipped."
+    answer: 2
+  says: "As I said in the chat: a count is text from the kitchen tablet. This skips the bad rows, and the home screen is back up! 🛟"
+  explain: >-
+    The crash goes away, but the banner becomes just "Top today: " because EVERY row is skipped.
+    The traceback never mentioned a count: "too many values to unpack (expected 2)" on line 25
+    means each row isn't a pair at all. top_dishes returns plain names, because sorted(counts)
+    sorts only the keys. Byte's explanation sounded sure and didn't match the evidence.

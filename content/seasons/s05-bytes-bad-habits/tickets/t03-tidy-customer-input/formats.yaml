@@ -1,0 +1,33 @@
+predict:
+  - code: |
+      code = "  orbit20 "
+      print(code.strip().upper())
+      phone = "+1 555 010 2345"
+      print(phone[-4:])
+      print(phone[3:6])
+    question: "What does this print?"
+    answer: |
+      ORBIT20
+      2345
+      555
+    choices:
+      - |
+        ORBIT20
+        2345
+        555
+      - |
+        ORBIT20
+        +1 555 010
+        555
+      - |
+        ORBIT20
+        2345
+        555 0
+      - |
+        orbit20
+        2345
+        555
+    explain: >-
+      `.strip()` removes the spaces at both ends, then `.upper()` makes capitals. `[-4:]` is the last
+      four characters. `[3:6]` starts at position 3 (counting from 0, so the "5" after "+1 ") and stops
+      BEFORE position 6: three characters, "555".

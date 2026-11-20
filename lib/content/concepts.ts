@@ -27,6 +27,12 @@ const LABELS: Record<string, string> = {
   "verifying-ai-claims": "Verifying AI claims",
   "test-first-verification": "Test-first verification",
   "specs-and-context": "Specs and context",
+  "try-except": "try / except, done right",
+  "while-loops": "while loops",
+  "string-methods": "Slicing and string methods",
+  "nested-data": "Nested data",
+  "tuples-and-sorting": "Tuples and sorting",
+  "scope-creep": "Scope creep",
 };
 
 /** "mutable-shared-data" → "Mutable shared data". Unknown slugs are tidied, labels pass through. */

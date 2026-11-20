@@ -1,0 +1,15 @@
+id: w051
+title: "Did I ask for that?"
+concept: scope-creep
+after: s05-t06
+code: |
+  # You asked: "item_count(order) returns how many items are in the order."
+  def item_count(order):
+      count = len(order.items)
+      if count > 10:
+          count = 10  # Byte: "capped it, nobody needs more than 10!"
+      return count
+question: "Which order shows that Byte's item_count does more than you asked for?"
+choices: ["An order with 3 items", "An empty order", "An order with 12 items"]
+answer: 2
+explain: "Byte added a cap nobody asked for. Up to 10 items you can't tell, but 12 items gives 10. Extras like this only show up on inputs that reach them, which is why you check every added line against the request."

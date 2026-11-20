@@ -1,0 +1,18 @@
+# Wrong: Byte makes CI green by editing the TEST to agree with the buggy code.
+suggestion:
+  file: team_tests/test_menu_board.py
+  find: "    expected = [\"marinara\", \"olives\", \"lemonade\"]"
+  replace: "    expected = [\"pizza\", \"sides\", \"drinks\"]"
+  correct: false
+  why:
+    choices:
+      - "It's right: only one dish in each category is vegan, so one entry per category is the same thing."
+      - "It changes the test to agree with the code, so the bug stays and the test can't catch it any more."
+      - "It's wrong because tests may never be edited, even when the spec changes."
+    answer: 1
+  says: "The test expects dish names, but the board is grouped by category, so the code returns categories. I updated the expected list to match. CI green in one line ✅"
+  explain: >-
+    Look at the file name in the diff: it's the TEST, not the code. The spec (the docstring, and the
+    menu screen) wants dish names, so the test was right and the code was wrong. Editing an expected
+    value to match the output turns a red test green without fixing anything, and the bug ships. Tests
+    do change, but only when the spec changes, and a person decides that.

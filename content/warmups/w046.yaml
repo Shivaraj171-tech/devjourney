@@ -1,0 +1,16 @@
+id: w046
+title: "Which tips survive?"
+concept: try-except
+after: s05-t01
+code: |
+  def tip(text):
+      try:
+          return int(text)
+      except ValueError:
+          return 0
+
+  print(tip("12"), tip("12.5"), tip(" 7 "))
+question: "What does this print?"
+choices: ["12 0 7", "12 12 7", "12 0 0", "12 12.5 7"]
+answer: 0
+explain: "int() accepts spaces at the ends, so \" 7 \" is 7. But \"12.5\" isn't a whole number, so int() raises ValueError and the except block returns 0. int() never rounds a string for you."

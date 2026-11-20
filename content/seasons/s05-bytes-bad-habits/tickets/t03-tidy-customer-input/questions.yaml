@@ -1,0 +1,22 @@
+questions:
+  - prompt: "The PR's file imports without any error. When does `split(\",\", strip=True)` cause a problem?"
+    choices:
+      - "Never: Python ignores keyword options it doesn't know"
+      - "The first time allergy_list is called"
+      - "As soon as app/customer_input.py is imported"
+    answer: 1
+    explain: "A def only has to be valid syntax, and split(\",\", strip=True) is. Python checks which options split accepts when the call actually runs, so the TypeError waits for the first customer with an allergy."
+  - prompt: "Which test would catch the bug in rider_phone?"
+    choices:
+      - "assert rider_phone(\"+1 555 010 2345\").startswith(\"...\")"
+      - "assert len(rider_phone(\"+1 555 010 2345\")) > 3"
+      - "assert rider_phone(\"+1 555 010 2345\") == \"...2345\""
+    answer: 2
+    explain: "Byte's version returns '...+1 555 010 ', which starts with '...' and is longer than 3 characters, so the first two tests pass. Only a test that states the exact answer catches it."
+  - prompt: "What is \"nuts,,dairy\".split(\",\")?"
+    choices:
+      - "['nuts', 'dairy']"
+      - "['nuts', '', 'dairy']"
+      - "['nuts', ',', 'dairy']"
+    answer: 1
+    explain: "split(\",\") cuts at EVERY comma, so two commas in a row leave an empty string between them. That's why a tidy-up helper should strip each part and skip the empty ones."
