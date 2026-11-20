@@ -1,16 +1,29 @@
 "use client";
 
-import type { RunResult } from "./types";
+import type { RunResult, TraceOutcome, TraceResult } from "./types";
 
 const TIMEOUT_MS = 8000;
 
-type Pending = { resolve: (r: RunResult) => void; timer: ReturnType<typeof setTimeout> };
+type Pending = {
+  /** Called with the worker's answer, or with an error message (timeout, crash, restart). */
+  settle: (answer: { value: unknown } | { error: string }) => void;
+  timer: ReturnType<typeof setTimeout>;
+};
+
+type WorkerMessage =
+  | { type: "ready" }
+  | { type: "result"; id: number; result: RunResult }
+  | { type: "trace"; id: number; trace: TraceResult }
+  | { type: "error"; id: number | null; message: string };
+
+const timeoutMessage = `Your code took longer than ${TIMEOUT_MS / 1000} seconds. Is there a loop that never ends?`;
 
 /**
  * Owns the Pyodide web worker. One instance per page.
  * - `warmUp()` starts loading Python in the background (takes a few seconds).
  * - `run()` runs the tests; if they take longer than TIMEOUT_MS (e.g. an
  *   infinite loop) the worker is killed and a fresh one is started.
+ * - `trace()` runs ONE check step by step for the debugger (same timeout).
  */
 export class PythonRunner {
   private worker: Worker | null = null;
@@ -23,13 +36,14 @@ export class PythonRunner {
     const worker = new Worker("/runner-worker.js", { type: "module" });
     this.worker = worker;
     this.ready = new Promise((resolve, reject) => {
-      worker.onmessage = (event: MessageEvent) => {
+      worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
         const msg = event.data;
         if (msg.type === "ready") resolve();
-        else if (msg.type === "result") this.finish(msg.id, msg.result);
+        else if (msg.type === "result") this.finish(msg.id, { value: msg.result });
+        else if (msg.type === "trace") this.finish(msg.id, { value: msg.trace });
         else if (msg.type === "error") {
           if (msg.id == null) reject(new Error(msg.message));
-          else this.finish(msg.id, { passed: false, results: [], error: msg.message });
+          else this.finish(msg.id, { error: msg.message });
         }
       };
       worker.onerror = (event) => reject(new Error(event.message || "worker failed to start"));
@@ -38,34 +52,48 @@ export class PythonRunner {
   }
 
   async run(files: Record<string, string>, tests: Record<string, string>): Promise<RunResult> {
+    const answer = await this.request({ type: "run", files, tests });
+    if ("error" in answer) return { passed: false, results: [], error: answer.error };
+    return answer.value as RunResult;
+  }
+
+  /** Run one check (test function `testName` in `testFile`) with tracing on. */
+  async trace(
+    files: Record<string, string>,
+    tests: Record<string, string>,
+    testFile: string,
+    testName: string,
+  ): Promise<TraceOutcome> {
+    const answer = await this.request({ type: "trace", files, tests, testFile, testName });
+    if ("error" in answer) return { error: answer.error };
+    return { trace: answer.value as TraceResult };
+  }
+
+  private async request(message: Record<string, unknown>): Promise<{ value: unknown } | { error: string }> {
     try {
       await this.warmUp();
     } catch (err) {
       this.reset();
-      return { passed: false, results: [], error: String(err) };
+      return { error: String(err) };
     }
     const id = this.nextId++;
-    return new Promise<RunResult>((resolve) => {
+    return new Promise((settle) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
         this.reset();
-        resolve({
-          passed: false,
-          results: [],
-          error: `Your code took longer than ${TIMEOUT_MS / 1000} seconds. Is there a loop that never ends?`,
-        });
+        settle({ error: timeoutMessage });
       }, TIMEOUT_MS);
-      this.pending.set(id, { resolve, timer });
-      this.worker!.postMessage({ type: "run", id, files, tests });
+      this.pending.set(id, { settle, timer });
+      this.worker!.postMessage({ ...message, id });
     });
   }
 
-  private finish(id: number, result: RunResult) {
+  private finish(id: number, answer: { value: unknown } | { error: string }) {
     const p = this.pending.get(id);
     if (!p) return;
     clearTimeout(p.timer);
     this.pending.delete(id);
-    p.resolve(result);
+    p.settle(answer);
   }
 
   /** Kill the worker; the next run() starts a fresh one. */
@@ -75,7 +103,7 @@ export class PythonRunner {
     this.ready = null;
     for (const [, p] of this.pending) {
       clearTimeout(p.timer);
-      p.resolve({ passed: false, results: [], error: "Python was restarted." });
+      p.settle({ error: "Python was restarted." });
     }
     this.pending.clear();
   }

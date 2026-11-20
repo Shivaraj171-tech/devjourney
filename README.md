@@ -62,5 +62,6 @@ That serves `out/` at http://localhost:3000.
 - `content/`: seasons and tickets (story, lesson, starter code, tests, reference solution, hints, quiz). Read at build time; the reference solution is never sent to the browser.
 - `lib/runner/test_runner.py`: a tiny stdlib-only test runner (plain `assert` tests, no pytest). Used by the validator **and** inside the browser.
 - `public/runner-worker.js`: web worker that loads Pyodide and runs a ticket's tests on the learner's code. Infinite loops are stopped by a timeout that restarts the worker.
+- `lib/runner/tracer.py`: the 🐞 Step through debugger. Re-runs one check with `sys.settrace` in the worker and records each step in the learner's code (line, variables, call stack, printed output; max 300 steps). `lib/debugger/timeline.ts` turns steps into captions and changed-variable highlights; `components/DebuggerPanel.tsx` replays them with the current line highlighted in the editor.
 - `scripts/copy-assets.mjs`: copies Pyodide and Monaco from `node_modules` into `public/` (self-hosted, no CDN). Runs automatically before `dev` and `build`.
 - `lib/progress/store.ts`: progress in `localStorage`. `lib/game/rules.ts`: XP, ranks, streaks, badges, leaderboard.

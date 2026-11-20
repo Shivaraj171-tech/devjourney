@@ -1,6 +1,6 @@
 "use client";
 import { explainResult, findLocation } from "@/lib/runner/explain";
-import type { RunResult } from "@/lib/runner/types";
+import type { RunResult, TestResult } from "@/lib/runner/types";
 
 const ICON = { pass: "✅", fail: "❌", error: "💥" } as const;
 
@@ -14,7 +14,16 @@ function prettyName(name: string, file: string, traceback: string) {
   return name.replace(/^test_/, "").replace(/_/g, " ");
 }
 
-export default function TestResults({ result, running }: { result: RunResult | null; running: boolean }) {
+type Props = {
+  result: RunResult | null;
+  running: boolean;
+  /** Offer a "Step through" debugger button on each check. */
+  onStepThrough?: (check: TestResult) => void;
+  /** `${file}:${name}` of the check being traced right now, if any. */
+  tracing?: string | null;
+};
+
+export default function TestResults({ result, running, onStepThrough, tracing = null }: Props) {
   if (running) {
     return <p className="animate-pulse text-sm text-slate-400">Running tests…</p>;
   }
@@ -49,7 +58,24 @@ export default function TestResults({ result, running }: { result: RunResult | n
             <div className="flex items-start gap-2">
               <span>{ICON[r.status]}</span>
               <div className="min-w-0 flex-1">
-                <div className={r.status === "pass" ? "text-slate-300" : "text-white"}>{prettyName(r.name, r.file, r.traceback)}</div>
+                <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
+                  <div className={`min-w-0 flex-1 ${r.status === "pass" ? "text-slate-300" : "text-white"}`}>{prettyName(r.name, r.file, r.traceback)}</div>
+                  {onStepThrough && r.name !== "(import)" && (
+                    <button
+                      data-testid="step-through"
+                      onClick={() => onStepThrough(r)}
+                      disabled={tracing !== null}
+                      aria-label={`Step through the check: ${prettyName(r.name, r.file, r.traceback)}`}
+                      className={`shrink-0 rounded-md px-2 py-0.5 text-xs disabled:cursor-not-allowed disabled:opacity-50 ${
+                        r.status === "pass"
+                          ? "text-slate-400 hover:bg-slate-800 hover:text-white"
+                          : "border border-violet-400/40 bg-violet-500/15 font-semibold text-violet-100 hover:bg-violet-500/30"
+                      }`}
+                    >
+                      {tracing === `${r.file}:${r.name}` ? "Tracing…" : "🐞 Step through"}
+                    </button>
+                  )}
+                </div>
                 {r.status !== "pass" && <Explained result={r} />}
                 {r.output && (
                   <pre className="mt-1.5 overflow-x-auto rounded bg-black/40 p-2 text-xs text-slate-300">
