@@ -67,6 +67,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const isRead = ticket.type === "read";
   const review = ticket.review;
   const noRunner = isRead || !!review; // read and review tickets have no tests to run
+  // Final exam (season.yaml `final: true`): no hints, no lesson, no Byte, no concept chip. CI checks stay.
+  const exam = ticket.final === true;
   // Progress only exists in the browser; until then we don't know if it's locked.
   const isClient = useIsClient();
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
@@ -237,7 +239,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   // The quiz is part of the "after merge" flow (read tickets: it *is* the task).
   if (hasQuiz && quizUnlocked) tabs.push({ id: "quiz", label: tp.quizDone ? "🧠 Quiz ✓" : "🧠 Quiz" });
   // On review tickets the prompt card could hint at the bug, so it opens after the review.
-  if (ticket.byte?.prompt && !(review && !tp.solved)) tabs.push({ id: "byte", label: "💬 Ask Byte" });
+  if (ticket.byte?.prompt && !exam && !(review && !tp.solved)) tabs.push({ id: "byte", label: "💬 Ask Byte" });
   const activeTab: Tab = tabs.some((t) => t.id === tab) ? tab : "ticket";
   const openQuiz = () => {
     setTab("quiz");
@@ -257,7 +259,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const phoneStep: Step = steps.some((s) => s.id === step) ? step : "brief";
   const stepPanel = (id: Step) => (isDesktop ? {} : tabPanelProps("step", id));
 
-  const hints = (placement: "up" | "down") => (
+  const hints = (placement: "up" | "down") => exam ? null : (
     <HintsButton placement={placement} hints={ticket.hints} revealed={tp.hintsUsed} solved={tp.solved} onReveal={() => actions.revealHint(ticket.id)} />
   );
   const incident = ticket.incident && <IncidentPanel ticketId={ticket.id} incident={ticket.incident} tp={tp} logsOpenAtStart={isDesktop} />;
@@ -341,7 +343,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">{TYPE_BADGE[ticket.type]}</span>
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">⏱ ~{ticket.estimatedMinutes} min</span>
-            <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-cyan-300">New: {conceptLabel(ticket.newConcept)}</span>
+            {!exam && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-cyan-300">New: {conceptLabel(ticket.newConcept)}</span>}
             {tp.solved && (
               <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-300">
                 {review ? "✔ Reviewed" : isRead ? "✔ Done" : ticket.type === "incident" ? "✔ Resolved" : "✔ Merged"}
@@ -351,6 +353,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           <h1 className="mt-2 text-lg font-bold text-white">
             <span className="text-slate-400">#{ticket.number}</span> {ticket.title}
           </h1>
+          {exam && <ExamBanner />}
         </div>
         {tabs.length > 1 && (
           <Tabs
@@ -403,7 +406,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               </section>
 
               {/* 2. Byte's suggestion, right under the goal. */}
-              {ticket.byte?.suggestion && !noRunner && (
+              {ticket.byte?.suggestion && !noRunner && !exam && (
                 <ByteSuggestionCard
                   ticketId={ticket.id}
                   suggestion={ticket.byte.suggestion}
@@ -419,13 +422,13 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
 
               {/* 3. Practice formats from formats.yaml: predict the output, break Byte's
                   code, put the lines in order. Renders nothing for tickets without them. */}
-              <TaskFormats ticket={ticket} tp={tp} getRunner={() => runnerRef.current} />
+              {!exam && <TaskFormats ticket={ticket} tp={tp} getRunner={() => runnerRef.current} />}
 
               {/* 4. The story, folded to two lines. */}
               <Story text={ticket.story} />
 
               {/* 5. The lesson, folded. */}
-              {ticket.concept && <Lesson concept={ticket.concept} newConcept={ticket.newConcept} />}
+              {ticket.concept && !exam && <Lesson concept={ticket.concept} newConcept={ticket.newConcept} />}
             </div>
           )}
           {activeTab === "byte" && ticket.byte?.prompt && (
@@ -593,6 +596,18 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
         />
       )}
     </div>
+  );
+}
+
+/** Final exam tickets: the rules, up front. */
+function ExamBanner() {
+  return (
+    <p
+      data-testid="exam-banner"
+      className="mt-2 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-xs text-amber-100"
+    >
+      <b>🎓 Exam mode.</b> No hints, no lesson, no Byte suggestions. Just you, the code and the CI checks.
+    </p>
   );
 }
 

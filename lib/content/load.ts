@@ -11,10 +11,13 @@ import type {
   Question,
   Review,
   Season,
+  SkillsCheck,
+  SkillsCheckItem,
   TaskFormatsContent,
   Ticket,
   Warmup,
 } from "./types";
+import { finalSeasonIndex, seasonGate } from "./order";
 
 const CONTENT_DIR = join(process.cwd(), "content", "seasons");
 
@@ -71,7 +74,7 @@ type TicketYaml = {
   time_limit_minutes?: number;
 };
 
-function loadTicket(seasonId: string, dir: string, slug: string, number: number): Ticket {
+function loadTicket(seasonId: string, dir: string, slug: string, number: number, final = false): Ticket {
   const meta = readYaml<TicketYaml>(join(dir, "ticket.yaml"));
   const questionsPath = join(dir, "questions.yaml");
   const questions = existsSync(questionsPath)
@@ -93,7 +96,8 @@ function loadTicket(seasonId: string, dir: string, slug: string, number: number)
     filesEditable: meta.files_editable ?? [],
     story: readText(join(dir, "story.md")),
     concept: existsSync(join(dir, "concept.md")) ? readText(join(dir, "concept.md")) : null,
-    hints: splitHints(readText(join(dir, "hints.md"))),
+    // Final-exam tickets have no hints.md (the validator forbids it).
+    hints: existsSync(join(dir, "hints.md")) ? splitHints(readText(join(dir, "hints.md"))) : [],
     questions,
     starter: readTree(join(dir, "starter")),
     tests: readTree(join(dir, "tests")),
@@ -103,6 +107,7 @@ function loadTicket(seasonId: string, dir: string, slug: string, number: number)
       : {}),
     ...(existsSync(join(dir, "byte.yaml")) ? { byte: loadByte(dir) } : {}),
     ...(existsSync(join(dir, "formats.yaml")) ? { formats: loadFormats(dir, meta.id) } : {}),
+    ...(final ? { final: true as const } : {}),
   };
 }
 
@@ -247,16 +252,56 @@ export function loadSeasons(): Season[] {
   for (const slug of readdirSync(CONTENT_DIR).sort()) {
     const dir = join(CONTENT_DIR, slug);
     if (!statSync(dir).isDirectory()) continue;
-    const meta = readYaml<{ id: string; title: string; intro: string; tickets: string[] }>(
+    const meta = readYaml<{ id: string; title: string; intro: string; tickets: string[]; chain?: boolean; final?: boolean }>(
       join(dir, "season.yaml"),
     );
+    const final = meta.final === true;
     const tickets = (meta.tickets ?? []).map((t, i) =>
-      loadTicket(meta.id, join(dir, "tickets", t), t, i + 1),
+      loadTicket(meta.id, join(dir, "tickets", t), t, i + 1, final),
     );
-    seasons.push({ id: meta.id, slug, title: meta.title, intro: meta.intro, tickets });
+    seasons.push({ id: meta.id, slug, title: meta.title, intro: meta.intro, chain: meta.chain !== false, final, tickets });
   }
   cache = seasons;
   return seasons;
+}
+
+/**
+ * The final exam (the season with `final: true`), and the tickets that must all be
+ * solved before it opens (the nearest on-chain season before it). null if there is none.
+ */
+export function finalExam(): { season: Season; gate: string[] } | null {
+  const seasons = loadSeasons();
+  const index = finalSeasonIndex(seasons);
+  return index === -1 ? null : { season: seasons[index], gate: seasonGate(seasons, index) };
+}
+
+type SkillsCheckYaml = {
+  title: string;
+  intro: string;
+  items: { id: string; kind: SkillsCheckItem["kind"]; prompt: string; code?: string; choices: string[]; answer: number; explain: string }[];
+};
+
+/**
+ * content/assessment/skills-check.yaml (format in scripts/validate_content.py).
+ * Only what the browser needs: the validator's reference code, fix and asserts stay here.
+ */
+export function loadSkillsCheck(): SkillsCheck | null {
+  const path = join(process.cwd(), "content", "assessment", "skills-check.yaml");
+  if (!existsSync(path)) return null;
+  const meta = readYaml<SkillsCheckYaml>(path);
+  return {
+    title: meta.title,
+    intro: meta.intro,
+    items: meta.items.map((i) => ({
+      id: i.id,
+      kind: i.kind,
+      prompt: i.prompt,
+      ...(i.code ? { code: trimEnd(i.code) } : {}),
+      choices: i.choices.map(trimEnd),
+      answer: i.answer,
+      explain: i.explain,
+    })),
+  };
 }
 
 /** All daily warm-ups (content/warmups/*.yaml), sorted by id. */

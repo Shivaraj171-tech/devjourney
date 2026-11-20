@@ -120,6 +120,46 @@ output, Byte's code meets the spec on normal_input and breaks it on
 example_input, and the correct Parsons order passes while each distractor
 (swapped in for the line it replaces) fails.
 
+season.yaml may set two optional flags:
+
+    chain: false     # off-chain: an unseen module, not part of the evolving codebase.
+                     # Check 7 is skipped inside the season and across its borders
+                     # (the next on-chain season continues from the last on-chain one).
+    final: true      # the final exam (needs chain: false and must come after every
+                     # on-chain season). Its tickets are an exam: no hints.md,
+                     # concept.md, byte.yaml, formats.yaml or questions.yaml allowed.
+
+The skills check (content/assessment/skills-check.yaml, optional) is checked too:
+
+    title: "Skills check"
+    intro: "..."
+    items:                             # exactly 12, unique ids, every kind used
+      - id: predict-big-prices
+        kind: predict                  # predict | catch_input | spot_line | pick_answer
+        prompt: "What does this print?"
+        code: |                        # predict: runs cleanly; its output is choices[answer]
+          print(450)
+        choices: ["450", "750"]        # 2-4, all different
+        answer: 0                      # 0-based
+        explain: "..."
+      - kind: catch_input              # "which test input catches Byte's bug?"
+        code: "def f(x): ..."          # Byte's buggy function
+        reference: "def f(x): ..."     # the correct one (same name; never sent to the browser)
+        call: "f({input})"             # each choice is a Python literal for {input}
+        # check: ONLY choices[answer] makes Byte's code and the reference disagree
+        #        (a different result, or one of them raises)
+      - kind: spot_line                # "which line has the bug?"
+        code: "..."                    # Byte's snippet; each choice is one of its lines (stripped)
+        fix: "late += 1"               # the fixed line (never sent to the browser)
+        check: "assert ..."            # fails on code, passes once choices[answer] -> fix
+      - kind: pick_answer              # "which of Byte's 3 answers is right?"
+        choices: ["def f(): ...", ...] # 3 code answers; ONLY choices[answer] passes `check`
+        check: "assert ..."
+
+Choices are balanced: across the whole check, the right answer may be the
+strictly longest choice in at most a quarter of the items (so "pick the
+longest" is no strategy).
+
 Usage:
     python3 scripts/validate_content.py [content_dir]
 
@@ -297,10 +337,21 @@ def check_concept(path):
     return errors
 
 
-def check_ticket_meta(ticket_dir):
-    """Check files, ticket.yaml, hints and questions. Returns a list of error strings."""
+# Files a final-exam ticket must not have: it's an exam (no hints, lesson, Byte or quiz).
+EXAM_FORBIDDEN = ["hints.md", "concept.md", "byte.yaml", "formats.yaml", "questions.yaml"]
+
+
+def check_ticket_meta(ticket_dir, final=False):
+    """Check files, ticket.yaml, hints and questions. Returns a list of error strings.
+
+    final: the ticket belongs to the final exam (season.yaml `final: true`), so it
+    has no hints.md and must not have a lesson, Byte content or a quiz.
+    """
     errors = []
-    for name in ["ticket.yaml", "story.md", "hints.md"]:
+    if final:
+        errors += [f"{name} is not allowed in a final-exam ticket (no help in the exam)"
+                   for name in EXAM_FORBIDDEN if (ticket_dir / name).exists()]
+    for name in ["ticket.yaml", "story.md"] + ([] if final else ["hints.md"]):
         if not (ticket_dir / name).is_file():
             errors.append(f"missing {name}")
     if errors:
@@ -342,7 +393,7 @@ def check_ticket_meta(ticket_dir):
         if not (ticket_dir / "starter" / rel).is_file():
             errors.append(f"files_editable: {rel} does not exist in starter/")
 
-    if not read_hints(ticket_dir / "hints.md"):
+    if not final and not read_hints(ticket_dir / "hints.md"):
         errors.append("hints.md has no hints")
     if has_tests and not list((ticket_dir / "tests").glob("test_*.py")):
         errors.append("tests/ has no test_*.py files")
@@ -875,11 +926,23 @@ def season_ticket_order(season_dir):
     return season.get("tickets") or []
 
 
+def season_flags(season_dir):
+    """(chain, final) from season.yaml: chain defaults to True, final to False."""
+    try:
+        season = yaml.safe_load((season_dir / "season.yaml").read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError):
+        return True, False
+    if not isinstance(season, dict):
+        return True, False
+    return season.get("chain", True) is not False, season.get("final", False) is True
+
+
 def validate_season(season_dir, prev=None):
     """Returns a dict {label: [errors]} for the season and each of its tickets.
 
-    prev is the last ticket folder of the previous season (if any), so the
-    evolving-codebase check continues across the season boundary.
+    prev is the last ticket folder of the previous on-chain season (if any), so the
+    evolving-codebase check continues across the season boundary. An off-chain
+    season (`chain: false`) skips the evolving-codebase check entirely.
     """
     report = {}
     season_file = season_dir / "season.yaml"
@@ -891,6 +954,14 @@ def validate_season(season_dir, prev=None):
     for field in ["id", "title", "intro", "tickets"]:
         if field not in season:
             season_errors.append(f"season.yaml: missing field '{field}'")
+    for flag in ["chain", "final"]:
+        if flag in season and not isinstance(season[flag], bool):
+            season_errors.append(f"season.yaml: '{flag}' must be true or false")
+    chain, final = season_flags(season_dir)
+    if final and chain:
+        season_errors.append("season.yaml: a final season must be off-chain (add `chain: false`)")
+    if not chain:
+        prev = None
 
     tickets_root = season_dir / "tickets"
     on_disk = {p.name for p in tickets_root.iterdir() if p.is_dir()} if tickets_root.is_dir() else set()
@@ -905,7 +976,7 @@ def validate_season(season_dir, prev=None):
             report[label] = ["listed in season.yaml but folder does not exist"]
             prev = None
             continue
-        errors = check_ticket_meta(ticket_dir)
+        errors = check_ticket_meta(ticket_dir, final=final)
         if not errors and load_ticket_type(ticket_dir) not in NO_TEST_TYPES:
             errors += check_ticket_tests(ticket_dir)
             if (ticket_dir / "byte.yaml").is_file():
@@ -913,7 +984,7 @@ def validate_season(season_dir, prev=None):
         if prev is not None and (ticket_dir / "starter").is_dir():
             errors += check_evolution(prev, ticket_dir)
         report[label] = errors
-        prev = ticket_dir
+        prev = ticket_dir if chain else None
     return report
 
 
@@ -983,6 +1054,177 @@ def validate_warmups(warmups_dir, ticket_ids):
     return errors
 
 
+# ---------- the skills check (content/assessment/skills-check.yaml) ----------
+
+SKILLS_CHECK_ITEMS = 12
+SKILLS_KINDS = ("predict", "catch_input", "spot_line", "pick_answer")
+PICK_ANSWER_CHOICES = 3
+# The right answer may be the strictly longest choice in at most this share of items.
+MAX_LONGEST_RIGHT_SHARE = 0.25
+
+
+def run_python(program):
+    """Run a program in a fresh python3 process. Returns (stdout, error or None)."""
+    try:
+        proc = subprocess.run([sys.executable, "-I", "-c", program], capture_output=True, text=True,
+                              timeout=TEST_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        return "", f"timed out after {TEST_TIMEOUT_SECONDS}s"
+    if proc.returncode != 0:
+        lines = proc.stderr.strip().splitlines()
+        return proc.stdout, lines[-1] if lines else f"exit code {proc.returncode}"
+    return proc.stdout, None
+
+
+def right_is_longest(choices, answer):
+    """True if choices[answer] is strictly longer than every other choice."""
+    length = len(choices[answer].strip())
+    return all(length > len(c.strip()) for i, c in enumerate(choices) if i != answer)
+
+
+def check_skills_check(path):
+    """Check skills-check.yaml (format in the module docstring), running every item."""
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return [f"skills-check.yaml is not valid YAML: {exc}"]
+    if not isinstance(data, dict):
+        return ["skills-check.yaml must be a mapping with title, intro and items"]
+    errors = _required_strings(data, "skills-check.yaml", ["title", "intro"])
+    items = data.get("items")
+    if not isinstance(items, list) or not all(isinstance(i, dict) for i in items):
+        return errors + ["skills-check.yaml: 'items' must be a list of mappings"]
+    if len(items) != SKILLS_CHECK_ITEMS:
+        errors.append(f"skills-check.yaml: needs exactly {SKILLS_CHECK_ITEMS} items, has {len(items)}")
+    seen, kinds, longest_right = {}, set(), []
+    for n, item in enumerate(items):
+        item_id = item.get("id")
+        where = f"skills-check.yaml: item {n} ({item_id})"
+        if not is_nonempty_str(item_id):
+            errors.append(f"skills-check.yaml: item {n}: 'id' is missing or empty")
+        elif item_id in seen:
+            errors.append(f"{where}: id is also used by item {seen[item_id]}")
+        else:
+            seen[item_id] = n
+        item_errors = check_skills_item(item, where)
+        errors += item_errors
+        kinds.add(item.get("kind"))
+        if not item_errors and right_is_longest(item["choices"], item["answer"]):
+            longest_right.append(item_id)
+    missing = [k for k in SKILLS_KINDS if k not in kinds]
+    if missing:
+        errors.append(f"skills-check.yaml: every kind must be used at least once, missing {missing}")
+    allowed = int(MAX_LONGEST_RIGHT_SHARE * len(items))
+    if len(longest_right) > allowed:
+        errors.append(f"skills-check.yaml: the right answer is the longest choice in {len(longest_right)} items "
+                      f"{longest_right}, at most {allowed} allowed (or 'pick the longest' becomes a strategy)")
+    return errors
+
+
+def check_skills_item(item, where):
+    kind = item.get("kind")
+    if kind not in SKILLS_KINDS:
+        return [f"{where}: kind {kind!r} must be one of {list(SKILLS_KINDS)}"]
+    errors = _required_strings(item, where, ["prompt", "explain"])
+    choices = item.get("choices")
+    if not isinstance(choices, list) or not all(is_nonempty_str(c) for c in choices):
+        return errors + [f"{where}: 'choices' must be a list of non-empty strings"]
+    if not MIN_CHOICES <= len(choices) <= MAX_CHOICES:
+        errors.append(f"{where}: has {len(choices)} choices, needs {MIN_CHOICES}-{MAX_CHOICES}")
+    if len({c.strip() for c in choices}) != len(choices):
+        errors.append(f"{where}: choices must all be different")
+    answer = item.get("answer")
+    if not isinstance(answer, int) or isinstance(answer, bool) or not 0 <= answer < len(choices):
+        errors.append(f"{where}: 'answer' must be a 0-based index into choices")
+    if errors:
+        return errors
+    checker = {"predict": check_skills_predict, "catch_input": check_skills_catch,
+               "spot_line": check_skills_spot, "pick_answer": check_skills_pick}[kind]
+    return checker(item, where)
+
+
+def check_skills_predict(item, where):
+    errors = _required_strings(item, where, ["code"])
+    if errors:
+        return errors
+    stdout, error = run_python(item["code"])
+    if error:
+        return [f"{where}: code raised {error} (predict code must run cleanly)"]
+    out = normalize_output(stdout)
+    right = [i for i, c in enumerate(item["choices"]) if normalize_output(c) == out]
+    if right != [item["answer"]]:
+        return [f"{where}: the code prints {out!r}, which must be exactly choices[answer] "
+                f"(matching choices: {right}, answer: {item['answer']})"]
+    return []
+
+
+CATCH_PROGRAM = """
+import json
+def outcome(source, call):
+    ns = {}
+    exec(source, ns)
+    try:
+        return ["ok", repr(eval(call, ns))]
+    except Exception as exc:
+        return ["raises", type(exc).__name__]
+code, reference, call, choices = json.loads(%r)
+print(json.dumps([outcome(code, call.replace("{input}", c)) != outcome(reference, call.replace("{input}", c))
+                  for c in choices]))
+"""
+
+
+def check_skills_catch(item, where):
+    errors = _required_strings(item, where, ["code", "reference", "call"])
+    if errors:
+        return errors
+    if "{input}" not in item["call"]:
+        return [f"{where}: 'call' must contain {{input}}"]
+    data = json.dumps([item["code"], item["reference"], item["call"], item["choices"]])
+    stdout, error = run_python(CATCH_PROGRAM % data)
+    if error:
+        return [f"{where}: couldn't run Byte's code and the reference: {error}"]
+    differs = [i for i, d in enumerate(json.loads(stdout)) if d]
+    if differs != [item["answer"]]:
+        return [f"{where}: only choices[answer] ({item['answer']}) may catch the bug, "
+                f"but these choices make Byte's code and the reference disagree: {differs}"]
+    return []
+
+
+def check_skills_spot(item, where):
+    errors = _required_strings(item, where, ["code", "fix", "check"])
+    if errors:
+        return errors
+    lines = item["code"].splitlines()
+    stripped = [line.strip() for line in lines]
+    for c in item["choices"]:
+        if stripped.count(c.strip()) != 1:
+            errors.append(f"{where}: choice {c!r} must be exactly one line of the code")
+    if errors:
+        return errors
+    _, error = run_python(item["code"] + "\n" + item["check"])
+    if not error:
+        errors.append(f"{where}: Byte's code already passes the check, so there is no bug to spot")
+    target = stripped.index(item["choices"][item["answer"]].strip())
+    indent = lines[target][: len(lines[target]) - len(lines[target].lstrip())]
+    fixed = lines[:target] + [indent + item["fix"].strip()] + lines[target + 1:]
+    _, error = run_python("\n".join(fixed) + "\n" + item["check"])
+    if error:
+        errors.append(f"{where}: with the answer line replaced by the fix, the check still fails: {error}")
+    return errors
+
+
+def check_skills_pick(item, where):
+    errors = _required_strings(item, where, ["check"])
+    if len(item["choices"]) != PICK_ANSWER_CHOICES:
+        errors.append(f"{where}: pick_answer needs exactly {PICK_ANSWER_CHOICES} answers")
+    if errors:
+        return errors
+    passing = [i for i, c in enumerate(item["choices"]) if run_python(c + "\n" + item["check"])[1] is None]
+    if passing != [item["answer"]]:
+        return [f"{where}: only choices[answer] ({item['answer']}) may pass the check, but these pass: {passing}"]
+    return []
+
+
 def all_ticket_ids(seasons_root):
     """Every ticket id found in any season's ticket.yaml files."""
     ids = set()
@@ -997,18 +1239,31 @@ def all_ticket_ids(seasons_root):
 
 
 def validate_content(content_dir):
-    """Validate every season in folder-name order, chaining the codebase from one season to the next."""
+    """Validate every season in folder-name order, chaining the codebase from one
+    on-chain season to the next (off-chain seasons are skipped by the chain)."""
     report = {}
     seasons_root = Path(content_dir) / "seasons"
     prev = None
+    final_seen = None
     for season_dir in sorted(p for p in seasons_root.iterdir() if p.is_dir()):
         report.update(validate_season(season_dir, prev))
+        chain, final = season_flags(season_dir)
+        if chain and final_seen:
+            report[season_dir.name].append(
+                f"on-chain season after the final season {final_seen} (the final exam must come last)")
+        if final:
+            final_seen = final_seen or season_dir.name
+        if not chain:
+            continue
         order = season_ticket_order(season_dir)
         last = season_dir / "tickets" / order[-1] if order else None
         prev = last if last is not None and last.is_dir() else None
     warmups_dir = Path(content_dir) / "warmups"
     if warmups_dir.is_dir():
         report["warmups"] = validate_warmups(warmups_dir, all_ticket_ids(seasons_root))
+    skills_check = Path(content_dir) / "assessment" / "skills-check.yaml"
+    if skills_check.is_file():
+        report["assessment/skills-check"] = check_skills_check(skills_check)
     return report
 
 

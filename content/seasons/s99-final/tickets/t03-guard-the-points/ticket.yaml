@@ -1,0 +1,10 @@
+id: s99-t03
+title: "Tests that catch Byte"
+type: feature
+level: mid
+track: ai
+concepts: [writing-tests, test-first-verification, conditionals, numbers]
+new_concept: final-exam
+estimated_minutes: 20
+tests_visible: true
+files_editable: [team_tests/test_points.py]

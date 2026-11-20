@@ -8,21 +8,23 @@ import { conceptLabel } from "@/lib/content/concepts";
 import { hitlScore } from "@/lib/game/byte";
 import { performanceReview, typeCount, type ReviewTicket } from "@/lib/game/juice";
 import { rankFor } from "@/lib/game/rules";
+import { comparisonText, skillsShareText } from "@/lib/game/skillsCheck";
 import { ticketProgress, totalXp, useProgress } from "@/lib/progress/store";
 import { useIsClient } from "@/lib/useIsClient";
 import type { TicketType } from "@/lib/content/types";
 import ShareButton from "./ShareButton";
 
 type Props = {
-  floor: number;
-  season: { id: string; title: string };
+  /** "Floor 3", or "Final exam" for the final season. */
+  floorLabel: string;
+  season: { id: string; title: string; final?: boolean };
   tickets: ReviewTicket[];
   next: { title: string; firstTicketId: string | null } | null;
 };
 
 const TYPE_ORDER: TicketType[] = ["bug", "feature", "read", "review", "incident"];
 
-export default function PerformanceReviewView({ floor, season, tickets, next }: Props) {
+export default function PerformanceReviewView({ floorLabel, season, tickets, next }: Props) {
   const progress = useProgress();
   const isClient = useIsClient();
   if (!isClient) return <div className="p-8 text-center text-slate-400">Opening your review…</div>;
@@ -33,18 +35,23 @@ export default function PerformanceReviewView({ floor, season, tickets, next }: 
   const name = progress.playerName === "You" ? "our newest developer" : progress.playerName;
   const { rank } = rankFor(totalXp(progress));
 
-  const learned = r.learned.map(conceptLabel);
+  // The final exam teaches nothing new (it's an exam), so it lists no concepts.
+  const learned = season.final ? [] : r.learned.map(conceptLabel);
+  const skills = comparisonText(progress.skillsCheck);
   const bugsSeen = hitl.caught + hitl.wavedThrough;
   const shareText = () =>
     (bugsSeen > 0 ? `I caught ${hitl.caught} of ${bugsSeen} of Byte's AI bugs on DevJourney 🤖🪤 ` : "") +
     `My Orbit Orders review for "${season.title}": ${r.rating.emoji} ${r.rating.title}. ` +
-    `${r.merged}/${r.total} tickets, ${r.clean} clean merges. Learned: ${learned.join(", ")}. ${currentSiteUrl()}`;
+    `${r.merged}/${r.total} tickets, ${r.clean} clean merges.` +
+    (learned.length ? ` Learned: ${learned.join(", ")}.` : "") +
+    (skills ? ` Skills check: ${skills}.` : "") +
+    ` ${currentSiteUrl()}`;
 
   return (
     <article className="mx-auto max-w-3xl space-y-6 px-4 py-8" data-testid="performance-review" data-complete={r.complete}>
       <header className="rounded-3xl border border-amber-400/30 bg-gradient-to-br from-amber-950/60 via-slate-900 to-violet-950/60 p-6">
         <p className="text-sm font-semibold tracking-widest text-amber-300 uppercase">
-          📋 {r.complete ? "Performance review" : "Mid-season check-in"} · Floor {floor}
+          📋 {r.complete ? "Performance review" : "Mid-season check-in"} · {floorLabel}
         </p>
         <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{season.title}</h1>
         <p className="mt-1 text-sm text-slate-400">
@@ -79,13 +86,32 @@ export default function PerformanceReviewView({ floor, season, tickets, next }: 
           ))}
           {r.merged === 0 && <li className="text-slate-400">Nothing yet. Your first ticket is waiting.</li>}
         </ul>
-        <h2 className="mt-5 text-lg font-bold text-white">🧠 What you learned</h2>
-        <ul className="mt-2 flex flex-wrap gap-2 text-sm" data-testid="review-learned">
-          {learned.map((c, i) => (
-            <li key={`${i}-${c}`} className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-100">{c}</li>
-          ))}
-        </ul>
+        {learned.length > 0 && (
+          <>
+            <h2 className="mt-5 text-lg font-bold text-white">🧠 What you learned</h2>
+            <ul className="mt-2 flex flex-wrap gap-2 text-sm" data-testid="review-learned">
+              {learned.map((c, i) => (
+                <li key={`${i}-${c}`} className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-100">{c}</li>
+              ))}
+            </ul>
+          </>
+        )}
       </section>
+
+      {skills && (
+        <section className="rounded-2xl border border-cyan-500/30 bg-cyan-950/20 p-5" data-testid="review-skills">
+          <h2 className="text-lg font-bold text-white">📝 Skills check</h2>
+          <p className="mt-1 font-mono text-2xl font-bold text-cyan-100" data-testid="review-skills-line">{skills}</p>
+          <p className="mt-1 text-sm text-slate-300">
+            {progress.skillsCheck?.final
+              ? "Same 12 questions, before and after. That's how far you've come."
+              : "Your starting point. You'll retake it before the final exam."}
+          </p>
+          <div className="mt-3">
+            <ShareButton getText={() => skillsShareText(progress.skillsCheck, currentSiteUrl())} testId="review-skills-share" label="📣 Share my skills check" />
+          </div>
+        </section>
+      )}
 
       <section className="rounded-2xl border border-violet-500/30 bg-violet-950/30 p-5" data-testid="review-hitl">
         <h2 className="text-lg font-bold text-white">🤖 You and Byte this season</h2>

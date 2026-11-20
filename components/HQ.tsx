@@ -19,6 +19,9 @@ import { BADGES, currentStreak, dayKey, incidentBonus, leaderboard, pickWarmup, 
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
 import type { TicketType, Warmup } from "@/lib/content/types";
 import { correctSeen, hitlScore, wrongSeen } from "@/lib/game/byte";
+import { finalSeasonIndex, previousChainSeasonIndex, seasonOpen } from "@/lib/content/order";
+import { certificateStatus } from "@/lib/game/skillsCheck";
+import SkillsCheckCard from "./SkillsCheckCard";
 
 export type TicketSummary = {
   id: string;
@@ -34,9 +37,20 @@ export type TicketSummary = {
   seasonId: string;
 };
 
-export type SeasonSummary = { id: string; title: string; intro: string; tickets: TicketSummary[] };
+export type SeasonSummary = {
+  id: string;
+  title: string;
+  intro: string;
+  /** false: off-chain (never gates the next season). */
+  chain: boolean;
+  /** true: the final exam, shown as "Final exam" on the board. */
+  final: boolean;
+  tickets: TicketSummary[];
+};
 
-export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; warmups: Warmup[] }) {
+type Props = { seasons: SeasonSummary[]; warmups: Warmup[]; hasSkillsCheck: boolean };
+
+export default function HQ({ seasons, warmups, hasSkillsCheck }: Props) {
   const progress = useProgress();
   const xp = totalXp(progress);
   const [toggled, setToggled] = useState<Record<string, boolean>>({});
@@ -51,11 +65,13 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
   const current = allTickets.find((t) => !ticketProgress(progress, t.id).solved);
 
   // Rooms merged or unlocked since the last visit animate once (lib/game/rooms.ts).
+  // A floor opens once the nearest on-chain floor before it is finished (lib/content/order.ts).
+  const isSolved = (id: string) => ticketProgress(progress, id).solved;
   const openIds = seasons.flatMap((s, floor) =>
     s.tickets.filter((t, i) => {
-      if (ticketProgress(progress, t.id).solved) return false;
-      if (i > 0) return ticketProgress(progress, s.tickets[i - 1].id).solved;
-      return floor === 0 || seasons[floor - 1].tickets.every((p) => ticketProgress(progress, p.id).solved);
+      if (isSolved(t.id)) return false;
+      if (i > 0) return isSolved(s.tickets[i - 1].id);
+      return seasonOpen(seasons, floor, isSolved);
     }).map((t) => t.id),
   );
   const fresh = useRoomChanges({ solved: solved.map((t) => t.id), open: openIds }, isClient);
@@ -111,6 +127,15 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
   const currentFloor = current ? seasons.findIndex((s) => s.id === current.seasonId) : seasons.length - 1;
   const hitlHasData = wrongSeen(hitl) + correctSeen(hitl) + hitl.promptsTried + hitl.pending > 0;
 
+  // The final exam: open once the floor before it is done; the certificate needs it all.
+  const finalIndex = finalSeasonIndex(seasons);
+  const finalSeason = finalIndex === -1 ? undefined : seasons[finalIndex];
+  const finalUnlocked = !!finalSeason && seasonOpen(seasons, finalIndex, isSolved);
+  const certificate = certificateStatus(
+    (finalSeason?.tickets ?? []).map((t) => ({ id: t.id, title: t.title, solved: solvedIds.has(t.id) })),
+    progress.skillsCheck,
+  );
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:space-y-8 sm:py-8">
       <BadgeToast ids={newBadgeIds} />
@@ -121,6 +146,7 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
           playerName={progress.playerName}
           next={current}
           nextFloor={currentFloor + 1}
+          nextIsExam={!!seasons[currentFloor]?.final && !!current}
           merged={solved.length}
           total={allTickets.length}
           streak={streak}
@@ -131,14 +157,17 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
         <Pitch current={current} />
       )}
 
+      {hasSkillsCheck && progress.onboarded && (
+        <SkillsCheckCard skillsCheck={progress.skillsCheck} finalUnlocked={finalUnlocked} certificateReady={certificate.eligible} />
+      )}
+
       {now && <TeamChat seasons={seasons} progress={progress} streak={streak} now={now} />}
 
       {/* ---------- office floors: a sprint board per floor ---------- */}
       <div className="space-y-3">
         {seasons.map((season, floor) => {
-          // A floor opens once the floor below is finished.
-          const prevSeason = seasons[floor - 1];
-          const floorOpen = !prevSeason || prevSeason.tickets.every((t) => solvedIds.has(t.id));
+          // A floor opens once the nearest on-chain floor below it is finished.
+          const floorOpen = seasonOpen(seasons, floor, isSolved);
           const rooms: Room[] = season.tickets.map((t, i) => {
             const tp = ticketProgress(progress, t.id);
             const prevSolved = i === 0 ? floorOpen : solvedIds.has(season.tickets[i - 1].id);
@@ -158,6 +187,14 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
               season={season}
               rooms={rooms}
               floorOpen={floorOpen}
+              gateFloor={previousChainSeasonIndex(seasons, floor) + 1}
+              extra={
+                season.final && certificate.eligible ? (
+                  <Link href="/certificate" data-testid="certificate-link" className="text-sm font-semibold text-amber-300 hover:underline">
+                    🎓 Your certificate →
+                  </Link>
+                ) : undefined
+              }
               expanded={toggled[season.id] ?? defaultOpen}
               onToggle={() => setToggled((m) => ({ ...m, [season.id]: !(m[season.id] ?? defaultOpen) }))}
             />
