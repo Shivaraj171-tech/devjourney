@@ -1,11 +1,10 @@
-# No crash any more... and a free garlic bread instead.
+# Correct: check the menu first, so removed items are skipped instead of crashing.
 suggestion:
   file: app/reorder.py
   find: "        cart.append(menu[name])"
-  replace: "        cart.append(menu.get(name, 0))"
-  correct: false
-  says: "`.get()` never raises KeyError. Removed items just default to 0. Crash fixed!"
+  replace: "        if name in menu:\n            cart.append(menu[name])"
+  correct: true
+  says: "Check the item is still on the menu before looking it up. Removed items get skipped, like the docstring says."
   explain: >-
-    The crash is gone, but a removed item now goes into the cart as a $0.00 item, so the cart becomes
-    `[1250, 0, 299]` instead of skipping it. The docstring says removed items are skipped. Making an
-    error disappear isn't the same as doing the right thing: check `if name in menu:` before appending.
+    Correct. `name in menu` checks the keys, so menu[name] only runs for items that still exist. Compare
+    with the tempting `menu.get(name)`, which stops the crash but puts None in the cart.

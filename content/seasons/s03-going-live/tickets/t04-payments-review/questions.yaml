@@ -3,20 +3,20 @@ questions:
     choices:
       - "It doesn't need to: the app and server always agree"
       - "Anyone can send the server a modified request, so a total from outside can't be trusted"
-      - "Servers are better at maths than phones"
+      - "Phones round prices differently, so the server's maths is more accurate"
     answer: 1
     explain: "The server can't know whether a request came from your app or from someone with a script. Prices, totals and permissions come from data the server controls."
   - prompt: "What's the safest thing to write in a log line about a payment?"
     choices:
-      - "The full card number, so support can trace it"
-      - "The order id and the masked card, like **** 4242"
-      - "The card number and its security code"
+      - "The full card number, so support can trace the payment"
+      - "The order id and a masked card (**** 4242)"
+      - "The card number and expiry date, but never the security code"
     answer: 1
     explain: "Logs are read by many people and tools and kept for a long time. The order id and last 4 digits are enough to trace a payment."
   - prompt: "How do you stop SQL injection in order_history_query?"
     choices:
-      - "Use a placeholder like ? and pass the customer's name separately, so it's always treated as data"
-      - "Use double quotes instead of single quotes around the name"
-      - "Make the name upper case first"
+      - "A ? placeholder, with the name passed separately"
+      - "Use double quotes instead of single quotes around the name in the query"
+      - "Remove spaces from the name first, because injected SQL needs spaces"
     answer: 0
     explain: "With placeholders the database never mixes the name into the command text, so a name like x' OR '1'='1 is just a strange name. Swapping quote styles just moves the problem."

@@ -1,15 +1,15 @@
 questions:
   - prompt: "What is a side effect?"
     choices:
-      - "When a function changes something outside itself, like the list it was given"
-      - "An error message printed by Python"
-      - "The value a function returns"
+      - "A change a function makes outside itself, like to a list it was given"
+      - "Any extra output a function prints, such as a warning, while it works out its result"
+      - "The value a function hands back with return"
     answer: 0
     explain: "Changing an argument (like appending to prices) is a side effect. The caller may not expect it, which is how the tip ended up in the cart."
   - prompt: "Why does 1999 * 15 // 100 give 299 and not 299.85?"
     choices:
       - "Python always rounds to the nearest whole number"
       - "// divides and rounds down to a whole number, so we never charge a fraction of a cent"
-      - "1999 is too big for a decimal answer"
+      - "Multiplying whole numbers can never give a decimal, whatever you divide by"
     answer: 1
     explain: "// is floor division: it drops the fractional part (for positive numbers). Amounts stay whole cents, like everywhere else in the codebase."

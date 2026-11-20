@@ -1,9 +1,9 @@
 questions:
   - prompt: "Why did the greeting show the literal text {name}?"
     choices:
-      - "The name variable was empty"
-      - "The string was missing the f prefix, so Python didn't fill in {name}"
-      - "greet() was never called"
+      - "The name variable was empty when greet() ran"
+      - "The string had no f in front, so Python left {name} as plain text"
+      - "greet() needs a print() inside it before {name} gets filled in"
     answer: 1
     explain: "Only f-strings replace {name} with the variable's value. Without the f, the curly braces are just ordinary characters."
   - prompt: "With name = \"Sam\", what does f\"Hi, {name}!\" give you?"
@@ -14,10 +14,10 @@ questions:
       - "An error, because name needs quotes inside the braces"
     answer: 2
     explain: "Inside an f-string, {name} is replaced by the value of the variable name, which is \"Sam\"."
-  - prompt: "Byte autocompletes `return \"Hi, {name}!\"`. What's the quickest way to check it before accepting?"
+  - prompt: "Byte autocompletes `return \"Welcome back to Orbit Orders, {name}!\"` (no f). Which test would catch it?"
     choices:
-      - "Trust it: Byte has read millions of lines of code"
-      - "Call it once with a real name, like greet(\"Sam\"), and look at what comes back"
-      - "Check that the editor shows no red underline"
+      - "assert greet(\"Sam\").startswith(\"Welcome back to Orbit Orders, \")"
+      - "assert \"Sam\" in greet(\"Sam\")"
+      - "assert isinstance(greet(\"Sam\"), str) and greet(\"Sam\") != \"\""
     answer: 1
-    explain: "One run with a real value shows the literal {name} straight away. No error is not the same as the right output."
+    explain: "Only a test that looks for the real name can tell {name} from Sam. The other two pass on Byte's line too."

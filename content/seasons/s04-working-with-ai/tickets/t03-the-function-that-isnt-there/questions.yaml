@@ -1,22 +1,22 @@
 questions:
   - prompt: "The PR's file imports without any error. When does the missing refunds.refund_for_delay cause a problem?"
     choices:
-      - "Never: if the import works, the function must exist"
-      - "Only when apology_sms runs that line, for example on the first late order"
-      - "When the server starts"
+      - "Never: if the import works, every function in it exists"
+      - "When apology_sms runs that line"
+      - "When the server starts and loads app/refunds.py into memory"
     answer: 1
     explain: "`from app import refunds` only checks that the module exists. Python looks up `refunds.refund_for_delay` when that line actually runs, so the AttributeError waits for the first order that takes 45 minutes or more."
   - prompt: "What's the quickest reliable way to check that a function an AI called really exists?"
     choices:
-      - "Ask the AI whether it exists"
-      - "Open the module it comes from and find its def (or run the line once)"
-      - "Check that the name sounds sensible"
+      - "Ask the AI to double-check whether the function exists"
+      - "Find its def in the module (or run the line once)"
+      - "Check the name follows the same style as the other functions in refunds.py"
     answer: 1
     explain: "The AI will happily confirm its own guess. The module's def lines (or one real run) are the truth."
   - prompt: "Why is copying the \"is it late?\" check into apology.py risky, even when the copy is right?"
     choices:
-      - "It isn't: copies make code faster"
-      - "If Leo ever changes the rule, someone has to remember to change every copy"
-      - "Python doesn't allow the same comparison in two files"
+      - "It isn't: copying a check is fine as long as the copy is correct"
+      - "If Leo ever changes the rule, someone must remember to update every single copy"
+      - "Python runs the copy twice, once in each file, so refunds get paid twice"
     answer: 1
     explain: "One rule, one place: that's the refactoring lesson from launch week. Here the copy was even wrong from day one (>= 45 instead of > 45)."

@@ -1,22 +1,23 @@
 questions:
   - prompt: "Why did Ana's new order contain Sam's items?"
     choices:
-      - "add_item adds the price to every order at once"
-      - "The default list in items=[] is made once and shared by every call that leaves items out"
-      - "Python reuses the old dictionary when the customer name changes"
+      - "add_item adds the price to every order that exists at that moment"
+      - "The default list in items=[] is made once, so every call that leaves items out shares it"
+      - "Python reuses the old order dictionary when create_order is called again"
     answer: 1
     explain: "Default values are created when the function is defined. Both orders pointed at the same list, so adding to one showed up in the other."
   - prompt: "Why does items=None with \"if items is None: items = []\" fix it?"
     choices:
       - "Using None as a default makes Python copy the list automatically"
+      - "items = [] runs on every call, making a new list"
       - "It doesn't really fix it; the list is still shared, just harder to spot"
-      - "items = [] runs on every call, so each order gets its own brand-new list"
-    answer: 2
-    explain: "The line inside the function runs each time create_order is called, creating a fresh empty list for every new order."
-  - prompt: "An AI writes `def create_order(customer, items=[])` and one quick test passes. Why isn't one test enough?"
-    choices:
-      - "One passing test proves a function is correct"
-      - "The bug only shows from the second call without items, so test two new orders in a row"
-      - "Default values only break with very big orders"
     answer: 1
-    explain: "The shared list is empty on the first call, so the first test always looks fine. Testing two orders in a row exposes the leak."
+    explain: "The line inside the function runs each time create_order is called, creating a fresh empty list for every new order."
+  - prompt: "An AI writes `def create_order(customer, items=[])`. Which test catches the shared list?"
+    choices:
+      - "assert create_order(\"Sam\")[\"items\"] == []"
+      - "create_order(\"Sam\")[\"items\"].append(1); assert create_order(\"Ana\")[\"items\"] == []"
+      - "assert create_order(\"Lee\", [450])[\"items\"] == [450]"
+      - "assert create_order(\"Sam\")[\"customer\"] == \"Sam\" and create_order(\"Ana\")[\"customer\"] == \"Ana\""
+    answer: 1
+    explain: "The shared list only shows up when one order adds an item and a LATER order is created. A single new order is always empty on the first call."

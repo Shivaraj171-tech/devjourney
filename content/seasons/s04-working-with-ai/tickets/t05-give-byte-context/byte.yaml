@@ -1,4 +1,4 @@
-# Prompt card: replay Maya's two prompts (and two worse ones).
+# Correct: Byte follows the spec in the docstring line by line. Read it before you accept it.
 prompt:
   goal: "Get Byte to draft `refund_report` for Leo."
   options:

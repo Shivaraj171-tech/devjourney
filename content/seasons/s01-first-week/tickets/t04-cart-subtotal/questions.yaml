@@ -8,15 +8,16 @@ questions:
     explain: "range(3) starts at 0 and stops just before 3. That's three numbers, one for each index of a 3-item list."
   - prompt: "Why did the buggy loop skip the last item?"
     choices:
-      - "Python lists start at 1, so prices[0] was missing"
-      - "total was reset to 0 inside the loop"
-      - "range(len(prices) - 1) stops one index too early, so the last price was never added"
-    answer: 2
+      - "Python lists start at 1, so prices[0] was never counted"
+      - "range(len(prices) - 1) stops one index too early, so the last price is never added"
+      - "total was set back to 0 inside the loop, so only part of the cart was added"
+    answer: 1
     explain: "Subtracting 1 meant the loop never reached the last index. This kind of 'off by one' mistake is one of the most common bugs in any language."
-  - prompt: "Byte suggests `for i in range(len(prices) - 1):`. What's the quickest way to check it before accepting?"
+  - prompt: "Byte's autocomplete wrote `for i in range(len(prices) - 1):`. Which test would catch it?"
     choices:
-      - "Run it on a tiny cart like [1, 2] and check you get 3"
-      - "Read it carefully: it looks like normal loop code"
-      - "Run it on an empty cart [] and check you get 0"
-    answer: 0
-    explain: "A tiny example with a known answer gives 1 instead of 3, so the bug shows at once. An empty cart gives 0 with or without the bug, so it can't catch it."
+      - "assert cart_subtotal([]) == 0"
+      - "assert cart_subtotal([1, 2]) == 3"
+      - "assert cart_subtotal([0, 0]) == 0"
+      - "assert cart_subtotal([5, 0]) == 5"
+    answer: 1
+    explain: "The bug drops the last item, so the test needs a last item that isn't 0. [] and [0, 0] add up the same either way, and [5, 0] only loses a 0."

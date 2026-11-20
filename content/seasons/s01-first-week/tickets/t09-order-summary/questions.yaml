@@ -1,22 +1,23 @@
 questions:
   - prompt: "Why does order_summary call cart_subtotal and delivery_fee instead of repeating their code?"
     choices:
-      - "Because Python doesn't allow loops inside order_summary"
-      - "Calling functions makes the code run faster"
-      - "So each rule lives in one place: fix or change it once and every caller gets the update"
-    answer: 2
+      - "Calling functions is faster than writing the same maths out again in each place"
+      - "Each rule lives in one place, so a fix reaches every caller"
+      - "A function can only do one calculation, so the rest has to live elsewhere"
+    answer: 1
     explain: "Reusing small, tested functions means the free-delivery rule, for example, can't end up different on the summary screen than in the rest of the app."
   - prompt: "In discount = discount_amount(subtotal, promo_code), what ends up in discount?"
     choices:
-      - "The function discount_amount itself"
-      - "The value that discount_amount returns for that subtotal and code"
-      - "The text \"discount_amount(subtotal, promo_code)\""
+      - "The function discount_amount itself, ready to call later"
+      - "The value that discount_amount returns when it runs with that subtotal and code"
+      - "The text \"discount_amount(subtotal, promo_code)\" until it's printed"
     answer: 1
     explain: "The brackets call the function. It runs with those inputs, and whatever it returns is stored in the variable."
-  - prompt: "Byte autocompletes `total = subtotal + discount + delivery`. What's the quickest check?"
+  - prompt: "Byte autocompletes `total = subtotal + discount + delivery`. Which call would show the mistake?"
     choices:
-      - "Compare with the docstring's worked example: the total should be $22.40"
-      - "Check the line for typos"
-      - "Trust it: it uses all the right variable names"
-    answer: 0
-    explain: "With that line the example comes out as $33.58, not $22.40. Right names with the wrong maths is a classic AI mistake."
+      - "order_summary([1250])"
+      - "order_summary([1250, 1250, 299], \"ORBIT20\")"
+      - "order_summary([], None)"
+      - "order_summary([1250, 450, 299, 299], \"PIZZA\")"
+    answer: 1
+    explain: "A mistake with the discount only shows when there IS one: with ORBIT20 the total is $33.58 instead of $22.40. With no code or an unknown code the discount is 0, so + and - give the same total."

@@ -8,15 +8,15 @@ questions:
     explain: "json.dumps quietly turns number keys into strings, because JSON only has text keys. That's why the orders came back as '1001'."
   - prompt: "After the fix, which of these still doesn't survive a JSON round trip unchanged?"
     choices:
-      - "The items list [1250, 450]"
-      - "An Order object itself, which json.dumps can't save directly"
-      - "The status text \"cooking\""
+      - "The items list [1250, 450], because lists come back as tuples"
+      - "An Order object, which json can't save"
+      - "The status text \"cooking\", because JSON only stores numbers and lists"
     answer: 1
     explain: "json only knows basic types like dictionaries, lists, strings and numbers. That's why orders_to_json copies each Order's data into a plain dictionary, and orders_from_json builds a new Order from it."
   - prompt: "Why did the bug only show up after the 3 a.m. restart?"
     choices:
-      - "Orders created during the day were never saved"
-      - "Before the restart, the orders were still the originals in memory with number ids; only loaded orders had text ids"
-      - "JSON files expire at midnight"
+      - "Orders created during the day were never saved, so there was nothing to load"
+      - "Before the restart the orders were the originals in memory; only loaded orders had text ids"
+      - "The night update changed the Order class, so old saved orders no longer fit it"
     answer: 1
     explain: "The data only changed shape on its way through JSON. Bugs at the boundary between a program and its saved data often hide until a restart, a deploy or a second server."

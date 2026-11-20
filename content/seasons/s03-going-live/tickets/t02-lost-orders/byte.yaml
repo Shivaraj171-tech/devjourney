@@ -1,15 +1,14 @@
-# Half a fix: the dictionary key is a number again, the Order inside is not.
+# Correct: convert the id once, before the Order is built.
 suggestion:
   file: app/storage.py
-  find: "        orders[order_id] = order"
-  replace: "        orders[int(order_id)] = order"
-  correct: false
-  says: "JSON turned your keys into text. Convert the key back with int() and lookups work again."
+  find: "    for order_id, fields in data.items():"
+  replace: "    for order_id, fields in data.items():\n        order_id = int(order_id)"
+  correct: true
+  says: "JSON turned your ids into text. Turn each one back into a number first, before the Order is built."
   explain: >-
-    Half a fix. `loaded[1001]` works now, but the Order was built a few lines earlier with the
-    text id "1001", so `order.order_id` is still a string and anything that compares or shows
-    it is wrong. Convert once, before you build the Order: `order_id = int(order_id)` at the
-    top of the loop.
+    Correct. Converting at the top of the loop fixes both the dictionary key AND order.order_id. A
+    tempting half-fix is `orders[int(order_id)] = order`: lookups work again, but every Order still
+    carries the text id "1001" inside it.
 
 # Prompt card: ask Byte to explain before it changes anything.
 prompt:
@@ -22,7 +21,7 @@ prompt:
       feedback: >-
         A yes/no question gets a confident yes/no answer, with no reasoning to check. Byte is just as sure
         when it's wrong, so ask for the WHY.
-    - prompt: "fix storage.py"
+    - prompt: "fix storage.py so orders survive the 3 a.m. restart: lookups by order number fail after loading, so make sure the ids in the dictionary always match whatever ids the JSON file has in it."
       response_code: |
         for order_id, fields in data.items():
             orders[str(order_id)] = Order(str(order_id), fields["customer"], fields["items"])
@@ -30,7 +29,7 @@ prompt:
       feedback: >-
         Byte "fixed" it by making every id text, so lookups by number (1001) still fail, now everywhere.
         Without understanding the problem, neither of you can tell a fix from a guess.
-    - prompt: "Explain step by step what happens to the order id 1001 when orders_to_json and then orders_from_json run. Show it with a tiny example. Don't change any code yet."
+    - prompt: "Explain step by step what happens to the id 1001 on its way through orders_to_json and orders_from_json, with a tiny example. Don't change code yet."
       response_code: |
         import json
 

@@ -11,7 +11,7 @@ prompt:
         Which bug? There are two, so Byte picked one and "fixed" it with round(), which sometimes
         rounds UP, while the docstring says round down. A vague prompt makes Byte guess, and it
         guesses with total confidence.
-    - prompt: "Make total_with_tip work without mutating anything. Use a copy of the list."
+    - prompt: "Make total_with_tip work without mutating anything: give it its own copy of the list with cart = prices, append the tip to that copy instead, and return cart_subtotal of the copy. Leave tip_amount exactly as it is."
       response_code: |
         def total_with_tip(prices, percent):
             cart = prices

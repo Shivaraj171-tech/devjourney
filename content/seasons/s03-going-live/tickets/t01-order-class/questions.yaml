@@ -15,8 +15,8 @@ questions:
     explain: "__init__ makes a fresh list for every new order (items=None, the fix from your first week), so Sam's item never shows up in Ana's order."
   - prompt: "Why is order.subtotal() better than every screen adding up order[\"items\"] itself?"
     choices:
-      - "It runs faster"
-      - "The maths lives in one place, so a fix there reaches every screen"
-      - "Dictionaries can't hold lists"
+      - "It runs faster, because methods are compiled before plain functions"
+      - "The maths lives in one place"
+      - "order[\"items\"] can be changed by anyone, but self.items is locked"
     answer: 1
     explain: "Keeping data and the code that uses it together gives you one source of truth. That's the main reason classes exist."

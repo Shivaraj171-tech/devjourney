@@ -1,15 +1,15 @@
 questions:
   - prompt: "Why are \"while I was in there\" changes risky in a pull request?"
     choices:
-      - "They aren't: extra cleanup is always good"
-      - "Reviewers focus on the main feature, so small unrelated changes can sneak bugs past them"
-      - "Python doesn't allow changing two functions in one PR"
+      - "They aren't: extra cleanup always makes code safer"
+      - "Reviewers focus on the main feature, so small changes slip past"
+      - "Git can only show one changed function per PR, so other changes are hidden from reviewers"
     answer: 1
     explain: "The fee feature was correct. The bug hid in a one-character tidy-up that nobody asked for. Good reviewers read every changed line."
   - prompt: "With Byte's change, what does delivery_fee(2500) return?"
     choices:
-      - "0, free delivery"
+      - "0: free delivery, because 2500 counts as $25.00 or more"
       - "399, because 2500 > 2500 is False"
-      - "It crashes"
+      - "It crashes, because the new SMALL_ORDER_FEE line comes first"
     answer: 1
     explain: "2500 is not greater than 2500, so the if is skipped and the standard fee is charged. With >= it would be free, as promised."

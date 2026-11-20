@@ -1,9 +1,9 @@
 questions:
   - prompt: "With menu = {\"lemonade\": 299}, what happens when you run menu[\"garlic_bread\"]?"
     choices:
-      - "It gives 0"
-      - "It gives None"
-      - "Python raises a KeyError and the program stops"
+      - "It gives 0, the default for a missing price"
+      - "It gives None, because there's no value for that key"
+      - "It raises a KeyError"
     answer: 2
     explain: "Square-bracket lookup only works for keys that exist. For a missing key, Python raises KeyError instead of guessing a value."
   - prompt: "What does \"garlic_bread\" in menu check?"
@@ -13,10 +13,11 @@ questions:
       - "Whether the word appears anywhere in the item names, even as part of a longer name"
     answer: 1
     explain: "For a dictionary, `in` checks the keys. It's a safe way to ask \"is this on the menu?\" before looking it up."
-  - prompt: "Byte suggests `cart.append(menu.get(name))` to stop the KeyError. What should you check before accepting?"
+  - prompt: "Byte suggests `cart.append(menu.get(name))` to stop the KeyError. Which test catches what's still wrong?"
     choices:
-      - "Only whether the crash is gone"
-      - "What ends up in the cart for a removed item: here it would be None instead of being skipped"
-      - "Whether the new line is shorter than the old one"
+      - "assert reorder([\"lemonade\"], {\"lemonade\": 299}) == [299]"
+      - "assert reorder([\"garlic_bread\"], {\"lemonade\": 299}) == []"
+      - "assert reorder([], {\"lemonade\": 299}) == []"
+      - "assert len(reorder([\"garlic_bread\"], {\"lemonade\": 299})) <= 1"
     answer: 1
-    explain: "The crash does go away, but the cart becomes [1250, None, 299]. An AI fix can swap a loud bug for a quiet one, so check the result, not just the error."
+    explain: "No crash, but a removed item becomes None in the cart: [None] is not []. The other tests pass on Byte's version, so they can't catch it."

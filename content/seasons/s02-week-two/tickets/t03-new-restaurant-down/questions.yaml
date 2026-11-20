@@ -8,15 +8,15 @@ questions:
     explain: "Tracebacks list the calls oldest-first, so the error type and message are at the bottom, right under the line that failed."
   - prompt: "rating_label already had an 'if len(ratings) == 0' check. Why did it still crash?"
     choices:
-      - "len() doesn't work on empty lists"
-      - "The check came after average_rating(ratings) was called, so the division ran first"
-      - "'New!' is not a valid return value"
+      - "len() raises an error on an empty list, so the check itself crashed"
+      - "The check came after average_rating(ratings), so the division ran before the check"
+      - "'New!' isn't a number, so a rating function isn't allowed to return it"
     answer: 1
     explain: "Code runs top to bottom. The guard has to come before the work it protects, or the crash happens before Python ever reaches the check."
   - prompt: "Other restaurants were fine. Why only Noodle Nook?"
     choices:
-      - "It was the only restaurant with no ratings yet, so len(ratings) was 0"
-      - "Its name contains a space"
-      - "It had too many ratings"
+      - "It was the only one with no ratings yet"
+      - "Its name has a space in it, and the header code splits names on spaces"
+      - "It had so many ratings that the average was too big to round"
     answer: 0
     explain: "The logs show ratings=0 when it launched. Dividing by len([]) is dividing by zero, which only happens for brand-new restaurants."
