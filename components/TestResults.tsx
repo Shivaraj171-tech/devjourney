@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+import { runEncouragement } from "@/lib/game/feedback";
 import { explainResult, findLocation } from "@/lib/runner/explain";
 import type { RunResult, TestResult } from "@/lib/runner/types";
 
@@ -24,6 +26,14 @@ type Props = {
 };
 
 export default function TestResults({ result, running, onStepThrough, tracing = null }: Props) {
+  // Remember how many checks passed on the previous run, to say "2 more than last time".
+  // (React's pattern for adjusting state when a prop changes.)
+  const [seen, setSeen] = useState<{ result: RunResult | null; previousPassed?: number }>({ result: null });
+  if (result !== seen.result && result && !result.error) {
+    const last = seen.result && !seen.result.error ? seen.result.results.filter((r) => r.status === "pass").length : undefined;
+    setSeen({ result, previousPassed: last });
+  }
+
   if (running) {
     return <p className="animate-pulse text-sm text-slate-400">Running tests…</p>;
   }
@@ -52,6 +62,11 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
       <p data-testid="run-summary" className={`text-sm font-semibold ${result.passed ? "text-emerald-300" : "text-amber-300"}`}>
         {result.passed ? "All checks passed — ready to merge!" : `${passed} of ${result.results.length} checks passing`}
       </p>
+      {!result.passed && (
+        <p data-testid="run-encouragement" className="text-xs text-slate-400">
+          {runEncouragement(passed, result.results.length, seen.result === result ? seen.previousPassed : undefined)}
+        </p>
+      )}
       <ul className="space-y-1.5">
         {result.results.map((r) => (
           <li key={`${r.file}-${r.name}`} className="rounded-lg bg-slate-900 p-2.5 text-sm">

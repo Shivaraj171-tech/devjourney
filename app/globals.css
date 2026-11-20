@@ -92,3 +92,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .pop-in, .room-stamp, .room-unlocked, .chat-in, .flame, .promo-shine::after { animation: none !important; }
 }
+
+/* New-badge pop-up slides in once */
+@keyframes badge-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.badge-toast { animation: badge-in 0.4s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .badge-toast { animation: none; }
+}

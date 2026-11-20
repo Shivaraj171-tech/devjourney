@@ -11,6 +11,8 @@ import Markdown from "./Markdown";
 import Onboarding from "./Onboarding";
 import TeamChat from "./TeamChat";
 import { useRoomChanges } from "@/lib/useOfficeSeen";
+import { useNewBadges } from "@/lib/useNewBadges";
+import BadgeToast from "./BadgeToast";
 import { BADGES, currentStreak, incidentBonus, leaderboard, rankFor, type BadgeContext } from "@/lib/game/rules";
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
 import type { TicketType, Warmup } from "@/lib/content/types";
@@ -84,12 +86,19 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
   const myPlace = board.findIndex((b) => b.isYou) + 1;
 
   // Progress lives in the browser: avoid flashing "first day" to returning players.
+  // Badges earned since the last office visit pop up once.
+  const newBadgeIds = useNewBadges(
+    BADGES.filter((b) => b.earned(badgeCtx)).map((b) => b.id),
+    isClient,
+  );
+
   if (!isClient) {
     return <div className="p-8 text-center text-slate-500">Opening the office…</div>;
   }
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+      <BadgeToast ids={newBadgeIds} />
       {now && !progress.onboarded && solved.length === 0 && <Onboarding />}
       {/* ---------- hero ---------- */}
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-violet-950 via-slate-900 to-cyan-950 p-6 sm:p-8">
