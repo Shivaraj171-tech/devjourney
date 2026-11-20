@@ -175,6 +175,22 @@ export function allSeasonTickets(): TicketInfo[] {
     .flatMap((s) => seasonTickets(s.slug));
 }
 
+export type BountyInfo = TicketInfo & { requires: string | null; bugKind: string | null; title: string };
+
+/**
+ * The Bug Bounty board's tickets: side-quest seasons (`chain: false` without `final`),
+ * shown as `bounty-<id>` cards on the HQ. Not part of allSeasonTickets().
+ */
+export function bountyTickets(): BountyInfo[] {
+  return seasonDirs()
+    .filter((s) => s.flags.chain === false && s.flags.final !== true)
+    .flatMap((s) => seasonTickets(s.slug))
+    .map((t) => {
+      const meta = readYaml<{ requires?: string; bug_kind?: string; title: string }>(join(t.dir, "ticket.yaml"));
+      return { ...t, requires: meta.requires ?? null, bugKind: meta.bug_kind ?? null, title: meta.title };
+    });
+}
+
 /** The final exam's tickets (season.yaml `final: true`), shown as `exam-room-<id>` on the HQ. */
 export function finalSeasonTickets(): TicketInfo[] {
   const final = seasonDirs().find((s) => s.flags.final === true);

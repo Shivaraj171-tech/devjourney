@@ -219,6 +219,54 @@ def trace_test(code_dir, tests_dir, test_file, test_name, max_steps=MAX_STEPS):
     return result
 
 
+class _SourceRecorder(_Recorder):
+    """Records the steps of one in-memory program (compiled with `filename`), module level included."""
+
+    def __init__(self, filename, stdout, max_steps):
+        super().__init__("/", "/", stdout, max_steps)
+        self.code_prefix = filename  # exact match: only the program's own frames
+        self.tests_prefix = "\0"  # no test frames here
+
+    def is_learner(self, frame):
+        return frame.f_code.co_filename == self.code_prefix
+
+
+TRACE_SOURCE_FILE = "<trace>"
+
+
+def trace_source(source, max_steps=MAX_STEPS):
+    """Run a short self-contained program (functions + a call) under sys.settrace.
+
+    Used by the trace-table format (lib/runner/formats.py). Returns a dict:
+        {"status": "pass" | "error" | "stopped", "message": str, "output": str,
+         "steps": [...same shape as trace_test()...], "truncated": bool}
+    Module-level lines are recorded too (func "<module>"), so variables set
+    outside a function can be watched.
+    """
+    printed = io.StringIO()
+    recorder = _SourceRecorder(TRACE_SOURCE_FILE, printed, max_steps)
+    result = {"status": "pass", "message": "", "output": "", "steps": [], "truncated": False}
+    try:
+        code = compile(source, TRACE_SOURCE_FILE, "exec")
+        namespace = {"__name__": "__main__", "__builtins__": __builtins__}
+        with contextlib.redirect_stdout(printed):
+            sys.settrace(recorder.on_call)
+            try:
+                exec(code, namespace)  # noqa: S102 - the format's own code, shown to the learner
+            finally:
+                sys.settrace(None)
+    except StepLimitReached:
+        result.update(status="stopped", message=f"Stopped after {max_steps} steps. Is there a loop that never ends?")
+    except BaseException as exc:  # noqa: BLE001 - the program can raise anything
+        result.update(status="error", message=f"{type(exc).__name__}: {exc}" if str(exc) else type(exc).__name__)
+    finally:
+        sys.settrace(None)
+    result["output"] = printed.getvalue()
+    result["steps"] = recorder.steps
+    result["truncated"] = recorder.truncated
+    return result
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 5:
         print("usage: tracer.py <code_dir> <tests_dir> <test_file> <test_name>", file=sys.stderr)

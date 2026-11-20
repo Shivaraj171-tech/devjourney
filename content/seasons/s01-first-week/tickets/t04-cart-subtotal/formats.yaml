@@ -1,0 +1,15 @@
+trace:
+  - code: |
+      def cart_subtotal(prices):
+          total = 0
+          for price in prices:
+              total = total + price
+          return total
+
+      subtotal = cart_subtotal([1250, 450, 299])
+    watch: [price, total]
+    rows: 7
+    explain: >-
+      Each time round the loop, `price` takes the NEXT item first, then `total` grows by it. A loop
+      over the list itself (`for price in prices`) visits every item, the last one (299) included,
+      so the total ends at 1999. Nothing to count, nothing to get one off.

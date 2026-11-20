@@ -1,0 +1,17 @@
+trace:
+  - code: |
+      def count_items(orders):
+          count = 0
+          for order in orders:
+              for item in order["items"]:
+                  count = count + 1
+          return count
+
+      orders = [{"id": 1, "items": ["pizza", "cola"]}, {"id": 2, "items": ["salad"]}]
+      n = count_items(orders)
+    watch: [item, count]
+    rows: 7
+    explain: >-
+      Two loops, one inside the other: the outer one picks an order (a dict), the inner one walks
+      that order's `"items"` list. The inner loop finishes ALL of order 1's items ('pizza', 'cola')
+      before the outer loop moves on to order 2. Three items in total, so `count` ends at 3.

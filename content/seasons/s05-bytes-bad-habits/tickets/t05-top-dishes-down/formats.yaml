@@ -23,3 +23,18 @@ break_it:
       Python's sort keeps tied items in the order they arrived, even with `reverse=True`, so two dishes
       with the same count come out in dictionary order, not A-Z. A key that returns a tuple,
       `(-count, dish)`, settles ties by name.
+trace:
+  - code: |
+      def podium(scores):
+          ranked = sorted(scores, reverse=True)
+          gold, silver = ranked[0], ranked[1]
+          gap = gold - silver
+          return gap
+
+      result = podium([7, 9, 4])
+    watch: [ranked, gold, silver, gap]
+    rows: 3
+    explain: >-
+      `sorted(..., reverse=True)` returns a NEW list, biggest first: [9, 7, 4] (the list passed in is
+      left alone). Line 3 unpacks a tuple, so `gold` and `silver` both get their values in ONE step,
+      and the gap is 9 - 7 = 2.

@@ -1,10 +1,10 @@
 // Rules for the extra task formats (formats.yaml): "Predict the output",
-// "Break Byte's code" and Parsons puzzles. Scoring, answer checking and the
+// "Break Byte's code", Parsons puzzles and trace tables. Scoring, answer checking and the
 // Python requests sent to the runner (lib/runner/formats.py).
 // Pure functions only (no imports with runtime code), so node can unit-test them.
 import type { ParsonsBlock, TaskFormatsContent } from "../content/types";
 
-export type FormatKind = "predict" | "break_it" | "parsons";
+export type FormatKind = "predict" | "break_it" | "parsons" | "trace";
 
 /** Small bonuses only: a miss costs nothing. */
 export const PREDICT_XP = 10;
@@ -14,6 +14,10 @@ export const PARSONS_XP = 15;
 export const PARSONS_RETRY_XP = 10;
 /** Checks allowed for the full Parsons bonus. */
 export const PARSONS_FULL_XP_CHECKS = 2;
+/** Trace table: every cell right within TRACE_FULL_XP_CHECKS checks, else the smaller bonus. */
+export const TRACE_XP = 15;
+export const TRACE_RETRY_XP = 10;
+export const TRACE_FULL_XP_CHECKS = 2;
 
 /** What the learner did on one format item (saved in progress under formatKey()). */
 export type FormatRecord = {
@@ -29,12 +33,16 @@ export type FormatRecord = {
   /** Break it: the input that broke Byte's code. Parsons: the winning order (block ids). */
   input?: string;
   order?: number[];
+  /** Trace table: the learner's winning grid (rows x watched variables). */
+  cells?: string[][];
+  /** Trace table: "Watch it run" was opened before every cell was right (smaller bonus). */
+  watched?: boolean;
 };
 
 /** True if a ticket has at least one format item (formats.yaml). */
 export function hasTaskFormats(ticket: { formats?: TaskFormatsContent }): boolean {
   const f = ticket.formats;
-  return !!f && f.predict.length + f.breakIt.length + f.parsons.length > 0;
+  return !!f && f.predict.length + f.breakIt.length + f.parsons.length + (f.trace?.length ?? 0) > 0;
 }
 
 /** Progress key for item `index` of a format, e.g. "parsons:0". */
@@ -80,19 +88,28 @@ export function recordPrediction(rec: FormatRecord | undefined, prediction: stri
   return { kind: "predict", attempts: 1, done: true, prediction, correct, xp: predictXp(correct) };
 }
 
-/** Record one break_it / parsons check. Once done, the record never changes (XP can't be farmed). */
-export function recordAttempt(
-  kind: "break_it" | "parsons",
-  rec: FormatRecord | undefined,
-  success: boolean,
-  extra: { input?: string; order?: number[] } = {},
-): FormatRecord {
+/** Trace table bonus: full within TRACE_FULL_XP_CHECKS checks (without peeking), smaller after. Never 0. */
+export function traceXp(checks: number, watched = false): number {
+  return checks <= TRACE_FULL_XP_CHECKS && !watched ? TRACE_XP : TRACE_RETRY_XP;
+}
+
+export type AttemptKind = "break_it" | "parsons" | "trace";
+export type AttemptExtra = { input?: string; order?: number[]; cells?: string[][] };
+
+/** Record one break_it / parsons / trace check. Once done, the record never changes (XP can't be farmed). */
+export function recordAttempt(kind: AttemptKind, rec: FormatRecord | undefined, success: boolean, extra: AttemptExtra = {}): FormatRecord {
   if (rec?.done) return rec;
   const attempts = (rec?.attempts ?? 0) + 1;
-  const base: FormatRecord = { kind, attempts, done: false, xp: 0 };
+  const base: FormatRecord = { kind, attempts, done: false, xp: 0, ...(rec?.watched ? { watched: true } : {}) };
   if (!success) return base;
-  const xp = kind === "break_it" ? BREAK_IT_XP : parsonsXp(attempts);
+  const xp = kind === "break_it" ? BREAK_IT_XP : kind === "parsons" ? parsonsXp(attempts) : traceXp(attempts, rec?.watched);
   return { ...base, done: true, xp, ...extra };
+}
+
+/** Trace table: the learner opened "Watch it run" (the real values). Unchanged once done or already watched. */
+export function recordWatched(rec: FormatRecord | undefined): FormatRecord {
+  if (rec && (rec.done || rec.watched)) return rec;
+  return { kind: "trace", attempts: rec?.attempts ?? 0, done: false, xp: 0, watched: true };
 }
 
 /** All format XP on one ticket. */
@@ -113,7 +130,9 @@ export type BreakItRequest = {
   crash_counts: boolean;
 };
 export type ParsonsRequest = { kind: "parsons"; program: string; check: string; expected_output?: string };
-export type FormatRequest = PredictRequest | BreakItRequest | ParsonsRequest;
+/** Trace table: answers are the learner's grid ("" = same as the row above). */
+export type TraceRequest = { kind: "trace"; code: string; watch: string[]; answers?: string[][] };
+export type FormatRequest = PredictRequest | BreakItRequest | ParsonsRequest | TraceRequest;
 
 /** formats.run_snippet() */
 export type SnippetResult = { stdout: string; error: string | null; error_type: string | null };
@@ -126,6 +145,44 @@ export type BreakItResult = {
 };
 /** formats.parsons() */
 export type ParsonsResult = { passed: boolean; stdout: string; error: string | null; error_type: string | null };
+
+/** One row of a real trace table: the line that just ran and each watched value (a repr, null = not set yet). */
+export type TraceRow = { line: number; values: (string | null)[] };
+/** formats.trace_table() */
+export type TraceTableResult = {
+  rows: TraceRow[];
+  stdout: string;
+  truncated: boolean;
+  error: string | null;
+  /** Only when answers were sent: right/wrong per cell, one row per real row. */
+  cells?: boolean[][];
+  first_wrong?: number | null;
+  all_right?: boolean;
+};
+
+export function traceRequest(task: { code: string; watch: string[] }, answers?: string[][]): TraceRequest {
+  const req: TraceRequest = { kind: "trace", code: task.code, watch: task.watch };
+  if (answers) req.answers = answers;
+  return req;
+}
+
+/** An empty trace-table grid: `rows` rows of one "" per watched variable. */
+export function emptyTraceGrid(rows: number, columns: number): string[][] {
+  return Array.from({ length: rows }, () => Array.from({ length: columns }, () => ""));
+}
+
+/** At least one cell typed in (Check stays disabled on an empty table). */
+export function traceGridStarted(grid: string[][]): boolean {
+  return grid.some((row) => row.some((cell) => cell.trim() !== ""));
+}
+
+/** What to say after a trace-table check. */
+export function traceFeedback(res: TraceTableResult): { tone: "good" | "neutral" | "warn"; text: string } {
+  if (res.error) return { tone: "warn", text: `Python couldn't trace it: ${res.error}` };
+  if (res.all_right) return { tone: "good", text: "Every cell matches what Python really did." };
+  const row = (res.first_wrong ?? 0) + 1;
+  return { tone: "neutral", text: `Step ${row} is the first one that doesn't match. Re-trace from there: which line runs next, and what does it change?` };
+}
 
 export function breakItRequest(
   task: { code: string; helpers: string; call: string; check: string; crashCounts: boolean },

@@ -1,0 +1,17 @@
+id: s50
+title: "Bug Bounty"
+# A side quest: off the main codebase (small, separate modules), never gates anything.
+chain: false
+intro: |
+  Short mystery bugs from all over Orbit Orders, posted on the office bounty board.
+  No lesson and no label: part of the job is working out what KIND of bug it is.
+  Each one opens once you've learned what you need to catch it.
+tickets:
+  - t01-the-last-stop
+  - t02-unknown-codes
+  - t03-the-crowded-basket
+  - t04-three-digits
+  - t05-first-order-of-the-day
+  - t06-brand-new-restaurants
+  - t07-rush-hour
+  - t08-free-tips

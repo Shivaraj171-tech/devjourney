@@ -29,3 +29,19 @@ parsons:
     explain: >-
       A start (`bags = 0`), a step that moves towards the end (`items = items - 4`) and a condition
       that the step eventually makes false (`items > 0`): every while loop needs all three.
+trace:
+  - code: |
+      def halvings(minutes):
+          pings = 0
+          while minutes > 0:
+              minutes = minutes // 2
+              pings = pings + 1
+          return pings
+
+      total = halvings(6)
+    watch: [minutes, pings]
+    rows: 8
+    explain: >-
+      The first row is the call itself: `minutes` starts at 6. Then the loop body runs while
+      `minutes > 0`: 6 → 3 → 1 → 0, one ping each time. When `minutes` reaches 0 the condition is
+      False and the loop stops, so `halvings(6)` is 3. The step (`// 2`) is what makes the loop end.

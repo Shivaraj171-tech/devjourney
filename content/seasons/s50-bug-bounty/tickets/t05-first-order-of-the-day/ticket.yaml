@@ -1,0 +1,14 @@
+id: s50-t05
+title: "The kitchen screen crashes every morning"
+type: bug
+level: intern
+track: debugging
+concepts: [dictionaries, loops]
+new_concept: dictionaries
+estimated_minutes: 5
+tests_visible: true
+files_editable: [kitchen.py]
+# Bug Bounty (side quest): opens once the ticket that taught this is solved.
+requires: s01-t06
+# Revealed after solving: "This was a ___ bug".
+bug_kind: "dict KeyError"

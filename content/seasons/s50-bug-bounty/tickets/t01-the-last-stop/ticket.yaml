@@ -1,0 +1,14 @@
+id: s50-t01
+title: "The rider app forgets the last stop"
+type: bug
+level: intern
+track: debugging
+concepts: [loops, lists]
+new_concept: loops
+estimated_minutes: 5
+tests_visible: true
+files_editable: [stops.py]
+# Bug Bounty (side quest): opens once the ticket that taught this is solved.
+requires: s01-t04
+# Revealed after solving: "This was a ___ bug".
+bug_kind: "off-by-one"

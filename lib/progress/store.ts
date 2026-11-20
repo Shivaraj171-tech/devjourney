@@ -5,7 +5,15 @@
 import { useSyncExternalStore } from "react";
 import { dayKey, WARMUP_XP } from "../game/rules";
 import { byteXp, type ByteDecision, type PromptRecord, type SuggestionRecord } from "../game/byte";
-import { formatsXp, recordAttempt, recordPrediction, type FormatRecord } from "../game/formats";
+import {
+  formatsXp,
+  recordAttempt,
+  recordPrediction,
+  recordWatched,
+  type AttemptExtra,
+  type AttemptKind,
+  type FormatRecord,
+} from "../game/formats";
 import type { SkillsAttempt, SkillsCheckProgress, SkillsCheckResult } from "../game/skillsCheck";
 import { mergeWarmupHistory, type WarmupAttempt } from "../game/warmups";
 
@@ -317,9 +325,13 @@ export const formatActions = {
   predict(id: string, key: string, prediction: string, correct: boolean) {
     updateFormat(id, key, (rec) => recordPrediction(rec, prediction, correct));
   },
-  /** One "Break Byte's code" or Parsons check. No-op once that item is done. */
-  attempt(id: string, key: string, kind: "break_it" | "parsons", success: boolean, extra?: { input?: string; order?: number[] }) {
+  /** One "Break Byte's code", Parsons or trace-table check. No-op once that item is done. */
+  attempt(id: string, key: string, kind: AttemptKind, success: boolean, extra?: AttemptExtra) {
     updateFormat(id, key, (rec) => recordAttempt(kind, rec, success, extra));
+  },
+  /** Trace table: "Watch it run" opened (the real values shown). */
+  watch(id: string, key: string) {
+    updateFormat(id, key, (rec) => recordWatched(rec));
   },
 };
 

@@ -1,0 +1,15 @@
+trace:
+  - code: |
+      def add_tip(amounts, tip):
+          amounts.append(tip)
+          return len(amounts)
+
+      tips = [100]
+      n = add_tip(tips, 50)
+      n = add_tip(tips, 25)
+    watch: [tips, n]
+    rows: 3
+    explain: >-
+      `tips` is never assigned again after line 5, yet it changes: `amounts` inside `add_tip` is the
+      SAME list as `tips`, so `.append` changes the caller's list. That is a side effect, and it is
+      why the list keeps growing with every call.
