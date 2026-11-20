@@ -1,0 +1,12 @@
+# After the capitalize() regression, Byte's second attempt is right. Trust it only after ALL the tests run.
+suggestion:
+  file: app/apology.py
+  find: "    return customer.capitalize()  # Byte's fix for Leo's \"sam\" complaint"
+  replace: "    return customer[:1].upper() + customer[1:]"
+  correct: true
+  says: "`capitalize()` also lowercases the rest of the name. Uppercase only the first letter and keep the rest as typed."
+  explain: >-
+    Correct, and this time the claim survives ALL the old tests, not just Leo's new one.
+    `customer[:1]` is the first letter (and, unlike `customer[0]`, doesn't crash on an empty
+    name), `.upper()` makes it a capital, and `customer[1:]` keeps the rest exactly as typed,
+    so McKenzie and Ana Lucia stay as they are.

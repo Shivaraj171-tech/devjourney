@@ -1,0 +1,36 @@
+# Prompt card: what you ask decides what you get.
+prompt:
+  goal: "Ask Byte to fix `total_with_tip`, so working out a total never changes the customer's cart."
+  options:
+    - prompt: "fix the tips bug"
+      response_code: |
+        def tip_amount(subtotal_cents, percent):
+            return round(subtotal_cents * percent / 100)
+      verdict: vague
+      feedback: >-
+        Which bug? There are two, so Byte picked one and "fixed" it with round(), which sometimes
+        rounds UP, while the docstring says round down. A vague prompt makes Byte guess, and it
+        guesses with total confidence.
+    - prompt: "Make total_with_tip work without mutating anything. Use a copy of the list."
+      response_code: |
+        def total_with_tip(prices, percent):
+            cart = prices
+            tip = tip_amount(cart_subtotal(cart), percent)
+            cart.append(tip)
+            return cart_subtotal(cart)
+      verdict: wrong
+      feedback: >-
+        Byte did what you said, literally: `cart = prices` isn't a copy, it's a second name for
+        the SAME list, so the cart still changes. Telling an AI HOW to do something only helps
+        if your "how" is right; it's safer to describe the result you need.
+    - prompt: "In app/tips.py, total_with_tip appends the tip to prices, so the customer's cart changes. Return the cart subtotal plus the tip, and don't modify prices: the cart must be the same after the call."
+      response_code: |
+        def total_with_tip(prices, percent):
+            tip = tip_amount(cart_subtotal(prices), percent)
+            return cart_subtotal(prices) + tip
+      verdict: good
+      feedback: >-
+        It names the file and function, says what's wrong, and states the rule the result must
+        follow ("the cart must be the same"). Byte's answer is short and does exactly that.
+        The tip maths in tip_amount is still yours to fix, and the tests are still how you check.
+  best: 2

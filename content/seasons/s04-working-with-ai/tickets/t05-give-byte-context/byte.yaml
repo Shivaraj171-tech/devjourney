@@ -1,0 +1,57 @@
+# Prompt card: replay Maya's two prompts (and two worse ones).
+prompt:
+  goal: "Get Byte to draft `refund_report` for Leo."
+  options:
+    - prompt: "write a refund report"
+      response_code: |
+        import csv
+        import sqlite3
+
+
+        def refund_report(db_path, out_path):
+            rows = sqlite3.connect(db_path).execute("SELECT * FROM refunds")
+            with open(out_path, "w") as f:
+                csv.writer(f).writerows(rows)
+      verdict: vague
+      feedback: >-
+        This is Maya's first prompt, and Byte's CSV exporter for a database we don't have. With no
+        context Byte fills the gaps with the most "typical" code it has seen, not with OUR code.
+    - prompt: "Write refund_report, using the late_refund_total() helper."
+      response_code: |
+        def refund_report(deliveries):
+            total = late_refund_total(deliveries)
+            return f"Total refunded: {format_price(total)}"
+      verdict: wrong
+      feedback: >-
+        There is no late_refund_total(): the prompt invented it and Byte happily used it. An AI
+        follows your mistakes too, so check every name in your prompt against the real code.
+    - prompt: "Write refund_report like refund_line but for a list of orders, with a total at the end."
+      response_code: |
+        def refund_report(deliveries):
+            lines = [refund_line(order, minutes) for order, minutes in deliveries]
+            total = sum(late_refund(order, minutes) for order, minutes in deliveries)
+            return "\n".join(lines) + f"\nTotal refunded: {format_price(total)}"
+      verdict: vague
+      feedback: >-
+        Closer! But Byte didn't know on-time deliveries must be left out, or what an empty day
+        should say. Every rule you leave out is a rule Byte guesses.
+    - prompt: "In app/refund_report.py, finish refund_report(deliveries). deliveries is a list of (order, delivery_minutes). Add refund_line(order, minutes) for each LATE one (late_refund(order, minutes) > 0), in order, then a last line 'Total refunded: $X.XX' using format_price. If nothing was late, return 'No late orders today.'"
+      response_code: |
+        def refund_report(deliveries):
+            lines = []
+            total = 0
+            for order, minutes in deliveries:
+                refund = late_refund(order, minutes)
+                if refund > 0:
+                    lines.append(refund_line(order, minutes))
+                    total = total + refund
+            if not lines:
+                return "No late orders today."
+            lines.append(f"Total refunded: {format_price(total)}")
+            return "\n".join(lines)
+      verdict: good
+      feedback: >-
+        Real function names, the exact line format, every rule and the empty case: that's Maya's
+        second prompt, and Byte's answer is solid. Read it line by line before you type it in.
+        If you couldn't explain each line to Leo, you don't own it yet.
+  best: 3

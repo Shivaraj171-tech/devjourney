@@ -1,0 +1,12 @@
+# Looks different, behaves the same: the default is still made only once.
+suggestion:
+  file: app/orders.py
+  find: "def create_order(customer, items=[]):"
+  replace: "def create_order(customer, items=list()):"
+  correct: false
+  says: "Linters warn about `[]` as a default. Use `list()` so every order gets a fresh list."
+  explain: >-
+    It looks different but behaves exactly the same. A default value is worked out ONCE, when
+    Python reads the `def` line, so `list()` also makes one single list that every order shares.
+    The fix is `items=None`, plus `if items is None: items = []` inside the function, which runs
+    on every call.

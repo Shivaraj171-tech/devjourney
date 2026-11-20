@@ -1,0 +1,12 @@
+# The classic AI "fix": make the error go away by deleting the feature.
+suggestion:
+  file: app/promo.py
+  find: "    return PROMO_CODES.get(code.upper(), 0)"
+  replace: "    return PROMO_CODES.get(code, 0)"
+  correct: false
+  says: "The crash is on `.upper()`, so just remove it. No more AttributeError!"
+  explain: >-
+    The crash is gone, and so is a feature: codes are no longer case-insensitive, so a customer
+    who types "orbit20" silently gets no discount, which the docstring promises won't happen.
+    A real fix handles the new case (None) and keeps everything else working:
+    `if code is None: return 0` before the lookup.

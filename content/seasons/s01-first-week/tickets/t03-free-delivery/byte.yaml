@@ -1,0 +1,11 @@
+# Byte's autocomplete offers a fix. This one is right: accept it, then let the tests prove it.
+suggestion:
+  file: app/delivery.py
+  find: "    if subtotal_cents > FREE_DELIVERY_THRESHOLD:"
+  replace: "    if subtotal_cents >= FREE_DELIVERY_THRESHOLD:"
+  correct: true
+  says: "`>` leaves out exactly $25.00. Use `>=` so \"$25 or more\" includes 2500."
+  explain: >-
+    Byte is right this time. `>=` means "greater than or equal to", which is exactly the
+    campaign's "$25 or more": 2500 is now free and 2499 still pays. Byte sounds just as sure
+    when it's wrong, so the tests are how you know, not the confident tone.

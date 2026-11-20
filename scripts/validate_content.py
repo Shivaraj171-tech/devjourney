@@ -48,6 +48,32 @@ Tickets with `type: incident` work like bug tickets (starter fails, solution
 passes) and also need logs.txt (the production logs shown in the Logs panel).
 ticket.yaml may set `time_limit_minutes` (1-60, default 15) for the speed bonus.
 
+Any ticket may also have byte.yaml: Byte, the office AI assistant, either
+suggests a change to the code (accept / reject / edit) or answers a prompt the
+learner picks. Both blocks are optional, but at least one must be present:
+
+    suggestion:                        # only on tickets with tests
+      file: app/cart.py                # one of files_editable
+      find: "    for i in range(len(prices) - 1):"   # exact text, exactly once in starter/<file>
+      replace: "    for i in range(1, len(prices)):" # Byte's proposed code
+      correct: false                   # true: starter + replacement PASSES the tests,
+                                       # false: it still FAILS them (checked by running)
+      says: "Off-by-one spotted! ..."  # Byte's one-line pitch
+      explain: "..."                   # why it's right or wrong (shown after the decision)
+    prompt:
+      goal: "..."                      # what the learner wants Byte to do
+      options:                         # 2-4 prompts the learner can pick from
+        - prompt: "..."
+          response_code: |             # what Byte writes for that prompt (valid Python)
+            ...
+          verdict: good                # good | vague | wrong
+          feedback: "..."
+      best: 2                          # 0-based index of the only "good" option
+
+The suggestion is checked for honesty: the replacement is applied to a copy of
+starter/ and the ticket's tests are run on it, so a "correct" suggestion really
+passes and a wrong one really fails.
+
 Usage:
     python3 scripts/validate_content.py [content_dir]
 
@@ -57,8 +83,10 @@ Requires PyYAML.
 
 import json
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import yaml
@@ -69,6 +97,8 @@ TEST_TIMEOUT_SECONDS = 10
 MIN_CHOICES, MAX_CHOICES = 2, 4
 MIN_READ_QUESTIONS = 3
 MAX_INCIDENT_MINUTES = 60
+MIN_PROMPT_OPTIONS, MAX_PROMPT_OPTIONS = 2, 4
+BYTE_VERDICTS = {"good", "vague", "wrong"}
 # Ticket types without tests to run: the quiz (read) or the review (review) is the task.
 NO_TEST_TYPES = {"read", "review"}
 
@@ -271,6 +301,8 @@ def check_ticket_meta(ticket_dir):
         errors += check_review(ticket_dir)
     if ticket_type == "incident":
         errors += check_incident(ticket_dir, meta)
+    if (ticket_dir / "byte.yaml").is_file():
+        errors += check_byte(ticket_dir, meta)
     return errors
 
 
@@ -356,6 +388,148 @@ def check_review(ticket_dir):
             else:
                 seen[(rel, line)] = n
     return errors
+
+
+# ---------- byte.yaml (Byte suggests / Ask Byte) ----------
+
+def load_byte(ticket_dir):
+    """byte.yaml as loaded YAML, or None if missing. Raises yaml.YAMLError if invalid."""
+    path = ticket_dir / "byte.yaml"
+    if not path.is_file():
+        return None
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def apply_suggestion(text, find, replace):
+    """The file text with Byte's replacement applied (find must occur exactly once)."""
+    return text.replace(find, replace, 1)
+
+
+def check_byte(ticket_dir, meta):
+    """Format checks for byte.yaml (format in the module docstring). Tests are run separately."""
+    try:
+        data = load_byte(ticket_dir)
+    except yaml.YAMLError as exc:
+        return [f"byte.yaml is not valid YAML: {exc}"]
+    if not isinstance(data, dict):
+        return ["byte.yaml must be a mapping with 'suggestion' and/or 'prompt'"]
+    errors = []
+    unknown = sorted(set(data) - {"suggestion", "prompt"})
+    if unknown:
+        errors.append(f"byte.yaml: unknown section(s) {unknown} (allowed: suggestion, prompt)")
+    if "suggestion" not in data and "prompt" not in data:
+        errors.append("byte.yaml needs a 'suggestion' or a 'prompt' block")
+    if "suggestion" in data:
+        errors += check_byte_suggestion(ticket_dir, meta, data["suggestion"])
+    if "prompt" in data:
+        errors += check_byte_prompt(data["prompt"])
+    return errors
+
+
+def check_byte_suggestion(ticket_dir, meta, sug):
+    where = "byte.yaml: suggestion"
+    if not isinstance(sug, dict):
+        return [f"{where} must be a mapping"]
+    if meta.get("type") in NO_TEST_TYPES:
+        return [f"{where}: only tickets with tests can have a suggestion (this is a {meta.get('type')} ticket)"]
+    errors = []
+    for field in ["file", "find", "replace", "says", "explain"]:
+        if not is_nonempty_str(sug.get(field)):
+            errors.append(f"{where}: '{field}' is missing or empty")
+    if not isinstance(sug.get("correct"), bool):
+        errors.append(f"{where}: 'correct' must be true or false")
+    if errors:
+        return errors
+    rel, find, replace = sug["file"], sug["find"], sug["replace"]
+    if rel not in (meta.get("files_editable") or []):
+        return [f"{where}: file {rel!r} is not in files_editable"]
+    starter_file = ticket_dir / "starter" / rel
+    if not starter_file.is_file():
+        return [f"{where}: file {rel} does not exist in starter/"]
+    if find == replace:
+        return [f"{where}: 'replace' is the same as 'find' (Byte must propose a change)"]
+    text = starter_file.read_text(encoding="utf-8")
+    count = text.count(find)
+    if count != 1:
+        return [f"{where}: 'find' must appear exactly once in starter/{rel}, found {count} time(s)"]
+    if rel.endswith(".py"):
+        try:
+            compile(apply_suggestion(text, find, replace), rel, "exec")
+        except SyntaxError as exc:
+            errors.append(f"{where}: starter/{rel} with the replacement is not valid Python: line {exc.lineno}: {exc.msg}")
+    return errors
+
+
+def check_byte_prompt(card):
+    where = "byte.yaml: prompt"
+    if not isinstance(card, dict):
+        return [f"{where} must be a mapping"]
+    errors = []
+    if not is_nonempty_str(card.get("goal")):
+        errors.append(f"{where}: 'goal' is missing or empty")
+    options = card.get("options")
+    if not isinstance(options, list) or not all(isinstance(o, dict) for o in options):
+        return errors + [f"{where}: 'options' must be a list of mappings"]
+    if not MIN_PROMPT_OPTIONS <= len(options) <= MAX_PROMPT_OPTIONS:
+        errors.append(f"{where}: has {len(options)} options, needs {MIN_PROMPT_OPTIONS}-{MAX_PROMPT_OPTIONS}")
+    for i, opt in enumerate(options):
+        here = f"{where}: option {i}"
+        for field in ["prompt", "response_code", "feedback"]:
+            if not is_nonempty_str(opt.get(field)):
+                errors.append(f"{here}: '{field}' is missing or empty")
+        if opt.get("verdict") not in BYTE_VERDICTS:
+            errors.append(f"{here}: verdict {opt.get('verdict')!r} must be one of {sorted(BYTE_VERDICTS)}")
+        if is_nonempty_str(opt.get("response_code")):
+            try:
+                compile(opt["response_code"], f"option {i}", "exec")
+            except SyntaxError as exc:
+                errors.append(f"{here}: response_code is not valid Python: line {exc.lineno}: {exc.msg}")
+    prompts = [o["prompt"].strip() for o in options if is_nonempty_str(o.get("prompt"))]
+    if len(set(prompts)) != len(prompts):
+        errors.append(f"{where}: prompts must all be different")
+    best = card.get("best")
+    if not isinstance(best, int) or isinstance(best, bool):
+        errors.append(f"{where}: 'best' must be a whole number (0-based index)")
+    elif not 0 <= best < len(options):
+        errors.append(f"{where}: best {best} is out of range for {len(options)} options")
+    else:
+        if options[best].get("verdict") != "good":
+            errors.append(f"{where}: the best option ({best}) must have verdict 'good'")
+        others = [i for i, o in enumerate(options) if i != best and o.get("verdict") == "good"]
+        if others:
+            errors.append(f"{where}: only the best option may be 'good', but option(s) {others} are too")
+    return errors
+
+
+def check_byte_suggestion_tests(ticket_dir):
+    """Honesty check: apply the suggestion to a copy of starter/ and run the tests.
+
+    correct: true must pass, correct: false must fail. Returns error strings.
+    Call only after check_byte() found no errors.
+    """
+    try:
+        data = load_byte(ticket_dir)
+    except yaml.YAMLError:
+        return []  # already reported by check_byte
+    sug = data.get("suggestion") if isinstance(data, dict) else None
+    if not isinstance(sug, dict):
+        return []
+    rel, find, replace, correct = sug["file"], sug["find"], sug["replace"], sug["correct"]
+    with tempfile.TemporaryDirectory() as tmp:
+        code_dir = Path(tmp) / "code"
+        # Skip __pycache__: a cached .pyc of the starter file can look up to date
+        # (same size, same second) and Python would run the old code instead.
+        shutil.copytree(ticket_dir / "starter", code_dir, ignore=shutil.ignore_patterns("__pycache__"))
+        target = code_dir / rel
+        target.write_text(apply_suggestion(target.read_text(encoding="utf-8"), find, replace), encoding="utf-8")
+        result = run_ticket_tests(code_dir, ticket_dir / "tests")
+    if correct and not result["passed"]:
+        failing = [f"{r['file']}::{r['name']}" for r in result.get("results", []) if r["status"] != "pass"]
+        detail = result.get("error") or ", ".join(failing) or "no tests ran"
+        return [f"byte.yaml: suggestion says correct: true, but starter + replacement fails the tests ({detail})"]
+    if not correct and result["passed"]:
+        return ["byte.yaml: suggestion says correct: false, but starter + replacement passes every test"]
+    return []
 
 
 def check_ticket_tests(ticket_dir):
@@ -475,6 +649,8 @@ def validate_season(season_dir, prev=None):
         errors = check_ticket_meta(ticket_dir)
         if not errors and load_ticket_type(ticket_dir) not in NO_TEST_TYPES:
             errors += check_ticket_tests(ticket_dir)
+            if (ticket_dir / "byte.yaml").is_file():
+                errors += check_byte_suggestion_tests(ticket_dir)
         if prev is not None and (ticket_dir / "starter").is_dir():
             errors += check_evolution(prev, ticket_dir)
         report[label] = errors

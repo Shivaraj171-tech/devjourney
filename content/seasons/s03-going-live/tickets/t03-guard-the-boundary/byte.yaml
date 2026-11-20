@@ -1,0 +1,45 @@
+# Prompt card: getting useful tests out of Byte.
+prompt:
+  goal: "Get Byte to draft tests for `delivery_fee` that would catch last week's `>` slip."
+  options:
+    - prompt: "write tests for delivery_fee"
+      response_code: |
+        def test_small_order():
+            assert delivery_fee(1000) == 399
+
+
+        def test_large_order():
+            assert delivery_fee(5000) == 0
+      verdict: vague
+      feedback: >-
+        These tests look busy but stay far away from the edge, so they pass on Byte's buggy `>`
+        version too. Byte can't know the $25.00 boundary is what matters unless you say so.
+    - prompt: "Write pytest tests for delivery_fee using fixtures and parametrize."
+      response_code: |
+        import pytest
+
+
+        @pytest.mark.parametrize("subtotal, fee", [(1000, 399), (5000, 0)])
+        def test_delivery_fee(subtotal, fee):
+            assert delivery_fee(subtotal) == fee
+      verdict: wrong
+      feedback: >-
+        Our CI doesn't have pytest: team tests are plain functions with `assert`. Byte doesn't
+        know your setup unless you tell it, and it never says "I'm not sure that's installed".
+        (It also still skipped the boundary.)
+    - prompt: "Write plain assert tests (no pytest) for delivery_fee in app/delivery.py. Rule: 2500 cents or more is free, less pays 399. Test right at the boundary (2499 and 2500) and one big order, with a helpful message in each assert."
+      response_code: |
+        def test_exactly_25_dollars_is_free():
+            fee = delivery_fee(2500)
+            assert fee == 0, f"exactly $25.00 should be free, got {fee}"
+
+
+        def test_just_under_25_dollars_pays():
+            fee = delivery_fee(2499)
+            assert fee == 399, f"$24.99 should pay 399, got {fee}"
+      verdict: good
+      feedback: >-
+        You gave the rule, the style CI expects and, most importantly, WHERE bugs hide: right at
+        the boundary. These two tests alone catch Byte's `>` slip. Now read them and add your own
+        big-order test: you own the tests you commit.
+  best: 2
