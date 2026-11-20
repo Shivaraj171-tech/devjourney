@@ -2,7 +2,7 @@
 // into public/. Runs automatically before `npm run dev` and `npm run build`.
 //   - Pyodide (Python in WebAssembly)      -> public/pyodide/
 //   - Monaco editor prebuilt files          -> public/monaco/vs/
-//   - Our Python test runner                -> public/runner/test_runner.py
+//   - Our Python test runner and tracer    -> public/runner/test_runner.py, tracer.py
 import { cpSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,3 +20,4 @@ function copy(from, to) {
 copy("node_modules/pyodide", "pyodide");
 copy("node_modules/monaco-editor/min/vs", "monaco/vs");
 copy("lib/runner/test_runner.py", "runner/test_runner.py");
+copy("lib/runner/tracer.py", "runner/tracer.py");

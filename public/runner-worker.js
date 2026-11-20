@@ -3,8 +3,10 @@
 // forever, the page simply terminates this worker and starts a new one.
 //
 // Messages in:  { type: "run", id, files: {path: text}, tests: {path: text} }
+//               { type: "trace", id, files, tests, testFile, testName }
 // Messages out: { type: "ready" }
 //               { type: "result", id, result }   (result = test_runner.run_tests JSON)
+//               { type: "trace", id, trace }     (trace = tracer.trace_test JSON)
 //               { type: "error", id, message }
 
 import { loadPyodide } from "/pyodide/pyodide.mjs";
@@ -15,6 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, "/runner")
 import test_runner
+import tracer
 
 WORKSPACE = Path("/workspace")
 
@@ -25,8 +28,7 @@ def _is_learner_module(name, mod):
     paths += list(getattr(mod, "__path__", None) or [])
     return any(str(p).startswith(str(WORKSPACE)) for p in paths)
 
-def run_payload(payload_json):
-    payload = json.loads(payload_json)
+def _prepare_workspace(payload):
     if WORKSPACE.exists():
         shutil.rmtree(WORKSPACE)
     for folder, files in (("code", payload["files"]), ("tests", payload["tests"])):
@@ -39,16 +41,27 @@ def run_payload(payload_json):
         if _is_learner_module(name, mod):
             del sys.modules[name]
     importlib.invalidate_caches()
+
+def run_payload(payload_json):
+    payload = json.loads(payload_json)
+    _prepare_workspace(payload)
     return json.dumps(test_runner.run_tests(str(WORKSPACE / "code"), str(WORKSPACE / "tests")))
+
+def trace_payload(payload_json):
+    payload = json.loads(payload_json)
+    _prepare_workspace(payload)
+    return json.dumps(tracer.trace_test(str(WORKSPACE / "code"), str(WORKSPACE / "tests"),
+                                        payload["testFile"], payload["testName"]))
 `;
 
 async function init() {
   const pyodide = await loadPyodide({ indexURL: "/pyodide/" });
-  const runnerSource = await (await fetch("/runner/test_runner.py")).text();
-  // Write the runner file from Python itself (avoids depending on FS APIs).
-  pyodide.runPython(
-    `from pathlib import Path\nPath("/runner").mkdir(exist_ok=True)\nPath("/runner/test_runner.py").write_text(${JSON.stringify(runnerSource)})`
-  );
+  // Write the runner files from Python itself (avoids depending on FS APIs).
+  pyodide.runPython(`from pathlib import Path\nPath("/runner").mkdir(exist_ok=True)`);
+  for (const name of ["test_runner.py", "tracer.py"]) {
+    const source = await (await fetch(`/runner/${name}`)).text();
+    pyodide.runPython(`Path("/runner/${name}").write_text(${JSON.stringify(source)})`);
+  }
   pyodide.runPython(SETUP);
   return pyodide;
 }
@@ -60,13 +73,19 @@ ready.then(
 );
 
 self.onmessage = async (event) => {
-  const { type, id, files, tests } = event.data;
-  if (type !== "run") return;
+  const { type, id, files, tests, testFile, testName } = event.data;
+  if (type !== "run" && type !== "trace") return;
   try {
     const pyodide = await ready;
-    const payload = JSON.stringify(JSON.stringify({ files, tests }));
-    const resultJson = pyodide.runPython(`run_payload(${payload})`);
-    self.postMessage({ type: "result", id, result: JSON.parse(resultJson) });
+    if (type === "run") {
+      const payload = JSON.stringify(JSON.stringify({ files, tests }));
+      const resultJson = pyodide.runPython(`run_payload(${payload})`);
+      self.postMessage({ type: "result", id, result: JSON.parse(resultJson) });
+    } else {
+      const payload = JSON.stringify(JSON.stringify({ files, tests, testFile, testName }));
+      const traceJson = pyodide.runPython(`trace_payload(${payload})`);
+      self.postMessage({ type: "trace", id, trace: JSON.parse(traceJson) });
+    }
   } catch (err) {
     self.postMessage({ type: "error", id, message: String(err) });
   }
