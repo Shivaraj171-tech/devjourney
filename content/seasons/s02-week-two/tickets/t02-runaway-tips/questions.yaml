@@ -9,7 +9,7 @@ questions:
   - prompt: "Why does 1999 * 15 // 100 give 299 and not 299.85?"
     choices:
       - "Python always rounds to the nearest whole number"
-      - "// rounds down to a whole number"
+      - "// divides and rounds down to a whole number, so we never charge a fraction of a cent"
       - "Multiplying whole numbers can never give a decimal, whatever you divide by"
     answer: 1
     explain: "// is floor division: it drops the fractional part (for positive numbers). Amounts stay whole cents, like everywhere else in the codebase."

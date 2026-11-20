@@ -1,11 +1,11 @@
-# Looks clean, but it returns a NEW list instead of changing the cart it was given.
+# Correct: both stubs filled in, the way the docstrings describe.
 suggestion:
   file: app/cart_actions.py
   find: "    # TODO: add price_cents to the end of the cart list\n    pass\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    # TODO: return the number of items in the cart\n    pass"
-  replace: "    return cart + [price_cents]\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    return len(cart)"
-  correct: false
-  says: "Done! `cart + [price_cents]` adds the item, and `len(cart)` counts them."
+  replace: "    cart.append(price_cents)\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    return len(cart)"
+  correct: true
+  says: "`append` adds to the end of the cart itself, and `len` counts the items. Done! 🛒"
   explain: >-
-    `item_count` is right, but `cart + [price_cents]` builds a brand-new list and leaves the customer's
-    cart exactly as it was. The docstring says add_item changes the cart itself (and returns nothing),
-    so the badge would never go up. `cart.append(price_cents)` changes the list in place.
+    Correct. append changes the list the caller passed in, which is why add_item doesn't need to return
+    anything, and len(cart) is the number on the badge. Accepting is fine; owning it means you could
+    explain both lines to Sofia.

@@ -16,7 +16,7 @@ questions:
   - prompt: "Byte suggests adding `if code == \"\": return 0` to fix the crash. Does it fix BUG-108?"
     choices:
       - "Yes: an empty promo box always arrives as an empty string"
-      - "No: the app sends None, so .upper() still runs"
+      - "No: the app sends None, not \"\", so the check is skipped and .upper() still crashes"
       - "Yes: Python treats None and \"\" as equal in an if check"
     answer: 1
     explain: "None == \"\" is False, so the check never runs for None. Check the AI's fix against the actual error message and the actual value."

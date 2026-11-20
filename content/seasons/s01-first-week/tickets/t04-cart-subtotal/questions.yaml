@@ -9,7 +9,7 @@ questions:
   - prompt: "Why did the buggy loop skip the last item?"
     choices:
       - "Python lists start at 1, so prices[0] was never counted"
-      - "range(len(prices) - 1) stops one index early"
+      - "range(len(prices) - 1) stops one index too early, so the last price is never added"
       - "total was set back to 0 inside the loop, so only part of the cart was added"
     answer: 1
     explain: "Subtracting 1 meant the loop never reached the last index. This kind of 'off by one' mistake is one of the most common bugs in any language."

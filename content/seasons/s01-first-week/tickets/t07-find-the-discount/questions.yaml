@@ -8,7 +8,7 @@ questions:
     explain: "discount_amount takes the subtotal and the code and returns the cents to subtract. discount_percent only looks up the percentage, and PROMO_CODES is a dictionary, not a function."
   - prompt: "What does discount_amount(1000, \"WELCOME10\") return?"
     choices:
-      - "0: $10.00 is under the $15.00 minimum"
+      - "0: 1000 cents is under the $15.00 minimum, so it returns before looking at the code"
       - "100, because WELCOME10 is 10% off every order"
       - "900, the price left after taking off the 10% discount"
     answer: 0

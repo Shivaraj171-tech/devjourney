@@ -15,7 +15,7 @@ prompt:
       feedback: >-
         No amounts, no units: Byte used dollars, while every amount in our code is in cents, so a $9.00
         order (900 cents) would never pay the fee.
-    - prompt: "Add a $1.50 fee for orders under $10.00, and clean up delivery.py while you're in there."
+    - prompt: "Add small_order_fee to app/delivery.py: $1.50 (150 cents) for orders under $10.00 (1000 cents), otherwise 0. And while you're in there, clean up delivery.py: shorter names, one-line ifs, whatever reads best."
       response_code: |
         def calc_delivery(subtotal_cents):
             return 0 if subtotal_cents >= FREE_DELIVERY_THRESHOLD else STANDARD_FEE

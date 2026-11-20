@@ -2,7 +2,7 @@ questions:
   - prompt: "Why did the greeting show the literal text {name}?"
     choices:
       - "The name variable was empty when greet() ran"
-      - "The string had no f in front, so {name} stayed as text"
+      - "The string had no f in front, so Python left {name} as plain text"
       - "greet() needs a print() inside it before {name} gets filled in"
     answer: 1
     explain: "Only f-strings replace {name} with the variable's value. Without the f, the curly braces are just ordinary characters."

@@ -1,11 +1,11 @@
-# Byte's autocomplete offers the one-letter fix. It's right: accept it, then let the tests prove it.
+# Byte's very first suggestion: the f is back, but retyping the line quietly lost the comma.
 suggestion:
   file: app/greeting.py
   find: "    return \"Welcome back to Orbit Orders, {name}!\""
-  replace: "    return f\"Welcome back to Orbit Orders, {name}!\""
-  correct: true
-  says: "Missing `f`! Without it, Python prints `{name}` as plain text."
+  replace: "    return f\"Welcome back to Orbit Orders {name}!\""
+  correct: false
+  says: "Missing `f`! Without it, Python prints `{name}` as plain text. Fixed. 🤖"
   explain: >-
-    Byte is right: the `f` turns the string into an f-string, so `{name}` is replaced by the real name.
-    But it was Byte's autocomplete that dropped the `f` in the first place, and it sounded just as sure
-    then. Run the tests either way: they're how you know, not the tone.
+    The `f` is right, but Byte retyped the whole line and dropped the comma: customers would now see
+    "Welcome back to Orbit Orders Sam!". When an AI rewrites a line, compare ALL of it with what it
+    should say, not just the part you asked about. The tests compare the exact text, so they catch it.

@@ -9,7 +9,7 @@ questions:
   - prompt: "rating_label already had an 'if len(ratings) == 0' check. Why did it still crash?"
     choices:
       - "len() raises an error on an empty list, so the check itself crashed"
-      - "The check ran after the division"
+      - "The check came after average_rating(ratings), so the division ran before the check"
       - "'New!' isn't a number, so a rating function isn't allowed to return it"
     answer: 1
     explain: "Code runs top to bottom. The guard has to come before the work it protects, or the crash happens before Python ever reaches the check."

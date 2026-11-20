@@ -9,7 +9,7 @@ questions:
   - prompt: "Why did the SMS show $27.99 when the email showed $22.40?"
     choices:
       - "The SMS used a different promo code table, with ORBIT20 missing"
-      - "The SMS copy of the maths left out the discount"
+      - "Each message had its own copy of the total maths, and the SMS copy left out the discount"
       - "Text messages round prices, so $22.40 got rounded back up to $27.99"
     answer: 1
     explain: "Copy-pasted code drifts apart. With one order_total, every message gets the same answer, including any future pricing changes."

@@ -9,7 +9,7 @@ questions:
   - prompt: "Byte's fix made the new \"sam\" test pass. Why didn't it notice it broke McKenzie?"
     choices:
       - "McKenzie is a rare name, so no test could have covered it"
-      - "It ran only the new test, not the old ones"
+      - "It only checked the new test, instead of running all the tests we already had"
       - "The old tests only check lowercase names, so they couldn't see the change"
     answer: 1
     explain: "The old tests would have gone red right away. Running the whole test suite after every fix is how you catch regressions, whoever wrote the fix."

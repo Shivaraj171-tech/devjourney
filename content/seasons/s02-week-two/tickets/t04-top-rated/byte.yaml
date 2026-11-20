@@ -1,15 +1,14 @@
-# Right conditions, wrong order: `and` short-circuits left to right.
+# Correct: both rules, with the safe check first so [] never reaches the average.
 suggestion:
   file: app/badges.py
   find: "    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
-  replace: "    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE and len(ratings) >= TOP_RATED_MIN_RATINGS"
-  correct: false
-  says: "Added the 5-ratings rule with `and`. Both conditions, just like the docstring says."
+  replace: "    return len(ratings) >= TOP_RATED_MIN_RATINGS and average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
+  correct: true
+  says: "Added the 5-ratings rule with `and`, length check first so a new restaurant can't divide by zero."
   explain: >-
-    Right conditions, wrong order. `and` checks left to right and stops at the first False, so
-    here `average_rating([])` runs FIRST and divides by zero for a brand-new restaurant:
-    Wednesday's incident all over again. Put `len(ratings) >= TOP_RATED_MIN_RATINGS` first, so
-    it guards the average.
+    Correct. `and` checks left to right and stops at the first False, so for [] (or any restaurant with
+    fewer than 5 ratings) average_rating never runs. Swap the two sides and Wednesday's
+    ZeroDivisionError is back: order matters.
 
 # Prompt card: spell out the rule AND the edge cases.
 prompt:
@@ -23,7 +22,7 @@ prompt:
       feedback: >-
         "Better" to Byte meant "more restaurants get the badge": it lowered the bar to 4.0 and still crashes
         on []. If you don't state the rule, Byte invents one.
-    - prompt: "Add a check for at least 5 ratings to is_top_rated."
+    - prompt: "Add a check for at least 5 ratings to is_top_rated in app/badges.py. Keep the existing 4.5 average rule, combine the two with `and` so both have to be true, and keep it all on one line so the badge code stays short, readable and fast."
       response_code: |
         def is_top_rated(ratings):
             return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE and len(ratings) >= 5
@@ -32,7 +31,7 @@ prompt:
         Closer, but you didn't mention the empty list, so Byte put the average first and [] still divides by
         zero. It also typed 5 instead of using TOP_RATED_MIN_RATINGS. Edge cases you don't mention are edge
         cases Byte doesn't handle.
-    - prompt: "is_top_rated(ratings) in app/badges.py: return True only when there are at least TOP_RATED_MIN_RATINGS ratings AND average_rating(ratings) >= TOP_RATED_MIN_AVERAGE. Edge cases: [] must return False without crashing; exactly 5 ratings averaging exactly 4.5 is True."
+    - prompt: "is_top_rated: True only with at least TOP_RATED_MIN_RATINGS ratings AND average >= TOP_RATED_MIN_AVERAGE. [] must return False without crashing; exactly 5 ratings averaging 4.5 is True."
       response_code: |
         def is_top_rated(ratings):
             return len(ratings) >= TOP_RATED_MIN_RATINGS and average_rating(ratings) >= TOP_RATED_MIN_AVERAGE

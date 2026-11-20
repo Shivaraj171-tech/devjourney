@@ -15,7 +15,7 @@ suggestion:
 prompt:
   goal: "Ask Byte to make `orders_to_send` fast enough for the lunch rush."
   options:
-    - prompt: "make orders_to_send faster"
+    - prompt: "make orders_to_send in app/kitchen.py as fast as possible: the kitchen screen calls it every few seconds and both lists grow to thousands of orders at lunchtime, so use whatever data structure is fastest."
       response_code: |
         def orders_to_send(orders, sent_ids):
             by_id = {order.order_id: order for order in orders}
@@ -38,7 +38,7 @@ prompt:
       feedback: >-
         Sorting doesn't make `in` on a list any faster, and `sent_ids.sort()` changes the caller's list.
         Byte followed your HOW without questioning it. Describe the goal and the limits instead.
-    - prompt: "orders_to_send in app/kitchen.py is slow at lunchtime because `order.order_id not in sent_ids` scans a list. Make it faster but keep the result exactly the same: the same orders, oldest first, and don't change either input list."
+    - prompt: "orders_to_send is slow because `not in sent_ids` scans a list. Make it faster, but keep the result identical (same orders, oldest first) and don't modify either input."
       response_code: |
         def orders_to_send(orders, sent_ids):
             sent = set(sent_ids)

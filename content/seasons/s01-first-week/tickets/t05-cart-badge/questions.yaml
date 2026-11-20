@@ -10,7 +10,7 @@ questions:
   - prompt: "Why doesn't add_item need a return statement?"
     choices:
       - "Python returns the last line of every function automatically"
-      - "append changes the cart the caller passed in"
+      - "append changes the cart list the caller passed in, so the caller already sees the new item"
       - "It does need one: without return the new item is lost when the function ends"
     answer: 1
     explain: "Lists can be changed in place. The test's cart and the function's cart are the same list, so the change shows up outside the function too."

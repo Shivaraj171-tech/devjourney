@@ -16,7 +16,7 @@ questions:
   - prompt: "Why is copying the \"is it late?\" check into apology.py risky, even when the copy is right?"
     choices:
       - "It isn't: copying a check is fine as long as the copy is correct"
-      - "If the rule changes, every copy must change too"
+      - "If Leo ever changes the rule, someone must remember to update every single copy"
       - "Python runs the copy twice, once in each file, so refunds get paid twice"
     answer: 1
     explain: "One rule, one place: that's the refactoring lesson from launch week. Here the copy was even wrong from day one (>= 45 instead of > 45)."

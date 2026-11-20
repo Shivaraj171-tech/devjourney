@@ -2,7 +2,7 @@ questions:
   - prompt: "Why did Ana's new order contain Sam's items?"
     choices:
       - "add_item adds the price to every order that exists at that moment"
-      - "items=[] is made once and shared by every call"
+      - "The default list in items=[] is made once, so every call that leaves items out shares it"
       - "Python reuses the old order dictionary when create_order is called again"
     answer: 1
     explain: "Default values are created when the function is defined. Both orders pointed at the same list, so adding to one showed up in the other."

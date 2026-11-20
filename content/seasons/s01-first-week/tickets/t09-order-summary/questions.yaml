@@ -9,7 +9,7 @@ questions:
   - prompt: "In discount = discount_amount(subtotal, promo_code), what ends up in discount?"
     choices:
       - "The function discount_amount itself, ready to call later"
-      - "Whatever discount_amount returns"
+      - "The value that discount_amount returns when it runs with that subtotal and code"
       - "The text \"discount_amount(subtotal, promo_code)\" until it's printed"
     answer: 1
     explain: "The brackets call the function. It runs with those inputs, and whatever it returns is stored in the variable."

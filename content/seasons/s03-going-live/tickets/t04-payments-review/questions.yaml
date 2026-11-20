@@ -2,7 +2,7 @@ questions:
   - prompt: "The phone app already shows the right total. Why must the server still work it out itself?"
     choices:
       - "It doesn't need to: the app and server always agree"
-      - "Anyone can send a modified request"
+      - "Anyone can send the server a modified request, so a total from outside can't be trusted"
       - "Phones round prices differently, so the server's maths is more accurate"
     answer: 1
     explain: "The server can't know whether a request came from your app or from someone with a script. Prices, totals and permissions come from data the server controls."

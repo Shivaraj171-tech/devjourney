@@ -15,7 +15,7 @@ suggestion:
 prompt:
   goal: "Ask Byte to write `Order.label()` for the kitchen screen."
   options:
-    - prompt: "write label() for the Order class"
+    - prompt: "Write label() for the Order class. It should return a friendly kitchen-screen line with the order number, the customer's name and the total price in dollars, exactly like 'Order 1001 for Sam: $17.00', for any order."
       response_code: |
         def label(self):
             return f"Order {self.id} for {self.customer_name}: {self.total_price().format()}"

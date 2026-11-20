@@ -9,7 +9,7 @@ questions:
   - prompt: "What does 1250 / 10 give, and why was the menu wrong?"
     choices:
       - "12.5, so the menu was actually right"
-      - "125.0: dividing by 10 leaves it 10x too big"
+      - "125.0: dividing by 10 instead of 100 leaves every price ten times too big"
       - "1.25: dividing by 10 instead of 100 makes every price 10 times too small"
     answer: 1
     explain: "1250 / 10 is 125.0. There are 100 cents in a dollar, so you need to divide by 100 to get 12.5."

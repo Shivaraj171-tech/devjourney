@@ -20,7 +20,7 @@ import {
 import { closeSolvedModal } from "./play";
 
 type ByteYaml = {
-  suggestion?: { file: string; find: string; replace: string; correct: boolean };
+  suggestion?: { file: string; find: string; replace: string; correct: boolean; explain: string };
   prompt?: { options: { prompt: string; verdict: string }[]; best: number };
 };
 
@@ -33,8 +33,17 @@ const seededXp = (t: TicketInfo) => before(t).length * 100;
 // Optional: where to save screenshots for humans (defaults to the e2e output folder).
 const SHOTS = process.env.BYTE_SCREENSHOT_DIR ?? "test-results/e2e";
 
-const wrongTicket = byId("s01-t04"); // Byte's "fix" moves the off-by-one to the start
-const rightTicket = byId("s01-t03"); // Byte's >= fix is correct
+// Pick demo tickets from the content itself, so recalibrating Byte doesn't break the tests:
+// the first ticket whose suggestion is wrong, and the first whose suggestion is right.
+const hasByte = (t: TicketInfo) => {
+  try {
+    return byteOf(t).suggestion !== undefined;
+  } catch {
+    return false;
+  }
+};
+const wrongTicket = all.find((t) => hasByte(t) && byteOf(t).suggestion!.correct === false)!;
+const rightTicket = all.find((t) => hasByte(t) && byteOf(t).suggestion!.correct === true)!;
 const promptTicket = byId("s02-t02"); // prompt card, best = option 2
 
 const card = (page: Page) => page.getByTestId("byte-suggestion");
@@ -81,7 +90,8 @@ test("accepting a wrong suggestion: the next run fails and the lesson is shown",
   await expect(page.getByTestId("run-summary")).not.toContainText("All checks passed");
   await expect(card(page)).toHaveAttribute("data-outcome", "waved-through");
   await expect(page.getByTestId("byte-outcome")).toContainText("You accepted Byte's code without checking");
-  await expect(page.getByTestId("byte-outcome")).toContainText("range(len(prices))");
+  // The suggestion's own explanation is shown (Markdown backticks are rendered away).
+  await expect(page.getByTestId("byte-outcome")).toContainText(sug.explain.replace(/`/g, "").slice(0, 25));
   await page.screenshot({ path: `${SHOTS}/byte-waved-through.png` });
   expect(await xpTotal(page)).toBe(xp); // no bonus, no penalty
 

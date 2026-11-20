@@ -16,7 +16,7 @@ questions:
   - prompt: "Why did the bug only show up after the 3 a.m. restart?"
     choices:
       - "Orders created during the day were never saved, so there was nothing to load"
-      - "Only orders loaded back from JSON had text ids"
+      - "Before the restart the orders were the originals in memory; only loaded orders had text ids"
       - "The night update changed the Order class, so old saved orders no longer fit it"
     answer: 1
     explain: "The data only changed shape on its way through JSON. Bugs at the boundary between a program and its saved data often hide until a restart, a deploy or a second server."

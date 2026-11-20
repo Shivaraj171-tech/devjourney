@@ -2,7 +2,7 @@ questions:
   - prompt: "With the old code, roughly what happens to the work when the number of orders doubles?"
     choices:
       - "It doubles, because there are twice as many orders to look at"
-      - "It roughly quadruples"
+      - "It roughly quadruples: twice the orders, each checked against a list twice as long"
       - "It stays the same, because the list is only read once per order"
     answer: 1
     explain: "The logs show it: 1200 orders took 1240ms, 2400 took 4960ms. A loop with a list search inside it grows with orders × sent ids."
