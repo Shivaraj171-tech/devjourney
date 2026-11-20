@@ -19,7 +19,7 @@ type Props = {
   floorLabel: string;
   season: { id: string; title: string; final?: boolean };
   tickets: ReviewTicket[];
-  next: { title: string; firstTicketId: string | null } | null;
+  next: { title: string; firstTicketId: string | null; final?: boolean } | null;
 };
 
 const TYPE_ORDER: TicketType[] = ["bug", "feature", "read", "review", "incident"];
@@ -147,7 +147,7 @@ export default function PerformanceReviewView({ floorLabel, season, tickets, nex
       <div className="flex flex-col gap-2 sm:flex-row">
         {r.complete && next?.firstTicketId ? (
           <Link href={`/ticket/${next.firstTicketId}`} className="rounded-xl bg-emerald-500 px-5 py-3 text-center font-semibold text-slate-950 hover:bg-emerald-400">
-            Start next floor: {next.title} →
+            {next.final ? "Start the final exam →" : `Start next floor: ${next.title} →`}
           </Link>
         ) : (
           <Link href="/" className="rounded-xl bg-emerald-500 px-5 py-3 text-center font-semibold text-slate-950 hover:bg-emerald-400">

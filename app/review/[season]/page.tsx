@@ -31,7 +31,7 @@ export default async function ReviewPage({ params }: PageProps<"/review/[season]
         newConcept: t.newConcept,
         questionCount: t.questions.length,
       }))}
-      next={next ? { title: next.title, firstTicketId: next.tickets[0]?.id ?? null } : null}
+      next={next ? { title: next.title, firstTicketId: next.tickets[0]?.id ?? null, final: next.final } : null}
     />
   );
 }

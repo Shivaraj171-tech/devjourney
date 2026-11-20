@@ -25,7 +25,7 @@ export type ChatMessage = {
   link?: { href: string; label: string };
 };
 
-export type ChatTicket = { id: string; number: number; title: string; type: TicketType; seasonId: string; seasonTitle: string };
+export type ChatTicket = { id: string; number: number; title: string; type: TicketType; seasonId: string; seasonTitle: string; exam?: boolean };
 
 export type ChatInput = {
   playerName: string;
@@ -135,7 +135,9 @@ export function teamChat(input: ChatInput): ChatMessage[] {
     msgs.push({
       id: `next-${input.next.id}`,
       from: "maya",
-      text: input.solved.length === 0 ? `Your first ticket is ready, ${name}: #${input.next.number} ${sentence(input.next.title)}` : `Next up: #${input.next.number} ${sentence(input.next.title)} Ping me if you get stuck.`,
+      text: input.solved.length === 0 ? `Your first ticket is ready, ${name}: #${input.next.number} ${sentence(input.next.title)}` : input.next.exam
+          ? `Final exam: #${input.next.number} ${sentence(input.next.title)} I'm away this week, so it's you and the checks. You're ready.`
+          : `Next up: #${input.next.number} ${sentence(input.next.title)} Ping me if you get stuck.`,
       link: { href: `/ticket/${input.next.id}`, label: "Open ticket" },
     });
   } else if (last) {

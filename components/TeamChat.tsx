@@ -13,7 +13,7 @@ type Props = { seasons: SeasonSummary[]; progress: Progress; streak: number; now
 
 export default function TeamChat({ seasons, progress, streak, now }: Props) {
   const tickets: ChatTicket[] = seasons.flatMap((s) =>
-    s.tickets.map((t) => ({ id: t.id, number: t.number, title: t.title, type: t.type, seasonId: s.id, seasonTitle: s.title })),
+    s.tickets.map((t) => ({ id: t.id, number: t.number, title: t.title, type: t.type, seasonId: s.id, seasonTitle: s.title, exam: s.final })),
   );
   const order = new Map(tickets.map((t, i) => [t.id, i]));
   const solved = tickets
