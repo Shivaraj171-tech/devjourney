@@ -1,0 +1,38 @@
+predict:
+  - code: |
+      for text in ["15", "ten", "20"]:
+          try:
+              percent = int(text)
+              print("tip", percent)
+          except ValueError:
+              print("bad tip:", text)
+      print("done")
+    question: "What does this print?"
+    answer: |
+      tip 15
+      bad tip: ten
+      tip 20
+      done
+    choices:
+      - |
+        tip 15
+        bad tip: ten
+        tip 20
+        done
+      - |
+        tip 15
+        bad tip: ten
+        done
+      - |
+        tip 15
+        tip ten
+        bad tip: ten
+        tip 20
+        done
+      - |
+        tip 15
+        bad tip: ten
+    explain: >-
+      When `int("ten")` raises ValueError, Python skips the rest of the `try` (so "tip ten" is never
+      printed), runs the `except` block, and then carries on with the loop as normal. A caught error
+      doesn't stop the program: "20" and "done" still run.

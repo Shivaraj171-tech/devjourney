@@ -1,0 +1,15 @@
+id: w047
+title: "Halve it until it's small"
+concept: while-loops
+after: s05-t02
+code: |
+  count = 0
+  n = 20
+  while n > 1:
+      n = n // 2
+      count = count + 1
+  print(count, n)
+question: "What does this print?"
+choices: ["4 1", "5 0", "4 2", "3 2"]
+answer: 0
+explain: "n goes 20, 10, 5, 2, 1: four rounds. When n is 1, the condition 1 > 1 is false, so the loop stops before halving again. Trace the last round by hand: that's where while loops go wrong."

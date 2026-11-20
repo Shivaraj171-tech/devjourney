@@ -1,0 +1,17 @@
+id: w049
+title: "Drawers and folders"
+concept: nested-data
+after: s05-t04
+code: |
+  board = {
+      "pizza": [{"name": "marinara", "vegan": True}],
+      "sides": [{"name": "olives", "vegan": True}, {"name": "fries", "vegan": False}],
+  }
+  count = 0
+  for category in board:
+      count = count + len(board[category])
+  print(count, board["sides"][1]["name"])
+question: "What does this print?"
+choices: ["3 fries", "2 fries", "3 olives", "2 olives"]
+answer: 0
+explain: "The loop adds up the length of each category's LIST of dishes (1 + 2 = 3), not the number of categories (2). board[\"sides\"][1] is the second side (counting from 0), so its name is \"fries\"."

@@ -1,0 +1,23 @@
+questions:
+  - prompt: "Which check would have caught Byte's hotfix (it returns [2, 4, 8, 16] for retry_waits(8))?"
+    choices:
+      - "assert retry_waits(0) == []"
+      - "assert retry_waits(8)[0] == 1"
+      - "assert len(retry_waits(8)) == 4"
+    answer: 1
+    explain: "The hotfix still returns [] for 0, and [2, 4, 8, 16] has 4 items, so both of those checks pass. Only checking the actual values (the first wait must be 1) catches the shifted list."
+  - prompt: "Suppose Byte had started the loop with wait = 0 instead of 1 (and kept wait <= max_wait). Which call would never finish?"
+    choices:
+      - "retry_waits(0) only"
+      - "retry_waits(8) only"
+      - "Both retry_waits(0) and retry_waits(8)"
+      - "Neither: doubling always makes wait bigger"
+    answer: 2
+    explain: "0 * 2 is 0, so wait never grows and wait <= max_wait stays true forever for any max_wait of 0 or more. Doubling only makes a number bigger if it isn't 0."
+  - prompt: "When is a while loop a better fit than a for loop?"
+    choices:
+      - "When you don't know in advance how many rounds it will take"
+      - "When you want to go through every item of a list"
+      - "Whenever the loop needs a counter variable"
+    answer: 0
+    explain: "for is for going through something you already have (a list, a range). while is for \"keep going until something changes\", like doubling waits until they pass a limit."

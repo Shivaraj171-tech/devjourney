@@ -1,0 +1,22 @@
+questions:
+  - prompt: "Byte's draft has `weekday=\"Mon\"` as a default. Why did no test notice the weekend doubling?"
+    choices:
+      - "Because the doubling only runs on real Saturdays, and tests can't know the date"
+      - "Because no test passed a weekday, so the default Monday always skipped it"
+      - "Because tuples like (\"Sat\", \"Sun\") can't be checked by an assert"
+    answer: 1
+    explain: "A default makes an extra invisible to every caller (and test) that doesn't pass that argument. It still changes behaviour the day someone does. Tests can't catch everything, which is why you review the diff against the request."
+  - prompt: "Which check would catch Byte's welcome bonus?"
+    choices:
+      - "points_message for any order contains the word \"points\" and a number"
+      - "points_message gives the same text for two identical orders in a row"
+      - "points_message for a $125.00 order doesn't start with \"WOW!\" any more"
+    answer: 1
+    explain: "The bonus is stored in customers_seen, a list shared between calls, so the first order earns 50 more than an identical second one. Calling it twice exposes the hidden state; the other checks pass or fail for other reasons."
+  - prompt: "Byte's extras might be good ideas. What's the right way to ship one of them?"
+    choices:
+      - "Keep it in this PR, but mention it at the end of the description"
+      - "Ask Byte to rewrite it more carefully and leave it in this PR"
+      - "Take it out of this PR and open its own ticket, so Priya can decide"
+    answer: 2
+    explain: "One change, one decision. A separate ticket lets the person who owns the feature say yes or no, and keeps each PR small enough to review properly."

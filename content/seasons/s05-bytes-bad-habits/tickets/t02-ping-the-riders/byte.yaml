@@ -1,0 +1,11 @@
+# Correct: Byte swaps the two lines in the loop. Trace the first and last round before you trust it.
+suggestion:
+  file: app/dispatch.py
+  find: "        wait = wait * 2\n        waits.append(wait)"
+  replace: "        waits.append(wait)\n        wait = wait * 2"
+  correct: true
+  says: "Found it: I doubled the wait before saving it. Save first, then double, and the 1 is back and the 16 is gone."
+  explain: >-
+    Correct. Now each round saves the wait the condition has just checked (1, 2, 4, 8) and only then
+    doubles it. When wait becomes 16, the condition `16 <= 8` is false, so 16 is never saved. Tracing
+    the first and the last round by hand is the quickest way to check any while loop.

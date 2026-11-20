@@ -1,0 +1,10 @@
+id: s05-t02
+title: "Ping the riders again"
+type: bug
+level: junior
+track: foundations
+concepts: [lists, numbers, loops, while-loops]
+new_concept: while-loops
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/dispatch.py]

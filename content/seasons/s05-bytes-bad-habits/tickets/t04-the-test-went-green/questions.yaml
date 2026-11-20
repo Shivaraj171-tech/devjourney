@@ -1,0 +1,22 @@
+questions:
+  - prompt: "board = {\"sides\": [{\"name\": \"olives\", \"price\": 350, \"vegan\": True}]}. What is board[\"sides\"][0][\"price\"]?"
+    choices:
+      - "350"
+      - "{'name': 'olives', 'price': 350, 'vegan': True}"
+      - "A KeyError, because \"price\" isn't a key of board"
+    answer: 0
+    explain: "Read it from the outside in: board[\"sides\"] is the list of sides, [0] is its first dish (a dictionary), and [\"price\"] is that dish's price. The outer dictionary has no \"price\" key, but by then you're no longer asking it."
+  - prompt: "Byte's vegan_dishes saves the category instead of the dish's name. Which board would make its answer look right, so a test with it couldn't catch the bug?"
+    choices:
+      - "{\"drinks\": [{\"name\": \"water\", \"price\": 100, \"vegan\": True}]}"
+      - "{\"drinks\": [{\"name\": \"drinks\", \"price\": 100, \"vegan\": True}]}"
+      - "{\"drinks\": [{\"name\": \"cola\", \"price\": 250, \"vegan\": False}]}"
+    answer: 1
+    explain: "A dish called \"drinks\" in the \"drinks\" category gives ['drinks'] either way, so the bug is invisible. With no vegan dishes both versions return [] too, so the third board can't catch it either. The water board does: ['water'] vs ['drinks']."
+  - prompt: "A test goes red on Byte's code. When is changing the test's expected value the right fix?"
+    choices:
+      - "When the code's output looks reasonable and the old expected value seems out of date"
+      - "When the spec itself has changed, and the person who owns the spec agrees"
+      - "When the test is the only one failing and every other test is green"
+    answer: 1
+    explain: "A red test is the code disagreeing with the spec. Only a change to the spec (decided by a person, like Maya or Leo) is a reason to change what the test expects. \"The output looks reasonable\" is exactly how Byte's edit slipped through."

@@ -1,0 +1,23 @@
+questions:
+  - prompt: "Byte's tip_line wraps everything in `except Exception:`. Which call shows that it also hides a bug in OUR code?"
+    choices:
+      - "tip_line(\"ten\", 2000)"
+      - "tip_line(\"15\", None)"
+      - "tip_line(\"15\", 2000)"
+    answer: 1
+    explain: "A missing subtotal is our mistake, not the customer's, and Byte's version turns the TypeError into 'Tip: $0.00'. \"ten\" is a customer mistake (it SHOULD be caught, just with a better message), and \"15\" with 2000 works in both versions."
+  - prompt: "What happens when Python runs int(\"15%\")?"
+    choices:
+      - "It returns 15 and ignores the %"
+      - "It raises ValueError"
+      - "It raises TypeError"
+      - "It returns None"
+    answer: 1
+    explain: "\"15%\" is a string, which is the right TYPE for int(), but its VALUE isn't a whole number, so int() raises ValueError. int(None) would be the TypeError: the wrong type altogether."
+  - prompt: "After your fix, tip_line(\"15\", None) crashes with a TypeError. Is that what we want?"
+    choices:
+      - "Yes: it's a bug in our code, and a crash puts it in the logs"
+      - "No: catch TypeError too, so the checkout always shows a tip"
+      - "No: a TypeError means the customer typed the tip wrong"
+    answer: 0
+    explain: "Only the customer's typing deserves a friendly message. A missing subtotal means some of OUR code passed the wrong thing; hiding it as 'Tip: $0.00' would short-change riders for weeks before anyone noticed."

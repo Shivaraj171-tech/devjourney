@@ -1,0 +1,13 @@
+id: w048
+title: "Strip, lower, slice"
+concept: string-methods
+after: s05-t03
+code: |
+  code = " Orbit20 "
+  phone = "+1 555 010 2345"
+  short = code.strip().lower()[:5]
+  print(short + "-" + phone[-4:])
+question: "What does this print?"
+choices: ["orbit-2345", "orbit2-2345", "Orbit-2345", "orbit-+1 555 010"]
+answer: 0
+explain: "strip() removes the outer spaces, lower() gives \"orbit20\", and [:5] keeps positions 0 to 4: \"orbit\". phone[-4:] is the last four characters. phone[:-4] would be everything EXCEPT them."

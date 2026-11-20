@@ -1,0 +1,10 @@
+id: s05-t04
+title: "Make the test go green (the right way)"
+type: bug
+level: junior
+track: ai
+concepts: [lists, dictionaries, loops, writing-tests, nested-data]
+new_concept: nested-data
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/menu_board.py, team_tests/test_menu_board.py]
