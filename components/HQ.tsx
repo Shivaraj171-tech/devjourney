@@ -9,6 +9,8 @@ import DailyWarmup from "./DailyWarmup";
 import HumanInTheLoop from "./HumanInTheLoop";
 import Markdown from "./Markdown";
 import Onboarding from "./Onboarding";
+import TeamChat from "./TeamChat";
+import { useRoomChanges } from "@/lib/useOfficeSeen";
 import { BADGES, currentStreak, incidentBonus, leaderboard, rankFor, type BadgeContext } from "@/lib/game/rules";
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
 import type { TicketType, Warmup } from "@/lib/content/types";
@@ -45,6 +47,16 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
   const allTickets = seasons.flatMap((s) => s.tickets);
   const solved = allTickets.filter((t) => ticketProgress(progress, t.id).solved);
   const current = allTickets.find((t) => !ticketProgress(progress, t.id).solved);
+
+  // Rooms merged or unlocked since the last visit animate once (lib/game/rooms.ts).
+  const openIds = seasons.flatMap((s, floor) =>
+    s.tickets.filter((t, i) => {
+      if (ticketProgress(progress, t.id).solved) return false;
+      if (i > 0) return ticketProgress(progress, s.tickets[i - 1].id).solved;
+      return floor === 0 || seasons[floor - 1].tickets.every((p) => ticketProgress(progress, p.id).solved);
+    }).map((t) => t.id),
+  );
+  const fresh = useRoomChanges({ solved: solved.map((t) => t.id), open: openIds }, isClient);
 
   const hitl = hitlScore(Object.values(progress.tickets));
   const badgeCtx: BadgeContext = {
@@ -126,6 +138,8 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
         <Stat label="Day streak" value={`🔥 ${streak}`} />
       </section>
 
+      {now && <TeamChat seasons={seasons} progress={progress} streak={streak} now={now} />}
+
       <HumanInTheLoop score={hitl} />
 
       {now && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={new Set(solved.map((t) => t.id))} now={now} />}
@@ -141,6 +155,11 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
             <h2 className="text-xl font-bold text-white">
               🏢 Floor {floor + 1} · {season.title}
               {!floorOpen && <span className="ml-2 text-sm font-normal text-slate-500">🔒 Opens when you finish Floor {floor}</span>}
+              {season.tickets.every((t) => ticketProgress(progress, t.id).solved) && (
+                <Link href={`/review/${season.id}`} data-testid={`review-link-${season.id}`} className="ml-2 align-middle text-sm font-semibold text-amber-300 hover:underline">
+                  📋 Your performance review →
+                </Link>
+              )}
             </h2>
             <Markdown text={season.intro} className="mt-1 max-w-3xl text-sm text-slate-400" />
           </div>
@@ -178,8 +197,9 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
                 </div>
               );
               return (
-                <li key={t.id} data-testid={`room-${t.id}`} data-state={state}>
+                <li key={t.id} data-testid={`room-${t.id}`} data-state={state} data-fresh={fresh[t.id]} className="relative">
                   {state === "locked" ? body : <Link href={`/ticket/${t.id}`} className="block h-full">{body}</Link>}
+                  {fresh[t.id] && <RoomFlourish change={fresh[t.id]} />}
                 </li>
               );
             })}
@@ -232,6 +252,25 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
         </section>
       </div>
     </div>
+  );
+}
+
+/** One-time flourish on a room that changed since the last visit: a MERGED stamp, or a door glow. */
+function RoomFlourish({ change }: { change: "merged" | "unlocked" }) {
+  if (change === "merged") {
+    return (
+      <span className="room-stamp pointer-events-none absolute top-8 right-2 rounded-md border-2 border-emerald-300 px-1.5 py-0.5 text-[11px] font-black tracking-widest text-emerald-200 uppercase">
+        Merged<span className="sr-only"> since your last visit</span>
+      </span>
+    );
+  }
+  return (
+    <>
+      <span className="room-unlocked pointer-events-none absolute inset-0 rounded-2xl" aria-hidden />
+      <span className="pop-in pointer-events-none absolute -top-2 right-2 rounded-full bg-violet-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-lg">
+        🔓 New<span className="sr-only">: unlocked since your last visit</span>
+      </span>
+    </>
   );
 }
 
