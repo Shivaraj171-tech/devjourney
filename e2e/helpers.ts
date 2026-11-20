@@ -155,10 +155,28 @@ export async function seedSolved(page: Page, tickets: TicketInfo[]) {
   await page.reload();
 }
 
-/** Every ticket in every season, in folder order (seasons are added over time). */
-export function allSeasonTickets(): TicketInfo[] {
+type SeasonFlags = { chain?: boolean; final?: boolean };
+
+function seasonDirs(): { slug: string; flags: SeasonFlags }[] {
   return readdirSync(SEASONS_DIR)
     .filter((d) => statSync(join(SEASONS_DIR, d)).isDirectory())
     .sort()
-    .flatMap((d) => seasonTickets(d));
+    .map((slug) => ({ slug, flags: readYaml<SeasonFlags>(join(SEASONS_DIR, slug, "season.yaml")) }));
+}
+
+/**
+ * Every ticket of every ON-CHAIN season (the main story, rooms `room-<id>` on the HQ),
+ * in folder order (seasons are added over time). Off-chain seasons such as the final
+ * exam (season.yaml `chain: false`) are left out: see finalSeasonTickets().
+ */
+export function allSeasonTickets(): TicketInfo[] {
+  return seasonDirs()
+    .filter((s) => s.flags.chain !== false)
+    .flatMap((s) => seasonTickets(s.slug));
+}
+
+/** The final exam's tickets (season.yaml `final: true`), shown as `exam-room-<id>` on the HQ. */
+export function finalSeasonTickets(): TicketInfo[] {
+  const final = seasonDirs().find((s) => s.flags.final === true);
+  return final ? seasonTickets(final.slug) : [];
 }

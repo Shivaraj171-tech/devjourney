@@ -6,6 +6,7 @@ import { useSyncExternalStore } from "react";
 import { dayKey, WARMUP_XP } from "../game/rules";
 import { byteXp, type ByteDecision, type PromptRecord, type SuggestionRecord } from "../game/byte";
 import { formatsXp, recordAttempt, recordPrediction, type FormatRecord } from "../game/formats";
+import type { SkillsAttempt, SkillsCheckProgress, SkillsCheckResult } from "../game/skillsCheck";
 
 const KEY = "devjourney:progress:v1";
 
@@ -50,6 +51,8 @@ export type Progress = {
   warmups?: Record<string, { id: string; correct: boolean }>;
   /** True once the "how it works" intro has been dismissed. */
   onboarded?: boolean;
+  /** The 12-question skills check: baseline and final results (optional: older saves have none). */
+  skillsCheck?: SkillsCheckProgress;
   tickets: Record<string, TicketProgress>;
 };
 
@@ -291,6 +294,19 @@ export const formatActions = {
   /** One "Break Byte's code" or Parsons check. No-op once that item is done. */
   attempt(id: string, key: string, kind: "break_it" | "parsons", success: boolean, extra?: { input?: string; order?: number[] }) {
     updateFormat(id, key, (rec) => recordAttempt(kind, rec, success, extra));
+  },
+};
+
+// ---------- the skills check (lib/game/skillsCheck.ts) ----------
+
+export const skillsCheckActions = {
+  /** Save a finished attempt. Each attempt is taken once: a second save is ignored. */
+  finish(attempt: SkillsAttempt, result: SkillsCheckResult) {
+    update((p) => (p.skillsCheck?.[attempt] ? p : { ...p, skillsCheck: { ...p.skillsCheck, [attempt]: result } }));
+  },
+  /** "Skip for now" on the baseline offer. */
+  skipBaseline() {
+    update((p) => ({ ...p, skillsCheck: { ...p.skillsCheck, baselineSkipped: true } }));
   },
 };
 

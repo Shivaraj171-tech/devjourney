@@ -13,7 +13,7 @@ export default function TopBar() {
   const streak = isClient ? currentStreak(progress.activeDays, new Date()) : 0;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/90 backdrop-blur print:hidden">
       <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-3 sm:gap-4 sm:px-4">
         <Link href="/" className="flex items-center gap-2 font-bold text-white">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-cyan-400 text-lg">🛰️</span>

@@ -1,0 +1,10 @@
+2026-11-19 12:31:07 INFO  loyalty.api     POST /loyalty/redeem customer=c-1042 points=500 order=o-7731
+2026-11-19 12:31:07 INFO  loyalty.ledger  balance(c-1042) = 620 -> can_redeem(500) = True
+2026-11-19 12:31:07 INFO  loyalty.ledger  redeem ok customer=c-1042 new_balance=120
+2026-11-19 23:59:00 INFO  nightly.audit   customer=c-1042 entries: earn +620 (o-7102), expire -300, redeem -500 (o-7731)
+2026-11-19 23:59:00 WARN  nightly.audit   customer=c-1042 sum of all ledger entries = -180 (NEGATIVE)
+2026-11-19 23:59:00 INFO  nightly.audit   customer=c-2290 entries: earn +900 (o-6610), expire -900, redeem -400 (o-7790)
+2026-11-19 23:59:00 WARN  nightly.audit   customer=c-2290 sum of all ledger entries = -400 (NEGATIVE)
+2026-11-19 23:59:00 INFO  nightly.audit   customer=c-3001 entries: earn +250 (o-7001), redeem -100 (o-7044)
+2026-11-19 23:59:00 INFO  nightly.audit   customer=c-3001 sum of all ledger entries = 150 (ok)
+2026-11-19 23:59:01 WARN  nightly.audit   37 customers with a negative balance. Every one of them has an "expire" entry.

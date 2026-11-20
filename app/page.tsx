@@ -1,5 +1,5 @@
 import HQ, { type SeasonSummary } from "@/components/HQ";
-import { loadSeasons, loadWarmups } from "@/lib/content/load";
+import { loadSeasons, loadSkillsCheck, loadWarmups } from "@/lib/content/load";
 
 export default function Home() {
   // Only send what the office map needs to the browser (no code, no tests).
@@ -7,6 +7,8 @@ export default function Home() {
     id: s.id,
     title: s.title,
     intro: s.intro,
+    chain: s.chain,
+    final: s.final,
     tickets: s.tickets.map((t) => ({
       id: t.id,
       number: t.number,
@@ -20,5 +22,5 @@ export default function Home() {
       timeLimitMinutes: t.incident?.timeLimitMinutes,
     })),
   }));
-  return <HQ seasons={seasons} warmups={loadWarmups()} />;
+  return <HQ seasons={seasons} warmups={loadWarmups()} hasSkillsCheck={loadSkillsCheck() !== null} />;
 }

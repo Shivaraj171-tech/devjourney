@@ -1,0 +1,16 @@
+id: s99
+title: "Byte's Week Alone"
+# Off the main codebase: an unseen module, so the evolving-codebase check is skipped.
+chain: false
+# The final exam: no hints, no lesson, no Byte suggestions, no concept label.
+final: true
+intro: |
+  Maya and the team are at a conference all week, and Byte has been left in
+  charge of a brand-new part of Orbit Orders: the **loyalty points service**.
+  You have never seen this code. Nobody will give you hints, there is no
+  lesson, and Byte won't suggest anything. Just you, the code and the CI checks.
+  Three tickets. Show us you are the human in the loop.
+tickets:
+  - t01-bonus-points-pr
+  - t02-negative-balances
+  - t03-guard-the-points

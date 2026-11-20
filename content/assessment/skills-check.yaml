@@ -1,0 +1,211 @@
+# The 12-question skills check, taken twice: a "baseline" after onboarding
+# (skippable) and a "final" when the final exam (Byte's Week Alone) opens.
+# Format and checks: scripts/validate_content.py (check_skills_check).
+# Every answer is verified by running the code; `reference`, `fix` and `check`
+# are for the validator only and are never sent to the browser.
+title: "Skills check"
+intro: >
+  12 quick questions, about 6 minutes. Read the code, predict what it does,
+  and catch Byte's mistakes. No hints, no running the code, one answer each.
+items:
+  # ---------- predict the output ----------
+  - id: predict-big-prices
+    kind: predict
+    prompt: "What does this print?"
+    code: |
+      prices = [300, 450, 250]
+      total = 0
+      for p in prices:
+          if p > 300:
+              total += p
+      print(total)
+    choices: ["450", "750", "1000", "0"]
+    answer: 0
+    explain: "Only 450 is greater than 300 (300 itself is not), so total is 450."
+
+  - id: predict-missing-return
+    kind: predict
+    prompt: "What does this print?"
+    code: |
+      def label(n):
+          if n == 1:
+              return "1 item"
+          print(f"{n} items")
+
+      text = label(3)
+      print(text)
+    choices: ["3 items\nNone", "3 items", "None", "3 items\n3 items"]
+    answer: 0
+    explain: >
+      label(3) prints "3 items" but never reaches a return, so it returns None,
+      and print(text) prints None.
+
+  - id: predict-shared-list
+    kind: predict
+    prompt: "What does this print?"
+    code: |
+      cart = ["pizza"]
+      saved = cart
+      saved.append("salad")
+      print(len(cart), len(saved))
+    choices: ["1 2", "2 2", "2 1", "1 1"]
+    answer: 1
+    explain: "saved = cart doesn't copy the list: both names point at the same list, so both have 2 items."
+
+  # ---------- which input catches the bug? ----------
+  - id: catch-free-delivery
+    kind: catch_input
+    prompt: "Byte wrote this function; the docstring is the spec. Which test input catches its bug?"
+    code: |
+      def delivery_fee(subtotal_cents):
+          """Free delivery from $25.00 (2500 cents) up. Otherwise 399."""
+          if subtotal_cents > 2500:
+              return 0
+          return 399
+    reference: |
+      def delivery_fee(subtotal_cents):
+          if subtotal_cents >= 2500:
+              return 0
+          return 399
+    call: "delivery_fee({input})"
+    choices: ["1000", "2500", "4000", "2499"]
+    answer: 1
+    explain: "Exactly 2500 should be free, but > makes it pay 399. Every other input gives the right fee."
+
+  - id: catch-empty-ratings
+    kind: catch_input
+    prompt: "Byte wrote this function; the docstring is the spec. Which test input catches its bug?"
+    code: |
+      def average_rating(ratings):
+          """Average of the ratings, or 0 when there are none yet."""
+          return sum(ratings) / len(ratings)
+    reference: |
+      def average_rating(ratings):
+          if not ratings:
+              return 0
+          return sum(ratings) / len(ratings)
+    call: "average_rating({input})"
+    choices: ["[4, 5]", "[]", "[3]", "[5, 5, 5]"]
+    answer: 1
+    explain: "With no ratings, len(ratings) is 0 and Byte's code crashes with ZeroDivisionError instead of returning 0."
+
+  - id: catch-leading-spaces
+    kind: catch_input
+    prompt: "Byte wrote this function; the docstring is the spec. Which test input catches its bug?"
+    code: |
+      def first_name(full):
+          """The first word of a name. Extra spaces anywhere are ignored."""
+          return full.split(" ")[0]
+    reference: |
+      def first_name(full):
+          return full.split()[0]
+    call: "first_name({input})"
+    choices: ['"Ana Lucia"', '"Bo"', '"  Ana"', '"Ana  Lucia"']
+    answer: 2
+    explain: >
+      split(" ") splits on every single space, so "  Ana" gives ['', '', 'Ana'] and
+      the first "word" is ''. split() with no argument ignores extra spaces.
+
+  # ---------- spot the bug line ----------
+  - id: spot-count-late
+    kind: spot_line
+    prompt: "Byte wrote this. Which line has the bug?"
+    code: |
+      def count_late(orders):
+          """How many orders took MORE than 45 minutes."""
+          late = 0
+          for minutes in orders:
+              if minutes > 45:
+                  late = 1
+          return late
+    choices: ["late = 0", "for minutes in orders:", "if minutes > 45:", "late = 1"]
+    answer: 3
+    fix: "late += 1"
+    check: |
+      assert count_late([50, 60, 10]) == 2
+    explain: "late = 1 sets the count to 1 every time instead of adding one. It should be late += 1."
+
+  - id: spot-tip-percent
+    kind: spot_line
+    prompt: "Byte wrote this. Which line has the bug?"
+    code: |
+      def total_with_tip(subtotal, tip_percent):
+          """Subtotal plus a tip. tip_percent is a percentage, e.g. 10 means 10%."""
+          tip = subtotal * tip_percent
+          return subtotal + tip
+    choices: ["def total_with_tip(subtotal, tip_percent):", "tip = subtotal * tip_percent", "return subtotal + tip"]
+    answer: 1
+    fix: "tip = subtotal * tip_percent / 100"
+    check: |
+      assert total_with_tip(2000, 10) == 2200
+    explain: "10 means 10%, so the tip is subtotal * tip_percent / 100. Byte multiplies by 10: a 1000% tip."
+
+  - id: spot-cheapest
+    kind: spot_line
+    prompt: "Byte wrote this. Which line has the bug?"
+    code: |
+      def cheapest(prices):
+          """The lowest price in a non-empty list."""
+          best = prices[0]
+          for p in prices:
+              if p > best:
+                  best = p
+          return best
+    choices: ["best = prices[0]", "for p in prices:", "if p > best:", "return best"]
+    answer: 2
+    fix: "if p < best:"
+    check: |
+      assert cheapest([5, 2, 9]) == 2
+    explain: "p > best keeps the HIGHEST price. To find the cheapest it must be p < best."
+
+  # ---------- pick the right one of Byte's 3 answers ----------
+  - id: pick-opening-hours
+    kind: pick_answer
+    prompt: >
+      Spec: is_open(hour) is True from 11:00 up to (but not including) 22:00.
+      You asked Byte three times and got three answers. Which one is right?
+    choices:
+      - "def is_open(hour):\n    return hour >= 11 and hour < 22"
+      - "def is_open(hour):\n    return hour > 11 and hour <= 22"
+      - "def is_open(hour):\n    return hour >= 11 or hour < 22"
+    answer: 0
+    check: |
+      assert is_open(11) and is_open(21)
+      assert not is_open(10) and not is_open(22)
+    explain: >
+      11 is open and 22 is closed: hour >= 11 and hour < 22. The second answer gets
+      both edges wrong, and the third uses `or`, which is True for every hour.
+
+  - id: pick-unique-ids
+    kind: pick_answer
+    prompt: >
+      Spec: unique_ids(ids) returns the order ids without repeats, keeping the order
+      each id was first seen. Which of Byte's three answers is right?
+    choices:
+      - "def unique_ids(ids):\n    return list(set(ids))"
+      - "def unique_ids(ids):\n    seen = []\n    for i in ids:\n        if i not in seen:\n            seen.append(i)\n    return seen"
+      - "def unique_ids(ids):\n    seen = []\n    for i in ids:\n        if ids.count(i) == 1:\n            seen.append(i)\n    return seen"
+    answer: 1
+    check: |
+      assert unique_ids([30, 10, 30, 20]) == [30, 10, 20]
+      assert unique_ids([]) == []
+    explain: >
+      A set forgets the order, and keeping only ids that appear once drops repeated
+      ids completely. Checking `if i not in seen` keeps each id once, in order.
+
+  - id: pick-menu-price
+    kind: pick_answer
+    prompt: >
+      Spec: price_of(menu, item) returns the item's price from the menu dict, or None
+      if the item isn't on the menu. Which of Byte's three answers is right?
+    choices:
+      - "def price_of(menu, item):\n    return menu[item]"
+      - "def price_of(menu, item):\n    return menu.get(item)"
+      - "def price_of(menu, item):\n    return menu.get_or_none(item)"
+    answer: 1
+    check: |
+      assert price_of({"pizza": 1200}, "pizza") == 1200
+      assert price_of({"pizza": 1200}, "sushi") is None
+    explain: >
+      menu[item] crashes with KeyError for a missing item, and dicts have no
+      get_or_none method (Byte made it up). dict.get(item) returns None when it's missing.

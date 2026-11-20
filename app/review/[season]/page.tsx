@@ -21,8 +21,8 @@ export default async function ReviewPage({ params }: PageProps<"/review/[season]
   const next = seasons[index + 1];
   return (
     <PerformanceReviewView
-      floor={index + 1}
-      season={{ id: season.id, title: season.title }}
+      floorLabel={season.final ? "Final exam" : `Floor ${index + 1}`}
+      season={{ id: season.id, title: season.title, final: season.final }}
       tickets={season.tickets.map((t) => ({
         id: t.id,
         number: t.number,

@@ -182,6 +182,11 @@ export type Ticket = {
   byte?: ByteContent;
   /** Extra task formats (formats.yaml), if any. */
   formats?: TaskFormatsContent;
+  /**
+   * True on the final exam's tickets (season.yaml `final: true`): no hints, no
+   * lesson, no Byte, no concept label. Absent everywhere else.
+   */
+  final?: true;
 };
 
 /** A 2-minute daily code-reading challenge (content/warmups/*.yaml). */
@@ -203,5 +208,31 @@ export type Season = {
   slug: string;
   title: string;
   intro: string;
+  /** false: off-chain (an unseen module, not part of the evolving codebase). Default true. */
+  chain: boolean;
+  /** true: the final exam ("Byte's Week Alone"). Default false. */
+  final: boolean;
   tickets: Ticket[];
 };
+
+// ---------- the skills check (content/assessment/skills-check.yaml) ----------
+
+export type SkillsCheckKind = "predict" | "catch_input" | "spot_line" | "pick_answer";
+
+/**
+ * One question. What the validator uses to verify the answer (reference code,
+ * the fixed line, asserts) stays on the server.
+ */
+export type SkillsCheckItem = {
+  id: string;
+  kind: SkillsCheckKind;
+  prompt: string;
+  /** The snippet to read (absent on pick_answer, whose choices are code). */
+  code?: string;
+  choices: string[];
+  /** 0-based index into choices. */
+  answer: number;
+  explain: string;
+};
+
+export type SkillsCheck = { title: string; intro: string; items: SkillsCheckItem[] };

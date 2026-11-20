@@ -12,6 +12,8 @@ type Props = {
   playerName: string;
   next: TicketSummary | undefined;
   nextFloor: number;
+  /** The next ticket is part of the final exam (no concept label: it's an exam). */
+  nextIsExam?: boolean;
   merged: number;
   total: number;
   streak: number;
@@ -19,7 +21,7 @@ type Props = {
   xp: number;
 };
 
-export default function TodayCard({ playerName, next, nextFloor, merged, total, streak, warmup, xp }: Props) {
+export default function TodayCard({ playerName, next, nextFloor, nextIsExam = false, merged, total, streak, warmup, xp }: Props) {
   const { rank, next: nextRank, progress } = rankFor(xp);
   const name = playerName === "You" ? "dev" : playerName;
   const type = next ? TICKET_TYPE[next.type] : null;
@@ -43,8 +45,14 @@ export default function TodayCard({ playerName, next, nextFloor, merged, total, 
                   <span aria-hidden>{type.icon}</span> {type.label}
                 </span>
                 <span>~{next.estimatedMinutes} min</span>
-                <span>New idea: {conceptLabel(next.newConcept)}</span>
-                <span>Floor {nextFloor}</span>
+                {nextIsExam ? (
+                  <span>🎓 Final exam · no hints</span>
+                ) : (
+                  <>
+                    <span>New idea: {conceptLabel(next.newConcept)}</span>
+                    <span>Floor {nextFloor}</span>
+                  </>
+                )}
               </p>
             </>
           ) : (

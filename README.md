@@ -26,6 +26,9 @@ No accounts, no setup: Python runs in your browser (Pyodide), and progress is sa
   | 4 | Month Two: Working with Byte | 5 | verifying AI claims, testing AI code first, hallucinated APIs, regressions, giving AI context |
 
   Plus 45 daily warm-ups (`content/warmups/`).
+
+- **Final exam: Byte's Week Alone** (`content/seasons/s99-final`, `chain: false` + `final: true` in season.yaml): an unseen module (the loyalty points service), 3 tickets (review Byte's PR with 3 mistakes, fix a bug from the logs, write tests that catch Byte's 4 earlier versions). Exam mode: no hints, lesson, Byte or concept label; normal CI checks. It opens when the nearest on-chain season before it is complete (`lib/content/order.ts`), so new seasons slot in before it with no code change.
+- **Skills check** (`/skills-check/`, `content/assessment/skills-check.yaml`): 12 questions (predict the output, which input catches the bug, spot the bug line, pick the right one of Byte's 3 answers), every answer verified by running it. Taken as a skippable baseline after onboarding and again when the final exam opens; "Baseline 5/12 → Final 11/12" shows on the HQ, the performance review and as a shareable line. Merging the 3 exam tickets and taking the final check unlocks the printable **Human in the loop: verified** certificate (`/certificate/`).
 - **Research**: competitor analysis in [`docs/research/competitors.md`](docs/research/competitors.md).
 
 ## Run it

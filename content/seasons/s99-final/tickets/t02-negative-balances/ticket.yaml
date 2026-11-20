@@ -1,0 +1,11 @@
+id: s99-t02
+title: "Negative balances in the nightly audit"
+type: incident
+level: mid
+track: debugging
+concepts: [loops, dictionaries, reading-code]
+new_concept: final-exam
+estimated_minutes: 15
+tests_visible: false
+files_editable: [loyalty/ledger.py]
+time_limit_minutes: 15

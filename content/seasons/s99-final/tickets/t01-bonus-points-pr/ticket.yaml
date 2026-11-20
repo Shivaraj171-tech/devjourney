@@ -1,0 +1,10 @@
+id: s99-t01
+title: "Byte's bonus points PR"
+type: review
+level: mid
+track: ai
+concepts: [code-review, boolean-logic, mutable-shared-data, hallucinated-apis]
+new_concept: final-exam
+estimated_minutes: 15
+tests_visible: false
+files_editable: []

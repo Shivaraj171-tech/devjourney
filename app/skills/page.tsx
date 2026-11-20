@@ -4,7 +4,8 @@ import { loadSeasons } from "@/lib/content/load";
 export const metadata = { title: "Skills · Orbit Orders HQ" };
 
 export default function SkillsPage() {
-  const skills: Skill[] = loadSeasons().flatMap((s) =>
+  // The final exam teaches no new concept (it's an exam), so it has no skills here.
+  const skills: Skill[] = loadSeasons().filter((s) => !s.final).flatMap((s) =>
     s.tickets.map((t) => ({
       ticketId: t.id,
       ticketTitle: t.title,
