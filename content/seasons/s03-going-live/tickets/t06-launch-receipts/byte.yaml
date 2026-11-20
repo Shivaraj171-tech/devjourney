@@ -1,0 +1,38 @@
+# Prompt card: a refactor needs a clear target and the right source of truth.
+prompt:
+  goal: "Ask Byte to write the ONE `order_total` that all three messages will use."
+  options:
+    - prompt: "refactor receipts.py"
+      response_code: |
+        class ReceiptService:
+            def __init__(self, order, promo_code=None):
+                self.order = order
+                self.promo_code = promo_code
+
+            def total(self):
+                return self.order.subtotal() + delivery_fee(self.order.subtotal())
+      verdict: vague
+      feedback: >-
+        "Refactor" can mean anything. Byte invented a class nobody asked for, and its total quietly
+        dropped the discount, so behaviour changed. Say what should change AND what must stay the same.
+    - prompt: "Write order_total(order, promo_code=None) in app/receipts.py. It's what the customer pays in cents: order.subtotal() minus discount_amount(subtotal, promo_code) plus delivery_fee(subtotal). Don't change any behaviour."
+      response_code: |
+        def order_total(order, promo_code=None):
+            subtotal = order.subtotal()
+            discount = discount_amount(subtotal, promo_code)
+            return subtotal - discount + delivery_fee(subtotal)
+      verdict: good
+      feedback: >-
+        Exact name, exact formula, and "don't change behaviour". Byte's answer matches the two
+        copies that were right. Making the three messages call it is still your job.
+    - prompt: "Make all the receipts show the same total. The SMS one is correct, copy that."
+      response_code: |
+        def order_total(order, promo_code=None):
+            subtotal = order.subtotal()
+            return subtotal + delivery_fee(subtotal)
+      verdict: wrong
+      feedback: >-
+        You pointed Byte at the wrong source of truth: the SMS is the copy that FORGOT the discount.
+        Byte copied the bug into the one place everything will now use. Context only helps when
+        it's correct.
+  best: 1

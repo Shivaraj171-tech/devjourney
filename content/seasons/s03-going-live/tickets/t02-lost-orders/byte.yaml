@@ -1,0 +1,12 @@
+# Half a fix: the dictionary key is a number again, the Order inside is not.
+suggestion:
+  file: app/storage.py
+  find: "        orders[order_id] = order"
+  replace: "        orders[int(order_id)] = order"
+  correct: false
+  says: "JSON turned your keys into text. Convert the key back with int() and lookups work again."
+  explain: >-
+    Half a fix. `loaded[1001]` works now, but the Order was built a few lines earlier with the
+    text id "1001", so `order.order_id` is still a string and anything that compares or shows
+    it is wrong. Convert once, before you build the Order: `order_id = int(order_id)` at the
+    top of the loop.

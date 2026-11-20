@@ -4,6 +4,7 @@
 // (private windows, disabled site data) and the app must still work.
 import { useSyncExternalStore } from "react";
 import { dayKey, WARMUP_XP } from "../game/rules";
+import { byteXp, type ByteDecision, type PromptRecord, type SuggestionRecord } from "../game/byte";
 
 const KEY = "devjourney:progress:v1";
 
@@ -31,6 +32,10 @@ export type TicketProgress = {
   reviewFalseAlarms?: string[];
   /** Incident tickets: when the learner first opened it (ISO). Persisted so a reload doesn't reset the timer. */
   incidentStartedAt?: string;
+  /** What the learner did with Byte's suggestion (byte.yaml), if it had one. */
+  byteSuggestion?: SuggestionRecord;
+  /** First pick on the ticket's "Ask Byte" prompt card. */
+  bytePrompt?: PromptRecord;
 };
 
 export type Progress = {
@@ -128,7 +133,7 @@ export function ticketProgress(p: Progress, id: string): TicketProgress {
 }
 
 export function totalXp(p: Progress): number {
-  const tickets = Object.values(p.tickets).reduce((sum, t) => sum + t.solveXp + t.quizXp, 0);
+  const tickets = Object.values(p.tickets).reduce((sum, t) => sum + t.solveXp + t.quizXp + byteXp(t), 0);
   const warmups = Object.values(p.warmups ?? {}).filter((w) => w.correct).length * WARMUP_XP;
   return tickets + warmups;
 }
@@ -231,5 +236,26 @@ export const incidentActions = {
   start(id: string) {
     if (getSnapshot().tickets[id]?.incidentStartedAt) return;
     patchTicket(id, (t) => (t.incidentStartedAt ? t : { ...t, incidentStartedAt: new Date().toISOString() }));
+  },
+};
+
+// ---------- Byte (the office AI) ----------
+
+export const byteActions = {
+  /**
+   * Record the learner's decision on Byte's suggestion (first decision only).
+   * For "accept" and "edit", `apply` is the file and its new text, saved as the learner's code.
+   */
+  decide(id: string, decision: ByteDecision, correct: boolean, apply?: { path: string; text: string }) {
+    updateTicket(id, (t) => {
+      if (t.byteSuggestion) return t;
+      const record: SuggestionRecord = { decision, correct, runsAtDecision: t.runs };
+      const code = apply ? { ...t.code, [apply.path]: apply.text } : t.code;
+      return { ...t, code, byteSuggestion: record };
+    });
+  },
+  /** Record the first prompt picked on the "Ask Byte" card; later picks are just for comparing. */
+  pickPrompt(id: string, index: number, best: boolean) {
+    updateTicket(id, (t) => (t.bytePrompt ? t : { ...t, bytePrompt: { firstPick: index, best } }));
   },
 };

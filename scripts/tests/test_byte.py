@@ -1,0 +1,211 @@
+"""Tests for byte.yaml (Byte's suggestions and prompt cards) in the content validator.
+
+Run from the repo root:
+    python3 -m unittest discover -s scripts/tests -v
+"""
+
+import shutil
+import tempfile
+import textwrap
+import unittest
+from pathlib import Path
+
+# Only helpers (not test classes) are imported, so no test runs twice.
+from test_runner_and_validator import GOOD_YAML, make_ticket, write
+from test_review_incident import make_review_ticket
+
+import validate_content as vc
+
+# make_ticket's starter is "return x + 2" (fails), its solution "return x * 2" (passes).
+RIGHT_SUGGESTION = """\
+    suggestion:
+      file: app/calc.py
+      find: "    return x + 2"
+      replace: "    return x * 2"
+      correct: true
+      says: "Doubling is times two."
+      explain: "x * 2 doubles x."
+"""
+WRONG_SUGGESTION = """\
+    suggestion:
+      file: app/calc.py
+      find: "    return x + 2"
+      replace: "    return x + x + 0 + 1"
+      correct: false
+      says: "Add it to itself!"
+      explain: "The + 1 is wrong."
+"""
+PROMPT = """\
+    prompt:
+      goal: "Fix double"
+      options:
+        - prompt: "fix it"
+          response_code: "def double(x):\\n    return x\\n"
+          verdict: vague
+          feedback: "Too vague."
+        - prompt: "double(x) must return x times two"
+          response_code: "def double(x):\\n    return x * 2\\n"
+          verdict: good
+          feedback: "Clear."
+      best: 1
+"""
+
+
+def byte_yaml(t, text):
+    write(t / "byte.yaml", text)
+
+
+class ByteYamlTests(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.root)
+
+    def meta_errors(self, t):
+        return vc.check_ticket_meta(t)
+
+    def all_errors(self, t):
+        errors = vc.check_ticket_meta(t)
+        if not errors:
+            errors += vc.check_byte_suggestion_tests(t)
+        return errors
+
+    def test_honest_correct_suggestion_is_valid(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, RIGHT_SUGGESTION)
+        self.assertEqual(self.all_errors(t), [])
+
+    def test_honest_wrong_suggestion_is_valid(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, WRONG_SUGGESTION)
+        self.assertEqual(self.all_errors(t), [])
+
+    def test_correct_true_that_fails_the_tests_is_caught(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, WRONG_SUGGESTION.replace("correct: false", "correct: true"))
+        errors = self.all_errors(t)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("correct: true", errors[0])
+        self.assertIn("fails the tests", errors[0])
+
+    def test_correct_false_that_passes_the_tests_is_caught(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, RIGHT_SUGGESTION.replace("correct: true", "correct: false"))
+        errors = self.all_errors(t)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("passes every test", errors[0])
+
+    def test_find_must_appear_exactly_once(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, RIGHT_SUGGESTION.replace('find: "    return x + 2"', 'find: "return x - 2"'))
+        self.assertTrue(any("exactly once" in e and "0 time" in e for e in self.meta_errors(t)))
+        t2 = make_ticket(self.root, "t02", starter_code="def double(x):\n    return x + 2\n\n# return x + 2\n")
+        byte_yaml(t2, RIGHT_SUGGESTION.replace('find: "    return x + 2"', 'find: "return x + 2"'))
+        self.assertTrue(any("exactly once" in e and "2 time" in e for e in self.meta_errors(t2)))
+
+    def test_replacement_must_compile(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, RIGHT_SUGGESTION.replace('replace: "    return x * 2"', 'replace: "    return x *"'))
+        self.assertTrue(any("not valid Python" in e for e in self.meta_errors(t)))
+
+    def test_suggestion_fields_and_file(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, RIGHT_SUGGESTION.replace("correct: true", "correct: maybe").replace(
+            '      says: "Doubling is times two."\n', ""))
+        errors = self.meta_errors(t)
+        self.assertTrue(any("'says' is missing" in e for e in errors))
+        self.assertTrue(any("'correct' must be true or false" in e for e in errors))
+
+        t2 = make_ticket(self.root, "t02", extra_starter={"app/other.py": "x = 1\n"})
+        byte_yaml(t2, RIGHT_SUGGESTION.replace("file: app/calc.py", "file: app/other.py"))
+        self.assertTrue(any("not in files_editable" in e for e in self.meta_errors(t2)))
+
+        t3 = make_ticket(self.root, "t03")
+        byte_yaml(t3, RIGHT_SUGGESTION.replace('"    return x * 2"', '"    return x + 2"'))
+        self.assertTrue(any("same as 'find'" in e for e in self.meta_errors(t3)))
+
+    def test_no_suggestions_on_review_tickets(self):
+        t = make_review_ticket(self.root, "t01")
+        byte_yaml(t, RIGHT_SUGGESTION)
+        self.assertTrue(any("only tickets with tests" in e for e in self.meta_errors(t)))
+
+    def test_prompt_card_valid_alone_and_with_a_suggestion(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, PROMPT)
+        self.assertEqual(self.all_errors(t), [])
+        t2 = make_ticket(self.root, "t02")
+        byte_yaml(t2, WRONG_SUGGESTION + PROMPT)
+        self.assertEqual(self.all_errors(t2), [])
+        # Prompt cards are fine on review tickets too.
+        t3 = make_review_ticket(self.root, "t03")
+        byte_yaml(t3, PROMPT)
+        self.assertEqual(self.meta_errors(t3), [])
+
+    def test_prompt_best_and_verdicts(self):
+        cases = {
+            "best: 1": ("best: 5", "out of range"),
+            "verdict: vague": ("verdict: meh", "must be one of"),
+        }
+        for i, (old, (new, message)) in enumerate(cases.items()):
+            t = make_ticket(self.root, f"t{i}")
+            byte_yaml(t, PROMPT.replace(old, new, 1))
+            errors = self.meta_errors(t)
+            self.assertTrue(any(message in e for e in errors), errors)
+
+        t = make_ticket(self.root, "best-not-good")
+        byte_yaml(t, PROMPT.replace("best: 1", "best: 0"))
+        errors = self.meta_errors(t)
+        self.assertTrue(any("must have verdict 'good'" in e for e in errors), errors)
+        self.assertTrue(any("only the best option" in e for e in errors), errors)
+
+    def test_prompt_option_count_and_code(self):
+        t = make_ticket(self.root, "one-option")
+        one = PROMPT.split("        - prompt: \"double(x)")[0] + "      best: 0\n"
+        byte_yaml(t, one.replace("verdict: vague", "verdict: good"))
+        self.assertTrue(any("needs 2-4" in e for e in self.meta_errors(t)))
+
+        t2 = make_ticket(self.root, "bad-code")
+        byte_yaml(t2, PROMPT.replace('"def double(x):\\n    return x\\n"', '"def double(x)\\n"'))
+        self.assertTrue(any("response_code is not valid Python" in e for e in self.meta_errors(t2)))
+
+        t3 = make_ticket(self.root, "dupe")
+        byte_yaml(t3, PROMPT.replace('"double(x) must return x times two"', '"fix it"'))
+        self.assertTrue(any("all be different" in e for e in self.meta_errors(t3)))
+
+    def test_byte_yaml_shape(self):
+        t = make_ticket(self.root, "t01")
+        byte_yaml(t, "hello: there\n")
+        errors = self.meta_errors(t)
+        self.assertTrue(any("unknown section" in e for e in errors))
+        self.assertTrue(any("needs a 'suggestion' or a 'prompt'" in e for e in errors))
+        t2 = make_ticket(self.root, "t02")
+        byte_yaml(t2, "- a list\n")
+        self.assertTrue(any("must be a mapping" in e for e in self.meta_errors(t2)))
+        t3 = make_ticket(self.root, "t03")
+        byte_yaml(t3, "suggestion: [unclosed\n")
+        self.assertTrue(any("not valid YAML" in e for e in self.meta_errors(t3)))
+
+    def test_validate_season_runs_the_honesty_check(self):
+        season = self.root / "s99"
+        write(season / "season.yaml", "id: s99\ntitle: T\nintro: I\ntickets: [t01]\n")
+        t = make_ticket(season / "tickets", "t01")
+        byte_yaml(t, RIGHT_SUGGESTION.replace("correct: true", "correct: false"))
+        # validate_season runs the starter's tests first, which leaves a __pycache__ in starter/.
+        # The replacement is the same size as the text it replaces, so a copied .pyc would look
+        # up to date and hide the change: the honesty check must not copy it.
+        report = vc.validate_season(season)
+        self.assertTrue(any("passes every test" in e for e in report["s99/t01"]), report)
+
+    def test_real_content_has_byte_suggestions_and_prompts(self):
+        files = list((vc.REPO_ROOT / "content" / "seasons").glob("*/tickets/*/byte.yaml"))
+        data = [vc.load_byte(f.parent) for f in files]
+        suggestions = [d["suggestion"] for d in data if "suggestion" in d]
+        self.assertGreaterEqual(len(suggestions), 6)
+        self.assertTrue(any(s["correct"] for s in suggestions))
+        self.assertTrue(any(not s["correct"] for s in suggestions))
+        self.assertGreaterEqual(sum(1 for d in data if "prompt" in d), 4)
+
+
+if __name__ == "__main__":
+    unittest.main()

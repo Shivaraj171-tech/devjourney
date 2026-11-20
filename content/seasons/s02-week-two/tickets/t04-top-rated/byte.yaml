@@ -1,0 +1,12 @@
+# Right conditions, wrong order: `and` short-circuits left to right.
+suggestion:
+  file: app/badges.py
+  find: "    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
+  replace: "    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE and len(ratings) >= TOP_RATED_MIN_RATINGS"
+  correct: false
+  says: "Added the 5-ratings rule with `and`. Both conditions, just like the docstring says."
+  explain: >-
+    Right conditions, wrong order. `and` checks left to right and stops at the first False, so
+    here `average_rating([])` runs FIRST and divides by zero for a brand-new restaurant:
+    Wednesday's incident all over again. Put `len(ratings) >= TOP_RATED_MIN_RATINGS` first, so
+    it guards the average.

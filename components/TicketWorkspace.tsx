@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AskByte from "./AskByte";
+import ByteSuggestionCard from "./ByteSuggestion";
 import CodeEditor from "./CodeEditor";
 import DebuggerPanel from "./DebuggerPanel";
 import HintPanel from "./HintPanel";
@@ -13,7 +15,7 @@ import TestResults from "./TestResults";
 import { listChecks } from "@/lib/content/checks";
 import type { Ticket } from "@/lib/content/types";
 import { incidentBonus, incidentXp, quizXp, readTicketXp, solveXp, type TicketXp } from "@/lib/game/rules";
-import { actions, ticketProgress, useProgress } from "@/lib/progress/store";
+import { actions, byteActions, ticketProgress, useProgress } from "@/lib/progress/store";
 import { PythonRunner } from "@/lib/runner/client";
 import { useIsClient } from "@/lib/useIsClient";
 import type { RunResult, TestResult, TraceResult } from "@/lib/runner/types";
@@ -24,7 +26,7 @@ type Props = {
   nextTicket: { id: string; title: string } | null;
 };
 
-type Tab = "ticket" | "learn" | "hints" | "quiz";
+type Tab = "ticket" | "learn" | "hints" | "quiz" | "byte";
 
 /** A recorded step-through of one check, and the code it was recorded on. */
 type DebugSession = { trace: TraceResult; files: Record<string, string> };
@@ -213,18 +215,19 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
             <span className="text-slate-500">#{ticket.number}</span> {ticket.title}
           </h1>
         </div>
-        <div className="flex border-b border-slate-800 text-sm" role="tablist">
-          {(["ticket", "learn", "hints", "quiz"] as Tab[]).map((t) => {
+        <div className={`flex overflow-x-auto border-b border-slate-800 ${ticket.byte?.prompt ? "text-[13px]" : "text-sm"}`} role="tablist">
+          {(["ticket", "learn", "hints", "quiz", "byte"] as Tab[]).map((t) => {
             if (t === "quiz" && !hasQuiz) return null;
             if (t === "learn" && !ticket.concept) return null;
-            const label = t === "ticket" ? "📨 Ticket" : t === "learn" ? "📘 Learn" : t === "hints" ? `💡 Hints (${tp.hintsUsed}/${ticket.hints.length})` : quizUnlocked ? "🧠 Quiz" : "🔒 Quiz";
+            if (t === "byte" && !ticket.byte?.prompt) return null;
+            const label = t === "byte" ? "💬 Ask Byte" : t === "ticket" ? "📨 Ticket" : t === "learn" ? "📘 Learn" : t === "hints" ? `💡 Hints (${tp.hintsUsed}/${ticket.hints.length})` : quizUnlocked ? "🧠 Quiz" : "🔒 Quiz";
             return (
               <button
                 key={t}
                 role="tab"
                 aria-selected={tab === t}
                 onClick={() => setTab(t)}
-                className={`flex-1 px-3 py-2.5 ${tab === t ? "border-b-2 border-violet-400 text-white" : "text-slate-400 hover:text-white"}`}
+                className={`flex-1 ${ticket.byte?.prompt ? "px-2" : "px-3"} py-2.5 whitespace-nowrap ${tab === t ? "border-b-2 border-violet-400 text-white" : "text-slate-400 hover:text-white"}`}
               >
                 {label}
               </button>
@@ -235,6 +238,16 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           {tab === "ticket" && (
             <div className="space-y-4">
               <Markdown text={ticket.story} />
+              {ticket.byte?.suggestion && !noRunner && (
+                <ByteSuggestionCard
+                  ticketId={ticket.id}
+                  suggestion={ticket.byte.suggestion}
+                  tp={tp}
+                  currentText={fileText(ticket.byte.suggestion.file)}
+                  autocomplete={ticket.seasonId === "s01"}
+                  onApplied={setActiveFile}
+                />
+              )}
               {ticket.concept && (
                 <button
                   onClick={() => setTab("learn")}
@@ -273,6 +286,9 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                 ← Back to the ticket
               </button>
             </div>
+          )}
+          {tab === "byte" && ticket.byte?.prompt && (
+            <AskByte card={ticket.byte.prompt} record={tp.bytePrompt} onPick={(i, best) => byteActions.pickPrompt(ticket.id, i, best)} />
           )}
           {tab === "hints" && (
             <HintPanel hints={ticket.hints} revealed={tp.hintsUsed} solved={tp.solved} onReveal={() => actions.revealHint(ticket.id)} />
