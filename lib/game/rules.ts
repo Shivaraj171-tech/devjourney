@@ -170,6 +170,7 @@ function hash(text: string): number {
 }
 
 /**
+ * @deprecated The HQ now plans a spaced, mixed session with `planWarmups` (lib/game/warmups.ts).
  * Today's warm-up: only concepts you've already met (its `after` ticket is
  * solved), preferring ones you haven't done yet. Deterministic per day.
  */

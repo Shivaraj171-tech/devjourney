@@ -6,6 +6,7 @@ import { useSyncExternalStore } from "react";
 import { dayKey, WARMUP_XP } from "../game/rules";
 import { byteXp, type ByteDecision, type PromptRecord, type SuggestionRecord } from "../game/byte";
 import { formatsXp, recordAttempt, recordPrediction, type FormatRecord } from "../game/formats";
+import { mergeWarmupHistory, type WarmupAttempt } from "../game/warmups";
 
 const KEY = "devjourney:progress:v1";
 
@@ -46,8 +47,13 @@ export type Progress = {
   playerName: string;
   startedAt: string; // ISO date
   activeDays: string[]; // YYYY-MM-DD
-  /** Daily warm-ups by day (YYYY-MM-DD): which one, and whether the first pick was right. */
+  /**
+   * Old saves only (one warm-up a day): by day (YYYY-MM-DD), which one and whether the
+   * first pick was right. Moved into `warmupLog` when progress loads.
+   */
   warmups?: Record<string, { id: string; correct: boolean }>;
+  /** Every warm-up answered, first pick only, oldest first (lib/game/warmups.ts). */
+  warmupLog?: WarmupAttempt[];
   /** True once the "how it works" intro has been dismissed. */
   onboarded?: boolean;
   tickets: Record<string, TicketProgress>;
@@ -68,12 +74,20 @@ function load(): Progress {
     const raw = window.localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Progress;
-      if (parsed && parsed.version === 1) return { ...fresh(), ...parsed };
+      if (parsed && parsed.version === 1) return migrate({ ...fresh(), ...parsed });
     }
   } catch {
     // ignore: fall back to fresh progress
   }
   return fresh();
+}
+
+/** Bring older saves up to date. Everything new is optional, so this only moves data. */
+function migrate(p: Progress): Progress {
+  if (!p.warmups) return p;
+  const next: Progress = { ...p, warmupLog: mergeWarmupHistory(p.warmupLog, p.warmups) };
+  delete next.warmups;
+  return next;
 }
 
 function save() {
@@ -140,8 +154,13 @@ export function totalXp(p: Progress): number {
     (sum, t) => sum + t.solveXp + t.quizXp + byteXp(t) + formatsXp(t.formats),
     0,
   );
-  const warmups = Object.values(p.warmups ?? {}).filter((w) => w.correct).length * WARMUP_XP;
+  const warmups = warmupHistory(p).filter((w) => w.correct).length * WARMUP_XP;
   return tickets + warmups;
+}
+
+/** Every warm-up answered (old one-a-day saves included), oldest first. */
+export function warmupHistory(p: Progress): WarmupAttempt[] {
+  return mergeWarmupHistory(p.warmupLog, p.warmups);
 }
 
 export function daysSinceStart(p: Progress, now: Date): number {
@@ -188,13 +207,16 @@ export const actions = {
       return next;
     });
   },
-  /** Record today's warm-up answer (first answer only); counts as an active day. */
+  /** Record a warm-up answer (first pick per warm-up per day only); counts as an active day. */
   answerWarmup(id: string, correct: boolean) {
     update((p) => {
       const today = dayKey(new Date());
-      if (p.warmups?.[today]) return p;
+      const log = warmupHistory(p);
+      if (log.some((a) => a.id === id && a.day === today)) return p;
       const activeDays = p.activeDays.includes(today) ? p.activeDays : [...p.activeDays, today];
-      return { ...p, activeDays, warmups: { ...p.warmups, [today]: { id, correct } } };
+      const next: Progress = { ...p, activeDays, warmupLog: [...log, { id, day: today, correct }] };
+      delete next.warmups; // now part of warmupLog
+      return next;
     });
   },
   finishOnboarding() {

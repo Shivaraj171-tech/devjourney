@@ -169,17 +169,20 @@ test.describe("phone", () => {
     await expect(page.getByTestId("daily-warmup")).toBeVisible();
     expect(await scrollWidth(page)).toBeLessThanOrEqual(390);
 
-    // The warm-up changes daily, so pin today's to the widest snippets in content/ (answered today).
+    // The warm-up session changes daily, so make the widest snippets in content/ the first
+    // item: a warm-up missed 20 days ago is the one review due today.
     for (const w of widestWarmups.slice(0, 3)) {
       await page.evaluate(
-        ({ key, id }) => {
+        ({ key, id, after }) => {
           const p = JSON.parse(window.localStorage.getItem(key)!);
           const d = new Date();
-          const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-          p.warmups = { [today]: { id, correct: true } };
+          d.setDate(d.getDate() - 20);
+          const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          p.warmupLog = [{ id, day, correct: false }];
+          p.tickets[after] ??= { ...(Object.values(p.tickets)[0] as object) }; // its concept is unlocked
           window.localStorage.setItem(key, JSON.stringify(p));
         },
-        { key: PROGRESS_KEY, id: w.id },
+        { key: PROGRESS_KEY, id: w.id, after: w.after },
       );
       await page.reload();
       await expect(page.getByTestId("daily-warmup").locator("pre")).toContainText(w.code.trimEnd().split("\n")[0].trim());
