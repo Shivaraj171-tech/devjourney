@@ -1,0 +1,10 @@
+id: s04-t05
+title: "Give Byte the whole picture"
+type: feature
+level: junior
+track: ai
+concepts: [loops, strings, functions, specs-and-context]
+new_concept: specs-and-context
+estimated_minutes: 15
+tests_visible: true
+files_editable: [app/refund_report.py]

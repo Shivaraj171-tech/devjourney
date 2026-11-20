@@ -1,0 +1,22 @@
+questions:
+  - prompt: "The PR's file imports without any error. When does the missing refunds.refund_for_delay cause a problem?"
+    choices:
+      - "Never: if the import works, the function must exist"
+      - "Only when apology_sms runs that line, for example on the first late order"
+      - "When the server starts"
+    answer: 1
+    explain: "`from app import refunds` only checks that the module exists. Python looks up `refunds.refund_for_delay` when that line actually runs, so the AttributeError waits for the first order that takes 45 minutes or more."
+  - prompt: "What's the quickest reliable way to check that a function an AI called really exists?"
+    choices:
+      - "Ask the AI whether it exists"
+      - "Open the module it comes from and find its def (or run the line once)"
+      - "Check that the name sounds sensible"
+    answer: 1
+    explain: "The AI will happily confirm its own guess. The module's def lines (or one real run) are the truth."
+  - prompt: "Why is copying the \"is it late?\" check into apology.py risky, even when the copy is right?"
+    choices:
+      - "It isn't: copies make code faster"
+      - "If Leo ever changes the rule, someone has to remember to change every copy"
+      - "Python doesn't allow the same comparison in two files"
+    answer: 1
+    explain: "One rule, one place: that's the refactoring lesson from launch week. Here the copy was even wrong from day one (>= 45 instead of > 45)."

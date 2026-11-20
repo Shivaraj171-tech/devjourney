@@ -1,0 +1,10 @@
+id: s04-t03
+title: "The function that isn't there"
+type: review
+level: junior
+track: ai
+concepts: [functions, code-review, verifying-ai-claims, hallucinated-apis]
+new_concept: hallucinated-apis
+estimated_minutes: 12
+tests_visible: false
+files_editable: []

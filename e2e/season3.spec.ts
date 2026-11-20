@@ -28,9 +28,9 @@ test("every Season 3 ticket can be played in the browser", async ({ page }) => {
   }
 
   await page.goto("/");
-  const all = allSeasonTickets();
+  const all = [...season1, ...season2, ...season3];
   expect(all.length).toBe(21);
-  await expect(page.locator("[data-testid^=room-]")).toHaveCount(all.length);
+  await expect(page.locator("[data-testid^=room-]")).toHaveCount(allSeasonTickets().length);
   for (const t of all) {
     await expect(page.getByTestId(`room-${t.id}`)).toHaveAttribute("data-state", "done");
   }

@@ -1,0 +1,14 @@
+id: w041
+title: "Check the claim"
+concept: verifying-ai-claims
+after: s04-t01
+code: |
+  # Byte: "Orders of 3 items or more get a free drink."
+  def free_drink(items):
+      return len(items) > 3
+
+  print(free_drink([450, 299, 1250]))
+question: "Byte explained this function with the comment on line 1. What does the code actually print?"
+choices: ["True", "False", "3"]
+answer: 1
+explain: "len([450, 299, 1250]) is 3, and 3 > 3 is False. The code means \"more than 3\", but Byte's claim says \"3 or more\". Run an example right on the edge before you repeat a claim."

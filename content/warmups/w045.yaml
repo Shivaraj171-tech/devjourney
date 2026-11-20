@@ -1,0 +1,15 @@
+id: w045
+title: "What does done look like?"
+concept: specs-and-context
+after: s04-t05
+code: |
+  def late_count(minutes):
+      count = 0
+      for m in minutes:
+          if m > 45:
+              count = count + 1
+      return count
+question: "You ask Byte for late_count with the spec \"late means more than 45 minutes\". Which example in your prompt best pins down the edge?"
+choices: ["late_count([10, 20]) == 0", "late_count([45, 46]) == 1", "late_count([90, 120]) == 2"]
+answer: 1
+explain: "45 and 46 sit right on the edge: 45 isn't late and 46 is, so the answer is 1. An example like that leaves Byte no room to guess >= instead of >. The other two examples give the same answer with either."

@@ -1,0 +1,22 @@
+questions:
+  - prompt: "Where should the expected answers in your tests come from?"
+    choices:
+      - "From the spec (SPEC-41), written down by you"
+      - "From running Byte's late_voucher and copying what it returns"
+      - "From asking Byte what the answers should be"
+    answer: 0
+    explain: "Tests are only useful if they can disagree with the code. If you copy the code's answers (or ask the AI that wrote it), your tests just repeat its mistakes."
+  - prompt: "Byte's second attempt used >= 60 instead of > 60. Which test catches it?"
+    choices:
+      - "assert late_voucher(90) == 500"
+      - "assert late_voucher(60) == 300"
+      - "assert late_voucher(30) == 0"
+    answer: 1
+    explain: "With >= 60, exactly 60 minutes gets 500 instead of 300. 90 and 30 give the same answer either way, so only the edge catches it."
+  - prompt: "Byte said \"Fixed! ✅\" after each of its three attempts. What does that tell you?"
+    choices:
+      - "That attempt 3 is correct"
+      - "Nothing on its own: only checks against the spec tell you which attempt is right"
+      - "That the tests are no longer needed"
+    answer: 1
+    explain: "Byte sounded equally sure about all three attempts, and two of them were wrong. Your tests are what turn \"it says it's fixed\" into \"we know it's right\"."

@@ -1,0 +1,14 @@
+id: w042
+title: "Test the spec, not the code"
+concept: test-first-verification
+after: s04-t02
+code: |
+  # Spec: "orders of 10 items or MORE get 5% off"
+  def bulk_discount(item_count):
+      if item_count > 10:
+          return 5
+      return 0
+question: "Byte wrote bulk_discount from the spec on line 1. Which test, written from the spec, catches its mistake?"
+choices: ["assert bulk_discount(12) == 5", "assert bulk_discount(3) == 0", "assert bulk_discount(10) == 5"]
+answer: 2
+explain: "The spec says 10 or more, but the code uses > 10, so bulk_discount(10) returns 0 and this test fails. 12 and 3 give the right answer either way: only a test on the spec's edge sees the difference."

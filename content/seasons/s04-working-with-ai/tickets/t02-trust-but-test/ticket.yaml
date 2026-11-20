@@ -1,0 +1,10 @@
+id: s04-t02
+title: "Trust, but test"
+type: feature
+level: junior
+track: ai
+concepts: [conditionals, functions, writing-tests, test-first-verification]
+new_concept: test-first-verification
+estimated_minutes: 15
+tests_visible: true
+files_editable: [team_tests/test_vouchers.py]
