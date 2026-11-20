@@ -2,7 +2,16 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { load as parseYaml } from "js-yaml";
-import type { Question, Review, Season, Ticket, Warmup } from "./types";
+import type {
+  ByteContent,
+  BytePromptVerdict,
+  ByteSuggestion,
+  Question,
+  Review,
+  Season,
+  Ticket,
+  Warmup,
+} from "./types";
 
 const CONTENT_DIR = join(process.cwd(), "content", "seasons");
 
@@ -89,7 +98,40 @@ function loadTicket(seasonId: string, dir: string, slug: string, number: number)
     ...(meta.type === "incident"
       ? { incident: { logs: readText(join(dir, "logs.txt")), timeLimitMinutes: meta.time_limit_minutes ?? 15 } }
       : {}),
+    ...(existsSync(join(dir, "byte.yaml")) ? { byte: loadByte(dir) } : {}),
   };
+}
+
+type ByteYaml = {
+  suggestion?: ByteSuggestion;
+  prompt?: {
+    goal: string;
+    options: { prompt: string; response_code: string; verdict: BytePromptVerdict; feedback: string }[];
+    best: number;
+  };
+};
+
+/** byte.yaml: Byte's suggestion and/or prompt card (format in scripts/validate_content.py). */
+function loadByte(dir: string): ByteContent {
+  const meta = readYaml<ByteYaml>(join(dir, "byte.yaml"));
+  const out: ByteContent = {};
+  if (meta.suggestion) {
+    const s = meta.suggestion;
+    out.suggestion = { file: s.file, find: s.find, replace: s.replace, correct: s.correct, says: s.says, explain: s.explain };
+  }
+  if (meta.prompt) {
+    out.prompt = {
+      goal: meta.prompt.goal,
+      best: meta.prompt.best,
+      options: meta.prompt.options.map((o) => ({
+        prompt: o.prompt,
+        responseCode: o.response_code.replace(/\n+$/, ""),
+        verdict: o.verdict,
+        feedback: o.feedback,
+      })),
+    };
+  }
+  return out;
 }
 
 type ReviewYaml = {

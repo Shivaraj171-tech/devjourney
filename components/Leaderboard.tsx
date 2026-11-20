@@ -1,5 +1,7 @@
 "use client";
+import { hitlScore } from "@/lib/game/byte";
 import { leaderboard, rankFor } from "@/lib/game/rules";
+import HumanInTheLoop from "./HumanInTheLoop";
 import { useIsClient } from "@/lib/useIsClient";
 import { daysSinceStart, totalXp, useProgress } from "@/lib/progress/store";
 
@@ -47,6 +49,13 @@ export default function Leaderboard() {
           );
         })}
       </ol>
+      <div className="mt-6">
+        <HumanInTheLoop score={hitlScore(Object.values(progress.tickets))} />
+        <p className="mt-2 text-xs text-slate-500">
+          🤖 Byte has plenty of XP, but it can&apos;t check its own work. XP says how much you&apos;ve shipped; this score says how
+          well you catch an AI&apos;s mistakes.
+        </p>
+      </div>
       <p className="mt-6 text-xs text-slate-500">
         Your teammates are fictional for now. Real multiplayer leaderboards are planned once accounts exist.
       </p>

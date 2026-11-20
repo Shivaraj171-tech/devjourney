@@ -6,11 +6,13 @@ import { useState } from "react";
 import { useIsClient } from "@/lib/useIsClient";
 import AppPreview from "./AppPreview";
 import DailyWarmup from "./DailyWarmup";
+import HumanInTheLoop from "./HumanInTheLoop";
 import Markdown from "./Markdown";
 import Onboarding from "./Onboarding";
 import { BADGES, currentStreak, incidentBonus, leaderboard, rankFor, type BadgeContext } from "@/lib/game/rules";
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
 import type { TicketType, Warmup } from "@/lib/content/types";
+import { hitlScore } from "@/lib/game/byte";
 
 export type TicketSummary = {
   id: string;
@@ -44,8 +46,10 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
   const solved = allTickets.filter((t) => ticketProgress(progress, t.id).solved);
   const current = allTickets.find((t) => !ticketProgress(progress, t.id).solved);
 
+  const hitl = hitlScore(Object.values(progress.tickets));
   const badgeCtx: BadgeContext = {
     streak,
+    hitl,
     seasonTicketCounts: Object.fromEntries(seasons.map((s) => [s.id, s.tickets.length])),
     solved: solved.map((t) => {
       const tp = ticketProgress(progress, t.id);
@@ -111,6 +115,8 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
         <Stat label="Tickets merged" value={`${solved.length}/${allTickets.length}`} />
         <Stat label="Day streak" value={`🔥 ${streak}`} />
       </section>
+
+      <HumanInTheLoop score={hitl} />
 
       {now && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={new Set(solved.map((t) => t.id))} now={now} />}
 

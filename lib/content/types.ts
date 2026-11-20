@@ -42,6 +42,42 @@ export type Incident = {
   timeLimitMinutes: number;
 };
 
+/** Byte (the office AI) proposes a change to one editable file (byte.yaml `suggestion`). */
+export type ByteSuggestion = {
+  /** One of the ticket's files_editable. */
+  file: string;
+  /** Exact text in the starter file (appears exactly once there). */
+  find: string;
+  /** Byte's proposed code for that text. */
+  replace: string;
+  /** True if starter + replacement passes the ticket's tests (verified by the validator). */
+  correct: boolean;
+  /** Byte's one-line pitch. */
+  says: string;
+  /** Why it's right or wrong; shown once the learner has decided (and checked). */
+  explain: string;
+};
+
+export type BytePromptVerdict = "good" | "vague" | "wrong";
+
+/** One prompt the learner could send Byte, and what Byte would write back. */
+export type BytePromptOption = {
+  prompt: string;
+  responseCode: string;
+  verdict: BytePromptVerdict;
+  feedback: string;
+};
+
+/** "Ask Byte" card (byte.yaml `prompt`): pick the prompt that gets useful code. */
+export type BytePrompt = {
+  goal: string;
+  options: BytePromptOption[];
+  /** 0-based index of the best (only "good") option. */
+  best: number;
+};
+
+export type ByteContent = { suggestion?: ByteSuggestion; prompt?: BytePrompt };
+
 export type Ticket = {
   /** e.g. "s01-t01" (from ticket.yaml) */
   id: string;
@@ -71,6 +107,8 @@ export type Ticket = {
   review?: Review;
   /** Only on `incident` tickets. */
   incident?: Incident;
+  /** Byte's suggestion and/or prompt card (byte.yaml), if any. */
+  byte?: ByteContent;
 };
 
 /** A 2-minute daily code-reading challenge (content/warmups/*.yaml). */

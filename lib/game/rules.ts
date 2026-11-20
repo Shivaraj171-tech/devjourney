@@ -1,6 +1,7 @@
 // Game rules: XP, ranks, streaks, badges and the office leaderboard.
 // Pure functions only, so they're easy to test and tweak.
 import type { Level, TicketType } from "../content/types";
+import type { HitlScore } from "./byte";
 
 // ---------- XP ----------
 export const BASE_XP: Record<Level, number> = { intern: 100, junior: 150, mid: 200, senior: 300 };
@@ -122,7 +123,13 @@ export type BadgeContext = {
   solved: SolvedInfo[];
   streak: number;
   seasonTicketCounts: Record<string, number>;
+  /** Byte decisions across tickets (lib/game/byte.ts). Optional so older callers still work. */
+  hitl?: HitlScore;
 };
+
+/** Byte badges: catch this many wrong suggestions / pick the best prompt first this often. */
+export const BUG_CATCHER_CATCHES = 3;
+export const PROMPT_PRO_PICKS = 3;
 
 export const BADGES: { id: string; emoji: string; title: string; description: string; earned: (c: BadgeContext) => boolean }[] = [
   { id: "first-commit", emoji: "🎉", title: "First Commit", description: "Ship your first ticket.",
@@ -139,6 +146,10 @@ export const BADGES: { id: string; emoji: string; title: string; description: st
     earned: (c) => c.solved.some((s) => s.type === "review" && s.falseAlarms === 0) },
   { id: "firefighter", emoji: "🧯", title: "Firefighter", description: "Fix a production incident before the clock runs out.",
     earned: (c) => c.solved.some((s) => s.type === "incident" && s.beatTheClock === true) },
+  { id: "bug-catcher", emoji: "🪤", title: "Bug Catcher", description: `Catch ${BUG_CATCHER_CATCHES} of Byte's wrong suggestions.`,
+    earned: (c) => (c.hitl?.caught ?? 0) >= BUG_CATCHER_CATCHES },
+  { id: "prompt-pro", emoji: "💬", title: "Prompt Pro", description: `Pick the best prompt for Byte first, ${PROMPT_PRO_PICKS} times.`,
+    earned: (c) => (c.hitl?.bestPrompts ?? 0) >= PROMPT_PRO_PICKS },
   { id: "on-fire", emoji: "🔥", title: "On Fire", description: "Keep a 3-day streak.",
     earned: (c) => c.streak >= 3 },
   { id: "week-one", emoji: "🏆", title: "Survived Week One", description: "Finish Season 1.",
