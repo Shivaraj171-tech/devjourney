@@ -113,12 +113,23 @@ ticket. Each section is optional (at least one is needed) and is a list:
           assert f(2) == 2
         expected_output: "..."         # optional: what the program + check must print
         explain: "..."                 # optional: shown once solved
+    trace:                             # "Trace table": fill in each variable, step by step
+      - code: |                        # 2-15 lines: a small function AND a call to it
+          def total(prices): ...
+          result = total([3, 4])
+        watch: [t, p]                  # 1-4 variable names to track (the columns)
+        rows: 5                        # rows to fill: one per line that gives a watched
+                                       # variable a new value (checked by tracing the code)
+        explain: "..."                 # shown after the first check
 
 Every item is checked by running it with python3 through lib/runner/formats.py,
 the same code the browser runs in Pyodide: a prediction's answer is the real
 output, Byte's code meets the spec on normal_input and breaks it on
-example_input, and the correct Parsons order passes while each distractor
-(swapped in for the line it replaces) fails.
+example_input, the correct Parsons order passes while each distractor
+(swapped in for the line it replaces) fails, and a trace table's code runs
+cleanly under lib/runner/tracer.py with exactly `rows` rows, every watched
+variable gets a value and every value is short enough to type. The real
+values are never stored: the browser traces the code itself on "Check".
 
 season.yaml may set two optional flags:
 
@@ -128,6 +139,19 @@ season.yaml may set two optional flags:
     final: true      # the final exam (needs chain: false and must come after every
                      # on-chain season). Its tickets are an exam: no hints.md,
                      # concept.md, byte.yaml, formats.yaml or questions.yaml allowed.
+
+An off-chain season WITHOUT `final` is a side quest (e.g. s50-bug-bounty, the
+Bug Bounty board): it never gates anything and none of its tickets gate each
+other. Its tickets are "mystery bugs": no concept.md, and ticket.yaml has
+
+    bug_kind: off-by-one   # optional, revealed once solved ("This was an off-by-one
+                           # bug"; default: the new_concept); the title and story.md
+                           # must not contain it
+    requires: s01-t04      # optional: opens once that ticket is solved. It must be an
+                           # on-chain ticket with a concept.md and the same new_concept
+                           # (the reveal links to its lesson)
+
+estimated_minutes is at most 10. `requires` and `bug_kind` are not allowed elsewhere.
 
 The skills check (content/assessment/skills-check.yaml, optional) is checked too:
 
@@ -187,8 +211,12 @@ MAX_INCIDENT_MINUTES = 60
 MIN_PROMPT_OPTIONS, MAX_PROMPT_OPTIONS = 2, 4
 BYTE_VERDICTS = {"good", "vague", "wrong"}
 WHY_CHOICES = 3
-FORMAT_SECTIONS = ("predict", "break_it", "parsons")
+FORMAT_SECTIONS = ("predict", "break_it", "parsons", "trace")
 MAX_PREDICT_LINES = 12
+MAX_TRACE_LINES = 15
+MAX_TRACE_WATCH = 4
+MAX_TRACE_ROWS = 12
+MAX_TRACE_VALUE = 30
 MIN_PARSONS_LINES = 3
 # Ticket types without tests to run: the quiz (read) or the review (review) is the task.
 NO_TEST_TYPES = {"read", "review"}
@@ -341,11 +369,13 @@ def check_concept(path):
 EXAM_FORBIDDEN = ["hints.md", "concept.md", "byte.yaml", "formats.yaml", "questions.yaml"]
 
 
-def check_ticket_meta(ticket_dir, final=False):
+def check_ticket_meta(ticket_dir, final=False, side_quest=False):
     """Check files, ticket.yaml, hints and questions. Returns a list of error strings.
 
     final: the ticket belongs to the final exam (season.yaml `final: true`), so it
     has no hints.md and must not have a lesson, Byte content or a quiz.
+    side_quest: the ticket belongs to a side-quest season (`chain: false`, not final),
+    e.g. the Bug Bounty board: a "mystery bug" with no lesson (see check_side_quest_meta).
     """
     errors = []
     if final:
@@ -395,6 +425,11 @@ def check_ticket_meta(ticket_dir, final=False):
 
     if not final and not read_hints(ticket_dir / "hints.md"):
         errors.append("hints.md has no hints")
+    if side_quest:
+        errors += check_side_quest_meta(ticket_dir, meta)
+    else:
+        errors += [f"ticket.yaml: '{field}' is only for side-quest tickets (season.yaml `chain: false`, not final)"
+                   for field in SIDE_QUEST_FIELDS if field in meta]
     if has_tests and not list((ticket_dir / "tests").glob("test_*.py")):
         errors.append("tests/ has no test_*.py files")
     if questions_file.is_file():
@@ -410,6 +445,73 @@ def check_ticket_meta(ticket_dir, final=False):
     if (ticket_dir / "formats.yaml").is_file():
         errors += check_formats(ticket_dir)
     return errors
+
+
+SIDE_QUEST_FIELDS = ("requires", "bug_kind")
+MAX_SIDE_QUEST_MINUTES = 10
+
+
+def check_side_quest_meta(ticket_dir, meta):
+    """A side-quest ("mystery bug") ticket: short, no concept named in its title or story.
+
+    ticket.yaml may set `bug_kind` (revealed after solving: "This was an off-by-one bug";
+    without it the reveal names the ticket's new_concept) and `requires: <ticket id>`
+    (checked against every season in check_requires).
+    """
+    errors = []
+    if (ticket_dir / "concept.md").exists():
+        errors.append("concept.md is not allowed in a side-quest ticket (a mystery bug has no lesson)")
+    kind = meta.get("bug_kind")
+    if "bug_kind" in meta and not is_nonempty_str(kind):
+        errors.append("ticket.yaml: 'bug_kind' must be a short name, e.g. off-by-one")
+    if "requires" in meta and not is_nonempty_str(meta["requires"]):
+        errors.append("ticket.yaml: 'requires' must be a ticket id, e.g. s01-t04")
+    minutes = meta.get("estimated_minutes")
+    if isinstance(minutes, int) and minutes > MAX_SIDE_QUEST_MINUTES:
+        errors.append(f"ticket.yaml: a side quest is short: estimated_minutes at most {MAX_SIDE_QUEST_MINUTES}")
+    if is_nonempty_str(kind):
+        story = (ticket_dir / "story.md").read_text(encoding="utf-8")
+        for label, text in (("title", str(meta.get("title", ""))), ("story.md", story)):
+            if kind.lower() in text.lower():
+                errors.append(f"{label} names the bug ({kind!r}): a mystery bug must not give its kind away")
+    return errors
+
+
+def check_requires(seasons_root):
+    """`requires` on side-quest tickets: a real on-chain ticket with a lesson, teaching the same concept.
+
+    Returns {label: [errors]} for the tickets with a problem.
+    """
+    tickets = {}  # id -> (label, meta, on_chain, has_lesson)
+    for season_dir in sorted(p for p in seasons_root.iterdir() if p.is_dir()):
+        chain, _final = season_flags(season_dir)
+        for name in season_ticket_order(season_dir):
+            ticket_dir = season_dir / "tickets" / name
+            try:
+                meta = yaml.safe_load((ticket_dir / "ticket.yaml").read_text(encoding="utf-8"))
+            except (OSError, yaml.YAMLError):
+                continue
+            if isinstance(meta, dict) and isinstance(meta.get("id"), str):
+                tickets[meta["id"]] = (f"{season_dir.name}/{name}", meta, chain, (ticket_dir / "concept.md").is_file())
+    report = {}
+    for label, meta, _chain, _lesson in tickets.values():
+        required = meta.get("requires")
+        if not is_nonempty_str(required):
+            continue
+        if required not in tickets:
+            report.setdefault(label, []).append(f"ticket.yaml: requires {required!r}, which is not a ticket id")
+            continue
+        _label, other, on_chain, has_lesson = tickets[required]
+        problems = []
+        if not on_chain:
+            problems.append("is not on the main story (an on-chain season)")
+        if not has_lesson:
+            problems.append("has no lesson (concept.md) to link to")
+        if other.get("new_concept") != meta.get("new_concept"):
+            problems.append(f"teaches {other.get('new_concept')!r}, not this ticket's new_concept {meta.get('new_concept')!r}")
+        if problems:
+            report.setdefault(label, []).append(f"ticket.yaml: requires {required!r}, which " + " and ".join(problems))
+    return report
 
 
 def check_incident(ticket_dir, meta):
@@ -665,14 +767,14 @@ def check_formats(ticket_dir):
     except yaml.YAMLError as exc:
         return [f"formats.yaml is not valid YAML: {exc}"]
     if not isinstance(data, dict):
-        return ["formats.yaml must be a mapping with predict, break_it and/or parsons"]
+        return ["formats.yaml must be a mapping with predict, break_it, parsons and/or trace"]
     errors = []
     unknown = sorted(set(data) - set(FORMAT_SECTIONS))
     if unknown:
         errors.append(f"formats.yaml: unknown section(s) {unknown} (allowed: {', '.join(FORMAT_SECTIONS)})")
     if not any(section in data for section in FORMAT_SECTIONS):
         errors.append("formats.yaml needs at least one of: " + ", ".join(FORMAT_SECTIONS))
-    checkers = {"predict": check_predict, "break_it": check_break_it, "parsons": check_parsons}
+    checkers = {"predict": check_predict, "break_it": check_break_it, "parsons": check_parsons, "trace": check_trace}
     for section in FORMAT_SECTIONS:
         if section not in data:
             continue
@@ -808,6 +910,46 @@ def check_parsons(item, where):
         result = run_format({**request, "program": "\n".join(swapped)})
         if result.get("passed"):
             errors.append(f"{where}: distractor {j} ({d['line'].strip()!r}) passes the check too, so it isn't a trap")
+    return errors
+
+
+IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def check_trace(item, where):
+    errors = _required_strings(item, where, ["code", "explain"])
+    watch, rows = item.get("watch"), item.get("rows")
+    if not isinstance(watch, list) or not watch or not all(isinstance(w, str) and IDENTIFIER.match(w) for w in watch):
+        errors.append(f"{where}: 'watch' must be a list of variable names")
+    elif len(watch) > MAX_TRACE_WATCH or len(set(watch)) != len(watch):
+        errors.append(f"{where}: 'watch' needs 1-{MAX_TRACE_WATCH} different variable names")
+    if not isinstance(rows, int) or isinstance(rows, bool) or not 1 <= rows <= MAX_TRACE_ROWS:
+        errors.append(f"{where}: 'rows' must be a whole number from 1 to {MAX_TRACE_ROWS}")
+    if errors:
+        return errors
+    code = item["code"]
+    lines = len(code.strip("\n").splitlines())
+    if not 2 <= lines <= MAX_TRACE_LINES:
+        errors.append(f"{where}: code has {lines} lines, needs 2-{MAX_TRACE_LINES}")
+    compile_errors = _compiles(code, where, "code")
+    if compile_errors:
+        return errors + compile_errors
+    result = run_format({"kind": "trace", "code": code, "watch": watch})
+    if result.get("truncated"):
+        return errors + [f"{where}: code takes too many steps to trace (a loop that never ends?)"]
+    if result.get("error"):
+        return errors + [f"{where}: code raised {result['error']} (trace code must run cleanly)"]
+    real = result["rows"]
+    if len(real) != rows:
+        errors.append(f"{where}: rows is {rows}, but tracing the code gives {len(real)} "
+                      f"(one per line that gives {', '.join(watch)} a new value)")
+    for c, name in enumerate(watch):
+        if all(row["values"][c] is None for row in real):
+            errors.append(f"{where}: '{name}' never gets a value (is it a variable in the code?)")
+    too_long = sorted({v for row in real for v in row["values"]
+                       if v is not None and (len(v) > MAX_TRACE_VALUE or "..." in v or "…" in v)})
+    if too_long:
+        errors.append(f"{where}: values too long to type in a cell (max {MAX_TRACE_VALUE} characters): {too_long[:3]}")
     return errors
 
 
@@ -976,7 +1118,7 @@ def validate_season(season_dir, prev=None):
             report[label] = ["listed in season.yaml but folder does not exist"]
             prev = None
             continue
-        errors = check_ticket_meta(ticket_dir, final=final)
+        errors = check_ticket_meta(ticket_dir, final=final, side_quest=not chain and not final)
         if not errors and load_ticket_type(ticket_dir) not in NO_TEST_TYPES:
             errors += check_ticket_tests(ticket_dir)
             if (ticket_dir / "byte.yaml").is_file():
@@ -1258,6 +1400,8 @@ def validate_content(content_dir):
         order = season_ticket_order(season_dir)
         last = season_dir / "tickets" / order[-1] if order else None
         prev = last if last is not None and last.is_dir() else None
+    for label, errors in check_requires(seasons_root).items():
+        report.setdefault(label, []).extend(errors)
     warmups_dir = Path(content_dir) / "warmups"
     if warmups_dir.is_dir():
         report["warmups"] = validate_warmups(warmups_dir, all_ticket_ids(seasons_root))

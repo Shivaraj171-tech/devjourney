@@ -1,0 +1,14 @@
+id: s50-t02
+title: "Checkout crashes on a mistyped coupon"
+type: bug
+level: intern
+track: debugging
+concepts: [functions, conditionals]
+new_concept: "None (no value)"
+estimated_minutes: 5
+tests_visible: true
+files_editable: [coupons.py]
+# Bug Bounty (side quest): opens once the ticket that taught this is solved.
+requires: s01-t08
+# Revealed after solving: "This was a ___ bug".
+bug_kind: "None"

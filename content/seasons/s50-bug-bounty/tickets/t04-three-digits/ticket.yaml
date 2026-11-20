@@ -1,0 +1,14 @@
+id: s50-t04
+title: "Receipts show the wrong card digits"
+type: bug
+level: intern
+track: debugging
+concepts: [strings]
+new_concept: string-methods
+estimated_minutes: 5
+tests_visible: true
+files_editable: [receipts.py]
+# Bug Bounty (side quest): opens once the ticket that taught this is solved.
+requires: s05-t03
+# Revealed after solving: "This was a ___ bug".
+bug_kind: "string slicing"

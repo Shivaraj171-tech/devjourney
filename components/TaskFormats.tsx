@@ -1,6 +1,6 @@
 "use client";
 // Extra task formats for a ticket (formats.yaml): "Predict the output",
-// "Break Byte's code" and "Put the lines in order". Renders nothing when the
+// "Break Byte's code", "Put the lines in order" and "Trace table". Renders nothing when the
 // ticket has none. Self-contained: it saves progress and XP itself.
 //
 // Mount it anywhere inside a ticket page, ideally sharing the page's Python worker:
@@ -8,12 +8,21 @@
 // Without getRunner it starts its own Pyodide worker the first time something runs.
 import { useCallback, useEffect, useRef } from "react";
 import type { Ticket } from "@/lib/content/types";
-import { formatKey, hasTaskFormats, recordAttempt, recordPrediction, type FormatKind } from "@/lib/game/formats";
+import {
+  formatKey,
+  hasTaskFormats,
+  recordAttempt,
+  recordPrediction,
+  type AttemptExtra,
+  type AttemptKind,
+  type FormatKind,
+} from "@/lib/game/formats";
 import { formatActions, ticketProgress, useProgress, type TicketProgress } from "@/lib/progress/store";
 import { PythonRunner } from "@/lib/runner/client";
 import BreakBytesCode from "./formats/BreakBytesCode";
 import ParsonsPuzzle from "./formats/ParsonsPuzzle";
 import PredictOutput from "./formats/PredictOutput";
+import TraceTable from "./formats/TraceTable";
 import type { RunFormat } from "./formats/shared";
 
 export type TaskFormatsProps = {
@@ -53,7 +62,7 @@ export default function TaskFormats({ ticket, tp, getRunner, onXp }: TaskFormats
   const f = ticket.formats!;
   const rec = (kind: FormatKind, i: number) => t.formats?.[formatKey(kind, i)];
 
-  function attempt(kind: "break_it" | "parsons", i: number, success: boolean, extra: { input?: string; order?: number[] }, label: string) {
+  function attempt(kind: AttemptKind, i: number, success: boolean, extra: AttemptExtra, label: string) {
     const key = formatKey(kind, i);
     const before = t.formats?.[key];
     const after = recordAttempt(kind, before, success, extra);
@@ -103,6 +112,18 @@ export default function TaskFormats({ ticket, tp, getRunner, onXp }: TaskFormats
           record={rec("parsons", i)}
           run={run}
           onAttempt={(success, order) => attempt("parsons", i, success, { order }, "Solved the Parsons puzzle")}
+        />
+      ))}
+      {(f.trace ?? []).map((task, i) => (
+        <TraceTable
+          key={`t${i}`}
+          testId={`format-trace-${i}`}
+          seed={`${ticket.id}:trace:${i}`}
+          task={task}
+          record={rec("trace", i)}
+          run={run}
+          onCheck={(success, cells) => attempt("trace", i, success, { cells }, "Traced it like Python")}
+          onWatch={() => formatActions.watch(ticket.id, formatKey("trace", i))}
         />
       ))}
     </div>

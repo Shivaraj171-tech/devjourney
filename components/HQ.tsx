@@ -22,6 +22,8 @@ import { correctSeen, hitlScore, wrongSeen } from "@/lib/game/byte";
 import { finalSeasonIndex, previousChainSeasonIndex, seasonOpen } from "@/lib/content/order";
 import { certificateStatus } from "@/lib/game/skillsCheck";
 import SkillsCheckCard from "./SkillsCheckCard";
+import BugBounty from "./BugBounty";
+import type { BountyCard } from "@/lib/game/bounty";
 
 export type TicketSummary = {
   id: string;
@@ -48,9 +50,15 @@ export type SeasonSummary = {
   tickets: TicketSummary[];
 };
 
-type Props = { seasons: SeasonSummary[]; warmups: Warmup[]; hasSkillsCheck: boolean };
+type Props = {
+  seasons: SeasonSummary[];
+  warmups: Warmup[];
+  hasSkillsCheck: boolean;
+  /** The Bug Bounty board (side-quest tickets), shown apart from the floors. */
+  bounties?: BountyCard[];
+};
 
-export default function HQ({ seasons, warmups, hasSkillsCheck }: Props) {
+export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [] }: Props) {
   const progress = useProgress();
   const xp = totalXp(progress);
   const [toggled, setToggled] = useState<Record<string, boolean>>({});
@@ -199,6 +207,18 @@ export default function HQ({ seasons, warmups, hasSkillsCheck }: Props) {
           );
         })}
       </div>
+
+      {/* ---------- side quest: the Bug Bounty board (never blocks anything) ---------- */}
+      {returning && (
+        <BugBounty
+          bounties={bounties}
+          isSolved={isSolved}
+          xpFor={(id) => {
+            const tp = ticketProgress(progress, id);
+            return tp.solveXp + tp.quizXp;
+          }}
+        />
+      )}
 
       {now && warmupAvailable && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={solvedIds} ticketConcepts={ticketConcepts} now={now} />}
 

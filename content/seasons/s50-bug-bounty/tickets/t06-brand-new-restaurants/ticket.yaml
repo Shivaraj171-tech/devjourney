@@ -1,0 +1,14 @@
+id: s50-t06
+title: "New restaurants break the homepage"
+type: bug
+level: intern
+track: debugging
+concepts: [boolean-logic, numbers]
+new_concept: boolean-logic
+estimated_minutes: 5
+tests_visible: true
+files_editable: [featured.py]
+# Bug Bounty (side quest): opens once the ticket that taught this is solved.
+requires: s02-t04
+# Revealed after solving: "This was a ___ bug".
+bug_kind: "boolean order"

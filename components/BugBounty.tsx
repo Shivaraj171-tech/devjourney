@@ -1,0 +1,97 @@
+"use client";
+// The Bug Bounty board on the HQ: short "mystery bug" side quests with no concept
+// label (lib/game/bounty.ts). A card opens once the ticket that taught its
+// concept is solved; never blocks anything. After solving, the card reveals the
+// kind of bug and links back to the lesson.
+import Link from "next/link";
+import { withBase } from "@/lib/basePath";
+import { bountyProgress, bountyState, lessonHref, revealText, type BountyCard, type BountyState } from "@/lib/game/bounty";
+
+type Props = {
+  bounties: BountyCard[];
+  isSolved: (ticketId: string) => boolean;
+  /** XP earned on a solved bounty. */
+  xpFor: (ticketId: string) => number;
+};
+
+export default function BugBounty({ bounties, isSolved, xpFor }: Props) {
+  if (bounties.length === 0) return null;
+  const cards = bounties.map((b) => ({ card: b, state: bountyState(b, isSolved) }));
+  const { solved, open, total } = bountyProgress(cards.map((c) => c.state));
+  return (
+    <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-2xl border border-lime-500/30 bg-lime-950/20 p-4 sm:p-5">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 id="bug-bounty-title" className="text-lg font-bold text-white">
+          🐞 Bug Bounty
+        </h2>
+        <span className="text-sm text-slate-300" data-testid="bounty-progress">
+          {solved}/{total} solved{open > 0 ? ` · ${open} open` : ""}
+        </span>
+      </div>
+      <p className="mt-1 max-w-3xl text-sm text-slate-300">
+        Mystery bugs from all over Orbit Orders. No lesson, no label: working out <i>what kind</i> of bug it is is part of the job.
+        Optional, and they never block your next ticket.
+      </p>
+      <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {cards.map(({ card, state }) => (
+          <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function BountyCardView({ card, state, xp }: { card: BountyCard; state: BountyState; xp: number }) {
+  const header = (
+    <div className="flex items-center justify-between gap-2 text-xs font-semibold text-lime-100">
+      <span>🐞 Mystery bug · ~{card.estimatedMinutes} min</span>
+      <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-amber-200" data-testid="bounty-xp">
+        {state === "done" ? `+${xp} XP` : `🪙 ${card.xp} XP`}
+      </span>
+    </div>
+  );
+  const title = <div className="mt-1.5 text-sm leading-snug font-bold text-white">{card.title}</div>;
+
+  if (state === "locked") {
+    return (
+      <li data-testid={`bounty-${card.id}`} data-state="locked" className="rounded-xl border border-slate-800 bg-slate-950/40 p-3 opacity-80">
+        {header}
+        {title}
+        <p className="mt-2 text-xs text-slate-300">
+          {/* Not the ticket's title: that would name the concept, and the bug is a mystery. */}
+          🔒 Opens after ticket #{card.requires?.number} of {card.requires?.seasonTitle}
+        </p>
+      </li>
+    );
+  }
+  if (state === "done") {
+    return (
+      <li data-testid={`bounty-${card.id}`} data-state="done" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
+        {header}
+        <Link href={`/ticket/${card.id}`} className="block hover:underline">
+          {title}
+        </Link>
+        <p className="mt-2 text-xs text-emerald-100" data-testid="bounty-reveal">
+          ✅ {revealText(card.bugKind)}
+        </p>
+        {card.requires && (
+          <a href={withBase(lessonHref(card.requires.id))} data-testid="bounty-lesson-link" className="mt-1 inline-block text-xs font-semibold text-cyan-300 hover:underline">
+            📘 Revisit the lesson →
+          </a>
+        )}
+      </li>
+    );
+  }
+  return (
+    <li data-testid={`bounty-${card.id}`} data-state="open">
+      <Link
+        href={`/ticket/${card.id}`}
+        className="block rounded-xl border-2 border-lime-400/60 bg-lime-500/10 p-3 transition hover:bg-lime-500/20"
+      >
+        {header}
+        {title}
+        <span className="mt-2 inline-block rounded-lg bg-lime-400 px-2.5 py-1 text-xs font-semibold text-slate-950">Take the bounty →</span>
+      </Link>
+    </li>
+  );
+}

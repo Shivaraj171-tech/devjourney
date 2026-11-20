@@ -1,0 +1,14 @@
+id: s50-t08
+title: "Every typo becomes a $0 tip"
+type: bug
+level: intern
+track: debugging
+concepts: [numbers, strings]
+new_concept: try-except
+estimated_minutes: 5
+tests_visible: true
+files_editable: [tips.py]
+# Bug Bounty (side quest): opens once the ticket that taught this is solved.
+requires: s05-t01
+# Revealed after solving: "This was a ___ bug".
+bug_kind: "swallowed exception"

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { TicketType } from "@/lib/content/types";
 import { QUIZ_XP_PER_CORRECT, type TicketXp } from "@/lib/game/rules";
 import MergeJuice from "./MergeJuice";
@@ -12,6 +12,8 @@ type Props = {
   variant?: TicketType;
   hasQuiz: boolean;
   nextTicket: { id: string; title: string } | null;
+  /** Optional extra under the blurb (e.g. a Bug Bounty's "This was a ___ bug" reveal). */
+  reveal?: ReactNode;
   onQuiz: () => void;
   onClose: () => void;
 };
@@ -23,7 +25,7 @@ const VARIANT_TEXT: Partial<Record<TicketType, { icon: string; title: string; bl
   incident: { icon: "🧯", title: "Incident resolved!", blurb: "Production is back up. Leo can finally answer the support queue." },
 };
 
-export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, onQuiz, onClose }: Props) {
+export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, reveal, onQuiz, onClose }: Props) {
   const text = (variant && VARIANT_TEXT[variant]) ?? {
     icon: isRead ? "📖" : "🚀",
     title: isRead ? "Ticket closed!" : "PR merged!",
@@ -88,6 +90,7 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
         <div className="text-5xl">{text.icon}</div>
         <h2 id="solved-title" className="mt-3 text-2xl font-bold text-white">{text.title}</h2>
         <p className="mt-1 text-slate-300">{text.blurb}</p>
+        {reveal}
         <div className="mt-5 space-y-1 rounded-xl bg-slate-950/70 p-4 text-left font-mono text-sm">
           <Row label="Ticket XP" value={`+${xp.base}`} />
           {xp.hintPenalty > 0 && <Row label="Hints used" value={`−${xp.hintPenalty}`} className="text-amber-300" />}

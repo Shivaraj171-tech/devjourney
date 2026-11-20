@@ -123,10 +123,26 @@ export type ParsonsTask = {
   explain: string;
 };
 
+/**
+ * "Trace table": predict each watched variable's value, step by step. The real values
+ * are never shipped: "Check" traces the code in Python (lib/runner/formats.py).
+ */
+export type TraceTask = {
+  /** A short function and a call to it. */
+  code: string;
+  /** Variable names (the table's columns). */
+  watch: string[];
+  /** Rows to fill: one per line that gives a watched variable a new value. */
+  rows: number;
+  explain: string;
+};
+
 export type TaskFormatsContent = {
   predict: PredictTask[];
   breakIt: BreakItTask[];
   parsons: ParsonsTask[];
+  /** Optional so older callers (and tests) can leave it out. */
+  trace?: TraceTask[];
 };
 
 export type BytePromptVerdict = "good" | "vague" | "wrong";
@@ -187,6 +203,19 @@ export type Ticket = {
    * lesson, no Byte, no concept label. Absent everywhere else.
    */
   final?: true;
+  /**
+   * Side-quest ("mystery bug") tickets of the Bug Bounty board (an off-chain season
+   * that isn't the final): no concept label or lesson until solved. Absent elsewhere.
+   */
+  bounty?: BountyInfo;
+};
+
+/** What a Bug Bounty ticket reveals once solved, and what opens it. */
+export type BountyInfo = {
+  /** e.g. "off-by-one": "This was an off-by-one bug". Defaults to the concept's label. */
+  bugKind: string;
+  /** The ticket that taught the concept (ticket.yaml `requires`): it opens this one, and its lesson is linked. */
+  requires: { id: string; title: string } | null;
 };
 
 /** A 2-minute daily code-reading challenge (content/warmups/*.yaml). */

@@ -13,6 +13,7 @@ import TaskFormats from "./TaskFormats";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import AskByte from "./AskByte";
+import BountyReveal from "./BountyReveal";
 import ByteSuggestionCard from "./ByteSuggestion";
 import CodeEditor from "./CodeEditor";
 import DebuggerPanel from "./DebuggerPanel";
@@ -69,6 +70,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const noRunner = isRead || !!review; // read and review tickets have no tests to run
   // Final exam (season.yaml `final: true`): no hints, no lesson, no Byte, no concept chip. CI checks stay.
   const exam = ticket.final === true;
+  // Bug Bounty side quest: a mystery bug, so no concept chip and no lesson (revealed once solved).
+  const bounty = ticket.bounty;
   // Progress only exists in the browser; until then we don't know if it's locked.
   const isClient = useIsClient();
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
@@ -223,7 +226,9 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
         <div className="text-5xl">🔒</div>
         <h1 className="mt-4 text-2xl font-bold text-white">This ticket is still in the backlog</h1>
-        <p className="mt-2 text-slate-400">Finish the previous ticket first. Maya likes one thing at a time.</p>
+        <p className="mt-2 text-slate-400">
+          {bounty ? "This bounty opens once you've solved the ticket that teaches what you need for it." : "Finish the previous ticket first. Maya likes one thing at a time."}
+        </p>
         <div className="mt-6 flex justify-center gap-3">
           <Link href={`/ticket/${prevTicketId}`} className="rounded-lg bg-violet-600 px-4 py-2 font-semibold text-white hover:bg-violet-500">
             Go to previous ticket
@@ -347,7 +352,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">{TYPE_BADGE[ticket.type]}</span>
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">⏱ ~{ticket.estimatedMinutes} min</span>
-            {!exam && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-cyan-300">New: {conceptLabel(ticket.newConcept)}</span>}
+            {!exam && !bounty && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-cyan-300">New: {conceptLabel(ticket.newConcept)}</span>}
+            {bounty && <span className="rounded-full bg-lime-500/10 px-2 py-0.5 text-lime-200">🐞 Mystery bug</span>}
             {tp.solved && (
               <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-300">
                 {review ? "✔ Reviewed" : isRead ? "✔ Done" : ticket.type === "incident" ? "✔ Resolved" : "✔ Merged"}
@@ -358,6 +364,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
             <span className="text-slate-400">#{ticket.number}</span> {ticket.title}
           </h1>
           {exam && <ExamBanner />}
+          {bounty && <BountyReveal bounty={bounty} solved={tp.solved} />}
         </div>
         {tabs.length > 1 && (
           <Tabs
@@ -432,7 +439,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               <Story text={ticket.story} />
 
               {/* 5. The lesson, folded. */}
-              {ticket.concept && !exam && <Lesson concept={ticket.concept} newConcept={ticket.newConcept} />}
+              {ticket.concept && !exam && !bounty && <Lesson concept={ticket.concept} newConcept={ticket.newConcept} />}
             </div>
           )}
           {activeTab === "byte" && ticket.byte?.prompt && (
@@ -594,6 +601,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           variant={ticket.type}
           hasQuiz={hasQuiz && !isRead}
           nextTicket={nextTicket}
+          reveal={bounty ? <BountyReveal bounty={bounty} solved compact /> : undefined}
           onQuiz={() => {
             setCelebrate(null);
             openQuiz();
@@ -647,9 +655,14 @@ function Story({ text }: { text: string }) {
 
 /** "📘 2-min lesson": the new concept, folded until asked for. */
 function Lesson({ concept, newConcept }: { concept: string; newConcept: string }) {
-  const [open, setOpen] = useState(false);
+  // Linked as /ticket/<id>/#lesson (e.g. from a solved Bug Bounty): open it and bring it into view.
+  const [open, setOpen] = useState(() => window.location.hash === "#lesson");
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (window.location.hash === "#lesson") ref.current?.scrollIntoView({ block: "start" });
+  }, []);
   return (
-    <section className="rounded-xl border border-cyan-500/30 bg-cyan-500/5" data-testid="lesson">
+    <section ref={ref} id="lesson" className="scroll-mt-16 rounded-xl border border-cyan-500/30 bg-cyan-500/5" data-testid="lesson">
       <h2>
         <button
           data-testid="lesson-toggle"

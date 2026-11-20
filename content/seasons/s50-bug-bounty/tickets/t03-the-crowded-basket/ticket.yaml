@@ -1,0 +1,14 @@
+id: s50-t03
+title: "Strangers' snacks in a new basket"
+type: bug
+level: intern
+track: debugging
+concepts: [lists, functions]
+new_concept: mutable-shared-data
+estimated_minutes: 5
+tests_visible: true
+files_editable: [basket.py]
+# Bug Bounty (side quest): opens once the ticket that taught this is solved.
+requires: s01-t10
+# Revealed after solving: "This was a ___ bug".
+bug_kind: "mutable default"

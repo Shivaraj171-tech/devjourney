@@ -17,7 +17,8 @@ import type {
   Ticket,
   Warmup,
 } from "./types";
-import { finalSeasonIndex, seasonGate } from "./order";
+import { conceptLabel } from "./concepts";
+import { finalSeasonIndex, isSideQuest, mainSeasons, seasonGate } from "./order";
 
 const CONTENT_DIR = join(process.cwd(), "content", "seasons");
 
@@ -72,6 +73,10 @@ type TicketYaml = {
   files_editable: string[];
   /** incident tickets only (default 15) */
   time_limit_minutes?: number;
+  /** side-quest (Bug Bounty) tickets only: the ticket that opens this one */
+  requires?: string;
+  /** side-quest (Bug Bounty) tickets only: revealed once solved */
+  bug_kind?: string;
 };
 
 function loadTicket(seasonId: string, dir: string, slug: string, number: number, final = false): Ticket {
@@ -127,6 +132,7 @@ type FormatsYaml = {
     miss?: string;
     explain: string;
   }[];
+  trace?: { code: string; watch: string[]; rows: number; explain: string }[];
   parsons?: {
     goal: string;
     lines: string[];
@@ -167,6 +173,8 @@ function loadFormats(dir: string, ticketId: string): TaskFormatsContent {
       miss: b.miss ?? "",
       explain: b.explain,
     })),
+    // Only the code and the shape: the real values are worked out by tracing it in the browser.
+    trace: (meta.trace ?? []).map((t) => ({ code: trimEnd(t.code), watch: t.watch, rows: t.rows, explain: t.explain })),
     parsons: (meta.parsons ?? []).map((p, i) => ({
       goal: p.goal,
       blocks: shuffleParsons(
@@ -261,8 +269,34 @@ export function loadSeasons(): Season[] {
     );
     seasons.push({ id: meta.id, slug, title: meta.title, intro: meta.intro, chain: meta.chain !== false, final, tickets });
   }
+  addBountyInfo(seasons);
   cache = seasons;
   return seasons;
+}
+
+/** Side-quest seasons (the Bug Bounty board): each ticket learns what it reveals and what opens it. */
+function addBountyInfo(seasons: Season[]) {
+  const byId = new Map(seasons.flatMap((s) => s.tickets.map((t) => [t.id, t] as const)));
+  for (const season of seasons.filter(isSideQuest)) {
+    for (const t of season.tickets) {
+      const meta = readYaml<TicketYaml>(join(CONTENT_DIR, season.slug, "tickets", t.slug, "ticket.yaml"));
+      const required = meta.requires ? byId.get(meta.requires) : undefined;
+      t.bounty = {
+        bugKind: meta.bug_kind ?? conceptLabel(t.newConcept),
+        requires: required ? { id: required.id, title: required.title } : null,
+      };
+    }
+  }
+}
+
+/** The side quests (e.g. the Bug Bounty board): off-chain seasons that aren't the final exam. */
+export function sideQuestSeasons(): Season[] {
+  return loadSeasons().filter(isSideQuest);
+}
+
+/** The story: on-chain seasons and the final exam, side quests left out. */
+export function storySeasons(): Season[] {
+  return mainSeasons(loadSeasons());
 }
 
 /**

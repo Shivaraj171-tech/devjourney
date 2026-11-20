@@ -1,0 +1,14 @@
+id: s50-t07
+title: "Rush hour at 60 o'clock"
+type: bug
+level: intern
+track: debugging
+concepts: [lists, loops]
+new_concept: tuples-and-sorting
+estimated_minutes: 5
+tests_visible: true
+files_editable: [rush.py]
+# Bug Bounty (side quest): opens once the ticket that taught this is solved.
+requires: s05-t05
+# Revealed after solving: "This was a ___ bug".
+bug_kind: "tuple unpacking"

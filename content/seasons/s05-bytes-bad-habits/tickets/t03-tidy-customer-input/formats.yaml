@@ -31,3 +31,18 @@ predict:
       `.strip()` removes the spaces at both ends, then `.upper()` makes capitals. `[-4:]` is the last
       four characters. `[3:6]` starts at position 3 (counting from 0, so the "5" after "+1 ") and stops
       BEFORE position 6: three characters, "555".
+trace:
+  - code: |
+      def initials(name):
+          result = ""
+          for word in name.split():
+              result = result + word[0].upper()
+          return result
+
+      short = initials("ana maria lopez")
+    watch: [word, result]
+    rows: 7
+    explain: >-
+      `result` starts as an empty string and grows by one letter per word: `word[0]` is the first
+      character and `.upper()` returns a NEW capital letter (strings never change in place). So
+      `result` goes '' → 'A' → 'AM' → 'AML'.
