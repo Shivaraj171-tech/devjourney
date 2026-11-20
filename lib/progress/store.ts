@@ -231,6 +231,10 @@ export const actions = {
   resetAll() {
     update(() => fresh());
   },
+  /** Replace everything with restored progress (validated first by lib/progress/backup.ts). */
+  replaceAll(next: Progress) {
+    update(() => migrate({ ...fresh(), ...next }));
+  },
 };
 
 // ---------- review & incident tickets ----------
