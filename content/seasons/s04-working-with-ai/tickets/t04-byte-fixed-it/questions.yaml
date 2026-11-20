@@ -1,0 +1,22 @@
+questions:
+  - prompt: "What is \"McKenzie\".capitalize()?"
+    choices:
+      - "\"McKenzie\""
+      - "\"Mckenzie\""
+      - "\"MCKENZIE\""
+    answer: 1
+    explain: "capitalize() uppercases the first character and lowercases ALL the others, so the K inside the name is lost. That's the regression."
+  - prompt: "Byte's fix made the new \"sam\" test pass. Why didn't it notice it broke McKenzie?"
+    choices:
+      - "Because McKenzie is a rare name"
+      - "Because it only checked the new test instead of running all the tests we already had"
+      - "Because Python can't test names"
+    answer: 1
+    explain: "The old tests would have gone red right away. Running the whole test suite after every fix is how you catch regressions, whoever wrote the fix."
+  - prompt: "What's a regression?"
+    choices:
+      - "A change that breaks something that used to work"
+      - "A bug that was there from the very first version"
+      - "A test that takes too long to run"
+    answer: 0
+    explain: "Regression = going backwards. The feature worked, a change landed, and now it doesn't. Tests written for old behaviour are what notice."

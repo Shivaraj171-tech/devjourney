@@ -1,0 +1,14 @@
+id: w044
+title: "Fixed one, broke one"
+concept: regressions
+after: s04-t04
+code: |
+  def label(text):
+      return text.upper()  # fix: "orbit20" -> "ORBIT20"
+
+  print(label("orbit20"))
+  print(label("Ana's Cafe"))
+question: "label used to return the text exactly as given, and the menu also uses it for restaurant names. The fix makes promo codes uppercase. What does the second print show?"
+choices: ["Ana's Cafe", "ANA'S CAFE", "Ana's cafe"]
+answer: 1
+explain: "upper() changes every letter, so the restaurant name that used to show as \"Ana's Cafe\" now shouts \"ANA'S CAFE\". The fix worked for promo codes, but every other caller of label changed too: that's a regression."

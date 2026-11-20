@@ -1,0 +1,10 @@
+id: s04-t01
+title: "What did Byte actually do?"
+type: read
+level: junior
+track: ai
+concepts: [conditionals, functions, reading-code, verifying-ai-claims]
+new_concept: verifying-ai-claims
+estimated_minutes: 10
+tests_visible: true
+files_editable: []

@@ -1,0 +1,10 @@
+id: s04-t04
+title: "Byte fixed it (and broke something else)"
+type: bug
+level: junior
+track: ai
+concepts: [strings, functions, writing-tests, regressions]
+new_concept: regressions
+estimated_minutes: 12
+tests_visible: true
+files_editable: [app/apology.py]

@@ -1,0 +1,15 @@
+id: w043
+title: "Does that function exist?"
+concept: hallucinated-apis
+after: s04-t03
+code: |
+  import math
+
+  def rounded_up(price):
+      return math.round_up(price)
+
+  print("ready")
+question: "An AI wrote this to round prices up. What happens when you run the file?"
+choices: ["It prints ready, and rounded_up would crash the first time it's called", "It crashes on line 1, because math has no round_up", "It prints ready, and rounded_up(4.2) returns 5"]
+answer: 0
+explain: "math is a real module, so the import works, and Python doesn't look up math.round_up until rounded_up actually runs. Then it raises AttributeError: the real function is math.ceil."
