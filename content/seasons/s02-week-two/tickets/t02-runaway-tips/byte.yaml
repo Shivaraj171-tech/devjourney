@@ -34,3 +34,15 @@ prompt:
         follow ("the cart must be the same"). Byte's answer is short and does exactly that.
         The tip maths in tip_amount is still yours to fix, and the tests are still how you check.
   best: 2
+
+# This time Byte fixes BOTH of its own bugs. Still: tests first, then accept.
+suggestion:
+  file: app/tips.py
+  find: "    return int(subtotal_cents * percent)\n\n\ndef total_with_tip(prices, percent):\n    \"\"\"Return the cart total in cents with the tip added.\n\n    prices is the cart: a list of prices in cents. The checkout screen\n    shows the cart again afterwards, so the cart itself must not change.\n    \"\"\"\n    tip = tip_amount(cart_subtotal(prices), percent)\n    prices.append(tip)\n    return cart_subtotal(prices)"
+  replace: "    return subtotal_cents * percent // 100\n\n\ndef total_with_tip(prices, percent):\n    \"\"\"Return the cart total in cents with the tip added.\n\n    prices is the cart: a list of prices in cents. The checkout screen\n    shows the cart again afterwards, so the cart itself must not change.\n    \"\"\"\n    tip = tip_amount(cart_subtotal(prices), percent)\n    return cart_subtotal(prices) + tip"
+  correct: true
+  says: "Sorry about that PR! Percent needs `// 100`, and the tip belongs in the total, not in the cart."
+  explain: >-
+    Both fixes are right: `* percent // 100` turns 15 into 15% and rounds down, and adding the tip to
+    the total leaves the customer's cart untouched. It's the same Byte that wrote both bugs, though, so
+    you run the tests before accepting, every time.

@@ -219,7 +219,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           {(["ticket", "learn", "hints", "quiz", "byte"] as Tab[]).map((t) => {
             if (t === "quiz" && !hasQuiz) return null;
             if (t === "learn" && !ticket.concept) return null;
-            if (t === "byte" && !ticket.byte?.prompt) return null;
+            // On review tickets the prompt card could hint at the bug, so it opens after the review.
+            if (t === "byte" && (!ticket.byte?.prompt || (review && !tp.solved))) return null;
             const label = t === "byte" ? "💬 Ask Byte" : t === "ticket" ? "📨 Ticket" : t === "learn" ? "📘 Learn" : t === "hints" ? `💡 Hints (${tp.hintsUsed}/${ticket.hints.length})` : quizUnlocked ? "🧠 Quiz" : "🔒 Quiz";
             return (
               <button

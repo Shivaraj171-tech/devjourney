@@ -1,0 +1,11 @@
+# Right cause, new bug: Byte "simplifies" the formatting while it's in there.
+suggestion:
+  file: app/menu.py
+  find: "    dollars = cents / 10\n    return f\"${dollars:.2f}\""
+  replace: "    dollars = cents / 100\n    return f\"${dollars}\""
+  correct: false
+  says: "Cents to dollars is / 100, not / 10. I also tidied up the f-string while I was there!"
+  explain: >-
+    The `/ 100` part is right, but the "tidy-up" dropped `:.2f`, so 1250 now shows as `$12.5` and 0 as
+    `$0.0`. Prices need exactly two decimals. Keep the fix, refuse the tidy-up: change only the line
+    that's wrong.

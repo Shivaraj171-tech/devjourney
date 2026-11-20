@@ -10,3 +10,45 @@ suggestion:
     thousands of sent ids is millions of looks. A set finds an item straight away. Byte builds
     the set ONCE, before the loop (building it inside the loop would be just as slow), and what
     the function returns, and in what order, is unchanged.
+
+# Prompt card: say what must NOT change.
+prompt:
+  goal: "Ask Byte to make `orders_to_send` fast enough for the lunch rush."
+  options:
+    - prompt: "make orders_to_send faster"
+      response_code: |
+        def orders_to_send(orders, sent_ids):
+            by_id = {order.order_id: order for order in orders}
+            new_ids = set(by_id) - set(sent_ids)
+            return [by_id[order_id] for order_id in new_ids]
+      verdict: vague
+      feedback: >-
+        It's fast, but a set doesn't keep the orders' sequence, so "oldest first" is no longer guaranteed
+        (it may even look right in a quick test). You didn't say the order mattered, so Byte didn't keep it.
+    - prompt: "Make orders_to_send faster by sorting sent_ids first."
+      response_code: |
+        def orders_to_send(orders, sent_ids):
+            sent_ids.sort()
+            to_send = []
+            for order in orders:
+                if order.order_id not in sent_ids:
+                    to_send.append(order)
+            return to_send
+      verdict: wrong
+      feedback: >-
+        Sorting doesn't make `in` on a list any faster, and `sent_ids.sort()` changes the caller's list.
+        Byte followed your HOW without questioning it. Describe the goal and the limits instead.
+    - prompt: "orders_to_send in app/kitchen.py is slow at lunchtime because `order.order_id not in sent_ids` scans a list. Make it faster but keep the result exactly the same: the same orders, oldest first, and don't change either input list."
+      response_code: |
+        def orders_to_send(orders, sent_ids):
+            sent = set(sent_ids)
+            to_send = []
+            for order in orders:
+                if order.order_id not in sent:
+                    to_send.append(order)
+            return to_send
+      verdict: good
+      feedback: >-
+        You named the slow line and listed what must NOT change (same result, same order, inputs untouched).
+        Byte builds the set once, outside the loop, and keeps everything else.
+  best: 2

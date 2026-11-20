@@ -10,3 +10,35 @@ suggestion:
     here `average_rating([])` runs FIRST and divides by zero for a brand-new restaurant:
     Wednesday's incident all over again. Put `len(ratings) >= TOP_RATED_MIN_RATINGS` first, so
     it guards the average.
+
+# Prompt card: spell out the rule AND the edge cases.
+prompt:
+  goal: "Ask Byte to finish `is_top_rated` in app/badges.py."
+  options:
+    - prompt: "make is_top_rated better"
+      response_code: |
+        def is_top_rated(ratings):
+            return average_rating(ratings) >= 4.0
+      verdict: vague
+      feedback: >-
+        "Better" to Byte meant "more restaurants get the badge": it lowered the bar to 4.0 and still crashes
+        on []. If you don't state the rule, Byte invents one.
+    - prompt: "Add a check for at least 5 ratings to is_top_rated."
+      response_code: |
+        def is_top_rated(ratings):
+            return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE and len(ratings) >= 5
+      verdict: vague
+      feedback: >-
+        Closer, but you didn't mention the empty list, so Byte put the average first and [] still divides by
+        zero. It also typed 5 instead of using TOP_RATED_MIN_RATINGS. Edge cases you don't mention are edge
+        cases Byte doesn't handle.
+    - prompt: "is_top_rated(ratings) in app/badges.py: return True only when there are at least TOP_RATED_MIN_RATINGS ratings AND average_rating(ratings) >= TOP_RATED_MIN_AVERAGE. Edge cases: [] must return False without crashing; exactly 5 ratings averaging exactly 4.5 is True."
+      response_code: |
+        def is_top_rated(ratings):
+            return len(ratings) >= TOP_RATED_MIN_RATINGS and average_rating(ratings) >= TOP_RATED_MIN_AVERAGE
+      verdict: good
+      feedback: >-
+        The full rule, the existing names, and the edge cases, including the one that caused Wednesday's
+        incident. Byte put the length check first so it guards the average. Check it against the tests
+        before you accept it.
+  best: 2

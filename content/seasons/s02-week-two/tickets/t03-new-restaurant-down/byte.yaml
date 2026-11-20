@@ -1,0 +1,52 @@
+# Swallowing the error: checkout stops crashing, and the promise quietly breaks.
+suggestion:
+  file: app/ratings.py
+  find: "    average = average_rating(ratings)"
+  replace: "    try:\n        average = average_rating(ratings)\n    except ZeroDivisionError:\n        return \"\""
+  correct: false
+  says: "Wrapped it in try/except: if the average fails, we just show no rating. Checkout is back! 🎉"
+  explain: >-
+    Checkout stops crashing, but new restaurants now get an empty label instead of "New!", and any
+    future error in there will be silent too. Catching an error hides the symptom; the cause is that
+    rating_label works out the average BEFORE it checks for an empty list. Move the check first.
+
+# Prompt card: give Byte the exact error, not just "it's broken".
+prompt:
+  goal: "Ask Byte to help fix the Noodle Nook checkout crash."
+  options:
+    - prompt: "checkout is broken, fix it"
+      response_code: |
+        def delivery_fee(subtotal_cents):
+            if subtotal_cents is None or subtotal_cents < 0:
+                return STANDARD_FEE
+            if subtotal_cents >= FREE_DELIVERY_THRESHOLD:
+                return 0
+            return STANDARD_FEE
+      verdict: vague
+      feedback: >-
+        With no error to go on, Byte guessed which part of checkout broke and "hardened" delivery_fee, which
+        was never the problem. Paste the traceback: it says exactly where to look.
+    - prompt: "Here's the traceback: ZeroDivisionError in average_rating (app/ratings.py line 10), called from rating_label (line 19) for a new restaurant with ratings=[]. rating_label's docstring says new restaurants show 'New!'. Fix rating_label without changing what it returns for rated restaurants."
+      response_code: |
+        def rating_label(ratings):
+            if len(ratings) == 0:
+                return "New!"
+            average = average_rating(ratings)
+            return f"★ {average} ({len(ratings)} ratings)"
+      verdict: good
+      feedback: >-
+        The exact error, where it happened, the input that triggers it, and the rule the result must follow.
+        Byte's answer moves the empty check above the average. Now run the tests and read the four lines:
+        you own them.
+    - prompt: "Stop the error from reaching customers."
+      response_code: |
+        def safe_rating_label(ratings):
+            try:
+                return rating_label(ratings)
+            except Exception:
+                return ""
+      verdict: wrong
+      feedback: >-
+        You asked Byte to hide the error, and it did: no crash, but no "New!" either, and every future bug
+        in rating_label will now fail silently. Ask for the cause to be fixed, not the error to be hidden.
+  best: 1

@@ -1,0 +1,11 @@
+# Looks clean, but it returns a NEW list instead of changing the cart it was given.
+suggestion:
+  file: app/cart_actions.py
+  find: "    # TODO: add price_cents to the end of the cart list\n    pass\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    # TODO: return the number of items in the cart\n    pass"
+  replace: "    return cart + [price_cents]\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    return len(cart)"
+  correct: false
+  says: "Done! `cart + [price_cents]` adds the item, and `len(cart)` counts them."
+  explain: >-
+    `item_count` is right, but `cart + [price_cents]` builds a brand-new list and leaves the customer's
+    cart exactly as it was. The docstring says add_item changes the cart itself (and returns nothing),
+    so the badge would never go up. `cart.append(price_cents)` changes the list in place.

@@ -1,0 +1,11 @@
+# Byte's autocomplete offers the one-letter fix. It's right: accept it, then let the tests prove it.
+suggestion:
+  file: app/greeting.py
+  find: "    return \"Welcome back to Orbit Orders, {name}!\""
+  replace: "    return f\"Welcome back to Orbit Orders, {name}!\""
+  correct: true
+  says: "Missing `f`! Without it, Python prints `{name}` as plain text."
+  explain: >-
+    Byte is right: the `f` turns the string into an f-string, so `{name}` is replaced by the real name.
+    But it was Byte's autocomplete that dropped the `f` in the first place, and it sounded just as sure
+    then. Run the tests either way: they're how you know, not the tone.

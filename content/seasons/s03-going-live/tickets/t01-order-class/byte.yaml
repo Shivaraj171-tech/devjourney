@@ -1,0 +1,42 @@
+# Passes the example in the story... because it IS the example. Hard-coding the test value.
+suggestion:
+  file: app/order.py
+  find: "        return 0  # TODO\n\n    def label(self):\n        \"\"\"Return the order's line on the kitchen screen.\n\n        For example: 'Order 1001 for Sam: $17.00'.\n        Use format_price (from app/menu.py) for the price.\n        \"\"\"\n        return \"\"  # TODO"
+  replace: "        return cart_subtotal(self.items)\n\n    def label(self):\n        \"\"\"Return the order's line on the kitchen screen.\n\n        For example: 'Order 1001 for Sam: $17.00'.\n        Use format_price (from app/menu.py) for the price.\n        \"\"\"\n        return \"Order 1001 for Sam: $17.00\""
+  correct: false
+  says: "Both done! subtotal() uses cart_subtotal, and label() returns exactly the format in the docstring."
+  explain: >-
+    `subtotal` is right, but `label` returns the docstring's example word for word, so EVERY order says
+    it's Sam's $17.00 order. It passes the one test that uses that example and fails the rest. Watch for
+    code that returns a test's expected value instead of computing it: build the label from
+    self.order_id, self.customer and self.subtotal().
+
+# Prompt card: give Byte the real names, or it invents them.
+prompt:
+  goal: "Ask Byte to write `Order.label()` for the kitchen screen."
+  options:
+    - prompt: "write label() for the Order class"
+      response_code: |
+        def label(self):
+            return f"Order {self.id} for {self.customer_name}: {self.total_price().format()}"
+      verdict: wrong
+      feedback: >-
+        self.id, self.customer_name and total_price() don't exist: Byte guessed what an Order "usually" has.
+        Python only complains when the line runs, so this would crash the kitchen screen, not your editor.
+    - prompt: "Write a label function that shows the order."
+      response_code: |
+        def label(self):
+            print(f"Order {self.order_id} for {self.customer}: {self.subtotal()}")
+      verdict: vague
+      feedback: >-
+        "Shows" made Byte print instead of return, so label() gives back None, and the price is raw cents
+        (1700). Say exactly what the function returns, with an example.
+    - prompt: "Write Order.label() in app/order.py. Return e.g. 'Order 1001 for Sam: $17.00'. Use self.order_id, self.customer, self.subtotal() and format_price from app/menu.py (already imported)."
+      response_code: |
+        def label(self):
+            return f"Order {self.order_id} for {self.customer}: {format_price(self.subtotal())}"
+      verdict: good
+      feedback: >-
+        Real attribute and function names plus an exact example: nothing left to invent. Byte's line uses
+        only things that exist in order.py.
+  best: 2

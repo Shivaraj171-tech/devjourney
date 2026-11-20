@@ -1,0 +1,46 @@
+# Prompt card: the prompt that should have produced this PR. Say what NOT to change.
+prompt:
+  goal: "Write the prompt that gets Byte to add the small-order fee, and nothing else."
+  options:
+    - prompt: "add a small order fee"
+      response_code: |
+        SMALL_ORDER_FEE = 1.50
+
+
+        def small_order_fee(subtotal):
+            if subtotal < 10:
+                return SMALL_ORDER_FEE
+            return 0
+      verdict: vague
+      feedback: >-
+        No amounts, no units: Byte used dollars, while every amount in our code is in cents, so a $9.00
+        order (900 cents) would never pay the fee.
+    - prompt: "Add a $1.50 fee for orders under $10.00, and clean up delivery.py while you're in there."
+      response_code: |
+        def calc_delivery(subtotal_cents):
+            return 0 if subtotal_cents >= FREE_DELIVERY_THRESHOLD else STANDARD_FEE
+
+
+        def small_order_fee(subtotal_cents):
+            return SMALL_ORDER_FEE if subtotal_cents < SMALL_ORDER_LIMIT else 0
+      verdict: wrong
+      feedback: >-
+        "Clean up while you're in there" is an open invitation: Byte renamed delivery_fee, so every file
+        that calls it now breaks. Unrequested changes are where regressions hide, so ask for exactly one
+        change.
+    - prompt: "In app/delivery.py, add small_order_fee(subtotal_cents): return 150 for orders under 1000 cents, otherwise 0. All amounts are in cents. Don't change delivery_fee or any other existing code."
+      response_code: |
+        SMALL_ORDER_LIMIT = 1000  # cents ($10.00)
+        SMALL_ORDER_FEE = 150  # cents ($1.50)
+
+
+        def small_order_fee(subtotal_cents):
+            """Orders under $10.00 pay an extra $1.50 small-order fee."""
+            if subtotal_cents < SMALL_ORDER_LIMIT:
+                return SMALL_ORDER_FEE
+            return 0
+      verdict: good
+      feedback: >-
+        Exact name, exact rule, the units, and a clear "don't change anything else". A PR made from this
+        prompt would have nothing unrelated in it to review.
+  best: 2
