@@ -58,6 +58,10 @@ learner picks. Both blocks are optional, but at least one must be present:
       replace: "    for i in range(1, len(prices)):" # Byte's proposed code
       correct: false                   # true: starter + replacement PASSES the tests,
                                        # false: it still FAILS them (checked by running)
+      partial: true                    # optional, only with correct: true: Byte's change is right
+                                       # as far as it goes but leaves work for the learner. It must
+                                       # keep every test that passes on starter/ passing, make at
+                                       # least one more test pass, and NOT make all tests pass
       says: "Off-by-one spotted! ..."  # Byte's one-line pitch
       explain: "..."                   # why it's right or wrong (shown after the decision)
       why:                             # optional: "decide before evidence". The learner must pick
@@ -544,6 +548,11 @@ def check_byte_suggestion(ticket_dir, meta, sug):
             errors.append(f"{where}: '{field}' is missing or empty")
     if not isinstance(sug.get("correct"), bool):
         errors.append(f"{where}: 'correct' must be true or false")
+    if "partial" in sug:
+        if not isinstance(sug["partial"], bool):
+            errors.append(f"{where}: 'partial' must be true or false")
+        elif sug["partial"] and sug.get("correct") is not True:
+            errors.append(f"{where}: 'partial: true' only goes with 'correct: true'")
     if errors:
         return errors
     rel, find, replace = sug["file"], sug["find"], sug["replace"]
@@ -814,8 +823,10 @@ def check_parsons(item, where):
 def check_byte_suggestion_tests(ticket_dir):
     """Honesty check: apply the suggestion to a copy of starter/ and run the tests.
 
-    correct: true must pass, correct: false must fail. Returns error strings.
-    Call only after check_byte() found no errors.
+    correct: true must pass, correct: false must fail. With partial: true the
+    change must keep every test that passes on starter/ passing, make at least
+    one more test pass, and still leave at least one test failing.
+    Returns error strings. Call only after check_byte() found no errors.
     """
     try:
         data = load_byte(ticket_dir)
@@ -833,6 +844,8 @@ def check_byte_suggestion_tests(ticket_dir):
         target = code_dir / rel
         target.write_text(apply_suggestion(target.read_text(encoding="utf-8"), find, replace), encoding="utf-8")
         result = run_ticket_tests(code_dir, ticket_dir / "tests")
+    if sug.get("partial"):
+        return check_partial_suggestion(run_ticket_tests(ticket_dir / "starter", ticket_dir / "tests"), result)
     if correct and not result["passed"]:
         failing = [f"{r['file']}::{r['name']}" for r in result.get("results", []) if r["status"] != "pass"]
         detail = result.get("error") or ", ".join(failing) or "no tests ran"
@@ -840,6 +853,25 @@ def check_byte_suggestion_tests(ticket_dir):
     if not correct and result["passed"]:
         return ["byte.yaml: suggestion says correct: false, but starter + replacement passes every test"]
     return []
+
+
+def check_partial_suggestion(before, after):
+    """partial: true means "right as far as it goes". Compares test results on starter/ (before)
+    with starter/ + Byte's change (after). Returns error strings."""
+    where = "byte.yaml: suggestion says partial: true"
+    if "error" in after:
+        return [f"{where}, but starter + replacement {after['error']}"]
+    status = lambda result: {(r["file"], r["name"]): r["status"] for r in result.get("results", [])}
+    old, new = status(before), status(after)
+    errors = []
+    broken = sorted(f"{f}::{n}" for (f, n), s in old.items() if s == "pass" and new.get((f, n)) != "pass")
+    if broken:
+        errors.append(f"{where}, but it breaks tests that passed before: {', '.join(broken)}")
+    if sum(s == "pass" for s in new.values()) <= sum(s == "pass" for s in old.values()):
+        errors.append(f"{where}, but it doesn't make any more tests pass")
+    if after["passed"]:
+        errors.append(f"{where}, but starter + replacement passes every test (that's a full fix: drop 'partial')")
+    return errors
 
 
 def check_ticket_tests(ticket_dir):

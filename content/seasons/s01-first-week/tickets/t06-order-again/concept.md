@@ -12,7 +12,7 @@ print(stock.get("kiwis", 0))    # 0
 print(stock["kiwis"])           # KeyError: 'kiwis'
 ```
 
-`key in my_dict` checks whether a key exists. `.get(key, default)` gives back the default instead of failing when the key is missing.
+`key in my_dict` checks whether a key exists. `.get(key, default)` gives back the default instead of failing when the key is missing. Use `.get()` when a stand-in value makes sense; when a missing item should be *left out*, check with `in` first, because `.get()` still hands you something (like `None` or `0`).
 
 **Watch out:** Square-bracket lookup on a missing key stops the whole program with a `KeyError`. When data can change over time (like a menu), don't assume every key you knew about yesterday is still there.
 

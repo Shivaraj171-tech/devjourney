@@ -1,14 +1,15 @@
-# Correct: both rules, with the safe check first so [] never reaches the average.
+# Partial: Byte stops the crash for new restaurants, but the 5-ratings rule is still missing.
 suggestion:
   file: app/badges.py
   find: "    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
-  replace: "    return len(ratings) >= TOP_RATED_MIN_RATINGS and average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
+  replace: "    if len(ratings) == 0:\n        return False\n    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
   correct: true
-  says: "Added the 5-ratings rule with `and`, length check first so a new restaurant can't divide by zero."
+  partial: true
+  says: "After Wednesday, safety first: a restaurant with no ratings can't be top rated, and can't crash."
   explain: >-
-    Correct. `and` checks left to right and stops at the first False, so for [] (or any restaurant with
-    fewer than 5 ratings) average_rating never runs. Swap the two sides and Wednesday's
-    ZeroDivisionError is back: order matters.
+    Right as far as it goes: [] returns False and never reaches the average. But one 5-star rating from
+    the owner's mum still earns the badge. The docstring's "at least 5 ratings" rule is still yours to
+    add.
 
 # Prompt card: spell out the rule AND the edge cases.
 prompt:

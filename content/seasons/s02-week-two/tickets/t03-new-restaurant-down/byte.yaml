@@ -1,8 +1,8 @@
-# Swallowing the error: checkout stops crashing, and the promise quietly breaks.
+# Right place, wrong check: a list is never equal to the number 0.
 suggestion:
   file: app/ratings.py
-  find: "    average = average_rating(ratings)"
-  replace: "    try:\n        average = average_rating(ratings)\n    except ZeroDivisionError:\n        return \"\""
+  find: "    average = average_rating(ratings)\n    if len(ratings) == 0:\n        return \"New!\""
+  replace: "    if ratings == 0:\n        return \"New!\"\n    average = average_rating(ratings)"
   correct: false
   why:
     choices:
@@ -10,11 +10,11 @@ suggestion:
       - "`try/except` can't catch ZeroDivisionError, so checkout still crashes."
       - "New restaurants would get an empty label instead of \"New!\"."
     answer: 2
-  says: "Wrapped it in try/except: if the average fails, we just show no rating. Checkout is back! 🎉"
+  says: "The check ran too late, so I moved it to the top. New restaurants get \"New!\" before any maths. 🎉"
   explain: >-
-    Checkout stops crashing, but new restaurants now get an empty label instead of "New!", and any
-    future error in there will be silent too. Catching an error hides the symptom; the cause is that
-    rating_label works out the average BEFORE it checks for an empty list. Move the check first.
+    Moving the check first is the right idea, but `ratings == 0` compares a LIST with the NUMBER 0,
+    which is never True, so [] still reaches average_rating and crashes. Check the length: `len(ratings)
+    == 0`. Read every character of the line an AI moves, not just where it moved to.
 
 # Prompt card: give Byte the exact error, not just "it's broken".
 prompt:

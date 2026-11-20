@@ -1,11 +1,12 @@
-# A test that can't fail: it checks the voucher is ONE of the amounts, not WHICH one.
+# Partial: one good edge test from the spec. The other edges are yours.
 suggestion:
   file: team_tests/test_vouchers.py
   find: "# TODO: add tests of your own below, one for each part of the spec (and its edges)."
-  replace: "def test_voucher_for_every_important_minute():\n    for minutes in [30, 45, 46, 60, 61, 90]:\n        voucher = late_voucher(minutes)\n        assert voucher in (0, 300, 500), f\"unexpected voucher {voucher} for {minutes} minutes\""
-  correct: false
-  says: "One loop that tests every important minute, both edges included. Full coverage! ✅"
+  replace: "def test_exactly_45_minutes_is_on_time():\n    voucher = late_voucher(45)\n    assert voucher == 0, f\"45 minutes is on time and should get no voucher, got {voucher}\""
+  correct: true
+  partial: true
+  says: "Straight from SPEC-41: 45 minutes or less is on time. Here's the edge test for that."
   explain: >-
-    It visits the right minutes but only checks the voucher is one of the three amounts, never WHICH
-    one, so every broken version passes it too: attempt 1 gives 300 at 45 minutes and this test is still
-    green. A test must state the exact answer from the spec, like `late_voucher(45) == 0`.
+    Right as far as it goes: the expected value comes from the spec, and it catches attempt 1's `>= 45`.
+    But the spec has another edge (60 minutes) and two voucher sizes, and CI's other broken versions
+    still pass. Those tests are yours.

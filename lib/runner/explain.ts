@@ -38,7 +38,7 @@ const EXPLAIN: [RegExp, (m: RegExpMatchArray) => string][] = [
   [/^TypeError: can only concatenate str/, () => "You tried to join text with something that isn't text. Use an f-string or str() to turn it into text first."],
   [/^TypeError: (\w+)\(\) missing (\d+) required positional argument/, (m) => `\`${m[1]}()\` was called without all the values it needs (${m[2]} missing).`],
   [/^TypeError: (.*)/, () => "A value is the wrong type for what the code does with it (for example, text where a number is expected)."],
-  [/^KeyError: (.*)/, (m) => `The dictionary has no key ${m[1]}. Check it exists first (with \`in\` or \`.get()\`).`],
+  [/^KeyError: (.*)/, (m) => `The dictionary has no key ${m[1]}. Check it's there first with \`in\`, and decide what should happen when it isn't.`],
   [/^IndexError: (.*)/, () => "The code asked for a position that doesn't exist in the list. Remember lists start at 0 and end at len - 1."],
   [/^ZeroDivisionError/, () => "The code divided by zero. What should happen when there's nothing to divide by?"],
   [/^ValueError: (.*)/, () => "A value has the right type but a bad content (for example, int('abc'))."],

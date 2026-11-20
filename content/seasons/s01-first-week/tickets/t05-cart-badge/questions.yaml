@@ -14,11 +14,11 @@ questions:
       - "It does need one: without return the new item is lost when the function ends"
     answer: 1
     explain: "Lists can be changed in place. The test's cart and the function's cart are the same list, so the change shows up outside the function too."
-  - prompt: "Byte writes add_item as `return cart + [price_cents]`. Which test catches it?"
+  - prompt: "Byte writes add_item as `return cart + [price_cents]`. Which check catches it?"
     choices:
-      - "assert item_count([1, 2]) == 2"
-      - "cart = [1]; add_item(cart, 2); assert cart == [1, 2]"
-      - "assert add_item([1], 2) == [1, 2]"
-      - "assert len([1] + [2]) == 2 and item_count([]) == 0"
+      - "Check that item_count([1, 2]) gives 2"
+      - "After cart = [1] and add_item(cart, 2), check that cart is [1, 2]"
+      - "Check that add_item([1], 2) gives back [1, 2]"
+      - "Check that item_count([]) gives 0 and that len([1] + [2]) gives 2"
     answer: 1
     explain: "Only checking the cart itself shows whether add_item changed it. Checking the return value would fail on the correct version too, which returns None."

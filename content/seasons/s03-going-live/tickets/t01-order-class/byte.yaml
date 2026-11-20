@@ -1,15 +1,15 @@
-# Passes the example in the story... because it IS the example. Hard-coding the test value.
+# Partial: Byte writes subtotal(); label() is yours.
 suggestion:
   file: app/order.py
-  find: "        return 0  # TODO\n\n    def label(self):\n        \"\"\"Return the order's line on the kitchen screen.\n\n        For example: 'Order 1001 for Sam: $17.00'.\n        Use format_price (from app/menu.py) for the price.\n        \"\"\"\n        return \"\"  # TODO"
-  replace: "        return cart_subtotal(self.items)\n\n    def label(self):\n        \"\"\"Return the order's line on the kitchen screen.\n\n        For example: 'Order 1001 for Sam: $17.00'.\n        Use format_price (from app/menu.py) for the price.\n        \"\"\"\n        return \"Order 1001 for Sam: $17.00\""
-  correct: false
-  says: "Both done! subtotal() uses cart_subtotal, and label() returns exactly the format in the docstring."
+  find: "        return 0  # TODO"
+  replace: "        return cart_subtotal(self.items)"
+  correct: true
+  partial: true
+  says: "subtotal() done: cart_subtotal already adds up a list of prices, so I reused it. label() is yours!"
   explain: >-
-    `subtotal` is right, but `label` returns the docstring's example word for word, so EVERY order says
-    it's Sam's $17.00 order. It passes the one test that uses that example and fails the rest. Watch for
-    code that returns a test's expected value instead of computing it: build the label from
-    self.order_id, self.customer and self.subtotal().
+    Right as far as it goes: self.items is this order's list, and cart_subtotal adds it up. label()
+    still returns "": build it from self.order_id, self.customer and self.subtotal(), with format_price
+    for the dollars.
 
 # Prompt card: give Byte the real names, or it invents them.
 prompt:

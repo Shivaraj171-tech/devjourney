@@ -13,11 +13,11 @@ questions:
       - "It doesn't really fix it; the list is still shared, just harder to spot"
     answer: 1
     explain: "The line inside the function runs each time create_order is called, creating a fresh empty list for every new order."
-  - prompt: "An AI writes `def create_order(customer, items=[])`. Which test catches the shared list?"
+  - prompt: "An AI writes `def create_order(customer, items=[])`. Which check catches the shared list?"
     choices:
-      - "assert create_order(\"Sam\")[\"items\"] == []"
-      - "create_order(\"Sam\")[\"items\"].append(1); assert create_order(\"Ana\")[\"items\"] == []"
-      - "assert create_order(\"Lee\", [450])[\"items\"] == [450]"
-      - "assert create_order(\"Sam\")[\"customer\"] == \"Sam\" and create_order(\"Ana\")[\"customer\"] == \"Ana\""
+      - "Check that create_order(\"Sam\") starts with no items"
+      - "Add an item to create_order(\"Sam\")'s list, then check that create_order(\"Ana\") starts with no items"
+      - "Check that create_order(\"Lee\", [450]) keeps the items [450]"
+      - "Check that create_order(\"Sam\") and create_order(\"Ana\") each have the right customer name"
     answer: 1
     explain: "The shared list only shows up when one order adds an item and a LATER order is created. A single new order is always empty on the first call."

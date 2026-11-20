@@ -209,3 +209,95 @@ class ByteYamlTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# A ticket with two separate bugs, so Byte can fix just one of them (partial: true).
+TWO_BUG_STARTER = """\
+def double(x):
+    return x + 2
+
+
+def half(x):
+    return x - 2
+
+
+def triple(x):
+    return x * 3
+"""
+TWO_BUG_SOLUTION = TWO_BUG_STARTER.replace("return x + 2", "return x * 2").replace("return x - 2", "return x // 2")
+TWO_BUG_TESTS = """\
+from app.calc import double, half, triple
+
+
+def test_double():
+    assert double(5) == 10
+
+
+def test_half():
+    assert half(10) == 5
+
+
+def test_triple_already_works():
+    assert triple(2) == 6
+"""
+PARTIAL = """\
+suggestion:
+  file: app/calc.py
+  find: "    return x + 2"
+  replace: "    return x * 2"
+  correct: true
+  partial: true
+  says: "Fixed double for you; half is yours."
+  explain: "double is right now, half still subtracts."
+"""
+
+
+class PartialSuggestionTests(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.root)
+
+    def ticket(self, byte_text):
+        t = make_ticket(self.root, "t01")
+        (t / "tests" / "test_calc.py").write_text(TWO_BUG_TESTS, encoding="utf-8")
+        (t / "starter" / "app" / "calc.py").write_text(TWO_BUG_STARTER, encoding="utf-8")
+        (t / "solution" / "app" / "calc.py").write_text(TWO_BUG_SOLUTION, encoding="utf-8")
+        write(t / "byte.yaml", byte_text)
+        return t
+
+    def errors(self, t):
+        errors = vc.check_ticket_meta(t)
+        if not errors:
+            errors += vc.check_ticket_tests(t) + vc.check_byte_suggestion_tests(t)
+        return errors
+
+    def test_honest_partial_suggestion_is_valid(self):
+        self.assertEqual(self.errors(self.ticket(PARTIAL)), [])
+
+    def test_partial_without_partial_flag_fails_as_correct(self):
+        errors = self.errors(self.ticket(PARTIAL.replace("  partial: true\n", "")))
+        self.assertTrue(any("correct: true" in e and "fails the tests" in e for e in errors), errors)
+
+    def test_partial_that_fixes_everything_is_caught(self):
+        text = PARTIAL.replace('find: "    return x + 2"', 'find: "    return x + 2\\n\\n\\ndef half(x):\\n    return x - 2"') \
+                      .replace('replace: "    return x * 2"', 'replace: "    return x * 2\\n\\n\\ndef half(x):\\n    return x // 2"')
+        errors = self.errors(self.ticket(text))
+        self.assertTrue(any("passes every test" in e for e in errors), errors)
+
+    def test_partial_that_fixes_nothing_is_caught(self):
+        errors = self.errors(self.ticket(PARTIAL.replace('replace: "    return x * 2"', 'replace: "    return x + 3"')))
+        self.assertTrue(any("doesn't make any more tests pass" in e for e in errors), errors)
+
+    def test_partial_that_breaks_a_passing_test_is_caught(self):
+        text = PARTIAL.replace('find: "    return x + 2"', 'find: "    return x + 2\\n\\n\\ndef half(x):\\n    return x - 2\\n\\n\\ndef triple(x):\\n    return x * 3"') \
+                      .replace('replace: "    return x * 2"', 'replace: "    return x * 2\\n\\n\\ndef half(x):\\n    return x - 2\\n\\n\\ndef triple(x):\\n    return x * 4"')
+        errors = self.errors(self.ticket(text))
+        self.assertTrue(any("breaks tests that passed before" in e and "test_triple_already_works" in e for e in errors), errors)
+
+    def test_partial_needs_correct_true_and_a_boolean(self):
+        errors = vc.check_ticket_meta(self.ticket(PARTIAL.replace("correct: true", "correct: false")))
+        self.assertTrue(any("only goes with 'correct: true'" in e for e in errors), errors)
+        errors = vc.check_ticket_meta(self.ticket(PARTIAL.replace("partial: true", "partial: sometimes")))
+        self.assertTrue(any("'partial' must be true or false" in e for e in errors), errors)

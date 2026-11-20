@@ -1,22 +1,3 @@
-# A correct performance fix: the set is built once, outside the loop.
-suggestion:
-  file: app/kitchen.py
-  find: "    to_send = []\n    for order in orders:\n        if order.order_id not in sent_ids:"
-  replace: "    sent = set(sent_ids)\n    to_send = []\n    for order in orders:\n        if order.order_id not in sent:"
-  correct: true
-  why:
-    choices:
-      - "Sets don't keep order, so orders would now be sent in a random order."
-      - "The set is built once; each `in` check is instant, and the output is unchanged."
-      - "Building a set from the list is as slow as the old loop, so nothing speeds up."
-    answer: 1
-  says: "`in` on a list checks every item, one by one. Build a set once, and each check is instant."
-  explain: >-
-    Correct. `x in some_list` looks at the items one by one, so thousands of orders times
-    thousands of sent ids is millions of looks. A set finds an item straight away. Byte builds
-    the set ONCE, before the loop (building it inside the loop would be just as slow), and what
-    the function returns, and in what order, is unchanged.
-
 # Prompt card: say what must NOT change.
 prompt:
   goal: "Ask Byte to make `orders_to_send` fast enough for the lunch rush."

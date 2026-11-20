@@ -13,11 +13,11 @@ questions:
       - "total was set back to 0 inside the loop, so only part of the cart was added"
     answer: 1
     explain: "Subtracting 1 meant the loop never reached the last index. This kind of 'off by one' mistake is one of the most common bugs in any language."
-  - prompt: "Byte's autocomplete wrote `for i in range(len(prices) - 1):`. Which test would catch it?"
+  - prompt: "Byte's autocomplete wrote `for i in range(len(prices) - 1):`. Which check would catch it?"
     choices:
-      - "assert cart_subtotal([]) == 0"
-      - "assert cart_subtotal([1, 2]) == 3"
-      - "assert cart_subtotal([0, 0]) == 0"
-      - "assert cart_subtotal([5, 0]) == 5"
+      - "Check that cart_subtotal([]) gives 0"
+      - "Check that cart_subtotal([1, 2]) gives 3"
+      - "Check that cart_subtotal([0, 0]) gives 0"
+      - "Check that cart_subtotal([5, 0]) gives 5"
     answer: 1
-    explain: "The bug drops the last item, so the test needs a last item that isn't 0. [] and [0, 0] add up the same either way, and [5, 0] only loses a 0."
+    explain: "The bug drops the last item, so the check needs a last item that isn't 0. [] and [0, 0] add up the same either way, and [5, 0] only loses a 0."

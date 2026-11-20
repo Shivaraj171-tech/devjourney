@@ -1,18 +1,16 @@
-# After the capitalize() regression, Byte's second attempt is right. Trust it only after ALL the tests run.
+# Byte's second fix: title() looks right for "sam"... and is another regression.
 suggestion:
   file: app/apology.py
   find: "    return customer.capitalize()  # Byte's fix for Leo's \"sam\" complaint"
-  replace: "    return customer[:1].upper() + customer[1:]"
-  correct: true
+  replace: "    return customer.title()"
+  correct: false
   why:
     choices:
       - "`.upper()` turns the whole name into capitals, like SAM."
       - "It capitalises the first letter and keeps the rest exactly as typed."
       - "`customer[:1]` crashes on an empty name, so an old test will now fail."
     answer: 1
-  says: "`capitalize()` also lowercases the rest of the name. Uppercase only the first letter and keep the rest as typed."
+  says: "`capitalize()` was the problem. `title()` capitalises every word, so two-part names work too!"
   explain: >-
-    Correct, and this time the claim survives ALL the old tests, not just Leo's new one.
-    `customer[:1]` is the first letter (and, unlike `customer[0]`, doesn't crash on an empty
-    name), `.upper()` makes it a capital, and `customer[1:]` keeps the rest exactly as typed,
-    so McKenzie and Ana Lucia stay as they are.
+    It fixes "sam" and "ana lucia", but title() also lowercases every letter after the first in each
+    word, so McKenzie becomes "Mckenzie" all over again. Run ALL the old tests before you trust a fix.

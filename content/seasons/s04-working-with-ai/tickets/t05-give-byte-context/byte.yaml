@@ -1,4 +1,16 @@
-# Correct: Byte follows the spec in the docstring line by line. Read it before you accept it.
+# Partial: Byte builds the late lines and the empty-day message. The total line is yours.
+suggestion:
+  file: app/refund_report.py
+  find: "    # TODO: Byte left this for you. Build the lines, then join them.\n    return \"\""
+  replace: "    lines = []\n    for order, delivery_minutes in deliveries:\n        if late_refund(order, delivery_minutes) > 0:\n            lines.append(refund_line(order, delivery_minutes))\n    if not lines:\n        return \"No late orders today.\"\n    # TODO: add the 'Total refunded: $X.XX' line, then join the lines with \"\\n\"\n    return \"\""
+  correct: true
+  partial: true
+  says: "I did the loop and the empty-day message from the spec. The total line is the fun bit, so I left it for you!"
+  explain: >-
+    Right as far as it goes: only late deliveries get a line, in order, and an empty day says "No late
+    orders today.". Days with late orders still return "": add up the refunds, add the total line with
+    format_price, and join the lines.
+
 prompt:
   goal: "Get Byte to draft `refund_report` for Leo."
   options:

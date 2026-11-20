@@ -14,10 +14,10 @@ questions:
       - "An error, because name needs quotes inside the braces"
     answer: 2
     explain: "Inside an f-string, {name} is replaced by the value of the variable name, which is \"Sam\"."
-  - prompt: "Byte autocompletes `return \"Welcome back to Orbit Orders, {name}!\"` (no f). Which test would catch it?"
+  - prompt: "Byte autocompletes `return \"Welcome back to Orbit Orders, {name}!\"` (no f). Which check would catch it?"
     choices:
-      - "assert greet(\"Sam\").startswith(\"Welcome back to Orbit Orders, \")"
-      - "assert \"Sam\" in greet(\"Sam\")"
-      - "assert isinstance(greet(\"Sam\"), str) and greet(\"Sam\") != \"\""
+      - "Check that greet(\"Sam\") starts with \"Welcome back to Orbit Orders, \""
+      - "Check that \"Sam\" appears in greet(\"Sam\")"
+      - "Check that greet(\"Sam\") gives back some text that isn't empty"
     answer: 1
-    explain: "Only a test that looks for the real name can tell {name} from Sam. The other two pass on Byte's line too."
+    explain: "Only a check that looks for the real name can tell {name} from Sam. The other two pass on Byte's line too."

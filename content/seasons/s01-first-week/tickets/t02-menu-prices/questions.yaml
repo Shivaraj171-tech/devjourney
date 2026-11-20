@@ -13,10 +13,10 @@ questions:
       - "1.25: dividing by 10 instead of 100 makes every price 10 times too small"
     answer: 1
     explain: "1250 / 10 is 125.0. There are 100 cents in a dollar, so you need to divide by 100 to get 12.5."
-  - prompt: "Byte's autocomplete offers `dollars = cents / 10`. Which test would catch it?"
+  - prompt: "Byte's autocomplete offers `dollars = cents / 10`. Which check would catch it?"
     choices:
-      - "assert format_price(0) == \"$0.00\""
-      - "assert format_price(1250) == \"$12.50\""
-      - "assert format_price(299).startswith(\"$\") and \".\" in format_price(299)"
+      - "Check that format_price(0) gives \"$0.00\""
+      - "Check that format_price(1250) gives \"$12.50\""
+      - "Check that format_price(299) starts with \"$\" and contains a dot"
     answer: 1
     explain: "Only a known price with a known label shows the 10x error. 0 is $0.00 either way, and \"$29.90\" still starts with $ and has a dot."

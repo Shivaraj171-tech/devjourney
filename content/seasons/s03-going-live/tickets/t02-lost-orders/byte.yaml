@@ -1,20 +1,21 @@
-# Correct: convert the id once, before the Order is built.
+# Partial: the dictionary key is a number again, but the Order inside still has a text id.
 suggestion:
   file: app/storage.py
-  find: "    for order_id, fields in data.items():"
-  replace: "    for order_id, fields in data.items():\n        order_id = int(order_id)"
+  find: "        orders[order_id] = order"
+  replace: "        orders[int(order_id)] = order"
   correct: true
+  partial: true
   why:
     choices:
       - "`int()` fails on JSON text, so loading crashes on every order."
       - "Only the dictionary key is fixed; the Order keeps its text id."
       - "The id is turned back into a number before the Order is built."
     answer: 2
-  says: "JSON turned your ids into text. Turn each one back into a number first, before the Order is built."
+  says: "JSON turned your keys into text. Convert the key back with int() and lookups work again."
   explain: >-
-    Correct. Converting at the top of the loop fixes both the dictionary key AND order.order_id. A
-    tempting half-fix is `orders[int(order_id)] = order`: lookups work again, but every Order still
-    carries the text id "1001" inside it.
+    Right as far as it goes: loaded[1001] works again. But the Order was built a few lines earlier with
+    the text id "1001", so order.order_id is still a string. Convert once, before the Order is built,
+    and both are fixed.
 
 # Prompt card: ask Byte to explain before it changes anything.
 prompt:

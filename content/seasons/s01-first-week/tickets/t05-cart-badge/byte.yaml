@@ -1,17 +1,17 @@
-# Correct: both stubs filled in, the way the docstrings describe.
+# Partial: Byte does the easy half (item_count). add_item is still yours.
 suggestion:
   file: app/cart_actions.py
-  find: "    # TODO: add price_cents to the end of the cart list\n    pass\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    # TODO: return the number of items in the cart\n    pass"
-  replace: "    cart.append(price_cents)\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    return len(cart)"
+  find: "    # TODO: return the number of items in the cart\n    pass"
+  replace: "    return len(cart)"
   correct: true
+  partial: true
   why:
     choices:
       - "`append` returns a new list, so the cart itself never changes."
       - "It adds to the cart in place, and `len` is the badge number."
       - "`len(cart)` counts characters, not items, so the badge is wrong."
     answer: 1
-  says: "`append` adds to the end of the cart itself, and `len` counts the items. Done! 🛒"
+  says: "I filled in item_count: `len(cart)` is the number on the badge. add_item is all yours! 🛒"
   explain: >-
-    Correct. append changes the list the caller passed in, which is why add_item doesn't need to return
-    anything, and len(cart) is the number on the badge. Accepting is fine; owning it means you could
-    explain both lines to Sofia.
+    Right as far as it goes: `len(cart)` counts the items, so the badge tests pass. But add_item still
+    does nothing, so the cart never grows. That part is yours: the lesson's `.append()` is the tool.

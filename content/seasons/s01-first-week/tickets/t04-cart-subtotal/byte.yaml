@@ -1,11 +1,11 @@
-# Correct, and simpler than fixing the range: loop over the prices themselves.
+# Byte's autocomplete "fixes" its own off-by-one... by moving it to the other end.
 suggestion:
   file: app/cart.py
-  find: "    for i in range(len(prices) - 1):\n        total = total + prices[i]"
-  replace: "    for price in prices:\n        total = total + price"
-  correct: true
-  says: "No need to count positions at all: loop over the prices themselves and nothing gets skipped."
+  find: "    for i in range(len(prices) - 1):"
+  replace: "    for i in range(1, len(prices)):"
+  correct: false
+  says: "Off-by-one spotted! Start the range at 1 so the loop covers every item."
   explain: >-
-    Correct. `for price in prices` visits every item exactly once, so there is no start or stop number
-    to get wrong. Byte is right more often than not, but it sounds just as sure when it isn't: the tests
-    are how you tell which time this is.
+    Same number of steps, wrong items. `range(1, len(prices))` gives 1, 2 for a 3-item cart, so now the
+    FIRST item is skipped instead of the last (and a one-item cart costs $0.00). Step through it with
+    [1250, 450, 299] and watch which prices[i] get added.

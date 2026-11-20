@@ -20,7 +20,7 @@ import {
 import { closeSolvedModal } from "./play";
 
 type ByteYaml = {
-  suggestion?: { file: string; find: string; replace: string; correct: boolean; explain: string; why?: unknown };
+  suggestion?: { file: string; find: string; replace: string; correct: boolean; partial?: boolean; explain: string; why?: unknown };
   prompt?: { options: { prompt: string; verdict: string }[]; best: number };
 };
 
@@ -46,7 +46,8 @@ const hasByte = (t: TicketInfo) => {
   }
 };
 const wrongTicket = all.find((t) => hasByte(t) && byteOf(t).suggestion!.correct === false)!;
-const rightTicket = all.find((t) => hasByte(t) && byteOf(t).suggestion!.correct === true)!;
+// A fully correct one: accepting it makes every check pass (partial ones leave work on purpose).
+const rightTicket = all.find((t) => hasByte(t) && byteOf(t).suggestion!.correct === true && !byteOf(t).suggestion!.partial)!;
 const promptTicket = byId("s02-t02"); // prompt card, best = option 2
 
 const card = (page: Page) => page.getByTestId("byte-suggestion");

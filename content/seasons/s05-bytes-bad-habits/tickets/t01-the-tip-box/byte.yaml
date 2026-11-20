@@ -1,17 +1,18 @@
-# Correct: after Maya's comment Byte narrows the except to the one error it means. Check WHY it's right.
+# Partial: after Maya's comment Byte narrows the except. The customer still gets no help.
 suggestion:
   file: app/tip_box.py
   find: "    try:\n        percent = int(text)\n        return f\"Tip: {format_price(tip_amount(subtotal_cents, percent))}\"\n    except Exception:\n        return \"Tip: $0.00\""
-  replace: "    try:\n        percent = int(text)\n    except ValueError:\n        return f'Tip: please type a whole number, like 15 (you typed \"{text}\")'\n    return f\"Tip: {format_price(tip_amount(subtotal_cents, percent))}\""
+  replace: "    try:\n        percent = int(text)\n    except ValueError:\n        return \"Tip: $0.00\"\n    return f\"Tip: {format_price(tip_amount(subtotal_cents, percent))}\""
   correct: true
+  partial: true
   why:
     choices:
       - "It catches only the error int() raises for bad typing, so our own bugs still crash."
       - "ValueError is the parent of every error, so it still catches all the same problems."
       - "A friendly message means no error can hide in here any more, whatever we catch."
     answer: 0
-  says: "Maya's right, I caught too much. Now only `int()` is inside the `try`, and only `ValueError` is caught, with a message the customer can act on."
+  says: "Maya's right, I caught too much. Now only `int()` is inside the `try`, and only `ValueError` is caught."
   explain: >-
-    Correct. `int(text)` is the only line that fails because of what the customer typed, and it
-    raises `ValueError`. Everything else (the tip maths, format_price) is outside the `try`, so a
-    bug there, like a missing subtotal, crashes with a TypeError and shows up in the logs.
+    Right as far as it goes: only the customer's typing can be caught now, so a bug in our own maths
+    crashes and reaches the logs. But someone who types "15%" still sees "Tip: $0.00" with no idea why.
+    The friendly message from the docstring is yours to add.

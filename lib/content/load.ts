@@ -201,6 +201,7 @@ function loadByte(dir: string): ByteContent {
       find: s.find,
       replace: s.replace,
       correct: s.correct,
+      ...(s.correct && s.partial ? { partial: true as const } : {}),
       says: s.says,
       explain: s.explain,
       ...(s.why ? { why: { choices: s.why.choices, answer: s.why.answer } } : {}),

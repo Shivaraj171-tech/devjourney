@@ -1,12 +1,12 @@
-# The classic AI "fix": make the error go away by deleting the feature.
+# Partial: Byte guards discount_amount, but discount_percent(None) still crashes.
 suggestion:
   file: app/promo.py
-  find: "    return PROMO_CODES.get(code.upper(), 0)"
-  replace: "    return PROMO_CODES.get(code, 0)"
-  correct: false
-  says: "The crash is on `.upper()`, so just remove it. No more AttributeError!"
+  find: "    if subtotal_cents < MIN_SUBTOTAL_FOR_PROMO:\n        return 0"
+  replace: "    if code is None:\n        return 0\n    if subtotal_cents < MIN_SUBTOTAL_FOR_PROMO:\n        return 0"
+  correct: true
+  partial: true
+  says: "No code, no discount: I return 0 straight away in discount_amount when the code is None."
   explain: >-
-    The crash is gone, and so is a feature: codes are no longer case-insensitive, so a customer
-    who types "orbit20" silently gets no discount, which the docstring promises won't happen.
-    A real fix handles the new case (None) and keeps everything else working:
-    `if code is None: return 0` before the lookup.
+    Right as far as it goes: checkout stops crashing, because discount_amount never reaches .upper() for
+    None. But discount_percent(None) still crashes, and other code can call it directly. Fix the
+    function that actually calls .upper(), too.

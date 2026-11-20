@@ -38,8 +38,9 @@ test("export a backup code, reset, import it: progress is back", async ({ page }
   await expect(page.getByTestId("settings-summary")).toContainText("Ana · 3 tickets merged");
 
   await page.getByTestId("backup-show-code").click();
+  // The code is built asynchronously (compression), so wait for it before reading.
+  await expect(page.getByTestId("backup-code")).toHaveValue(/^DJB1\.[zj]\.[A-Za-z0-9_-]+\.[0-9a-f]{8}$/);
   const code = await page.getByTestId("backup-code").inputValue();
-  expect(code).toMatch(/^DJB1\.[zj]\.[A-Za-z0-9_-]+\.[0-9a-f]{8}$/);
 
   // Reset needs the typed confirmation.
   await expect(page.getByTestId("reset-button")).toBeDisabled();

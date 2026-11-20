@@ -13,11 +13,11 @@ questions:
       - "Whether the word appears anywhere in the item names, even as part of a longer name"
     answer: 1
     explain: "For a dictionary, `in` checks the keys. It's a safe way to ask \"is this on the menu?\" before looking it up."
-  - prompt: "Byte suggests `cart.append(menu.get(name))` to stop the KeyError. Which test catches what's still wrong?"
+  - prompt: "Byte suggests `cart.append(menu.get(name))` to stop the KeyError. Which check catches what's still wrong?"
     choices:
-      - "assert reorder([\"lemonade\"], {\"lemonade\": 299}) == [299]"
-      - "assert reorder([\"garlic_bread\"], {\"lemonade\": 299}) == []"
-      - "assert reorder([], {\"lemonade\": 299}) == []"
-      - "assert len(reorder([\"garlic_bread\"], {\"lemonade\": 299})) <= 1"
+      - "Check that reorder([\"lemonade\"], {\"lemonade\": 299}) gives [299]"
+      - "Check that reorder([\"garlic_bread\"], {\"lemonade\": 299}) gives []"
+      - "Check that reorder([], {\"lemonade\": 299}) gives []"
+      - "Check that reorder([\"garlic_bread\"], {\"lemonade\": 299}) gives at most one item"
     answer: 1
-    explain: "No crash, but a removed item becomes None in the cart: [None] is not []. The other tests pass on Byte's version, so they can't catch it."
+    explain: "No crash, but a removed item becomes None in the cart: [None] is not []. The other checks pass on Byte's version, so they can't catch it."

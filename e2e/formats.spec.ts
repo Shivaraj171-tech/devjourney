@@ -24,7 +24,7 @@ type FormatsYaml = {
   break_it?: { normal_input: string; example_input: string; miss?: string; call: string }[];
   parsons?: { lines: string[]; distractors: { line: string; explain: string }[] }[];
 };
-type ByteYaml = { suggestion: { file: string; replace: string; correct: boolean; why: { choices: string[]; answer: number } } };
+type ByteYaml = { suggestion: { file: string; replace: string; correct: boolean; partial?: boolean; why: { choices: string[]; answer: number } } };
 
 const all = allSeasonTickets();
 const byId = (id: string) => all.find((t) => t.id === id)!;
@@ -261,7 +261,8 @@ const withWhy = all.filter((t) => {
   }
 });
 const wrongWhyId = withWhy.find((t) => !byteOf(t.id).suggestion.correct)!.id;
-const rightWhyId = withWhy.find((t) => byteOf(t.id).suggestion.correct)!.id;
+// Fully correct (not partial), so accepting it makes every check pass.
+const rightWhyId = withWhy.find((t) => byteOf(t.id).suggestion.correct && !byteOf(t.id).suggestion.partial)!.id;
 
 async function openTicketWithWhy(page: Page, id: string) {
   const t = byId(id);

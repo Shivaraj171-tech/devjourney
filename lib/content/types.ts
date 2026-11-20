@@ -52,6 +52,11 @@ export type ByteSuggestion = {
   replace: string;
   /** True if starter + replacement passes the ticket's tests (verified by the validator). */
   correct: boolean;
+  /**
+   * Correct as far as it goes: it fixes part of the problem and the learner
+   * finishes the rest (some checks still fail after accepting, on purpose).
+   */
+  partial?: true;
   /** Byte's one-line pitch. */
   says: string;
   /** Why it's right or wrong; shown once the learner has decided (and checked). */

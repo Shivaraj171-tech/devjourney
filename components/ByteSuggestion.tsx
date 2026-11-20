@@ -160,12 +160,12 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
 
       {!record && tp.solved && (
         <Verdict tone="neutral" title="You solved this one without Byte.">
-          Byte&apos;s suggestion was {suggestion.correct ? "right" : "wrong"}: <InlineCode text={suggestion.explain} />
+          Byte&apos;s suggestion was {suggestion.correct ? (suggestion.partial ? "right, but only part of the fix" : "right") : "wrong"}: <InlineCode text={suggestion.explain} />
         </Verdict>
       )}
 
       {record && outcome && (
-        <OutcomeNote outcome={outcome} record={record} explain={suggestion.explain} file={suggestion.file} />
+        <OutcomeNote outcome={outcome} record={record} explain={suggestion.explain} file={suggestion.file} partial={suggestion.partial === true} />
       )}
       {record && outcome && outcome !== "pending" && why && record.reason !== undefined && (
         <ReasonNote why={why} record={record} />
@@ -244,7 +244,19 @@ function ReasonNote({ why, record }: { why: ByteWhy; record: SuggestionRecord })
   );
 }
 
-function OutcomeNote({ outcome, record, explain, file }: { outcome: SuggestionOutcome; record: SuggestionRecord; explain: string; file: string }) {
+function OutcomeNote({
+  outcome,
+  record,
+  explain,
+  file,
+  partial,
+}: {
+  outcome: SuggestionOutcome;
+  record: SuggestionRecord;
+  explain: string;
+  file: string;
+  partial: boolean;
+}) {
   const decision = record.decision;
   // "why" mode: a good outcome only pays out with the right reason too.
   if ((outcome === "caught" || outcome === "trusted") && !reasonOk(record)) {
@@ -286,7 +298,10 @@ function OutcomeNote({ outcome, record, explain, file }: { outcome: SuggestionOu
   if (outcome === "trusted") {
     return (
       <Verdict tone="good" title={`✅ Trusted correctly, +${TRUST_XP} XP`}>
-        Byte was right, and you checked it with the tests before trusting it. <InlineCode text={explain} />
+        {partial
+          ? "Byte's part is right, and you checked it before trusting it. It only does part of the job, so some checks still fail: the rest is yours. "
+          : "Byte was right, and you checked it with the tests before trusting it. "}
+        <InlineCode text={explain} />
       </Verdict>
     );
   }
