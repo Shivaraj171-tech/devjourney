@@ -25,3 +25,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .confetti { display: none; }
 }
+
+/* Step-through debugger: the line that runs next (Monaco decorations, see CodeEditor). */
+.debug-current-line {
+  background: rgba(250, 204, 21, 0.16);
+}
+.debug-current-glyph {
+  background: #facc15;
+  width: 4px !important;
+  margin-left: 3px;
+}

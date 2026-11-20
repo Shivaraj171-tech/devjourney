@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CodeEditor from "./CodeEditor";
+import DebuggerPanel from "./DebuggerPanel";
 import HintPanel from "./HintPanel";
 import IncidentPanel from "./IncidentPanel";
 import Markdown from "./Markdown";
@@ -15,7 +16,7 @@ import { incidentBonus, incidentXp, quizXp, readTicketXp, solveXp, type TicketXp
 import { actions, ticketProgress, useProgress } from "@/lib/progress/store";
 import { PythonRunner } from "@/lib/runner/client";
 import { useIsClient } from "@/lib/useIsClient";
-import type { RunResult } from "@/lib/runner/types";
+import type { RunResult, TestResult, TraceResult } from "@/lib/runner/types";
 
 type Props = {
   ticket: Ticket;
@@ -24,6 +25,9 @@ type Props = {
 };
 
 type Tab = "ticket" | "learn" | "hints" | "quiz";
+
+/** A recorded step-through of one check, and the code it was recorded on. */
+type DebugSession = { trace: TraceResult; files: Record<string, string> };
 
 const TYPE_BADGE: Record<string, string> = {
   bug: "🐛 Bug",
@@ -88,25 +92,70 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   );
   const [tab, setTab] = useState<Tab>("ticket");
 
+  // ----- step-through debugger -----
+  const [debug, setDebug] = useState<DebugSession | null>(null);
+  const [debugPos, setDebugPos] = useState(0);
+  const [tracing, setTracing] = useState<string | null>(null);
+  const [traceError, setTraceError] = useState<string | null>(null);
+
+  // A timeout restarts Python; show it as loading again until ready.
+  const restartPython = useCallback((runner: PythonRunner) => {
+    setPythonState("loading");
+    runner.warmUp().then(() => setPythonState("ready"), () => setPythonState("failed"));
+  }, []);
+
   const runTests = useCallback(async () => {
     const runner = runnerRef.current;
-    if (!runner || running) return;
+    if (!runner || running || tracing) return;
     setRunning(true);
+    setDebug(null);
+    setTraceError(null);
     const files = { ...ticket.starter, ...tp.code };
     const res = await runner.run(files, ticket.tests);
     setResult(res);
     setRunning(false);
     if (res.error) {
-      // A timeout restarts Python; show it as loading again until ready.
-      setPythonState("loading");
-      runner.warmUp().then(() => setPythonState("ready"), () => setPythonState("failed"));
+      restartPython(runner);
       return;
     }
     const wasSolved = tp.solved;
     const runsAfter = tp.runs + 1;
     actions.recordRun(ticket.id, res.passed, (runs, hints) => passXp(runs, hints).total);
     if (res.passed && !wasSolved) setCelebrate(passXp(runsAfter, tp.hintsUsed));
-  }, [running, ticket, tp, passXp]);
+  }, [running, tracing, ticket, tp, passXp, restartPython]);
+
+  /** Move the debugger to a step, and show the file that step is in. */
+  const goToStep = useCallback(
+    (trace: TraceResult, position: number) => {
+      const clamped = Math.max(0, Math.min(position, trace.steps.length));
+      setDebugPos(clamped);
+      const step = trace.steps[Math.min(clamped, trace.steps.length - 1)];
+      if (step && step.file in ticket.starter) setActiveFile(step.file);
+    },
+    [ticket.starter],
+  );
+
+  const stepThrough = useCallback(
+    async (check: TestResult) => {
+      const runner = runnerRef.current;
+      if (!runner || running || tracing) return;
+      setTracing(`${check.file}:${check.name}`);
+      setTraceError(null);
+      const files = { ...ticket.starter, ...tp.code };
+      const out = await runner.trace(files, ticket.tests, check.file, check.name);
+      setTracing(null);
+      if (out.error !== undefined) {
+        setTraceError(out.error);
+        restartPython(runner);
+        return;
+      }
+      setDebug({ trace: out.trace, files });
+      goToStep(out.trace, 0);
+    },
+    [running, tracing, ticket, tp.code, goToStep, restartPython],
+  );
+  const debugStep = debug ? debug.trace.steps[Math.min(debugPos, debug.trace.steps.length - 1)] : undefined;
+  const debugStale = !!debug && Object.keys(debug.files).some((path) => debug.files[path] !== (tp.code[path] ?? ticket.starter[path]));
 
   // Ctrl/Cmd + Enter runs the tests.
   useEffect(() => {
@@ -146,7 +195,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   }
 
   return (
-    <div className="mx-auto grid max-w-[1600px] gap-3 p-3 lg:h-[calc(100vh-3.5rem)] lg:grid-cols-[400px_1fr]">
+    <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)] gap-3 p-3 lg:h-[calc(100vh-3.5rem)] lg:grid-cols-[400px_minmax(0,1fr)]">
       {/* ---------- left: ticket / hints / quiz ---------- */}
       <aside className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
         <div className="border-b border-slate-800 p-4">
@@ -316,13 +365,30 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               readOnly={isRead || !editable.has(activeFile)}
               onChange={(v) => actions.saveCode(ticket.id, activeFile, v)}
               onRun={isRead ? undefined : runTests}
+              highlightLine={debugStep && debugStep.file === activeFile ? debugStep.line : undefined}
             />
           </div>
         </div>
-        {!isRead && (
+        {!isRead && debug && (
+          <div className="max-h-[55%] min-h-[220px] overflow-y-auto rounded-2xl border border-violet-500/40 bg-slate-900/70 p-4">
+            <DebuggerPanel
+              trace={debug.trace}
+              position={debugPos}
+              onPosition={(pos) => goToStep(debug.trace, pos)}
+              onClose={() => setDebug(null)}
+              stale={debugStale}
+            />
+          </div>
+        )}
+        {!isRead && !debug && (
           <div className="max-h-[40%] min-h-[140px] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div className="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">CI checks</div>
-            <TestResults result={result} running={running} />
+            {traceError && (
+              <div data-testid="trace-error" className="mb-2 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+                ⚠️ Couldn&apos;t step through that check: {traceError}
+              </div>
+            )}
+            <TestResults result={result} running={running} onStepThrough={pythonState === "ready" ? stepThrough : undefined} tracing={tracing} />
           </div>
         )}
       </section>
