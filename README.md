@@ -1,6 +1,10 @@
 # DevJourney: Orbit Orders HQ (working name)
 
-Learn to code by getting hired. You join **Orbit Orders**, a small (fictional) food-delivery startup, as a junior developer, and grow **one real codebase** by closing 10–15 minute tickets: bugs, features, code-reading tasks, code reviews and production incidents.
+**Learn to code with an AI teammate, and learn to catch its mistakes.**
+
+More and more code is written by AI. The people who thrive will be the ones who can read it, run it, debug it and decide what ships: the human in the loop. DevJourney teaches exactly that, starting from zero.
+
+You join **Orbit Orders**, a small (fictional) food-delivery startup, as a junior developer. Your teammate **Byte** is an AI that writes code fast but not always right. You grow **one real codebase** by closing short tickets (10–20 minutes): bugs, features, code-reading tasks, reviews of AI-written pull requests, and production incidents.
 
 No accounts, no setup: Python runs in your browser (Pyodide), and progress is saved in your browser.
 
@@ -17,8 +21,9 @@ No accounts, no setup: Python runs in your browser (Pyodide), and progress is sa
   | 1 | Your First Week | 10 | strings, numbers, conditionals, loops, lists, dictionaries, reading code, None, functions, mutable shared data |
   | 2 | Week Two: The AI Pair | 5 | code review, side effects, tracebacks, boolean logic, reviewing diffs |
   | 3 | Month One: Going Live | 6 | classes, JSON, writing tests, security, performance, refactoring |
+  | 4 | Month Two: Working with Byte | 5 | verifying AI claims, testing AI code first, hallucinated APIs, regressions, giving AI context |
 
-  Plus 40 daily warm-ups (`content/warmups/`).
+  Plus 45 daily warm-ups (`content/warmups/`).
 - **Research**: competitor analysis in [`docs/research/competitors.md`](docs/research/competitors.md).
 
 ## Run it

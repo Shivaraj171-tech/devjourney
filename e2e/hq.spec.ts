@@ -7,7 +7,7 @@ const season2 = seasonTickets("s02-week-two");
 test("HQ shows every room with only room 1 open (Floor 2 locked)", async ({ page }) => {
   const errors = trackPageErrors(page);
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /Welcome to your first day/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /catch its mistakes/ })).toBeVisible();
 
   const rooms = page.locator("[data-testid^=room-]");
   await expect(rooms).toHaveCount(allSeasonTickets().length);

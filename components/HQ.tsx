@@ -78,14 +78,24 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
       {/* ---------- hero ---------- */}
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-violet-950 via-slate-900 to-cyan-950 p-6 sm:p-8">
         <div className="relative z-10 max-w-2xl">
-          <p className="text-sm font-semibold tracking-widest text-cyan-300 uppercase">Startup HQ · Orbit Orders</p>
-          <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
-            {solved.length === 0 ? "Welcome to your first day! 👋" : `Welcome back, ${progress.playerName === "You" ? "dev" : progress.playerName}!`}
+          <p className="text-sm font-semibold tracking-widest text-cyan-300 uppercase">
+            Startup HQ · Orbit Orders{solved.length > 0 && ` · Welcome back, ${progress.playerName === "You" ? "dev" : progress.playerName}`}
+          </p>
+          <h1 className="mt-2 text-3xl leading-tight font-bold text-white sm:text-4xl">
+            Learn to code with an AI teammate, and learn to catch its mistakes.
           </h1>
           <p className="mt-3 text-slate-300">
-            You&apos;re the newest developer at a tiny food-delivery startup. No disconnected puzzles here: every ticket
-            you close fixes or grows <b className="text-white">one real app</b>. Short tasks, real bugs, and your teammates are counting on you.
+            Byte, our office AI, writes code fast but not always right. You&apos;ll learn Python by reading, running and fixing
+            the real code of <b className="text-white">one growing app</b>, so when AI writes code for you, you can understand it,
+            debug it, and decide what ships. <b className="text-white">Be the human in the loop.</b>
           </p>
+          <ul className="mt-4 flex flex-wrap gap-2 text-xs" aria-label="What you practise">
+            {["📖 Read it", "▶️ Run it", "🐞 Debug it", "🔍 Review it", "✅ Decide"].map((skill) => (
+              <li key={skill} className="rounded-full border border-slate-700 bg-slate-950/40 px-2.5 py-1 text-slate-200">
+                {skill}
+              </li>
+            ))}
+          </ul>
           <div className="mt-5 flex flex-wrap items-center gap-3">
             {current ? (
               <Link
@@ -93,15 +103,15 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
                 data-testid="continue"
                 className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400"
               >
-                {solved.length === 0 ? "Start your first ticket →" : `Continue: #${current.number} ${current.title} →`}
+                {solved.length === 0 ? "Start your first day →" : `Continue: #${current.number} ${current.title} →`}
               </Link>
             ) : (
               <span className="rounded-xl bg-emerald-500/20 px-5 py-3 font-semibold text-emerald-200">🏆 Season complete! More seasons coming soon.</span>
             )}
-            <span className="text-sm text-slate-400">≈10–15 minutes per ticket</span>
+            <span className="text-sm text-slate-400">Short tickets (10–20 min) · no setup · free</span>
           </div>
         </div>
-        <div className="pointer-events-none absolute -right-6 -bottom-8 text-[10rem] opacity-20 select-none sm:text-[12rem]">🛰️</div>
+        <div className="pointer-events-none absolute -right-6 -bottom-8 text-[10rem] opacity-20 select-none sm:text-[12rem]">🤖</div>
       </section>
 
       {/* ---------- stats ---------- */}

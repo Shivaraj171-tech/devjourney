@@ -50,11 +50,12 @@ test("Ctrl+Enter inside the Monaco editor runs the tests", async ({ page }) => {
   expect(after).toBe(before);
 });
 
-test("static HTML doesn't flash the locked message or the first-day welcome", async ({ request }) => {
+test("static HTML doesn't flash the locked message or progress-dependent HQ content", async ({ request }) => {
   const ticketHtml = await (await request.get(ticketUrl(t02.id))).text();
   expect(ticketHtml).not.toContain("still in the backlog");
   const hqHtml = await (await request.get("/")).text();
-  expect(hqHtml).not.toContain("Welcome to your first day");
+  expect(hqHtml).toContain("Opening the office");
+  expect(hqHtml).not.toContain("Welcome back");
 });
 
 test("a locked ticket page doesn't download Python", async ({ page }) => {

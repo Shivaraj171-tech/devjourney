@@ -16,8 +16,9 @@ export default function Onboarding() {
         <p className="text-sm font-semibold tracking-widest text-cyan-300 uppercase">Day 1 · Orbit Orders</p>
         <h2 className="mt-1 text-2xl font-bold text-white">You&apos;re hired! 🎉</h2>
         <p className="mt-2 text-slate-300">
-          You just joined a small food-delivery startup as a junior developer. You&apos;ll learn to code by working on
-          the real app, one 10-minute ticket at a time.
+          You just joined a small food-delivery startup as a junior developer. Your teammate Byte is an AI that writes code
+          fast but not always right. You&apos;ll learn to code by working on the real app, one short ticket at a time, and
+          learn to check, debug and fix what the AI writes.
         </p>
         <ol className="mt-5 space-y-3">
           {STEPS.map((s, i) => (
