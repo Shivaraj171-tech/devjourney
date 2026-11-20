@@ -4,7 +4,7 @@
 // can copy by hand, so it never silently fails.
 import { useRef, useState } from "react";
 
-async function copyText(text: string): Promise<boolean> {
+export async function copyText(text: string): Promise<boolean> {
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);

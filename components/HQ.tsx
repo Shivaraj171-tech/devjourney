@@ -22,6 +22,7 @@ import { correctSeen, hitlScore, wrongSeen } from "@/lib/game/byte";
 import { finalSeasonIndex, previousChainSeasonIndex, seasonOpen } from "@/lib/content/order";
 import { certificateStatus } from "@/lib/game/skillsCheck";
 import SkillsCheckCard from "./SkillsCheckCard";
+import BackupReminder from "./BackupReminder";
 
 export type TicketSummary = {
   id: string;
@@ -158,6 +159,9 @@ export default function HQ({ seasons, warmups, hasSkillsCheck }: Props) {
       {hasSkillsCheck && progress.onboarded && (
         <SkillsCheckCard skillsCheck={progress.skillsCheck} finalUnlocked={finalUnlocked} certificateReady={certificate.eligible} />
       )}
+
+      {/* Back-up nudge (lib/progress/backup.ts): only after 7+ days without a backup. */}
+      {now && <BackupReminder ticketsMerged={solved.length} startedAt={progress.startedAt} now={now} />}
 
       {now && <TeamChat seasons={seasons} progress={progress} streak={streak} now={now} />}
 

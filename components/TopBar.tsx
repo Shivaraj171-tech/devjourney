@@ -15,7 +15,8 @@ export default function TopBar() {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/90 backdrop-blur print:hidden">
       <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-3 sm:gap-4 sm:px-4">
-        <Link href="/" className="flex items-center gap-2 font-bold text-white">
+        {/* Phones: the logo gives its room to ⚙️ (the Office link also goes home). */}
+        <Link href="/" className="hidden items-center gap-2 font-bold text-white sm:flex">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-cyan-400 text-lg">🛰️</span>
           <span className="hidden sm:inline">Orbit Orders <span className="font-normal text-slate-400">HQ</span></span>
         </Link>
@@ -39,6 +40,9 @@ export default function TopBar() {
             </div>
           </div>
           <span className="font-mono whitespace-nowrap text-cyan-300 sm:hidden">{xp} XP</span>
+          <Link href="/settings" data-testid="settings-link" aria-label="Settings and progress backup" title="Settings and backup" className="grid h-9 w-7 shrink-0 place-items-center rounded-md text-base text-slate-300 sm:w-9 sm:text-lg hover:bg-slate-800 hover:text-white">
+            <span aria-hidden>⚙️</span>
+          </Link>
         </div>
       </div>
     </header>
