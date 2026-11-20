@@ -102,3 +102,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .badge-toast { animation: none; }
 }
+
+/* ---------- Ticket page (TicketWorkspace) ---------- */
+/* A clear 2px keyboard focus ring on every control (the browser default is a faint 1px). */
+.ticket-page :focus-visible {
+  outline: 2px solid #a78bfa; /* violet-400 */
+  outline-offset: 2px;
+}
+/* Monaco draws its own focus state; a ring around its hidden input would look broken. */
+.ticket-page .monaco-editor :focus-visible {
+  outline: none;
+}

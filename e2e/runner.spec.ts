@@ -21,10 +21,13 @@ test("revealing a hint before solving reduces the XP awarded", async ({ page }) 
   await runTests(page);
   await expect(page.getByTestId("run-summary")).not.toContainText("All checks passed");
 
-  await page.getByRole("tab", { name: /Hints/ }).click();
+  // Hints live next to Run, in a popover.
+  await page.getByTestId("hints-toggle").click();
   await page.getByRole("button", { name: /Reveal hint 1/ }).click();
   await expect(page.getByText("Hint 1 · Nudge")).toBeVisible();
-  await expect(page.getByRole("tab", { name: /Hints \(1\// })).toBeVisible();
+  await expect(page.getByTestId("hints-toggle")).toContainText("Hints (1/");
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("hints-popover")).toHaveCount(0);
 
   await setEditorFile(page, t01.id, file, solutionFile(t01, file));
   await runTests(page);

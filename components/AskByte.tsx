@@ -71,7 +71,7 @@ export default function AskByte({ card, record, onPick }: Props) {
 
       {option && (
         <div data-testid="prompt-response" className="space-y-2">
-          <div className="text-xs font-semibold tracking-wide text-slate-500 uppercase">🤖 Byte replies</div>
+          <div className="text-xs font-semibold tracking-wide text-slate-400 uppercase">🤖 Byte replies</div>
           <pre className="w-0 min-w-full overflow-x-auto rounded-lg border border-slate-800 bg-[#1e1e1e] p-3 font-mono text-xs leading-relaxed text-slate-100">
             {option.responseCode}
           </pre>

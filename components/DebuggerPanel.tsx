@@ -36,7 +36,8 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.altKey || e.ctrlKey || e.metaKey || isTypingTarget(e.target)) return;
+      // defaultPrevented: the arrow key already moved focus in a tab list.
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || isTypingTarget(e.target)) return;
       if (e.key === "ArrowRight" && position < last) {
         e.preventDefault();
         onPosition(position + 1);
@@ -55,7 +56,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
     <div data-testid="debugger" className="space-y-3 text-sm">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold tracking-wide text-slate-500 uppercase">🐞 Step through</div>
+          <div className="text-xs font-semibold tracking-wide text-slate-400 uppercase">🐞 Step through</div>
           <div className="truncate font-semibold text-white" title={trace.name}>
             {checkLabel(trace.name)}
           </div>
@@ -105,7 +106,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
         </button>
         <span data-testid="debugger-position" className="w-full text-xs text-slate-400 tabular-nums sm:w-auto">
           Step {position + 1} of {total}
-          <span className="hidden text-slate-600 sm:inline"> · ← → keys</span>
+          <span className="hidden text-slate-400 sm:inline"> · ← → keys</span>
         </span>
       </div>
 
@@ -123,7 +124,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
 
       {atEnd && (
         <div data-testid="debugger-result" className="rounded-lg bg-slate-950/70 p-3">
-          <div className="text-xs font-semibold tracking-wide text-slate-500 uppercase">What the check expected</div>
+          <div className="text-xs font-semibold tracking-wide text-slate-400 uppercase">What the check expected</div>
           {trace.status === "pass" ? (
             <p className="mt-1 text-emerald-300">Everything matched what the check expected.</p>
           ) : (
@@ -142,11 +143,11 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
         <div className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           {/* ----- variables ----- */}
           <div>
-            <div className="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">
+            <div className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
               Variables in <span className="font-mono normal-case">{step.func}</span>
             </div>
             {step.locals.length === 0 ? (
-              <p className="text-xs text-slate-500">No variables yet.</p>
+              <p className="text-xs text-slate-400">No variables yet.</p>
             ) : (
               <table data-testid="debugger-vars" className="w-full table-fixed border-collapse font-mono text-xs">
                 <tbody>
@@ -183,7 +184,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
 
           {/* ----- call stack ----- */}
           <div>
-            <div className="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">Call stack</div>
+            <div className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">Call stack</div>
             <ol data-testid="debugger-stack" className="space-y-0.5 font-mono text-xs">
               {step.stack.map((name, i) => (
                 <li
@@ -196,7 +197,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
                 </li>
               ))}
             </ol>
-            <p className="mt-1 text-[11px] text-slate-500">Top: the check. Bottom: where we are now.</p>
+            <p className="mt-1 text-[11px] text-slate-400">Top: the check. Bottom: where we are now.</p>
           </div>
         </div>
       )}
@@ -204,7 +205,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
       {/* ----- printed output so far ----- */}
       {step?.stdout && (
         <pre data-testid="debugger-output" className="max-h-32 overflow-auto rounded bg-black/40 p-2 text-xs whitespace-pre-wrap text-slate-300">
-          <span className="text-slate-500"># printed so far{"\n"}</span>
+          <span className="text-slate-400"># printed so far{"\n"}</span>
           {atEnd ? trace.output || step.stdout : step.stdout}
         </pre>
       )}

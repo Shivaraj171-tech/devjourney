@@ -1,6 +1,6 @@
 // Regression tests for bugs found by QA (see the e2e report):
 // SystemExit handling, Ctrl+Enter inside Monaco, first-paint lock flash,
-// Pyodide on locked tickets, mobile overflow, and the Learn tab.
+// Pyodide on locked tickets, mobile overflow, and the lesson.
 import { expect, test } from "@playwright/test";
 import { readProgress, runTests, seasonTickets, setEditorFile, ticketUrl, waitForPython } from "./helpers";
 
@@ -93,18 +93,17 @@ test.describe("phone viewport", () => {
   });
 });
 
-test("Learn tab on s01-t01 renders the Strings lesson with a code block", async ({ page }) => {
+test("the 2-minute lesson on s01-t01 unfolds in the brief and shows the Strings lesson with a code block", async ({ page }) => {
   await page.goto(ticketUrl(t01.id));
-  const learn = page.getByRole("tab", { name: /📘 Learn/ });
-  await expect(learn).toBeVisible();
-  await learn.click();
-  await expect(learn).toHaveAttribute("aria-selected", "true");
-  const panel = page.locator("aside");
-  await expect(panel.getByText("Strings", { exact: true })).toBeVisible();
-  const code = panel.locator("pre").first();
+  const toggle = page.getByTestId("lesson-toggle");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const lesson = page.getByTestId("lesson");
+  await expect(lesson.getByText("Strings", { exact: true })).toBeVisible();
+  const code = lesson.locator("pre").first();
   await expect(code).toBeVisible();
   await expect(code).toContainText('f"');
-  // The ticket tab links to the lesson too, and the lesson links back.
-  await panel.getByRole("button", { name: /Back to the ticket/ }).click();
-  await expect(page.getByRole("tab", { name: /Ticket/ })).toHaveAttribute("aria-selected", "true");
+  await toggle.click();
+  await expect(lesson.locator("pre")).toHaveCount(0);
 });
