@@ -209,7 +209,7 @@ export default function HQ({ seasons, warmups }: { seasons: SeasonSummary[]; war
       })}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <AppPreview solved={new Set(solved.map((t) => t.id))} />
+        <AppPreview solved={new Set(solved.map((t) => t.id))} playerName={progress.playerName} />
         {/* ---------- badges ---------- */}
         <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
           <h2 className="text-lg font-bold text-white">🏅 Badges</h2>

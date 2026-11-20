@@ -6,7 +6,7 @@
 // see (reviews, tests, refactors) aren't listed.
 import type { ReactNode } from "react";
 
-type Props = { solved: Set<string> };
+type Props = { solved: Set<string>; playerName: string };
 
 function Feature({ on, label, children }: { on: boolean; label: string; children: ReactNode }) {
   return (
@@ -25,7 +25,8 @@ const FEATURE_TICKETS = [
   "s02-t02", "s02-t03", "s02-t04", "s03-t02", "s03-t05", "s03-t06",
 ];
 
-export default function AppPreview({ solved }: Props) {
+export default function AppPreview({ solved, playerName }: Props) {
+  const customer = playerName && playerName !== "You" ? playerName : "Sam";
   const has = (n: number, season = 1) => solved.has(`s0${season}-t${String(n).padStart(2, "0")}`);
   const shipped = FEATURE_TICKETS.filter((id) => solved.has(id)).length;
 
@@ -58,7 +59,7 @@ export default function AppPreview({ solved }: Props) {
             </Feature>
           </div>
           <Feature on={has(1)} label="greeting by name">
-            <p className="font-medium">Welcome back to Orbit Orders, Sam!</p>
+            <p className="font-medium">Welcome back to Orbit Orders, {customer}!</p>
           </Feature>
           <Feature on={has(3)} label="free delivery over $25">
             <p className="rounded-lg bg-emerald-100 px-2 py-1 text-xs text-emerald-800">🚚 Free delivery on orders of $25 or more</p>
