@@ -100,7 +100,8 @@ test("the 2-minute lesson on s01-t01 unfolds in the brief and shows the Strings 
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   const lesson = page.getByTestId("lesson");
-  await expect(lesson.getByText("Strings", { exact: true })).toBeVisible();
+  // The toggle label also says "Strings" now (human concept names), so take the lesson title.
+  await expect(lesson.getByText("Strings", { exact: true }).last()).toBeVisible();
   const code = lesson.locator("pre").first();
   await expect(code).toBeVisible();
   await expect(code).toContainText('f"');

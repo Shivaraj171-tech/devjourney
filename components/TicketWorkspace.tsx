@@ -8,6 +8,7 @@
 //
 // Phone (<1024px): the same pieces as a 3-step flow (Brief / Code / Checks)
 // with Run in a sticky bottom bar. Running switches to Checks.
+import { conceptLabel } from "@/lib/content/concepts";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import AskByte from "./AskByte";
@@ -339,7 +340,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">{TYPE_BADGE[ticket.type]}</span>
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">⏱ ~{ticket.estimatedMinutes} min</span>
-            <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-cyan-300">New: {ticket.newConcept}</span>
+            <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-cyan-300">New: {conceptLabel(ticket.newConcept)}</span>
             {tp.solved && (
               <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-300">
                 {review ? "✔ Reviewed" : isRead ? "✔ Done" : ticket.type === "incident" ? "✔ Resolved" : "✔ Merged"}
@@ -639,7 +640,7 @@ function Lesson({ concept, newConcept }: { concept: string; newConcept: string }
         >
           <span aria-hidden>📘</span>
           <span className="flex-1">
-            2-min lesson: <b>{newConcept}</b>
+            2-min lesson: <b>{conceptLabel(newConcept)}</b>
           </span>
           <span aria-hidden className="text-xs text-cyan-200">{open ? "▲" : "▼"}</span>
         </button>
