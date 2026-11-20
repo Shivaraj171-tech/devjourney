@@ -4,6 +4,12 @@ suggestion:
   find: "    dollars = cents / 10\n    return f\"${dollars:.2f}\""
   replace: "    dollars = cents / 100\n    return f\"${dollars}\""
   correct: false
+  why:
+    choices:
+      - "The tidy-up drops `:.2f`, so 1250 would show as `$12.5`."
+      - "`/ 100` is the right fix, so the whole change is right too."
+      - "It should be `// 100`, so prices come out in whole dollars."
+    answer: 0
   says: "Cents to dollars is / 100, not / 10. I also tidied up the f-string while I was there!"
   explain: >-
     The `/ 100` part is right, but the "tidy-up" dropped `:.2f`, so 1250 now shows as `$12.5` and 0 as

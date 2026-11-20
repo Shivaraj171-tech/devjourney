@@ -4,6 +4,12 @@ suggestion:
   find: "        orders[order_id] = order"
   replace: "        orders[int(order_id)] = order"
   correct: false
+  why:
+    choices:
+      - "JSON keys are always text, so converting them with int() fixes every lookup."
+      - "The Order was already built with the text id, so `order_id` stays a string."
+      - "`int()` can't turn text like \"1001\" into a number, so loading crashes."
+    answer: 1
   says: "JSON turned your keys into text. Convert the key back with int() and lookups work again."
   explain: >-
     Half a fix. `loaded[1001]` works now, but the Order was built a few lines earlier with the

@@ -4,6 +4,12 @@ suggestion:
   find: "        cart.append(menu[name])"
   replace: "        cart.append(menu.get(name, 0))"
   correct: false
+  why:
+    choices:
+      - "`.get()` avoids the KeyError, and the crash was the whole bug."
+      - "A removed item goes in as a $0.00 item instead of being skipped."
+      - "Dictionaries have no `.get()`, so this crashes with a new error."
+    answer: 1
   says: "`.get()` never raises KeyError. Removed items just default to 0. Crash fixed!"
   explain: >-
     The crash is gone, but a removed item now goes into the cart as a $0.00 item, so the cart becomes

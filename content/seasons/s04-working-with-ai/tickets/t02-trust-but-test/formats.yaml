@@ -1,0 +1,48 @@
+predict:
+  - code: |
+      name = "  Ana Lucia"
+      print(name.split(" "))
+      print(name.split())
+    question: "What does this print?"
+    answer: |
+      ['', '', 'Ana', 'Lucia']
+      ['Ana', 'Lucia']
+    choices:
+      - |
+        ['Ana', 'Lucia']
+        ['Ana', 'Lucia']
+      - |
+        ['', '', 'Ana', 'Lucia']
+        ['Ana', 'Lucia']
+      - |
+        ['', 'Ana', 'Lucia']
+        ['Ana', 'Lucia']
+      - |
+        ['  Ana', 'Lucia']
+        ['Ana', 'Lucia']
+    explain: >-
+      `split(" ")` cuts at EVERY single space, so two leading spaces give two empty strings first.
+      `split()` with no argument splits on any run of whitespace and ignores it at the ends.
+
+break_it:
+  - says: "`first_name` is done: `full.split(\" \")[0]`. Tried it on \"Ana Lucia\" and got \"Ana\"!"
+    code: |
+      def first_name(full):
+          return full.split(" ")[0]
+    spec: >-
+      `first_name(full)` returns the first word of the name, ignores extra spaces, and returns
+      `""` for a blank name.
+    call: "first_name({input})"
+    input_hint: "a name in quotes (e.g. \"Ana Lucia\")"
+    helpers: |
+      def spec_ok(full, first):
+          words = full.split()
+          return first == (words[0] if words else "")
+    check: "spec_ok({input}, result)"
+    normal_input: "\"Ana Lucia\""
+    example_input: "\"  Ana Lucia\""
+    miss: "Byte gets that one right. The spec says it ignores extra spaces. Where could extra spaces go?"
+    explain: >-
+      `split(" ")` splits at every single space, so a name that starts with spaces splits into
+      `['', '', 'Ana', 'Lucia']` and the "first name" is `''`. `full.split()` (no argument) ignores
+      extra spaces; check it has a word before taking `[0]`, or a blank name crashes.

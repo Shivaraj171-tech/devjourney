@@ -1,0 +1,24 @@
+break_it:
+  - says: "`split_bill` splits a bill fairly. Tested it on $9.00 for 3 people: [300, 300, 300]. Works!"
+    code: |
+      def split_bill(total_cents, people):
+          share = total_cents // people
+          return [share] * people
+    spec: >-
+      Return a list of `people` shares that add up EXACTLY to `total_cents`, and no two shares
+      differ by more than 1 cent.
+    call: "split_bill({input})"
+    input_hint: "total_cents, people (e.g. 900, 3)"
+    helpers: |
+      def spec_ok(total_cents, people, shares):
+          return (len(shares) == people
+                  and sum(shares) == total_cents
+                  and max(shares) - min(shares) <= 1)
+    check: "spec_ok({input}, result)"
+    normal_input: "900, 3"
+    example_input: "1000, 3"
+    miss: "Right for that input. What total can't be split evenly?"
+    explain: >-
+      `//` rounds each share down, so whenever the total doesn't divide evenly the leftover cents
+      vanish: 1000 for 3 gives [333, 333, 333], which is 999. Byte tested one input that happens to
+      divide evenly. A fix hands the leftover cents out one by one: [334, 333, 333].

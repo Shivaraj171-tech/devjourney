@@ -4,6 +4,12 @@ suggestion:
   find: "    # TODO: add price_cents to the end of the cart list\n    pass\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    # TODO: return the number of items in the cart\n    pass"
   replace: "    return cart + [price_cents]\n\n\ndef item_count(cart):\n    \"\"\"Return how many items are in the cart (the number on the cart badge).\"\"\"\n    return len(cart)"
   correct: false
+  why:
+    choices:
+      - "It builds a new list, so the customer's cart never changes."
+      - "Both functions do what their docstrings say, so it's safe to accept."
+      - "`len(cart)` would count the digits of the prices, not the items."
+    answer: 0
   says: "Done! `cart + [price_cents]` adds the item, and `len(cart)` counts them."
   explain: >-
     `item_count` is right, but `cart + [price_cents]` builds a brand-new list and leaves the customer's

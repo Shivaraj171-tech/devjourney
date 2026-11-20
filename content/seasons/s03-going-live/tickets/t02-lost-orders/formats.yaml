@@ -1,0 +1,29 @@
+parsons:
+  - goal: >-
+      `late_orders(deliveries)` gets a list of `(order_id, minutes)` pairs and returns the ids of
+      the orders that took MORE THAN 45 minutes, in order. Two of the lines are Byte's slips:
+      leave them out.
+    lines:
+      - "def late_orders(deliveries):"
+      - "    late = []"
+      - "    for order_id, minutes in deliveries:"
+      - "        if minutes > 45:"
+      - "            late.append(order_id)"
+      - "    return late"
+    distractors:
+      - line: "        if minutes >= 45:"
+        replaces: 3
+        explain: >-
+          Byte's boundary slip: `>=` also counts an order that took exactly 45 minutes, and that
+          one was on time. "More than 45" is `> 45`.
+      - line: "            late = late.append(order_id)"
+        replaces: 4
+        explain: >-
+          `.append()` changes the list and returns `None`, so this line throws the list away and
+          `late` becomes `None`. Just call `late.append(order_id)`.
+    check: |
+      assert late_orders([(1001, 50), (1002, 45), (1003, 46)]) == [1001, 1003]
+      assert late_orders([]) == []
+    explain: >-
+      `for order_id, minutes in deliveries` unpacks each pair into two names, `> 45` leaves the
+      on-time 45-minute order out, and `.append()` adds to the list in place.

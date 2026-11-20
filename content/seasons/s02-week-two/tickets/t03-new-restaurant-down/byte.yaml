@@ -4,6 +4,12 @@ suggestion:
   find: "    average = average_rating(ratings)"
   replace: "    try:\n        average = average_rating(ratings)\n    except ZeroDivisionError:\n        return \"\""
   correct: false
+  why:
+    choices:
+      - "Catching the error stops the crash, which is all the ticket asks for."
+      - "`try/except` can't catch ZeroDivisionError, so checkout still crashes."
+      - "New restaurants would get an empty label instead of \"New!\"."
+    answer: 2
   says: "Wrapped it in try/except: if the average fails, we just show no rating. Checkout is back! 🎉"
   explain: >-
     Checkout stops crashing, but new restaurants now get an empty label instead of "New!", and any

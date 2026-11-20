@@ -5,6 +5,7 @@
 import { useSyncExternalStore } from "react";
 import { dayKey, WARMUP_XP } from "../game/rules";
 import { byteXp, type ByteDecision, type PromptRecord, type SuggestionRecord } from "../game/byte";
+import { formatsXp, recordAttempt, recordPrediction, type FormatRecord } from "../game/formats";
 
 const KEY = "devjourney:progress:v1";
 
@@ -36,6 +37,8 @@ export type TicketProgress = {
   byteSuggestion?: SuggestionRecord;
   /** First pick on the ticket's "Ask Byte" prompt card. */
   bytePrompt?: PromptRecord;
+  /** Extra task formats (formats.yaml), keyed "predict:0", "break_it:0", "parsons:0"... */
+  formats?: Record<string, FormatRecord>;
 };
 
 export type Progress = {
@@ -133,7 +136,10 @@ export function ticketProgress(p: Progress, id: string): TicketProgress {
 }
 
 export function totalXp(p: Progress): number {
-  const tickets = Object.values(p.tickets).reduce((sum, t) => sum + t.solveXp + t.quizXp + byteXp(t), 0);
+  const tickets = Object.values(p.tickets).reduce(
+    (sum, t) => sum + t.solveXp + t.quizXp + byteXp(t) + formatsXp(t.formats),
+    0,
+  );
   const warmups = Object.values(p.warmups ?? {}).filter((w) => w.correct).length * WARMUP_XP;
   return tickets + warmups;
 }
@@ -246,10 +252,16 @@ export const byteActions = {
    * Record the learner's decision on Byte's suggestion (first decision only).
    * For "accept" and "edit", `apply` is the file and its new text, saved as the learner's code.
    */
-  decide(id: string, decision: ByteDecision, correct: boolean, apply?: { path: string; text: string }) {
+  decide(
+    id: string,
+    decision: ByteDecision,
+    correct: boolean,
+    apply?: { path: string; text: string },
+    why?: { reason: number; reasonCorrect: boolean },
+  ) {
     updateTicket(id, (t) => {
       if (t.byteSuggestion) return t;
-      const record: SuggestionRecord = { decision, correct, runsAtDecision: t.runs };
+      const record: SuggestionRecord = { decision, correct, runsAtDecision: t.runs, ...why };
       const code = apply ? { ...t.code, [apply.path]: apply.text } : t.code;
       return { ...t, code, byteSuggestion: record };
     });
@@ -259,3 +271,30 @@ export const byteActions = {
     updateTicket(id, (t) => (t.bytePrompt ? t : { ...t, bytePrompt: { firstPick: index, best } }));
   },
 };
+
+// ---------- Extra task formats (formats.yaml) ----------
+// Scoring lives in lib/game/formats.ts; these only store its records.
+
+function updateFormat(id: string, key: string, fn: (rec: FormatRecord | undefined) => FormatRecord) {
+  updateTicket(id, (t) => {
+    const before = t.formats?.[key];
+    const after = fn(before);
+    return after === before ? t : { ...t, formats: { ...t.formats, [key]: after } };
+  });
+}
+
+export const formatActions = {
+  /** Lock in a "Predict the output" answer (the first one counts). */
+  predict(id: string, key: string, prediction: string, correct: boolean) {
+    updateFormat(id, key, (rec) => recordPrediction(rec, prediction, correct));
+  },
+  /** One "Break Byte's code" or Parsons check. No-op once that item is done. */
+  attempt(id: string, key: string, kind: "break_it" | "parsons", success: boolean, extra?: { input?: string; order?: number[] }) {
+    updateFormat(id, key, (rec) => recordAttempt(kind, rec, success, extra));
+  },
+};
+
+/** The current record of one format item (undefined if untouched). */
+export function formatRecord(t: TicketProgress, key: string): FormatRecord | undefined {
+  return t.formats?.[key];
+}

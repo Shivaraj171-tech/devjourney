@@ -2,6 +2,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { load as parseYaml } from "js-yaml";
+import { shuffleParsons } from "../game/formats";
+import { shuffledOrder } from "../game/shuffle";
 import type {
   ByteContent,
   BytePromptVerdict,
@@ -9,6 +11,7 @@ import type {
   Question,
   Review,
   Season,
+  TaskFormatsContent,
   Ticket,
   Warmup,
 } from "./types";
@@ -99,6 +102,77 @@ function loadTicket(seasonId: string, dir: string, slug: string, number: number)
       ? { incident: { logs: readText(join(dir, "logs.txt")), timeLimitMinutes: meta.time_limit_minutes ?? 15 } }
       : {}),
     ...(existsSync(join(dir, "byte.yaml")) ? { byte: loadByte(dir) } : {}),
+    ...(existsSync(join(dir, "formats.yaml")) ? { formats: loadFormats(dir, meta.id) } : {}),
+  };
+}
+
+type FormatsYaml = {
+  predict?: { code: string; question: string; answer: string; choices?: string[]; explain: string }[];
+  break_it?: {
+    says: string;
+    code: string;
+    spec: string;
+    call: string;
+    input_hint: string;
+    helpers?: string;
+    check: string;
+    crash_counts?: boolean;
+    normal_input: string;
+    example_input: string;
+    miss?: string;
+    explain: string;
+  }[];
+  parsons?: {
+    goal: string;
+    lines: string[];
+    distractors: { line: string; replaces: number; explain: string }[];
+    check?: string;
+    expected_output?: string;
+    explain?: string;
+  }[];
+};
+
+const trimEnd = (s: string) => s.replace(/\n+$/, "");
+
+/**
+ * formats.yaml (format in scripts/validate_content.py). What would give the answer
+ * away stays on the server: break_it's example_input, and which line a Parsons
+ * distractor replaces (the lines are shipped already shuffled).
+ */
+function loadFormats(dir: string, ticketId: string): TaskFormatsContent {
+  const meta = readYaml<FormatsYaml>(join(dir, "formats.yaml")) ?? {};
+  return {
+    predict: (meta.predict ?? []).map((p) => ({
+      code: trimEnd(p.code),
+      question: p.question,
+      answer: trimEnd(p.answer),
+      ...(p.choices ? { choices: p.choices.map(trimEnd) } : {}),
+      explain: p.explain,
+    })),
+    breakIt: (meta.break_it ?? []).map((b) => ({
+      says: b.says,
+      code: trimEnd(b.code),
+      spec: b.spec,
+      call: b.call,
+      inputHint: b.input_hint,
+      helpers: b.helpers ?? "",
+      check: b.check,
+      crashCounts: b.crash_counts ?? false,
+      normalInput: b.normal_input,
+      miss: b.miss ?? "",
+      explain: b.explain,
+    })),
+    parsons: (meta.parsons ?? []).map((p, i) => ({
+      goal: p.goal,
+      blocks: shuffleParsons(
+        p.lines,
+        p.distractors.map((d) => ({ line: d.line, explain: d.explain })),
+        shuffledOrder(p.lines.length + p.distractors.length, `${ticketId}:parsons:${i}`),
+      ),
+      check: p.check ?? "",
+      ...(p.expected_output !== undefined ? { expectedOutput: p.expected_output } : {}),
+      explain: p.explain ?? "",
+    })),
   };
 }
 
@@ -117,7 +191,15 @@ function loadByte(dir: string): ByteContent {
   const out: ByteContent = {};
   if (meta.suggestion) {
     const s = meta.suggestion;
-    out.suggestion = { file: s.file, find: s.find, replace: s.replace, correct: s.correct, says: s.says, explain: s.explain };
+    out.suggestion = {
+      file: s.file,
+      find: s.find,
+      replace: s.replace,
+      correct: s.correct,
+      says: s.says,
+      explain: s.explain,
+      ...(s.why ? { why: { choices: s.why.choices, answer: s.why.answer } } : {}),
+    };
   }
   if (meta.prompt) {
     out.prompt = {

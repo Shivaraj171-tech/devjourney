@@ -4,6 +4,12 @@ suggestion:
   find: "    to_send = []\n    for order in orders:\n        if order.order_id not in sent_ids:"
   replace: "    sent = set(sent_ids)\n    to_send = []\n    for order in orders:\n        if order.order_id not in sent:"
   correct: true
+  why:
+    choices:
+      - "Sets don't keep order, so orders would now be sent in a random order."
+      - "The set is built once; each `in` check is instant, and the output is unchanged."
+      - "Building a set from the list is as slow as the old loop, so nothing speeds up."
+    answer: 1
   says: "`in` on a list checks every item, one by one. Build a set once, and each check is instant."
   explain: >-
     Correct. `x in some_list` looks at the items one by one, so thousands of orders times

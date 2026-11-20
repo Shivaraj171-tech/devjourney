@@ -4,6 +4,12 @@ suggestion:
   find: "    return \"Welcome back to Orbit Orders, {name}!\""
   replace: "    return f\"Welcome back to Orbit Orders, {name}!\""
   correct: true
+  why:
+    choices:
+      - "Without the `f`, Python shows `{name}` as plain text, not the name."
+      - "The `f` only changes how the text looks, so the tests won't change."
+      - "f-strings need `str(name)` around the name, or Python raises an error."
+    answer: 0
   says: "Missing `f`! Without it, Python prints `{name}` as plain text."
   explain: >-
     Byte is right: the `f` turns the string into an f-string, so `{name}` is replaced by the real name.
