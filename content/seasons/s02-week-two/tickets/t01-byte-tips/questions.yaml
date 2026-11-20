@@ -1,15 +1,16 @@
 questions:
-  - prompt: "Byte said it was \"99.7% confident\" the code was correct. How should you treat AI-written code?"
+  - prompt: "Byte's PR has `return int(subtotal_cents * percent)`. Which call shows the bug?"
     choices:
-      - "Merge it: an AI that confident is almost never wrong"
-      - "Review it like any teammate's code: check it against what it should do, with real examples"
-      - "Never use AI-written code at all"
+      - "tip_amount(0, 15)"
+      - "tip_amount(2000, 15)"
+      - "tip_amount(250000, 0)"
+      - "tip_amount(0, 0)"
     answer: 1
-    explain: "AI assistants are useful but can be confidently wrong. Reading the code and trying real inputs is how you catch bugs before customers do."
+    explain: "2000 * 15 is 30000 cents, a $300.00 tip instead of $3.00. Whenever the subtotal or the percent is 0, the answer is 0 with or without the bug."
   - prompt: "Why is prices.append(tip) a problem inside total_with_tip?"
     choices:
-      - "append is slow on long lists"
-      - "It changes the caller's cart list: the tip shows up in the cart as an extra item"
-      - "append only works on lists of strings"
+      - "append is slow on long lists, so checkout gets slower"
+      - "It changes the caller's cart: the tip shows up as an item"
+      - "append makes a copy of the list, so the tip is lost after the function ends"
     answer: 1
     explain: "The function gets the customer's actual cart list, not a copy, so appending changes the real cart. A function that only works out a total shouldn't change its input."

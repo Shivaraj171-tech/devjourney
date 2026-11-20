@@ -2,21 +2,21 @@ questions:
   - prompt: "Which prompt gives Byte enough context to write refund_report well?"
     choices:
       - "\"Write a refund report.\""
-      - "\"Write a really good, bug-free refund report. Be careful!\""
-      - "\"In app/refund_report.py, write refund_report(deliveries): deliveries is a list of (order, minutes) pairs. Use late_refund and refund_line. One line per late order, then 'Total refunded: $X.XX'; 'No late orders today.' if none. Example: ...\""
+      - "\"Write a really good, bug-free refund report for Leo with every late order and the total. Use best practices, add type hints and docstrings, handle every possible edge case, make it fast, and be careful with the money!\""
+      - "\"In app/refund_report.py, write refund_report(deliveries): a list of (order, minutes) pairs. Use late_refund and refund_line; one line per late order, then 'Total refunded: $X.XX'; 'No late orders today.' if none.\""
     answer: 2
     explain: "The third prompt names the real functions, the input, the exact output, the edge case and gives an example. \"Be careful!\" adds no information, and \"write a refund report\" is how Maya got a CSV exporter for a database we don't have."
   - prompt: "Byte's refund_line looks right and its tests pass. Who is responsible if it sends a wrong refund to a customer?"
     choices:
       - "Byte, because it wrote the code"
-      - "The team that merged it: AI writes code, we own it"
-      - "Nobody, because the tests passed"
+      - "The team that merged it"
+      - "Nobody, because the tests passed, so any wrong refund is a problem in the spec"
     answer: 1
     explain: "Once it's merged, it's our code. That's why we read it, test it against the spec, and only ship what we understand."
   - prompt: "Why does the spec say what to return when nothing was late?"
     choices:
-      - "Edge cases are exactly what an AI (or a person) guesses wrong if nobody writes them down"
-      - "Because Python requires every function to handle empty lists"
-      - "It doesn't matter: an empty string would be fine too"
+      - "Edge cases are what gets guessed wrong if nobody writes them down"
+      - "Python raises an error when a loop runs over an empty list, so it must be handled"
+      - "It doesn't matter: an empty string would be fine, Leo would understand"
     answer: 0
     explain: "Without that line, one person returns \"\", another returns \"Total refunded: $0.00\", and Leo's report looks broken. Writing the edge case down makes the answer clear for Byte, for you and for the tests."

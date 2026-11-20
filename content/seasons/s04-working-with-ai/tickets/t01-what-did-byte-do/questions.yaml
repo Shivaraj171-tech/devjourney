@@ -2,15 +2,15 @@ questions:
   - prompt: "Byte says customers get money back if the order takes \"45 minutes or more\". What does late_refund(order, 45) return?"
     choices:
       - "20% of what the customer paid, because 45 counts as late"
-      - "0, because is_late uses >, so an order is only late after MORE than 45 minutes"
-      - "It crashes, because 45 is exactly the limit"
+      - "0: is_late uses >, so 45 isn't late"
+      - "It crashes, because 45 is exactly LATE_AFTER_MINUTES and neither branch matches"
     answer: 1
     explain: "is_late(45) is 45 > 45, which is False, so late_refund returns 0 before it works anything out. The code means \"more than 45\"; Byte's summary says \"45 or more\". The FAQ should say what the code does (or Maya decides the code should change)."
   - prompt: "Sam's order is a $12.50 pizza and $4.50 garlic bread (1250 + 450 cents, no promo code), so Sam pays $3.99 delivery. It takes 50 minutes. What is late_refund?"
     choices:
-      - "340 cents: 20% of the food only, like Byte said"
-      - "419 cents: 20% of order_total, which includes the delivery fee"
-      - "0 cents: there's no promo code"
+      - "340 cents: 20% of the food only, just like Byte's summary says"
+      - "419: 20% of order_total, delivery included"
+      - "0 cents, because refunds only apply to orders with a promo code"
     answer: 1
     explain: "late_refund takes 20% of order_total, and order_total (app/receipts.py) is subtotal - discount + delivery fee = 1700 + 399 = 2099. 2099 * 20 // 100 = 419. So the delivery fee IS part of the refund, the opposite of Byte's claim."
   - prompt: "A customer ordered two margheritas and a lemonade (1250, 1250, 299) and the lemonade was wrong. What does wrong_item_refund(order, 299) return?"
@@ -20,10 +20,11 @@ questions:
       - "0, because refunds are only for late orders"
     answer: 1
     explain: "wrong_item_refund only gives back item_price, and only if that price is in the order. Byte's \"whole order refunded\" isn't what its own code does."
-  - prompt: "Byte says the code is \"100% tested and verified\". What's the best way to check that?"
+  - prompt: "Byte says the refund is on the food only. Which 50-minute order (no promo code) would prove that wrong?"
     choices:
-      - "Trust it: Byte wrote the code, so it knows best"
-      - "Ask Byte again and see if it says the same thing"
-      - "Look for the tests yourself, and try a few examples (like exactly 45 minutes) against the code"
-    answer: 2
-    explain: "An AI's description is a claim, not evidence. There are no tests for app/refunds.py in the codebase at all. Asking again just gets another confident answer; reading the code and running examples tells you what's true."
+      - "An order of 3000 cents (free delivery)"
+      - "An order of 1700 cents (pays delivery)"
+      - "An order of 2500 cents (free delivery)"
+      - "An order of 5000 cents (free delivery)"
+    answer: 1
+    explain: "Only an order that pays delivery tells \"20% of the food\" apart from \"20% of order_total\": 1700 cents gives 419, not 340. With free delivery the two are the same number."

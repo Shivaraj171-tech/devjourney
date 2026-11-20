@@ -10,14 +10,15 @@ questions:
   - prompt: "Why doesn't add_item need a return statement?"
     choices:
       - "Python returns the last line of every function automatically"
-      - "It does need one; without return the item is lost"
-      - "append changes the cart list that was passed in, so the caller already sees the new item"
-    answer: 2
+      - "append changes the cart the caller passed in"
+      - "It does need one: without return the new item is lost when the function ends"
+    answer: 1
     explain: "Lists can be changed in place. The test's cart and the function's cart are the same list, so the change shows up outside the function too."
-  - prompt: "Byte offers to fill in both functions at once. What should you do before telling Sofia it's done?"
+  - prompt: "Byte writes add_item as `return cart + [price_cents]`. Which test catches it?"
     choices:
-      - "Nothing: if Byte wrote it, it's done"
-      - "Ask Byte to write tests too, and skip running them"
-      - "Run the tests, and read each line until you could explain what it does"
-    answer: 2
-    explain: "You own any code you accept. Passing tests show it works, and understanding it means you can debug it later."
+      - "assert item_count([1, 2]) == 2"
+      - "cart = [1]; add_item(cart, 2); assert cart == [1, 2]"
+      - "assert add_item([1], 2) == [1, 2]"
+      - "assert len([1] + [2]) == 2 and item_count([]) == 0"
+    answer: 1
+    explain: "Only checking the cart itself shows whether add_item changed it. Checking the return value would fail on the correct version too, which returns None."

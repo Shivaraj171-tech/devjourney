@@ -13,10 +13,11 @@ questions:
       - "assert late_voucher(30) == 0"
     answer: 1
     explain: "With >= 60, exactly 60 minutes gets 500 instead of 300. 90 and 30 give the same answer either way, so only the edge catches it."
-  - prompt: "Byte said \"Fixed! ✅\" after each of its three attempts. What does that tell you?"
+  - prompt: "Byte's attempt 1 used `>= 45` for the $3.00 voucher. Which test catches it?"
     choices:
-      - "That attempt 3 is correct"
-      - "Nothing on its own: only checks against the spec tell you which attempt is right"
-      - "That the tests are no longer needed"
+      - "assert late_voucher(46) == 300"
+      - "assert late_voucher(45) == 0"
+      - "assert late_voucher(61) == 500"
+      - "assert late_voucher(30) == 0"
     answer: 1
-    explain: "Byte sounded equally sure about all three attempts, and two of them were wrong. Your tests are what turn \"it says it's fixed\" into \"we know it's right\"."
+    explain: "With >= 45, exactly 45 minutes gets 300 instead of 0. 46, 61 and 30 give the same voucher either way, so only the edge catches it."
