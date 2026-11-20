@@ -20,7 +20,7 @@ import {
 import { closeSolvedModal } from "./play";
 
 type ByteYaml = {
-  suggestion?: { file: string; find: string; replace: string; correct: boolean; explain: string };
+  suggestion?: { file: string; find: string; replace: string; correct: boolean; explain: string; why?: unknown };
   prompt?: { options: { prompt: string; verdict: string }[]; best: number };
 };
 
@@ -37,7 +37,10 @@ const SHOTS = process.env.BYTE_SCREENSHOT_DIR ?? "test-results/e2e";
 // the first ticket whose suggestion is wrong, and the first whose suggestion is right.
 const hasByte = (t: TicketInfo) => {
   try {
-    return byteOf(t).suggestion !== undefined;
+    // These tests cover the plain accept/reject flow; suggestions with a "why"
+    // (decide-before-evidence) are tested in formats.spec.ts.
+    const sug = byteOf(t).suggestion;
+    return sug !== undefined && sug.why === undefined;
   } catch {
     return false;
   }

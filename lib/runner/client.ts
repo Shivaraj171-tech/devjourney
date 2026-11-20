@@ -15,6 +15,7 @@ type WorkerMessage =
   | { type: "ready" }
   | { type: "result"; id: number; result: RunResult }
   | { type: "trace"; id: number; trace: TraceResult }
+  | { type: "snippet"; id: number; result: unknown }
   | { type: "error"; id: number | null; message: string };
 
 const timeoutMessage = `Your code took longer than ${TIMEOUT_MS / 1000} seconds. Is there a loop that never ends?`;
@@ -25,6 +26,7 @@ const timeoutMessage = `Your code took longer than ${TIMEOUT_MS / 1000} seconds.
  * - `run()` runs the tests; if they take longer than TIMEOUT_MS (e.g. an
  *   infinite loop) the worker is killed and a fresh one is started.
  * - `trace()` runs ONE check step by step for the debugger (same timeout).
+ * - `runSnippet()` runs a small task-format program (formats.yaml), same timeout.
  */
 export class PythonRunner {
   private worker: Worker | null = null;
@@ -42,6 +44,7 @@ export class PythonRunner {
         if (msg.type === "ready") resolve();
         else if (msg.type === "result") this.finish(msg.id, { value: msg.result });
         else if (msg.type === "trace") this.finish(msg.id, { value: msg.trace });
+        else if (msg.type === "snippet") this.finish(msg.id, { value: msg.result });
         else if (msg.type === "error") {
           if (msg.id == null) reject(new Error(msg.message));
           else this.finish(msg.id, { error: msg.message });
@@ -68,6 +71,21 @@ export class PythonRunner {
     const answer = await this.request({ type: "trace", files, tests, testFile, testName });
     if ("error" in answer) return { error: answer.error };
     return { trace: answer.value as TraceResult };
+  }
+
+  /**
+   * Run one task-format request (predict / break_it / parsons, see lib/game/formats.ts)
+   * through lib/runner/formats.py. Resolves to { value } (its JSON result), or { error }
+   * when Python couldn't answer (timeout, crash, failed to load).
+   */
+  async runSnippet<T>(request: { kind: string }): Promise<{ value: T } | { error: string }> {
+    const answer = await this.request({ type: "snippet", request });
+    if ("error" in answer) return { error: answer.error };
+    const value = answer.value as T & { error?: string };
+    if (value && typeof value === "object" && typeof value.error === "string" && value.error.startsWith("internal:")) {
+      return { error: value.error };
+    }
+    return { value };
   }
 
   private async request(message: Record<string, unknown>): Promise<{ value: unknown } | { error: string }> {

@@ -11,6 +11,10 @@ export type SuggestionRecord = {
   correct: boolean;
   /** The ticket's test-run count at the moment of the decision. */
   runsAtDecision: number;
+  /** Only when the suggestion asks "why?" (byte.yaml `why`): index of the reason picked. */
+  reason?: number;
+  /** Only when the suggestion asks "why?": whether that reason was the right one. */
+  reasonCorrect?: boolean;
 };
 
 /** The learner's first pick on a ticket's "Ask Byte" card (saved in progress). */
@@ -69,9 +73,24 @@ export function promptXp(rec: PromptRecord | undefined): number {
   return rec?.best ? BEST_PROMPT_XP : 0;
 }
 
+/** False only when the suggestion asked "why?" and the learner picked a wrong reason. */
+export function reasonOk(rec: SuggestionRecord): boolean {
+  return rec.reasonCorrect !== false;
+}
+
+/** Was the call itself right? Accept a correct suggestion; reject (or fix) a wrong one. */
+export function decisionRight(decision: ByteDecision, correct: boolean): boolean {
+  return decision === "accept" ? correct : !correct;
+}
+
+/** XP for the suggestion: a good outcome AND (when asked) the right reason. */
+export function suggestionRewardXp(rec: SuggestionRecord, t: { runs: number; solved: boolean }): number {
+  return reasonOk(rec) ? suggestionXp(suggestionOutcome(rec, t)) : 0;
+}
+
 /** All Byte XP for one ticket. */
 export function byteXp(t: ByteTicketState): number {
-  const fromSuggestion = t.byteSuggestion ? suggestionXp(suggestionOutcome(t.byteSuggestion, t)) : 0;
+  const fromSuggestion = t.byteSuggestion ? suggestionRewardXp(t.byteSuggestion, t) : 0;
   return fromSuggestion + promptXp(t.bytePrompt);
 }
 

@@ -60,6 +60,9 @@ learner picks. Both blocks are optional, but at least one must be present:
                                        # false: it still FAILS them (checked by running)
       says: "Off-by-one spotted! ..."  # Byte's one-line pitch
       explain: "..."                   # why it's right or wrong (shown after the decision)
+      why:                             # optional: "decide before evidence". The learner must pick
+        choices: ["...", "...", "..."] # Accept/Reject AND the reason (exactly 3 choices) before
+        answer: 0                      # Byte's code is applied; XP only for decision + reason right
     prompt:
       goal: "..."                      # what the learner wants Byte to do
       options:                         # 2-4 prompts the learner can pick from
@@ -73,6 +76,49 @@ learner picks. Both blocks are optional, but at least one must be present:
 The suggestion is checked for honesty: the replacement is applied to a copy of
 starter/ and the ticket's tests are run on it, so a "correct" suggestion really
 passes and a wrong one really fails.
+
+Any ticket may also have formats.yaml: extra short task formats shown with the
+ticket. Each section is optional (at least one is needed) and is a list:
+
+    predict:                           # "Predict the output", then run it
+      - code: |                        # 1-12 lines, runs without error
+          print(1000 // 3)
+        question: "What does this print?"
+        answer: "333"                  # EXACTLY what the code prints (checked by running it)
+        choices: ["333", "333.33"]     # optional: 2-4 choices, one equal to answer
+        explain: "..."
+    break_it:                          # "Break Byte's code": find an input that breaks the spec
+      - says: "Tested it on 900, 3. Works!"   # Byte's pitch
+        code: |                        # Byte's (buggy) function
+          def split_bill(total_cents, people): ...
+        spec: "..."                    # the spec, in plain English
+        call: "split_bill({input})"    # {input} is what the learner types (Python literals)
+        input_hint: "total_cents, people"
+        helpers: |                     # optional: code the check uses (e.g. a spec predicate)
+          def spec_ok(total_cents, people, shares): ...
+        check: "spec_ok({input}, result)"   # True when Byte's `result` meets the spec
+        crash_counts: false            # optional: does a crash in Byte's code count as breaking it?
+        normal_input: "900, 3"         # must meet the spec (Byte's own test)
+        example_input: "1000, 3"       # must break it (never sent to the browser)
+        miss: "..."                    # optional nudge after an input that doesn't break it
+        explain: "..."                 # shown once the learner breaks it
+    parsons:                           # "Put the lines in order"
+      - goal: "..."
+        lines: ["def f(x):", "    return x"]   # the correct program, in order, with indentation
+        distractors:                   # 1+ wrong lines mixed in (e.g. Byte's slip)
+          - line: "    return x + 1"
+            replaces: 1                # 0-based index into lines (never sent to the browser)
+            explain: "..."             # shown if the learner uses it
+        check: |                       # asserts run after the learner's program
+          assert f(2) == 2
+        expected_output: "..."         # optional: what the program + check must print
+        explain: "..."                 # optional: shown once solved
+
+Every item is checked by running it with python3 through lib/runner/formats.py,
+the same code the browser runs in Pyodide: a prediction's answer is the real
+output, Byte's code meets the spec on normal_input and breaks it on
+example_input, and the correct Parsons order passes while each distractor
+(swapped in for the line it replaces) fails.
 
 Usage:
     python3 scripts/validate_content.py [content_dir]
@@ -93,12 +139,17 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RUNNER = REPO_ROOT / "lib" / "runner" / "test_runner.py"
+FORMATS_RUNNER = REPO_ROOT / "lib" / "runner" / "formats.py"
 TEST_TIMEOUT_SECONDS = 10
 MIN_CHOICES, MAX_CHOICES = 2, 4
 MIN_READ_QUESTIONS = 3
 MAX_INCIDENT_MINUTES = 60
 MIN_PROMPT_OPTIONS, MAX_PROMPT_OPTIONS = 2, 4
 BYTE_VERDICTS = {"good", "vague", "wrong"}
+WHY_CHOICES = 3
+FORMAT_SECTIONS = ("predict", "break_it", "parsons")
+MAX_PREDICT_LINES = 12
+MIN_PARSONS_LINES = 3
 # Ticket types without tests to run: the quiz (read) or the review (review) is the task.
 NO_TEST_TYPES = {"read", "review"}
 
@@ -303,6 +354,8 @@ def check_ticket_meta(ticket_dir):
         errors += check_incident(ticket_dir, meta)
     if (ticket_dir / "byte.yaml").is_file():
         errors += check_byte(ticket_dir, meta)
+    if (ticket_dir / "formats.yaml").is_file():
+        errors += check_formats(ticket_dir)
     return errors
 
 
@@ -457,6 +510,32 @@ def check_byte_suggestion(ticket_dir, meta, sug):
             compile(apply_suggestion(text, find, replace), rel, "exec")
         except SyntaxError as exc:
             errors.append(f"{where}: starter/{rel} with the replacement is not valid Python: line {exc.lineno}: {exc.msg}")
+    if "why" in sug:
+        errors += check_byte_why(sug["why"])
+    return errors
+
+
+def check_byte_why(why):
+    """suggestion.why: the reason the learner must pick together with their decision."""
+    where = "byte.yaml: suggestion.why"
+    if not isinstance(why, dict):
+        return [f"{where} must be a mapping with 'choices' and 'answer'"]
+    errors = []
+    unknown = sorted(set(why) - {"choices", "answer"})
+    if unknown:
+        errors.append(f"{where}: unknown field(s) {unknown}")
+    choices = why.get("choices")
+    if not isinstance(choices, list) or not all(is_nonempty_str(c) for c in choices):
+        return errors + [f"{where}: 'choices' must be a list of non-empty strings"]
+    if len(choices) != WHY_CHOICES:
+        errors.append(f"{where}: needs exactly {WHY_CHOICES} choices, has {len(choices)}")
+    if len({c.strip() for c in choices}) != len(choices):
+        errors.append(f"{where}: choices must all be different")
+    answer = why.get("answer")
+    if not isinstance(answer, int) or isinstance(answer, bool):
+        errors.append(f"{where}: 'answer' must be a whole number (0-based index)")
+    elif not 0 <= answer < len(choices):
+        errors.append(f"{where}: answer {answer} is out of range for {len(choices)} choices")
     return errors
 
 
@@ -498,6 +577,184 @@ def check_byte_prompt(card):
         others = [i for i, o in enumerate(options) if i != best and o.get("verdict") == "good"]
         if others:
             errors.append(f"{where}: only the best option may be 'good', but option(s) {others} are too")
+    return errors
+
+
+# ---------- formats.yaml (predict / break_it / parsons) ----------
+
+def run_format(request):
+    """Run one request through lib/runner/formats.py in a fresh python3 process.
+
+    Returns its result dict, or {"error": ...} on timeout or crash.
+    """
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(FORMATS_RUNNER)], input=json.dumps(request),
+            capture_output=True, text=True, timeout=TEST_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return {"error": f"timed out after {TEST_TIMEOUT_SECONDS}s", "harness": True}
+    if proc.returncode != 0:
+        return {"error": f"formats runner crashed: {proc.stderr.strip()}", "harness": True}
+    return json.loads(proc.stdout)
+
+
+def normalize_output(text):
+    """Same rule as lib/runner/formats.py: ignore trailing spaces and blank lines at the ends."""
+    lines = [line.rstrip() for line in str(text).replace("\r\n", "\n").split("\n")]
+    return "\n".join(lines).strip("\n")
+
+
+def check_formats(ticket_dir):
+    """Check formats.yaml (format in the module docstring), running every item. Returns error strings."""
+    try:
+        data = yaml.safe_load((ticket_dir / "formats.yaml").read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        return [f"formats.yaml is not valid YAML: {exc}"]
+    if not isinstance(data, dict):
+        return ["formats.yaml must be a mapping with predict, break_it and/or parsons"]
+    errors = []
+    unknown = sorted(set(data) - set(FORMAT_SECTIONS))
+    if unknown:
+        errors.append(f"formats.yaml: unknown section(s) {unknown} (allowed: {', '.join(FORMAT_SECTIONS)})")
+    if not any(section in data for section in FORMAT_SECTIONS):
+        errors.append("formats.yaml needs at least one of: " + ", ".join(FORMAT_SECTIONS))
+    checkers = {"predict": check_predict, "break_it": check_break_it, "parsons": check_parsons}
+    for section in FORMAT_SECTIONS:
+        if section not in data:
+            continue
+        items = data[section]
+        if not isinstance(items, list) or not items:
+            errors.append(f"formats.yaml: '{section}' must be a non-empty list")
+            continue
+        for i, item in enumerate(items):
+            where = f"formats.yaml: {section} {i}"
+            if not isinstance(item, dict):
+                errors.append(f"{where} must be a mapping")
+                continue
+            errors += checkers[section](item, where)
+    return errors
+
+
+def _required_strings(item, where, fields):
+    return [f"{where}: '{f}' is missing or empty" for f in fields if not is_nonempty_str(item.get(f))]
+
+
+def _compiles(code, where, label, mode="exec"):
+    try:
+        compile(code, label, mode)
+    except SyntaxError as exc:
+        return [f"{where}: {label} is not valid Python: line {exc.lineno}: {exc.msg}"]
+    return []
+
+
+def check_predict(item, where):
+    errors = _required_strings(item, where, ["code", "question", "answer", "explain"])
+    if errors:
+        return errors
+    code, answer = item["code"], item["answer"]
+    lines = len(code.strip("\n").splitlines())
+    if lines > MAX_PREDICT_LINES:
+        errors.append(f"{where}: code has {lines} lines, at most {MAX_PREDICT_LINES}")
+    if "choices" in item:
+        choices = item["choices"]
+        if not isinstance(choices, list) or not all(is_nonempty_str(c) for c in choices):
+            errors.append(f"{where}: 'choices' must be a list of non-empty strings")
+        else:
+            if not MIN_CHOICES <= len(choices) <= MAX_CHOICES:
+                errors.append(f"{where}: has {len(choices)} choices, needs {MIN_CHOICES}-{MAX_CHOICES}")
+            normalized = [normalize_output(c) for c in choices]
+            if len(set(normalized)) != len(choices):
+                errors.append(f"{where}: choices must all be different")
+            if normalized.count(normalize_output(answer)) != 1:
+                errors.append(f"{where}: exactly one choice must equal the answer {answer!r}")
+    compile_errors = _compiles(code, where, "code")
+    if compile_errors:
+        return errors + compile_errors
+    result = run_format({"kind": "predict", "code": code})
+    if result.get("error"):
+        return errors + [f"{where}: code raised {result['error']} (predict code must run cleanly)"]
+    if normalize_output(result["stdout"]) != normalize_output(answer):
+        errors.append(f"{where}: answer {answer!r} is wrong: the code really prints {result['stdout']!r}")
+    return errors
+
+
+def check_break_it(item, where):
+    errors = _required_strings(
+        item, where, ["says", "code", "spec", "call", "input_hint", "check", "normal_input", "example_input", "explain"])
+    for field in ["helpers", "miss"]:
+        if field in item and not is_nonempty_str(item[field]):
+            errors.append(f"{where}: '{field}' must be a non-empty string when present")
+    if "crash_counts" in item and not isinstance(item["crash_counts"], bool):
+        errors.append(f"{where}: 'crash_counts' must be true or false")
+    if errors:
+        return errors
+    if "{input}" not in item["call"]:
+        errors.append(f"{where}: 'call' must contain {{input}}, e.g. split_bill({{input}})")
+    errors += _compiles(item["code"] + "\n" + item.get("helpers", ""), where, "code + helpers")
+    errors += _compiles(item["call"].replace("{input}", "*args"), where, "call", "eval")
+    errors += _compiles(item["check"].replace("{input}", "*args"), where, "check", "eval")
+    if errors:
+        return errors
+    request = {"kind": "break_it", "code": item["code"], "helpers": item.get("helpers", ""), "call": item["call"],
+               "check": item["check"], "crash_counts": item.get("crash_counts", False)}
+    normal = run_format({**request, "input": item["normal_input"]})
+    if normal.get("status") != "holds":
+        detail = normal.get("message") or normal.get("error") or f"Byte's code returned {normal.get('result')}"
+        errors.append(f"{where}: Byte's code must meet the spec on normal_input {item['normal_input']!r}, "
+                      f"but got {normal.get('status')}: {detail}")
+    example = run_format({**request, "input": item["example_input"]})
+    if example.get("status") != "broken":
+        detail = example.get("message") or example.get("error") or f"Byte's code returned {example.get('result')}"
+        errors.append(f"{where}: example_input {item['example_input']!r} must break the spec, "
+                      f"but got {example.get('status')}: {detail}")
+    return errors
+
+
+def check_parsons(item, where):
+    errors = _required_strings(item, where, ["goal"])
+    for field in ["check", "expected_output", "explain"]:
+        if field in item and not isinstance(item[field], str):
+            errors.append(f"{where}: '{field}' must be a string when present")
+    if not is_nonempty_str(item.get("check")) and not isinstance(item.get("expected_output"), str):
+        errors.append(f"{where}: needs a 'check' (asserts) or an 'expected_output'")
+    lines = item.get("lines")
+    if not isinstance(lines, list) or not all(is_nonempty_str(line) for line in lines):
+        return errors + [f"{where}: 'lines' must be a list of non-blank lines"]
+    if len(lines) < MIN_PARSONS_LINES:
+        errors.append(f"{where}: needs at least {MIN_PARSONS_LINES} lines, has {len(lines)}")
+    distractors = item.get("distractors")
+    if not isinstance(distractors, list) or not distractors or not all(isinstance(d, dict) for d in distractors):
+        return errors + [f"{where}: 'distractors' must be a non-empty list of mappings"]
+    all_lines = list(lines)
+    for j, d in enumerate(distractors):
+        here = f"{where}: distractor {j}"
+        errors += _required_strings(d, here, ["line", "explain"])
+        replaces = d.get("replaces")
+        if not isinstance(replaces, int) or isinstance(replaces, bool) or not 0 <= replaces < len(lines):
+            errors.append(f"{here}: 'replaces' must be a 0-based index into lines (0-{len(lines) - 1})")
+        if is_nonempty_str(d.get("line")):
+            all_lines.append(d["line"])
+    if len(set(all_lines)) != len(all_lines):
+        errors.append(f"{where}: every line and distractor must be different")
+    if errors:
+        return errors
+    program = "\n".join(lines)
+    errors += _compiles(program, where, "the correct order")
+    check = item.get("check") or ""
+    errors += _compiles(check, where, "check")
+    if errors:
+        return errors
+    request = {"kind": "parsons", "check": check, "expected_output": item.get("expected_output")}
+    result = run_format({**request, "program": program})
+    if not result.get("passed"):
+        errors.append(f"{where}: the correct order fails its check: {result.get('error')}")
+    for j, d in enumerate(distractors):
+        swapped = list(lines)
+        swapped[d["replaces"]] = d["line"]
+        result = run_format({**request, "program": "\n".join(swapped)})
+        if result.get("passed"):
+            errors.append(f"{where}: distractor {j} ({d['line'].strip()!r}) passes the check too, so it isn't a trap")
     return errors
 
 

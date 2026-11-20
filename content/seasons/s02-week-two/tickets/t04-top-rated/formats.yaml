@@ -1,0 +1,36 @@
+parsons:
+  - goal: >-
+      `top_rated_names(ratings_by_name)` returns the names of restaurants with at least 5 ratings
+      AND an average of 4.5 or more, in the order they appear. Brand-new restaurants (no ratings
+      yet) must not crash it. Two of the lines are Byte's traps: leave them out.
+    lines:
+      - "def top_rated_names(ratings_by_name):"
+      - "    names = []"
+      - "    for name in ratings_by_name:"
+      - "        ratings = ratings_by_name[name]"
+      - "        if len(ratings) >= 5 and sum(ratings) / len(ratings) >= 4.5:"
+      - "            names.append(name)"
+      - "    return names"
+    distractors:
+      - line: "        if sum(ratings) / len(ratings) >= 4.5 and len(ratings) >= 5:"
+        replaces: 4
+        explain: >-
+          Byte's order: `and` checks left to right, so the average runs FIRST and divides by zero
+          for a restaurant with no ratings. Put the length check first so it guards the division.
+      - line: "        return names"
+        replaces: 6
+        explain: >-
+          Indented inside the loop, `return` stops the function after the very first restaurant.
+          Return once, after the loop has looked at every restaurant.
+    check: |
+      ratings = {
+          "Pizza Planet": [5, 5, 5, 4, 5],
+          "Taco Moon": [],
+          "Noodle Nebula": [5, 4, 5, 5, 5, 5],
+          "Curry Comet": [5, 5],
+      }
+      assert top_rated_names(ratings) == ["Pizza Planet", "Noodle Nebula"], top_rated_names(ratings)
+      assert top_rated_names({}) == []
+    explain: >-
+      The cheap, safe check (`len(ratings) >= 5`) goes first, so `and` never reaches the division
+      for a new restaurant. And `return` sits after the loop, at the same depth as `for`.

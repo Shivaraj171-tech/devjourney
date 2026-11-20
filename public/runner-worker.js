@@ -4,9 +4,11 @@
 //
 // Messages in:  { type: "run", id, files: {path: text}, tests: {path: text} }
 //               { type: "trace", id, files, tests, testFile, testName }
+//               { type: "snippet", id, request }  (a task-format request, see lib/runner/formats.py)
 // Messages out: { type: "ready" }
 //               { type: "result", id, result }   (result = test_runner.run_tests JSON)
 //               { type: "trace", id, trace }     (trace = tracer.trace_test JSON)
+//               { type: "snippet", id, result }  (result = formats.handle JSON)
 //               { type: "error", id, message }
 
 // Asset URLs are relative to this worker file, so the site works under any
@@ -20,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, "/runner")
 import test_runner
 import tracer
+import formats
 
 WORKSPACE = Path("/workspace")
 
@@ -60,7 +63,7 @@ async function init() {
   const pyodide = await loadPyodide({ indexURL: new URL("./pyodide/", self.location.href).href });
   // Write the runner files from Python itself (avoids depending on FS APIs).
   pyodide.runPython(`from pathlib import Path\nPath("/runner").mkdir(exist_ok=True)`);
-  for (const name of ["test_runner.py", "tracer.py"]) {
+  for (const name of ["test_runner.py", "tracer.py", "formats.py"]) {
     const source = await (await fetch(new URL(`./runner/${name}`, self.location.href))).text();
     pyodide.runPython(`Path("/runner/${name}").write_text(${JSON.stringify(source)})`);
   }
@@ -75,11 +78,16 @@ ready.then(
 );
 
 self.onmessage = async (event) => {
-  const { type, id, files, tests, testFile, testName } = event.data;
-  if (type !== "run" && type !== "trace") return;
+  const { type, id, files, tests, testFile, testName, request } = event.data;
+  if (type !== "run" && type !== "trace" && type !== "snippet") return;
   try {
     const pyodide = await ready;
-    if (type === "run") {
+    if (type === "snippet") {
+      // Task formats run in their own fresh namespace: /workspace is left alone.
+      const payload = JSON.stringify(JSON.stringify(request));
+      const resultJson = pyodide.runPython(`formats.handle_json(${payload})`);
+      self.postMessage({ type: "snippet", id, result: JSON.parse(resultJson) });
+    } else if (type === "run") {
       const payload = JSON.stringify(JSON.stringify({ files, tests }));
       const resultJson = pyodide.runPython(`run_payload(${payload})`);
       self.postMessage({ type: "result", id, result: JSON.parse(resultJson) });

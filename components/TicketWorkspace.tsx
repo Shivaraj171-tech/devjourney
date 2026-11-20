@@ -9,6 +9,7 @@
 // Phone (<1024px): the same pieces as a 3-step flow (Brief / Code / Checks)
 // with Run in a sticky bottom bar. Running switches to Checks.
 import { conceptLabel } from "@/lib/content/concepts";
+import TaskFormats from "./TaskFormats";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import AskByte from "./AskByte";
@@ -416,11 +417,9 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                 />
               )}
 
-              {/*
-                3. Task-format widgets go here (e.g. "predict the output", "commit to a
-                judgement before you run"). Render them as self-contained components
-                that take `ticket` and `tp`, between Byte's card and the story.
-              */}
+              {/* 3. Practice formats from formats.yaml: predict the output, break Byte's
+                  code, put the lines in order. Renders nothing for tickets without them. */}
+              <TaskFormats ticket={ticket} tp={tp} getRunner={() => runnerRef.current} />
 
               {/* 4. The story, folded to two lines. */}
               <Story text={ticket.story} />

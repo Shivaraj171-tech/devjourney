@@ -1,0 +1,13 @@
+predict:
+  - code: |
+      cart = [1250]
+      result = cart.append(299)
+      print(result)
+      print(len(cart))
+    question: "Type exactly what this prints (two lines)."
+    answer: |
+      None
+      2
+    explain: >-
+      `.append()` changes the list itself and gives back nothing, so `result` is `None`. The cart now
+      holds two prices. That's why `cart = cart.append(...)` is a classic bug: it throws the cart away.

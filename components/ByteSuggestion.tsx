@@ -4,17 +4,24 @@
 // myself" applies it and leaves the fixing to the learner. Whether Byte was
 // right is only revealed once the learner has decided (and, for Accept, run
 // the tests), because checking is the whole point.
-import { useEffect, useRef, type ReactNode } from "react";
-import type { ByteSuggestion as Suggestion } from "@/lib/content/types";
+//
+// "Decide before evidence" (byte.yaml `why`): the learner first picks a call
+// (Accept / Reject / Edit) AND the reason from three options, then locks both
+// in. Only then is Byte's code applied. XP needs the right call and the right reason.
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ByteSuggestion as Suggestion, ByteWhy } from "@/lib/content/types";
 import {
   applySuggestion,
   CATCH_XP,
+  reasonOk,
   suggestionLine,
   suggestionOutcome,
   TRUST_XP,
   type ByteDecision,
   type SuggestionOutcome,
+  type SuggestionRecord,
 } from "@/lib/game/byte";
+import { shuffledOrder } from "@/lib/game/shuffle";
 import { byteActions, type TicketProgress } from "@/lib/progress/store";
 
 type Props = {
@@ -46,14 +53,28 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
     lastOutcome.current = outcome;
   }, [outcome]);
 
-  function decide(decision: ByteDecision) {
+  // "why" mode: the call and the reason are picked first, then locked in together.
+  const why = suggestion.why;
+  const [pendingDecision, setPendingDecision] = useState<ByteDecision | null>(null);
+  const [pendingReason, setPendingReason] = useState<number | null>(null);
+
+  function decide(decision: ByteDecision, reason?: number) {
+    const whyRecord = why && reason !== undefined ? { reason, reasonCorrect: reason === why.answer } : undefined;
     if (decision === "reject" || applied === null) {
-      byteActions.decide(ticketId, "reject", suggestion.correct);
+      byteActions.decide(ticketId, "reject", suggestion.correct, undefined, whyRecord);
       return;
     }
-    byteActions.decide(ticketId, decision, suggestion.correct, { path: suggestion.file, text: applied });
+    byteActions.decide(ticketId, decision, suggestion.correct, { path: suggestion.file, text: applied }, whyRecord);
     onApplied(suggestion.file);
   }
+
+  function choose(decision: ByteDecision) {
+    if (why) setPendingDecision(decision);
+    else decide(decision);
+  }
+
+  const pressed = (d: ByteDecision) => (why ? { "aria-pressed": pendingDecision === d } : {});
+  const ring = (d: ByteDecision) => (why && pendingDecision === d ? " ring-2 ring-white/80 ring-offset-2 ring-offset-slate-900" : "");
 
   return (
     <section
@@ -91,33 +112,49 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
             </p>
           )}
           <p className="mt-2 text-xs text-slate-400">
-            Read it like a reviewer: would it pass the &quot;Done when&quot; list? Byte sounds just as sure when it&apos;s wrong.
+            {why
+              ? "Decide before you see any evidence: pick your call AND why. Byte's code is only applied once you lock both in."
+              : <>Read it like a reviewer: would it pass the &quot;Done when&quot; list? Byte sounds just as sure when it&apos;s wrong.</>}
           </p>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          {why && <div className="mt-2 text-xs font-semibold text-violet-100" id={`${ticketId}-byte-call`}>1. Your call</div>}
+          <div className="mt-2 grid grid-cols-3 gap-2" role={why ? "group" : undefined} aria-labelledby={why ? `${ticketId}-byte-call` : undefined}>
             <button
               data-testid="byte-accept"
-              onClick={() => decide("accept")}
+              onClick={() => choose("accept")}
               disabled={applied === null}
-              className="rounded-lg bg-emerald-600 px-2 py-2 font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+              {...pressed("accept")}
+              className={`rounded-lg bg-emerald-600 px-2 py-2 font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400${ring("accept")}`}
             >
               ✓ Accept
             </button>
             <button
               data-testid="byte-reject"
-              onClick={() => decide("reject")}
-              className="rounded-lg border border-red-400/50 px-2 py-2 font-semibold text-red-200 hover:bg-red-500/10"
+              onClick={() => choose("reject")}
+              {...pressed("reject")}
+              className={`rounded-lg border border-red-400/50 px-2 py-2 font-semibold text-red-200 hover:bg-red-500/10${why && pendingDecision === "reject" ? " bg-red-500/20" : ""}${ring("reject")}`}
             >
               ✕ Reject
             </button>
             <button
               data-testid="byte-edit"
-              onClick={() => decide("edit")}
+              onClick={() => choose("edit")}
               disabled={applied === null}
-              className="rounded-lg border border-cyan-400/50 px-2 py-2 font-semibold text-cyan-100 hover:bg-cyan-500/10 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-500"
+              {...pressed("edit")}
+              className={`rounded-lg border border-cyan-400/50 px-2 py-2 font-semibold text-cyan-100 hover:bg-cyan-500/10 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-500${why && pendingDecision === "edit" ? " bg-cyan-500/20" : ""}${ring("edit")}`}
             >
               ✎ Edit it myself
             </button>
           </div>
+          {why && (
+            <WhyPicker
+              why={why}
+              seed={`${ticketId}:why`}
+              picked={pendingReason}
+              onPick={setPendingReason}
+              ready={pendingDecision !== null && pendingReason !== null}
+              onLock={() => pendingDecision && pendingReason !== null && decide(pendingDecision, pendingReason)}
+            />
+          )}
         </>
       )}
 
@@ -127,12 +164,97 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
         </Verdict>
       )}
 
-      {record && outcome && <OutcomeNote outcome={outcome} decision={record.decision} explain={suggestion.explain} file={suggestion.file} />}
+      {record && outcome && (
+        <OutcomeNote outcome={outcome} record={record} explain={suggestion.explain} file={suggestion.file} />
+      )}
+      {record && outcome && outcome !== "pending" && why && record.reason !== undefined && (
+        <ReasonNote why={why} record={record} />
+      )}
     </section>
   );
 }
 
-function OutcomeNote({ outcome, decision, explain, file }: { outcome: SuggestionOutcome; decision: ByteDecision; explain: string; file: string }) {
+/** Step 2 of "decide before evidence": pick the reason, then lock in the call and the reason. */
+function WhyPicker({
+  why,
+  seed,
+  picked,
+  onPick,
+  ready,
+  onLock,
+}: {
+  why: ByteWhy;
+  seed: string;
+  picked: number | null;
+  onPick: (i: number) => void;
+  ready: boolean;
+  onLock: () => void;
+}) {
+  return (
+    <div className="mt-3" data-testid="byte-why">
+      <div className="text-xs font-semibold text-violet-100" id={`${seed}-label`}>
+        2. Why? Pick the reason that decides it
+      </div>
+      <div className="mt-1.5 space-y-1.5" role="radiogroup" aria-labelledby={`${seed}-label`}>
+        {shuffledOrder(why.choices.length, seed).map((ci) => (
+          <button
+            key={ci}
+            role="radio"
+            aria-checked={picked === ci}
+            data-testid={`byte-why-${ci}`}
+            onClick={() => onPick(ci)}
+            className={`block w-full rounded-lg border px-2.5 py-2 text-left text-[13px] leading-snug transition ${
+              picked === ci
+                ? "border-violet-300 bg-violet-500/25 text-white"
+                : "border-slate-700 text-slate-200 hover:border-violet-400/60 hover:bg-slate-800"
+            }`}
+          >
+            <InlineCode text={why.choices[ci]} />
+          </button>
+        ))}
+      </div>
+      <button
+        data-testid="byte-lock"
+        onClick={onLock}
+        disabled={!ready}
+        className="mt-2 w-full rounded-lg bg-violet-600 px-3 py-2 font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+      >
+        {ready ? "🔒 Lock in my call" : "Pick a call and a reason to lock in"}
+      </button>
+    </div>
+  );
+}
+
+/** After the verdict: was the learner's reason the real one? */
+function ReasonNote({ why, record }: { why: ByteWhy; record: SuggestionRecord }) {
+  const right = record.reasonCorrect === true;
+  return (
+    <div
+      data-testid="byte-reason"
+      data-reason={right ? "right" : "wrong"}
+      className={`mt-2 rounded-lg border p-2.5 text-[13px] ${right ? "border-emerald-400/40 text-emerald-100" : "border-amber-400/50 text-amber-100"}`}
+    >
+      <div className="font-semibold">{right ? "✓ Your reason was the real one." : "✗ Your reason wasn't the one that decides it."}</div>
+      {!right && (
+        <div className="mt-1">
+          The real reason: <InlineCode text={why.choices[why.answer]} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OutcomeNote({ outcome, record, explain, file }: { outcome: SuggestionOutcome; record: SuggestionRecord; explain: string; file: string }) {
+  const decision = record.decision;
+  // "why" mode: a good outcome only pays out with the right reason too.
+  if ((outcome === "caught" || outcome === "trusted") && !reasonOk(record)) {
+    return (
+      <Verdict tone="neutral" title={outcome === "caught" ? "Right call, shaky reason" : "Right to trust it, shaky reason"}>
+        <InlineCode text={explain} /> The call was right, but the reason matters as much: next time, name what
+        actually makes the code right or wrong. No XP this time, nothing lost.
+      </Verdict>
+    );
+  }
   if (outcome === "pending") {
     return (
       <Verdict tone="neutral" title={decision === "edit" ? `Byte's code is in ${file}. Your turn.` : `Byte's code is in ${file}.`}>

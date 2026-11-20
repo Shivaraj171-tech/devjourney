@@ -4,6 +4,12 @@ suggestion:
   find: "    for order_id, fields in data.items():"
   replace: "    for order_id, fields in data.items():\n        order_id = int(order_id)"
   correct: true
+  why:
+    choices:
+      - "`int()` fails on JSON text, so loading crashes on every order."
+      - "Only the dictionary key is fixed; the Order keeps its text id."
+      - "The id is turned back into a number before the Order is built."
+    answer: 2
   says: "JSON turned your ids into text. Turn each one back into a number first, before the Order is built."
   explain: >-
     Correct. Converting at the top of the loop fixes both the dictionary key AND order.order_id. A

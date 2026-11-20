@@ -56,6 +56,77 @@ export type ByteSuggestion = {
   says: string;
   /** Why it's right or wrong; shown once the learner has decided (and checked). */
   explain: string;
+  /**
+   * "Decide before evidence": when set, the learner must pick Accept/Reject AND the
+   * reason (one of `choices`) before Byte's code is applied or any verdict is shown.
+   */
+  why?: ByteWhy;
+};
+
+/** byte.yaml `suggestion.why`: three reasons, one right. */
+export type ByteWhy = {
+  choices: string[];
+  /** 0-based index of the right reason. */
+  answer: number;
+};
+
+// ---------- Extra task formats (formats.yaml) ----------
+
+/** "Predict the output": guess what a short snippet prints, then run it. */
+export type PredictTask = {
+  code: string;
+  question: string;
+  /** Exactly what the code prints (verified by the validator). */
+  answer: string;
+  /** Optional multiple choice; one of them equals `answer`. Free text otherwise. */
+  choices?: string[];
+  explain: string;
+};
+
+/** "Break Byte's code": find an input where Byte's function breaks the spec. */
+export type BreakItTask = {
+  /** Byte's pitch, e.g. "Tested it on 900, 3. Works!" */
+  says: string;
+  /** Byte's (buggy) function. */
+  code: string;
+  /** The spec in plain English. */
+  spec: string;
+  /** e.g. "split_bill({input})"; {input} is what the learner types. */
+  call: string;
+  /** What to type, e.g. "total_cents, people". */
+  inputHint: string;
+  /** Code the check needs (e.g. a spec predicate); "" if none. */
+  helpers: string;
+  /** Python expression: true when Byte's `result` meets the spec for {input}. */
+  check: string;
+  /** Does a crash in Byte's code count as breaking it? */
+  crashCounts: boolean;
+  /** An input where Byte's code is fine (Byte's own test). The counterexample is never shipped. */
+  normalInput: string;
+  /** Nudge after an input that doesn't break it. */
+  miss: string;
+  explain: string;
+};
+
+/** One line of a Parsons puzzle. Only distractors carry an `explain`. */
+export type ParsonsBlock = { id: number; text: string; explain?: string };
+
+/** "Put the lines in order" (Parsons puzzle) with Byte's wrong lines mixed in. */
+export type ParsonsTask = {
+  goal: string;
+  /** Every line (correct ones and distractors), already shuffled; `id` is the position here. */
+  blocks: ParsonsBlock[];
+  /** Asserts run after the learner's program ("" if none). */
+  check: string;
+  /** What the program + check must print, if set. */
+  expectedOutput?: string;
+  explain: string;
+};
+
+export type TaskFormatsContent = {
+  predict: PredictTask[];
+  breakIt: BreakItTask[];
+  parsons: ParsonsTask[];
 };
 
 export type BytePromptVerdict = "good" | "vague" | "wrong";
@@ -109,6 +180,8 @@ export type Ticket = {
   incident?: Incident;
   /** Byte's suggestion and/or prompt card (byte.yaml), if any. */
   byte?: ByteContent;
+  /** Extra task formats (formats.yaml), if any. */
+  formats?: TaskFormatsContent;
 };
 
 /** A 2-minute daily code-reading challenge (content/warmups/*.yaml). */

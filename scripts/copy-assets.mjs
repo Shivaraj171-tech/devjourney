@@ -3,6 +3,7 @@
 //   - Pyodide (Python in WebAssembly)      -> public/pyodide/
 //   - Monaco editor prebuilt files          -> public/monaco/vs/
 //   - Our Python test runner and tracer    -> public/runner/test_runner.py, tracer.py
+//   - Task-format runner (formats.yaml)    -> public/runner/formats.py
 import { cpSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,3 +22,4 @@ copy("node_modules/pyodide", "pyodide");
 copy("node_modules/monaco-editor/min/vs", "monaco/vs");
 copy("lib/runner/test_runner.py", "runner/test_runner.py");
 copy("lib/runner/tracer.py", "runner/tracer.py");
+copy("lib/runner/formats.py", "runner/formats.py");
