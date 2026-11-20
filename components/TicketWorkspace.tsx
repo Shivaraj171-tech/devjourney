@@ -127,6 +127,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   );
   const [tab, setTab] = useState<Tab>("ticket");
   const [step, setStep] = useState<Step>("brief");
+  // Phone: Monaco (~4 MB) loads the first time the Code step opens, not while reading the brief.
+  const [editorLoaded, setEditorLoaded] = useState(false);
 
   // ----- step-through debugger -----
   const [debug, setDebug] = useState<DebugSession | null>(null);
@@ -257,6 +259,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
     }
   }
   const phoneStep: Step = steps.some((s) => s.id === step) ? step : "brief";
+  const showEditor = editorLoaded || isDesktop || phoneStep === "code";
+  if (showEditor && !editorLoaded) setEditorLoaded(true); // once loaded, keep it (undo history)
   const stepPanel = (id: Step) => (isDesktop ? {} : tabPanelProps("step", id));
 
   const hints = (placement: "up" | "down") => exam ? null : (
@@ -520,15 +524,17 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               )}
             </div>
             <div className="min-h-0 flex-1">
-              <CodeEditor
-                path={`file:///${ticket.id}/${activeFile}`}
-                value={fileText(activeFile)}
-                readOnly={isRead || !editable.has(activeFile)}
-                onChange={(v) => actions.saveCode(ticket.id, activeFile, v)}
-                onRun={isRead ? undefined : runTests}
-                highlightLine={debugStep && debugStep.file === activeFile ? debugStep.line : undefined}
-                compact={!isDesktop}
-              />
+              {showEditor && (
+                <CodeEditor
+                  path={`file:///${ticket.id}/${activeFile}`}
+                  value={fileText(activeFile)}
+                  readOnly={isRead || !editable.has(activeFile)}
+                  onChange={(v) => actions.saveCode(ticket.id, activeFile, v)}
+                  onRun={isRead ? undefined : runTests}
+                  highlightLine={debugStep && debugStep.file === activeFile ? debugStep.line : undefined}
+                  compact={!isDesktop}
+                />
+              )}
             </div>
           </div>
 

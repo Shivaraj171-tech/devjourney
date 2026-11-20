@@ -4,7 +4,9 @@
 //   - Monaco editor prebuilt files          -> public/monaco/vs/
 //   - Our Python test runner and tracer    -> public/runner/test_runner.py, tracer.py
 //   - Task-format runner (formats.yaml)    -> public/runner/formats.py
-import { cpSync, mkdirSync, rmSync } from "node:fs";
+//   - Service worker (scripts/sw.template.js) -> public/sw.js, with versioned cache names
+import { createHash } from "node:crypto";
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -23,3 +25,19 @@ copy("node_modules/monaco-editor/min/vs", "monaco/vs");
 copy("lib/runner/test_runner.py", "runner/test_runner.py");
 copy("lib/runner/tracer.py", "runner/tracer.py");
 copy("lib/runner/formats.py", "runner/formats.py");
+
+// Service worker: cache names change whenever Pyodide/Monaco are upgraded
+// (package versions) or the runner files change (content hash), so a deploy
+// never serves stale Python or editor files from a learner's device.
+const version = (pkg) => JSON.parse(readFileSync(join(root, "node_modules", pkg, "package.json"), "utf-8")).version;
+const assetsVersion = `pyodide-${version("pyodide")}_monaco-${version("monaco-editor")}`;
+const runnerHash = createHash("sha256");
+for (const f of ["public/runner-worker.js", "public/runner/test_runner.py", "public/runner/tracer.py", "public/runner/formats.py"]) {
+  runnerHash.update(readFileSync(join(root, f)));
+}
+const runnerVersion = runnerHash.digest("hex").slice(0, 12);
+const sw = readFileSync(join(root, "scripts", "sw.template.js"), "utf-8")
+  .replace("__ASSETS_VERSION__", assetsVersion)
+  .replace("__RUNNER_VERSION__", runnerVersion);
+writeFileSync(join(pub, "sw.js"), sw);
+console.log(`wrote public/sw.js (assets ${assetsVersion}, runner ${runnerVersion})`);

@@ -8,14 +8,14 @@ import FloorBoard, { type Room } from "./FloorBoard";
 import TodayCard from "./TodayCard";
 import { useIsClient } from "@/lib/useIsClient";
 import AppPreview from "./AppPreview";
-import DailyWarmup from "./DailyWarmup";
+import DailyWarmup, { warmupSession } from "./DailyWarmup";
 import HumanInTheLoop from "./HumanInTheLoop";
 import Onboarding from "./Onboarding";
 import TeamChat from "./TeamChat";
 import { useRoomChanges } from "@/lib/useOfficeSeen";
 import { useNewBadges } from "@/lib/useNewBadges";
 import BadgeToast from "./BadgeToast";
-import { BADGES, currentStreak, dayKey, incidentBonus, leaderboard, pickWarmup, type BadgeContext } from "@/lib/game/rules";
+import { BADGES, currentStreak, incidentBonus, leaderboard, type BadgeContext } from "@/lib/game/rules";
 import { daysSinceStart, ticketProgress, totalXp, useProgress, actions } from "@/lib/progress/store";
 import type { TicketType, Warmup } from "@/lib/content/types";
 import { correctSeen, hitlScore, wrongSeen } from "@/lib/game/byte";
@@ -115,13 +115,11 @@ export default function HQ({ seasons, warmups, hasSkillsCheck }: Props) {
   const solvedIds = new Set(solved.map((t) => t.id));
   const returning = solved.length > 0;
 
-  // Today's warm-up: ready, done, or not unlocked yet (hidden until there is one).
-  const today = now ? dayKey(now) : "";
-  const warmupDone = !!progress.warmups?.[today];
-  const warmupAvailable =
-    warmupDone ||
-    pickWarmup(warmups, solvedIds, new Set(Object.values(progress.warmups ?? {}).map((w) => w.id)), today) !== null;
-  const warmupStatus = warmupDone ? "done" : warmupAvailable ? "ready" : "none";
+  // Today's warm-up session: ready, done, or not unlocked yet (hidden until there is one).
+  const ticketConcepts = Object.fromEntries(allTickets.map((t) => [t.id, t.newConcept]));
+  const warmupPlan = now ? warmupSession(warmups, progress, solvedIds, ticketConcepts, now) : null;
+  const warmupAvailable = !!warmupPlan && warmupPlan.items.length > 0;
+  const warmupStatus = warmupPlan?.done ? "done" : warmupAvailable ? "ready" : "none";
 
   // The floor you're working on starts open; every other floor is a one-line row.
   const currentFloor = current ? seasons.findIndex((s) => s.id === current.seasonId) : seasons.length - 1;
@@ -202,7 +200,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck }: Props) {
         })}
       </div>
 
-      {now && warmupAvailable && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={solvedIds} now={now} />}
+      {now && warmupAvailable && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={solvedIds} ticketConcepts={ticketConcepts} now={now} />}
 
       {hitlHasData && <HumanInTheLoop score={hitl} />}
 

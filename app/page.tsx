@@ -1,4 +1,5 @@
 import HQ, { type SeasonSummary } from "@/components/HQ";
+import PythonPrefetch from "@/components/PythonPrefetch";
 import { loadSeasons, loadSkillsCheck, loadWarmups } from "@/lib/content/load";
 
 export default function Home() {
@@ -22,5 +23,10 @@ export default function Home() {
       timeLimitMinutes: t.incident?.timeLimitMinutes,
     })),
   }));
-  return <HQ seasons={seasons} warmups={loadWarmups()} hasSkillsCheck={loadSkillsCheck() !== null} />;
+  return (
+    <>
+      <HQ seasons={seasons} warmups={loadWarmups()} hasSkillsCheck={loadSkillsCheck() !== null} />
+      <PythonPrefetch />
+    </>
+  );
 }

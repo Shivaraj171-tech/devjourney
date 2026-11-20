@@ -1,6 +1,7 @@
 "use client";
 
 import { withBase } from "../basePath";
+import { whenServiceWorkerControls } from "../serviceWorker";
 import type { RunResult, TraceOutcome, TraceResult } from "./types";
 
 const TIMEOUT_MS = 8000;
@@ -17,6 +18,9 @@ type WorkerMessage =
   | { type: "trace"; id: number; trace: TraceResult }
   | { type: "snippet"; id: number; result: unknown }
   | { type: "error"; id: number | null; message: string };
+
+/** First visit only: wait this long at most for the service worker, so Pyodide is cached as it downloads. */
+const SW_WAIT_MS = 3000;
 
 const timeoutMessage = `Your code took longer than ${TIMEOUT_MS / 1000} seconds. Is there a loop that never ends?`;
 
@@ -36,9 +40,18 @@ export class PythonRunner {
 
   warmUp(): Promise<void> {
     if (this.ready) return this.ready;
+    const ready: Promise<void> = whenServiceWorkerControls(SW_WAIT_MS).then(() =>
+      // Reset or disposed while waiting: this warm-up was abandoned (never settles).
+      this.ready === ready ? this.start() : new Promise<void>(() => {}),
+    );
+    this.ready = ready;
+    return ready;
+  }
+
+  private start(): Promise<void> {
     const worker = new Worker(withBase("/runner-worker.js"), { type: "module" });
     this.worker = worker;
-    this.ready = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
         const msg = event.data;
         if (msg.type === "ready") resolve();
@@ -52,7 +65,6 @@ export class PythonRunner {
       };
       worker.onerror = (event) => reject(new Error(event.message || "worker failed to start"));
     });
-    return this.ready;
   }
 
   async run(files: Record<string, string>, tests: Record<string, string>): Promise<RunResult> {
