@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import type { TicketType } from "@/lib/content/types";
 import type { TicketXp } from "@/lib/game/rules";
+import MergeJuice from "./MergeJuice";
 
 type Props = {
   xp: TicketXp;
@@ -35,7 +36,7 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4" role="dialog" aria-modal="true" data-testid="solved-modal">
+    <div className="fixed inset-0 z-50 flex overflow-y-auto bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="solved-title" data-testid="solved-modal">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {Array.from({ length: 24 }).map((_, i) => (
           <span
@@ -47,9 +48,9 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
           </span>
         ))}
       </div>
-      <div className="relative w-full max-w-md rounded-2xl border border-emerald-500/40 bg-slate-900 p-6 text-center shadow-2xl shadow-emerald-500/10">
+      <div className="relative m-auto w-full max-w-md rounded-2xl border border-emerald-500/40 bg-slate-900 p-6 text-center shadow-2xl shadow-emerald-500/10">
         <div className="text-5xl">{text.icon}</div>
-        <h2 className="mt-3 text-2xl font-bold text-white">{text.title}</h2>
+        <h2 id="solved-title" className="mt-3 text-2xl font-bold text-white">{text.title}</h2>
         <p className="mt-1 text-slate-400">{text.blurb}</p>
         <div className="mt-5 space-y-1 rounded-xl bg-slate-950/70 p-4 text-left font-mono text-sm">
           <Row label="Ticket XP" value={`+${xp.base}`} />
@@ -60,6 +61,7 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
           <div className="my-1 border-t border-slate-800" />
           <Row label="Total" value={`+${xp.total} XP`} className="font-bold text-emerald-300" />
         </div>
+        <MergeJuice earned={xp.total} />
         <div className="mt-5 flex flex-col gap-2">
           {hasQuiz && (
             <button onClick={onQuiz} className="rounded-lg bg-violet-600 py-2.5 font-semibold text-white hover:bg-violet-500">

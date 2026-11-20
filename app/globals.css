@@ -35,3 +35,60 @@ body {
   width: 4px !important;
   margin-left: 3px;
 }
+
+/* ---------- Fun layer (MergeJuice, TeamChat, HQ room flourishes) ---------- */
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pop-in { animation: pop-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+
+/* A sheen that sweeps across the promotion banner. */
+@keyframes promo-shine {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(320%) skewX(-20deg); }
+}
+.promo-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  animation: promo-shine 1.6s ease-in-out 0.5s 2 both;
+  pointer-events: none;
+}
+
+/* HQ: a room merged since your last visit gets stamped. */
+@keyframes room-stamp {
+  0% { transform: scale(2.4) rotate(-14deg); opacity: 0; }
+  70% { transform: scale(0.95) rotate(-8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-8deg); opacity: 1; }
+}
+.room-stamp { transform: rotate(-8deg); animation: room-stamp 0.6s ease-out 0.4s both; }
+
+/* HQ: a room unlocked since your last visit glows like a door opening. */
+@keyframes room-unlocked {
+  0% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); }
+  35% { box-shadow: 0 0 0 6px rgba(167, 139, 250, 0.55), 0 0 32px rgba(34, 211, 238, 0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); }
+}
+.room-unlocked { animation: room-unlocked 1.6s ease-out 0.9s 2; }
+
+/* #orbit-team messages arrive one by one. */
+@keyframes chat-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.chat-in { animation: chat-in 0.35s ease-out both; }
+
+/* The streak flame flickers while the streak is alive. */
+@keyframes flame {
+  0%, 100% { transform: scale(1) rotate(-4deg); }
+  50% { transform: scale(1.15) rotate(4deg); }
+}
+.flame { display: inline-block; transform-origin: 50% 90%; animation: flame 1.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-in, .room-stamp, .room-unlocked, .chat-in, .flame, .promo-shine::after { animation: none !important; }
+}

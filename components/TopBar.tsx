@@ -25,8 +25,9 @@ export default function TopBar() {
           <Link href="/leaderboard" className="rounded-md px-2 py-1.5 text-slate-300 sm:px-3 hover:bg-slate-800 hover:text-white">Leaderboard</Link>
         </nav>
         <div className="ml-auto flex items-center gap-2 text-sm sm:gap-3">
-          <span title="Daily streak" className="rounded-full bg-orange-500/10 px-2.5 py-1 font-semibold text-orange-300">
-            🔥 {streak}
+          <span title="Daily streak" data-testid="streak" className="whitespace-nowrap rounded-full bg-orange-500/10 px-2.5 py-1 font-semibold text-orange-300">
+            <span className={streak > 0 ? "flame" : "opacity-50 grayscale"} aria-hidden>🔥</span> {streak}
+            <span className="sr-only"> day streak</span>
           </span>
           <div className="hidden min-w-48 sm:block" title={next ? `${next.minXp - xp} XP to ${next.title}` : "Max rank"}>
             <div className="flex justify-between gap-3 text-xs whitespace-nowrap">
@@ -37,7 +38,7 @@ export default function TopBar() {
               <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all" style={{ width: `${Math.round(pct * 100)}%` }} />
             </div>
           </div>
-          <span className="font-mono text-cyan-300 sm:hidden">{xp} XP</span>
+          <span className="font-mono whitespace-nowrap text-cyan-300 sm:hidden">{xp} XP</span>
         </div>
       </div>
     </header>
