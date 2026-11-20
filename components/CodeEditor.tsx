@@ -3,9 +3,10 @@
 // instead of a CDN. Files are copied there by scripts/copy-assets.mjs.
 import Editor, { loader, type OnMount } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
+import { withBase } from "@/lib/basePath";
 
 if (typeof window !== "undefined") {
-  loader.config({ paths: { vs: "/monaco/vs" } });
+  loader.config({ paths: { vs: withBase("/monaco/vs") } });
 }
 
 type MonacoEditor = Parameters<OnMount>[0];

@@ -9,7 +9,9 @@
 //               { type: "trace", id, trace }     (trace = tracer.trace_test JSON)
 //               { type: "error", id, message }
 
-import { loadPyodide } from "/pyodide/pyodide.mjs";
+// Asset URLs are relative to this worker file, so the site works under any
+// base path (e.g. GitHub Pages at /devjourney/).
+import { loadPyodide } from "./pyodide/pyodide.mjs";
 
 const SETUP = `
 import json, sys, shutil, importlib
@@ -55,11 +57,11 @@ def trace_payload(payload_json):
 `;
 
 async function init() {
-  const pyodide = await loadPyodide({ indexURL: "/pyodide/" });
+  const pyodide = await loadPyodide({ indexURL: new URL("./pyodide/", self.location.href).href });
   // Write the runner files from Python itself (avoids depending on FS APIs).
   pyodide.runPython(`from pathlib import Path\nPath("/runner").mkdir(exist_ok=True)`);
   for (const name of ["test_runner.py", "tracer.py"]) {
-    const source = await (await fetch(`/runner/${name}`)).text();
+    const source = await (await fetch(new URL(`./runner/${name}`, self.location.href))).text();
     pyodide.runPython(`Path("/runner/${name}").write_text(${JSON.stringify(source)})`);
   }
   pyodide.runPython(SETUP);

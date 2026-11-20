@@ -1,5 +1,6 @@
 "use client";
 
+import { withBase } from "../basePath";
 import type { RunResult, TraceOutcome, TraceResult } from "./types";
 
 const TIMEOUT_MS = 8000;
@@ -33,7 +34,7 @@ export class PythonRunner {
 
   warmUp(): Promise<void> {
     if (this.ready) return this.ready;
-    const worker = new Worker("/runner-worker.js", { type: "module" });
+    const worker = new Worker(withBase("/runner-worker.js"), { type: "module" });
     this.worker = worker;
     this.ready = new Promise((resolve, reject) => {
       worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
