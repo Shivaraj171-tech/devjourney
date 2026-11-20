@@ -58,7 +58,8 @@ test("first visit: the pitch, Floor 1 open, and no empty sections", async ({ pag
   // Nothing to show yet: no zero stats, no 0/0 score table, no locked warm-up.
   await expect(page.getByTestId("hitl-score")).toHaveCount(0);
   await expect(page.getByTestId("daily-warmup")).toHaveCount(0);
-  await expect(page.getByText("Day streak")).toHaveCount(0);
+  await expect(page.getByText("Day streak", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Tickets merged", { exact: true })).toHaveCount(0);
   // Badges are a short teaser, not a grid of greyed-out tiles.
   await expect(page.getByTestId("badges")).toContainText("Badges you can earn");
   await expect(page.getByTestId("badges").locator("li")).toHaveCount(3);
