@@ -1,10 +1,13 @@
 "use client";
+import { shuffledOrder } from "@/lib/game/shuffle";
 import { useState } from "react";
 import type { Question } from "@/lib/content/types";
 import { QUIZ_XP_PER_CORRECT } from "@/lib/game/rules";
 
 type Props = {
   questions: Question[];
+  /** Seed for the stable choice order (e.g. the ticket id). */
+  seed?: string;
   /** First choice picked per question (persisted), used to restore state. */
   firstPicks: (number | null)[];
   done: boolean;
@@ -14,7 +17,7 @@ type Props = {
   intro?: string;
 };
 
-export default function Quiz({ questions, firstPicks, done, onAnswer, onComplete, intro }: Props) {
+export default function Quiz({ questions, firstPicks, done, onAnswer, onComplete, intro, seed = "" }: Props) {
   // Which questions are answered correctly (in this visit, or all if already done).
   const [correct, setCorrect] = useState<Set<number>>(() =>
     done ? new Set(questions.map((_, i) => i)) : new Set(),
@@ -53,7 +56,8 @@ export default function Quiz({ questions, firstPicks, done, onAnswer, onComplete
               {qi + 1}. {q.prompt}
             </p>
             <div className="space-y-1.5">
-              {q.choices.map((c, ci) => {
+              {shuffledOrder(q.choices.length, `${seed}:${qi}`).map((ci) => {
+                const c = q.choices[ci];
                 const state =
                   last === ci ? (ci === q.answer ? "right" : "wrong") : isCorrect && ci === q.answer ? "right" : "idle";
                 return (

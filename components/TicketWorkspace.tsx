@@ -297,6 +297,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           {tab === "quiz" &&
             (quizUnlocked ? (
               <Quiz
+                seed={ticket.id}
                 questions={ticket.questions}
                 firstPicks={tp.quizFirstPick}
                 done={tp.quizDone}

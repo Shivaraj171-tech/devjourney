@@ -1,6 +1,7 @@
 "use client";
 // Daily warm-up: a 2-minute "read this code" question. Keeps your streak alive
 // on days when there's no time for a full ticket.
+import { shuffledOrder } from "@/lib/game/shuffle";
 import { useState } from "react";
 import type { Warmup } from "@/lib/content/types";
 import { dayKey, pickWarmup, WARMUP_XP } from "@/lib/game/rules";
@@ -38,7 +39,8 @@ export default function DailyWarmup({ warmups, progress, solvedTicketIds, now }:
           <div>
             <p className="text-sm text-slate-200">{warmup.question}</p>
             <div className="mt-2 space-y-1.5">
-              {warmup.choices.map((c, i) => {
+              {shuffledOrder(warmup.choices.length, warmup.id).map((i) => {
+                const c = warmup.choices[i];
                 const shown = doneToday ? i === warmup.answer : picked !== null && (i === picked || i === warmup.answer);
                 const right = i === warmup.answer;
                 return (

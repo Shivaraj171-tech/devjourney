@@ -114,7 +114,8 @@ export async function answerQuiz(page: Page, questions: Question[]) {
   for (let i = 0; i < questions.length; i++) {
     const q = page.getByTestId(`question-${i}`);
     await expect(q).toBeVisible();
-    await q.getByRole("button").nth(questions[i].answer).click();
+    // Choices are shown in a shuffled order, so click the right one by its text.
+    await q.getByRole("button", { name: questions[i].choices[questions[i].answer], exact: true }).click();
     await expect(q.getByRole("button").first()).toBeDisabled();
   }
 }
