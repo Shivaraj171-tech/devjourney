@@ -30,4 +30,5 @@ playwright-report/
 npm-debug.log*
 public/monaco/
 public/runner/
+public/sw.js
 .claude/

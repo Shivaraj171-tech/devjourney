@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ServiceWorker from "@/components/ServiceWorker";
 import TopBar from "@/components/TopBar";
 import { SITE_URL } from "@/lib/basePath";
 import "./globals.css";
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
       <body className="flex min-h-full flex-col bg-slate-950 text-slate-200">
+        <ServiceWorker />
         <TopBar />
         <main className="flex-1">{children}</main>
       </body>
