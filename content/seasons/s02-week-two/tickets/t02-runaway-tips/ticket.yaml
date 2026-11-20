@@ -5,6 +5,6 @@ level: junior
 track: debugging
 concepts: [numbers, lists, functions, side-effects]
 new_concept: side-effects
-estimated_minutes: 12
+estimated_minutes: 15
 tests_visible: true
 files_editable: [app/tips.py]

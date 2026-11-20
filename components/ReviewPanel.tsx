@@ -6,7 +6,7 @@ import Markdown from "./Markdown";
 import type { Review, Ticket } from "@/lib/content/types";
 import { checkReview, FALSE_ALARM_COST, reviewXp, type TicketXp } from "@/lib/game/rules";
 import { reviewActions, type TicketProgress } from "@/lib/progress/store";
-import { changedLines } from "@/lib/review/diff";
+import { changedLines, removedLines } from "@/lib/review/diff";
 
 type Props = {
   ticket: Ticket & { review: Review };
@@ -87,7 +87,7 @@ export default function ReviewPanel({ ticket, tp, onSolved }: Props) {
           <div className="border-t border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-500">
             {solved
               ? "Review finished. These are the problems that were in this PR."
-              : "Click a line to flag it as a problem (click again to unflag). Lines marked + are new in this PR."}
+              : "Click a line to flag it as a problem (click again to unflag). Lines marked + are new in this PR; red − lines were removed."}
           </div>
         )}
       </div>
@@ -165,6 +165,7 @@ type ViewProps = {
 /** A PR file: every line is a toggle button for flagging it. */
 function PrFileView({ path, text, before, review, flags, last, solved, onToggle }: ViewProps) {
   const added = useMemo(() => changedLines(before, text), [before, text]);
+  const removed = useMemo(() => removedLines(before, text), [before, text]);
   const lines = splitLines(text);
   const issueAt = (n: number) =>
     review.issues.findIndex((i) => i.file === path && (i.line === n || i.alsoLines.includes(n)));
@@ -191,6 +192,7 @@ function PrFileView({ path, text, before, review, flags, last, solved, onToggle 
                 : "";
         return (
           <div key={n}>
+            <RemovedLines lines={removed.get(n)} />
             <button
               type="button"
               data-line={n}
@@ -220,7 +222,25 @@ function PrFileView({ path, text, before, review, flags, last, solved, onToggle 
           </div>
         );
       })}
+      <RemovedLines lines={removed.get(lines.length + 1)} />
     </div>
+  );
+}
+
+/** Lines the PR deleted: shown in red for context, but there's nothing to flag on them. */
+function RemovedLines({ lines }: { lines: string[] | undefined }) {
+  if (!lines?.length) return null;
+  return (
+    <>
+      {lines.map((line, i) => (
+        <div key={i} className="flex bg-red-500/[0.08] text-red-300/80 select-none" title="Removed in this PR" data-testid="removed-line">
+          <span className="w-8 shrink-0" />
+          <span className="w-10 shrink-0" />
+          <span className="w-4 shrink-0 text-red-400">−</span>
+          <span className="pr-4 whitespace-pre line-through decoration-red-400/40">{line}</span>
+        </div>
+      ))}
+    </>
   );
 }
 

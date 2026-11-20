@@ -3,8 +3,8 @@ title: "The free lemonade nobody asked for"
 type: bug
 level: intern
 track: foundations
-concepts: [numbers, loops]
+concepts: [numbers, lists, loops]
 new_concept: loops
-estimated_minutes: 12
+estimated_minutes: 20
 tests_visible: true
 files_editable: [app/cart.py]

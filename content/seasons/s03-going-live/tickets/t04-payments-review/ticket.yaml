@@ -5,6 +5,6 @@ level: junior
 track: systems
 concepts: [functions, strings, code-review, security]
 new_concept: security
-estimated_minutes: 12
+estimated_minutes: 20
 tests_visible: false
 files_editable: []

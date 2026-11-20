@@ -1,19 +1,29 @@
 **Mutable shared data**
 
-Some values can be changed after they are created. Lists and dictionaries are *mutable*: `.append()` changes the list in place. When two variables point at the **same** list, a change through one shows up in the other.
+Lists and dictionaries are *mutable*: they can be changed after they are made, like `.append()` does. If two names point at the **same** list, a change through one shows up in the other. Think of a shared online document: you and a friend aren't holding copies, you're both editing one document.
 
-Think of a shared online document. If you and a friend both have the link, you're not each holding a copy: you're both editing one document, so you see each other's changes.
+That matters for *default arguments*, the `=something` in a `def` line. The default value is created **once**, when Python reads the `def`, not each time the function is called. So a list default is one list, shared by every call that leaves it out:
 
 ```python
-first = []
-second = first        # not a copy: the same list
-second.append("tea")
-print(first)          # ['tea']
+def add_tea(cup=[]):
+    cup.append("tea")
+    return cup
 
-third = []            # a brand-new, separate list
-print(third)          # []
+print(add_tea())  # ['tea']
+print(add_tea())  # ['tea', 'tea']  <- the same cup again!
 ```
 
-`second = first` doesn't copy anything; it gives the same list a second name. Writing `[]` again creates a new list.
+The usual safe pattern is to use `None` as the default, and make a fresh list *inside* the function, which runs on every call:
 
-**Watch out:** A default value in a function's `def` line is created once, when Python reads the `def`, not each time the function is called. A mutable default like a list can quietly be shared between calls.
+```python
+def add_coffee(cup=None):
+    if cup is None:
+        cup = []
+    cup.append("coffee")
+    return cup
+
+print(add_coffee())  # ['coffee']
+print(add_coffee())  # ['coffee']
+```
+
+**Watch out:** The bug only appears from the *second* call on, so a single quick test can look perfectly fine.

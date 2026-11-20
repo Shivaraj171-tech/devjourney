@@ -5,6 +5,6 @@ level: junior
 track: reading
 concepts: [conditionals, dictionaries, reading-code]
 new_concept: reading-code
-estimated_minutes: 10
+estimated_minutes: 20
 tests_visible: true
 files_editable: []

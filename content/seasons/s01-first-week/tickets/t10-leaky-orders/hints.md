@@ -1,4 +1,4 @@
-Try it: call `create_order("Sam")`, add an item to its `items`, then call `create_order("Ana")`. What's in Ana's order? Where did that list come from?
+Look at the failing check: Ana's brand-new order already has Sam's item in it. To see it happen, add `print(customer, items)` as the first line inside `create_order`, run the tests, and look under the check for "# printed output". Which list is `items` when nobody passes one in?
 ---
 A default value like `items=[]` is created **once**, when Python reads the `def` line, not each time the function is called. So every order created without items gets the *same* list. The usual fix is to use `None` as the default and make a fresh list inside the function.
 ---

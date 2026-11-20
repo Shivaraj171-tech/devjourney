@@ -5,6 +5,6 @@ level: intern
 track: debugging
 concepts: [loops, lists, dictionaries]
 new_concept: dictionaries
-estimated_minutes: 12
+estimated_minutes: 20
 tests_visible: true
 files_editable: [app/reorder.py]

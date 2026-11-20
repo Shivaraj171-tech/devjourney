@@ -5,6 +5,6 @@ level: junior
 track: systems
 concepts: [dictionaries, classes, strings, json]
 new_concept: json
-estimated_minutes: 12
+estimated_minutes: 20
 tests_visible: true
 files_editable: [app/storage.py]

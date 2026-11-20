@@ -17,4 +17,6 @@ print(c.count)  # 6
 
 `__init__` runs when you write `Counter(5)` and sets up the new object. Inside a method, `self` is the object the method was called on, so `c.add_one()` changes `c.count`.
 
+**Who is `self`?** When you write `order.add_item(450)`, Python runs `add_item` with `self` = `order` and `price_cents` = `450`. You never pass `self` yourself.
+
 **Watch out:** Inside a method, reach the object's data through `self`. Writing `count` instead of `self.count` looks for an ordinary variable and gives a `NameError`.

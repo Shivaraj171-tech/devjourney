@@ -5,6 +5,6 @@ level: junior
 track: debugging
 concepts: [conditionals, functions, code-review, writing-tests]
 new_concept: writing-tests
-estimated_minutes: 15
+estimated_minutes: 20
 tests_visible: true
 files_editable: [team_tests/test_delivery.py]

@@ -9,11 +9,9 @@ nickname = None
 if nickname is None:
     print("No nickname given")  # No nickname given
 else:
-    print(nickname.title())
-
-print(type(None))  # <class 'NoneType'>
+    print(nickname.upper())
 ```
 
-Check for it with `is None` (or `is not None`). `None` is not a string, a number or a list, so it has none of their abilities.
+Check for it with `is None` (or `is not None`). The `else:` part runs only when the `if` was not true, so here `.upper()` is never reached. `None` is not a string, a number or a list, so it has none of their abilities.
 
-**Watch out:** Calling a method like `.lower()` on `None` crashes with `AttributeError: 'NoneType' object has no attribute ...`. If a value is optional, check for `None` before you treat it like a string.
+**Watch out:** Calling a string method like `.lower()` on `None` crashes with `AttributeError: 'NoneType' object has no attribute ...`. If a value is optional, check for `None` before you treat it like a string.

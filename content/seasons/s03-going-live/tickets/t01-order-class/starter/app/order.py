@@ -31,7 +31,9 @@ class Order:
 
     def item_count(self):
         """Return how many items are in this order."""
-        return 0  # TODO
+        # Worked example: self is the order this was called on,
+        # so self.items is that order's list of prices.
+        return len(self.items)
 
     def subtotal(self):
         """Return the total price of this order's items, in cents.

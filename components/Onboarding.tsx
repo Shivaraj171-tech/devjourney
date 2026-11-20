@@ -6,7 +6,7 @@ const STEPS = [
   { icon: "📨", title: "Read the ticket", text: "A teammate explains what's broken and why it matters to customers." },
   { icon: "📘", title: "Learn the idea", text: "Each ticket teaches one new concept in a 2-minute lesson. Never two at once." },
   { icon: "▶️", title: "Fix the code & run the checks", text: "Edit the real app's code right in your browser. Run the checks as often as you like: no lives, no penalties." },
-  { icon: "🎉", title: "Merge, earn XP, level up", text: "Green checks = PR merged. Stuck? Hints cost a little XP. A quick quiz earns bonus XP." },
+  { icon: "🎉", title: "Merge, earn XP, level up", text: "When every check is green, your change is accepted into the app (developers call this \"merging a pull request\", or PR). Stuck? Hints cost a little XP. A quick quiz earns bonus XP." },
 ];
 
 export default function Onboarding() {

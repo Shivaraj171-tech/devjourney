@@ -22,6 +22,11 @@ export default function TestResults({ result, running }: { result: RunResult | n
     return (
       <p className="text-sm text-slate-500">
         Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 text-slate-300">Run tests</kbd> (or Ctrl/⌘ + Enter) to check your fix.
+        <br />
+        <span className="text-slate-600">
+          Tip: add <code className="text-slate-400">print(...)</code> anywhere in your code to see what&apos;s going on. Whatever it prints shows up
+          under each check as &quot;# printed output&quot;.
+        </span>
       </p>
     );
   }
