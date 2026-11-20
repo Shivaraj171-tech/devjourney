@@ -13,6 +13,19 @@ body {
   font-family: var(--font-sans);
 }
 
+/* One visible keyboard focus style for the whole site (2px violet-400 ring).
+   In the base layer, so a component can still restyle it with utilities.
+   Monaco draws its own focus, and its hidden input would get a stray ring. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-violet-400, #a78bfa);
+    outline-offset: 2px;
+  }
+  .monaco-editor :focus-visible {
+    outline: none;
+  }
+}
+
 /* Confetti for the "PR merged" celebration */
 @keyframes confetti-fall {
   0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }

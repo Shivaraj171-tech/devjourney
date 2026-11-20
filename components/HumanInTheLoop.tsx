@@ -1,7 +1,10 @@
 "use client";
 // "🤖 Human-in-the-loop score": how well the learner checks Byte's work.
 // Shown on the HQ and on the leaderboard page.
+import { currentSiteUrl } from "@/lib/basePath";
 import { correctSeen, hitlAccuracy, hitlSummary, wrongSeen, type HitlScore } from "@/lib/game/byte";
+import { hitlShareText } from "@/lib/game/share";
+import ShareButton from "./ShareButton";
 
 export default function HumanInTheLoop({ score, compact = false }: { score: HitlScore; compact?: boolean }) {
   const summary = hitlSummary(score);
@@ -29,7 +32,7 @@ export default function HumanInTheLoop({ score, compact = false }: { score: Hitl
         <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {stats.map((s) => (
             <li key={s.label} className="rounded-xl border border-slate-800 bg-slate-950/50 p-2.5">
-              <div className="text-[11px] tracking-wide text-slate-500 uppercase">{s.label}</div>
+              <div className="text-[11px] tracking-wide text-slate-400 uppercase">{s.label}</div>
               <div className="mt-0.5 font-mono text-lg font-bold text-white" data-testid={s.testId}>{s.value}</div>
             </li>
           ))}
@@ -40,7 +43,12 @@ export default function HumanInTheLoop({ score, compact = false }: { score: Hitl
           {score.pending} of Byte&apos;s suggestion{score.pending === 1 ? " is" : "s are"} applied but not tested yet.
         </p>
       )}
-      <p className="mt-2 text-xs text-slate-500">
+      {wrongSeen(score) > 0 && (
+        <div className="mt-3">
+          <ShareButton getText={() => hitlShareText(score.caught, wrongSeen(score), currentSiteUrl())} />
+        </div>
+      )}
+      <p className="mt-2 text-xs text-slate-400">
         Byte writes fast and always sounds sure. Your job is to be the human in the loop.
       </p>
     </section>

@@ -3,13 +3,15 @@
 // learned, how you handled Byte, your strengths and one thing to try next.
 // Built only from saved progress (lib/game/juice.ts performanceReview).
 import Link from "next/link";
-import { useState } from "react";
+import { currentSiteUrl } from "@/lib/basePath";
+import { conceptLabel } from "@/lib/content/concepts";
 import { hitlScore } from "@/lib/game/byte";
 import { performanceReview, typeCount, type ReviewTicket } from "@/lib/game/juice";
 import { rankFor } from "@/lib/game/rules";
 import { ticketProgress, totalXp, useProgress } from "@/lib/progress/store";
 import { useIsClient } from "@/lib/useIsClient";
 import type { TicketType } from "@/lib/content/types";
+import ShareButton from "./ShareButton";
 
 type Props = {
   floor: number;
@@ -23,8 +25,7 @@ const TYPE_ORDER: TicketType[] = ["bug", "feature", "read", "review", "incident"
 export default function PerformanceReviewView({ floor, season, tickets, next }: Props) {
   const progress = useProgress();
   const isClient = useIsClient();
-  const [copied, setCopied] = useState(false);
-  if (!isClient) return <div className="p-8 text-center text-slate-500">Opening your review…</div>;
+  if (!isClient) return <div className="p-8 text-center text-slate-400">Opening your review…</div>;
 
   const byId = Object.fromEntries(tickets.map((t) => [t.id, progress.tickets[t.id] ? ticketProgress(progress, t.id) : undefined]));
   const hitl = hitlScore(tickets.flatMap((t) => (byId[t.id] ? [byId[t.id]!] : [])));
@@ -32,20 +33,12 @@ export default function PerformanceReviewView({ floor, season, tickets, next }: 
   const name = progress.playerName === "You" ? "our newest developer" : progress.playerName;
   const { rank } = rankFor(totalXp(progress));
 
-  const summary =
+  const learned = r.learned.map(conceptLabel);
+  const bugsSeen = hitl.caught + hitl.wavedThrough;
+  const shareText = () =>
+    (bugsSeen > 0 ? `I caught ${hitl.caught} of ${bugsSeen} of Byte's AI bugs on DevJourney 🤖🪤 ` : "") +
     `My Orbit Orders review for "${season.title}": ${r.rating.emoji} ${r.rating.title}. ` +
-    `${r.merged}/${r.total} tickets, ${r.clean} clean merges` +
-    (hitl.caught + hitl.wavedThrough > 0 ? `, caught ${hitl.caught}/${hitl.caught + hitl.wavedThrough} of the AI's bugs` : "") +
-    `. Learned: ${r.learned.join(", ")}.`;
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(summary);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  }
+    `${r.merged}/${r.total} tickets, ${r.clean} clean merges. Learned: ${learned.join(", ")}. ${currentSiteUrl()}`;
 
   return (
     <article className="mx-auto max-w-3xl space-y-6 px-4 py-8" data-testid="performance-review" data-complete={r.complete}>
@@ -88,7 +81,7 @@ export default function PerformanceReviewView({ floor, season, tickets, next }: 
         </ul>
         <h2 className="mt-5 text-lg font-bold text-white">🧠 What you learned</h2>
         <ul className="mt-2 flex flex-wrap gap-2 text-sm" data-testid="review-learned">
-          {r.learned.map((c, i) => (
+          {learned.map((c, i) => (
             <li key={`${i}-${c}`} className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-100">{c}</li>
           ))}
         </ul>
@@ -135,14 +128,7 @@ export default function PerformanceReviewView({ floor, season, tickets, next }: 
             Back to the office
           </Link>
         )}
-        <button
-          type="button"
-          onClick={copy}
-          data-testid="review-copy"
-          className="rounded-xl border border-slate-700 px-5 py-3 font-semibold text-slate-200 hover:bg-slate-800"
-        >
-          {copied ? "✓ Copied" : "📋 Copy a summary to share"}
-        </button>
+        <ShareButton getText={shareText} testId="review-copy" className="w-full px-5 py-3 text-base sm:w-auto" />
       </div>
     </article>
   );
@@ -151,9 +137,9 @@ export default function PerformanceReviewView({ floor, season, tickets, next }: 
 function Tile({ label, value, hint, testId }: { label: string; value: string; hint?: string; testId?: string }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-      <div className="text-xs tracking-wide text-slate-500 uppercase">{label}</div>
+      <div className="text-xs tracking-wide text-slate-400 uppercase">{label}</div>
       <div className="mt-1 text-xl font-bold text-white" data-testid={testId}>{value}</div>
-      {hint && <div className="text-[11px] text-slate-500">{hint}</div>}
+      {hint && <div className="text-[11px] text-slate-400">{hint}</div>}
     </div>
   );
 }
@@ -161,7 +147,7 @@ function Tile({ label, value, hint, testId }: { label: string; value: string; hi
 function Mini({ label, value }: { label: string; value: string }) {
   return (
     <li className="rounded-xl border border-slate-800 bg-slate-950/50 p-2.5">
-      <div className="text-[11px] tracking-wide text-slate-500 uppercase">{label}</div>
+      <div className="text-[11px] tracking-wide text-slate-400 uppercase">{label}</div>
       <div className="font-mono text-lg font-bold text-white">{value}</div>
     </li>
   );

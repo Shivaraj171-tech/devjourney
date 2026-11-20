@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2e1065"/>
+      <stop offset="0.5" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#083344"/>
+    </linearGradient>
+    <linearGradient id="logo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="24" y="24" width="1152" height="582" rx="36" fill="none" stroke="#334155" stroke-width="2"/>
+  <!-- logo -->
+  <rect x="80" y="78" width="64" height="64" rx="16" fill="url(#logo)"/>
+  <circle cx="112" cy="110" r="14" fill="none" stroke="#0f172a" stroke-width="5"/>
+  <circle cx="112" cy="110" r="4" fill="#0f172a"/>
+  <text x="164" y="122" font-family="DejaVu Sans, Arial, sans-serif" font-size="32" font-weight="700" fill="#ffffff">DevJourney <tspan fill="#94a3b8" font-weight="400">· Orbit Orders HQ</tspan></text>
+  <!-- headline -->
+  <text font-family="DejaVu Sans, Arial, sans-serif" font-weight="700" fill="#ffffff" font-size="56">
+    <tspan x="80" y="250">Learn to code with an</tspan>
+    <tspan x="80" y="320">AI teammate, and catch</tspan>
+    <tspan x="80" y="390" fill="#67e8f9">its mistakes.</tspan>
+  </text>
+  <text x="80" y="480" font-family="DejaVu Sans, Arial, sans-serif" font-size="28" fill="#cbd5e1">Fix real Python and review the AI's code.</text>
+  <!-- chips -->
+  <g font-family="DejaVu Sans, Arial, sans-serif" font-size="24" font-weight="700">
+    <rect x="80" y="520" width="160" height="50" rx="25" fill="#10b981"/>
+    <text x="160" y="553" text-anchor="middle" fill="#022c22">Free</text>
+    <rect x="256" y="520" width="230" height="50" rx="25" fill="none" stroke="#475569" stroke-width="2"/>
+    <text x="371" y="553" text-anchor="middle" fill="#e2e8f0">In the browser</text>
+    <rect x="502" y="520" width="200" height="50" rx="25" fill="none" stroke="#475569" stroke-width="2"/>
+    <text x="602" y="553" text-anchor="middle" fill="#e2e8f0">No sign-up</text>
+  </g>
+  <!-- Byte the robot -->
+  <g transform="translate(960 200)">
+    <rect x="70" y="-40" width="8" height="40" fill="#a78bfa"/>
+    <circle cx="74" cy="-48" r="12" fill="#22d3ee"/>
+    <rect x="0" y="0" width="148" height="120" rx="28" fill="#1e1b4b" stroke="#a78bfa" stroke-width="5"/>
+    <circle cx="46" cy="56" r="16" fill="#67e8f9"/>
+    <circle cx="102" cy="56" r="16" fill="#67e8f9"/>
+    <rect x="44" y="90" width="60" height="8" rx="4" fill="#a78bfa"/>
+    <rect x="16" y="140" width="116" height="110" rx="24" fill="#1e1b4b" stroke="#a78bfa" stroke-width="5"/>
+    <rect x="40" y="168" width="68" height="14" rx="7" fill="#ef4444"/>
+    <rect x="40" y="194" width="68" height="14" rx="7" fill="#10b981"/>
+  </g>
+</svg>
