@@ -157,6 +157,13 @@ other. Its tickets are "mystery bugs": no concept.md, and ticket.yaml has
 
 estimated_minutes is at most 10. `requires` and `bug_kind` are not allowed elsewhere.
 
+ticket.yaml may also set
+
+    tutorial: true   # optional: Byte's suggestion here is a practice round (the first
+                     # tickets). The decision is not counted in the human-in-the-loop
+                     # score. Needs a byte.yaml suggestion; not allowed in the final
+                     # exam or a side quest.
+
 The skills check (content/assessment/skills-check.yaml, optional) is checked too:
 
     title: "Skills check"
@@ -434,6 +441,7 @@ def check_ticket_meta(ticket_dir, final=False, side_quest=False):
     else:
         errors += [f"ticket.yaml: '{field}' is only for side-quest tickets (season.yaml `chain: false`, not final)"
                    for field in SIDE_QUEST_FIELDS if field in meta]
+    errors += check_tutorial_flag(ticket_dir, meta, final or side_quest)
     if has_tests and not list((ticket_dir / "tests").glob("test_*.py")):
         errors.append("tests/ has no test_*.py files")
     if questions_file.is_file():
@@ -449,6 +457,24 @@ def check_ticket_meta(ticket_dir, final=False, side_quest=False):
     if (ticket_dir / "formats.yaml").is_file():
         errors += check_formats(ticket_dir)
     return errors
+
+
+def check_tutorial_flag(ticket_dir, meta, off_story):
+    """`tutorial: true`: a practice Byte decision, left out of the human-in-the-loop score."""
+    if "tutorial" not in meta:
+        return []
+    if meta["tutorial"] is not True:
+        return ["ticket.yaml: 'tutorial' must be true (or left out)"]
+    if off_story:
+        return ["ticket.yaml: 'tutorial' is not allowed in the final exam or a side quest"]
+    byte_file = ticket_dir / "byte.yaml"
+    try:
+        byte = yaml.safe_load(byte_file.read_text(encoding="utf-8")) if byte_file.is_file() else None
+    except yaml.YAMLError:
+        byte = None  # reported by check_byte
+    if not isinstance(byte, dict) or "suggestion" not in byte:
+        return ["ticket.yaml: 'tutorial' needs a byte.yaml suggestion (it only changes how Byte's decision is scored)"]
+    return []
 
 
 SIDE_QUEST_FIELDS = ("requires", "bug_kind")

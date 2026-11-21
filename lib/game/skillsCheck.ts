@@ -26,6 +26,12 @@ export type SkillsCheckProgress = {
   baselineSkipped?: boolean;
 };
 
+/** The "Not sure yet" answer: honest, and scored as wrong. */
+export const NOT_SURE = -1;
+
+/** What most people score on the baseline when they're starting out (shown for context). */
+export const TYPICAL_BASELINE = "2–5";
+
 /** Number of items answered with the right choice. Unknown ids are ignored. */
 export function scoreAnswers(items: Pick<SkillsCheckItem, "id" | "answer">[], answers: Record<string, number>): number {
   return items.filter((item) => answers[item.id] === item.answer).length;

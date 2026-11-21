@@ -27,7 +27,23 @@ export type ParsonsPuzzleProps = {
   testId?: string;
 };
 
-type Outcome = { passed: boolean; error: string | null; distractors: { text: string; explain: string }[] };
+/** `explained`: the traps' explanations show from the second failed check on (the first only names the lines). */
+type Outcome = { passed: boolean; error: string | null; distractors: { text: string; explain: string }[]; explained: boolean };
+
+/**
+ * One line of code that wraps instead of being cut off (two lines can differ only
+ * at their end), with a hanging indent so the wrapped part stays under the code,
+ * not under the indentation. The text content is the line exactly as written.
+ */
+function CodeLine({ text, className = "" }: { text: string; className?: string }) {
+  const indent = text.match(/^\s*/)?.[0] ?? "";
+  return (
+    <code className={`flex min-w-0 flex-1 font-mono text-xs ${className}`}>
+      {indent && <span className="shrink-0 whitespace-pre">{indent}</span>}
+      <span className="min-w-0 flex-1 whitespace-pre-wrap [overflow-wrap:anywhere]">{text.slice(indent.length)}</span>
+    </code>
+  );
+}
 
 export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, testId = "format-parsons" }: ParsonsPuzzleProps) {
   // Lines in the program (block ids, top to bottom). Everything starts in, in shuffled order.
@@ -45,6 +61,7 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
   const shown = done && record?.order ? record.order : order;
   const unused = task.blocks.filter((b) => !shown.includes(b.id));
   const byId = new Map(task.blocks.map((b) => [b.id, b]));
+  const traps = task.blocks.filter((b) => b.explain);
 
   const ref = (key: string) => (el: HTMLButtonElement | null) => {
     if (el) buttons.current.set(key, el);
@@ -62,13 +79,14 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
     const res = await run<ParsonsResult>(parsonsRequest(task, task.blocks, order));
     setRunning(false);
     if ("error" in res) {
-      setOutcome({ passed: false, error: res.error, distractors: [] });
+      setOutcome({ passed: false, error: res.error, distractors: [], explained: false });
       return;
     }
     const traps = res.value.passed
       ? []
       : usedDistractors(task.blocks, order).map((b) => ({ text: b.text, explain: b.explain ?? "" }));
-    setOutcome({ passed: res.value.passed, error: res.value.error, distractors: traps });
+    // This check is attempt number (record.attempts + 1): explain from the second failure on.
+    setOutcome({ passed: res.value.passed, error: res.value.error, distractors: traps, explained: (record?.attempts ?? 0) >= 1 });
     onAttempt(res.value.passed, order);
   }
 
@@ -93,11 +111,11 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
               className="flex min-w-0 flex-wrap items-center gap-1 rounded-lg border border-slate-700 bg-[#1e1e1e] py-1 pr-1 pl-2"
             >
               {/* Long lines push the buttons onto their own row on narrow screens, so the code stays readable. */}
-              <span className="flex min-w-0 flex-[1_1_auto] items-center gap-1">
+              <span className="flex min-w-0 flex-[1_1_auto] items-baseline gap-1">
                 <span className="w-5 shrink-0 text-right font-mono text-[11px] text-slate-500 select-none" aria-hidden>
                   {pos + 1}
                 </span>
-                <code className="min-w-0 overflow-x-auto py-1 font-mono text-xs whitespace-pre text-slate-100">{byId.get(id)?.text}</code>
+                <CodeLine text={byId.get(id)?.text ?? ""} className="py-1 text-slate-100" />
               </span>
               {!done && (
                 <span className="ml-auto flex shrink-0 gap-1">
@@ -144,7 +162,7 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
           <ul aria-labelledby={`${seed}-unused`} className="space-y-1" data-testid={`${testId}-unused`}>
             {unused.map((b) => (
               <li key={b.id} className="flex min-w-0 items-center gap-1 rounded-lg border border-dashed border-slate-700 py-1 pr-1 pl-2 opacity-80">
-                <code className="min-w-0 flex-1 overflow-x-auto font-mono text-xs whitespace-pre text-slate-400 line-through">{b.text}</code>
+                <CodeLine text={b.text} className="text-slate-400 line-through" />
                 <button
                   onClick={() => change([...order, b.id], null)}
                   aria-label={`Put line back (at the end): ${lineLabel(b.id)}`}
@@ -168,15 +186,34 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
       {done && (
         <Note testId={`${testId}-success`} tone="good" title={`✓ It works! +${record?.xp ?? 0} XP`}>
           {task.explain ? <InlineCode text={task.explain} /> : "Every check passed."}
+          {/* Solved: now every one of Byte's slips can explain itself. */}
+          {traps.length > 0 && (
+            <div className="mt-2" data-testid={`${testId}-traps`}>
+              <div className="text-xs font-semibold">Byte&apos;s slips, and why they&apos;re wrong:</div>
+              {traps.map((d) => (
+                <div key={d.id} className="mt-1.5">
+                  <CodeLine text={d.text} className="text-amber-200" />
+                  <InlineCode text={d.explain ?? ""} />
+                </div>
+              ))}
+            </div>
+          )}
         </Note>
       )}
       {!done && outcome && !outcome.passed && (
         <Note testId={`${testId}-fail`} tone="warn" title="Not yet: the check failed">
           {outcome.error && <p className="font-mono text-xs break-words">{outcome.error}</p>}
+          {outcome.distractors.length > 0 && (
+            <p className="mt-1.5">
+              {outcome.explained
+                ? "These lines are Byte's slips:"
+                : `${outcome.distractors.length === 1 ? "This line doesn't" : "These lines don't"} belong in the program. Can you see why? (Check again to get the explanation.)`}
+            </p>
+          )}
           {outcome.distractors.map((d) => (
-            <div key={d.text} className="mt-1.5">
-              <pre className="overflow-x-auto font-mono text-xs text-amber-200">{d.text}</pre>
-              <InlineCode text={d.explain} />
+            <div key={d.text} className="mt-1.5" data-testid={`${testId}-wrong-line`}>
+              <CodeLine text={d.text} className="text-amber-200" />
+              {outcome.explained && <InlineCode text={d.explain} />}
             </div>
           ))}
           {(record?.attempts ?? 0) >= PARSONS_FULL_XP_CHECKS && outcome.distractors.length === 0 && (

@@ -8,6 +8,7 @@ import {
   improvement,
   makeResult,
   nextAttempt,
+  NOT_SURE,
   scoreAnswers,
   skillsCardState,
   skillsShareText,
@@ -30,6 +31,8 @@ test("scoring counts only the right picks", () => {
   const allRight = Object.fromEntries(items.map((i) => [i.id, i.answer]));
   assert.equal(scoreAnswers(items, allRight), 12);
   assert.equal(scoreAnswers(items, { ...allRight, q0: 2, q1: 0 }), 10);
+  // "Not sure yet" is honest, and scored as wrong.
+  assert.equal(scoreAnswers(items, { ...allRight, q0: NOT_SURE, q1: NOT_SURE }), 10);
   // Unknown ids and missing answers are simply not right.
   assert.equal(scoreAnswers(items, { nope: 0, q3: 0 }), 1);
 });

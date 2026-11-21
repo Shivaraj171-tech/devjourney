@@ -112,8 +112,12 @@ body {
   to { transform: translateY(0); opacity: 1; }
 }
 .badge-toast { animation: badge-in 0.4s ease-out; }
+/* The countdown bar under the badge toast: shrinks to nothing as it auto-dismisses. */
+.badge-toast-timer { transform-origin: left; animation: badge-timer linear forwards; }
+@keyframes badge-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 @media (prefers-reduced-motion: reduce) {
   .badge-toast { animation: none; }
+  .badge-toast-timer { animation: none; }
 }
 
 /* ---------- Ticket page (TicketWorkspace) ---------- */

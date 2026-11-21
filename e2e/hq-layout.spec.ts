@@ -38,7 +38,8 @@ async function seedWithByteCatch(page: Page) {
         tickets[id] = {
           code: {}, runs: 1, hintsUsed: 0, solved: true, solvedAt: now, solveXp: 100,
           quizFirstPick: [], quizDone: true, quizFirstTryCorrect: 0, quizXp: 0,
-          ...(i === 1 ? { byteSuggestion: { decision: "reject", correct: false, runsAtDecision: 0 } } : {}),
+          // s01-t03: Byte calls on the tutorial tickets (t01/t02) are practice and don't count.
+          ...(i === 2 ? { byteSuggestion: { decision: "reject", correct: false, runsAtDecision: 0 } } : {}),
         };
       });
       window.localStorage.setItem(key, JSON.stringify({ version: 1, playerName: "You", startedAt: now, activeDays: [], onboarded: true, tickets }));

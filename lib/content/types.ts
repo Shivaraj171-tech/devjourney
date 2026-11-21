@@ -209,6 +209,11 @@ export type Ticket = {
    */
   final?: true;
   /**
+   * ticket.yaml `tutorial: true`: Byte's suggestion here is a practice round (the
+   * first tickets). The decision is recorded but left out of the human-in-the-loop score.
+   */
+  tutorial?: true;
+  /**
    * Side-quest ("mystery bug") tickets of the Bug Bounty board (an off-chain season
    * that isn't the final): no concept label or lesson until solved. Absent elsewhere.
    */

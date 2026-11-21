@@ -8,3 +8,5 @@ new_concept: strings
 estimated_minutes: 10
 tests_visible: true
 files_editable: [app/greeting.py]
+# Byte's suggestion here is practice: not counted in the human-in-the-loop score.
+tutorial: true

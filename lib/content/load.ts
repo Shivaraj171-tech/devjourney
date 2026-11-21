@@ -77,6 +77,8 @@ type TicketYaml = {
   requires?: string;
   /** side-quest (Bug Bounty) tickets only: revealed once solved */
   bug_kind?: string;
+  /** Byte's suggestion is a practice round, left out of the human-in-the-loop score */
+  tutorial?: boolean;
 };
 
 function loadTicket(seasonId: string, dir: string, slug: string, number: number, final = false): Ticket {
@@ -113,6 +115,7 @@ function loadTicket(seasonId: string, dir: string, slug: string, number: number,
     ...(existsSync(join(dir, "byte.yaml")) ? { byte: loadByte(dir) } : {}),
     ...(existsSync(join(dir, "formats.yaml")) ? { formats: loadFormats(dir, meta.id) } : {}),
     ...(final ? { final: true as const } : {}),
+    ...(meta.tutorial === true ? { tutorial: true as const } : {}),
   };
 }
 

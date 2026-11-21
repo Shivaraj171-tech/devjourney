@@ -301,3 +301,44 @@ class PartialSuggestionTests(unittest.TestCase):
         self.assertTrue(any("only goes with 'correct: true'" in e for e in errors), errors)
         errors = vc.check_ticket_meta(self.ticket(PARTIAL.replace("partial: true", "partial: sometimes")))
         self.assertTrue(any("'partial' must be true or false" in e for e in errors), errors)
+
+
+class TutorialFlagTests(unittest.TestCase):
+    """ticket.yaml `tutorial: true`: a practice Byte decision, left out of the human-in-the-loop score."""
+
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.root)
+
+    def ticket(self, flag="tutorial: true", byte=RIGHT_SUGGESTION):
+        t = make_ticket(self.root, "t01", yaml_text=GOOD_YAML + f"    {flag}\n")
+        if byte is not None:
+            byte_yaml(t, byte)
+        return t
+
+    def test_tutorial_with_a_suggestion_is_valid(self):
+        self.assertEqual(vc.check_ticket_meta(self.ticket()), [])
+
+    def test_tutorial_must_be_true(self):
+        errors = vc.check_ticket_meta(self.ticket("tutorial: yes please"))
+        self.assertTrue(any("'tutorial' must be true" in e for e in errors), errors)
+        errors = vc.check_ticket_meta(self.ticket("tutorial: false"))
+        self.assertTrue(any("'tutorial' must be true" in e for e in errors), errors)
+
+    def test_tutorial_needs_a_byte_suggestion(self):
+        errors = vc.check_ticket_meta(self.ticket(byte=None))
+        self.assertTrue(any("needs a byte.yaml suggestion" in e for e in errors), errors)
+        errors = vc.check_ticket_meta(self.ticket(byte=PROMPT))
+        self.assertTrue(any("needs a byte.yaml suggestion" in e for e in errors), errors)
+
+    def test_tutorial_not_in_side_quests(self):
+        errors = vc.check_ticket_meta(self.ticket(), side_quest=True)
+        self.assertTrue(any("not allowed in the final exam or a side quest" in e for e in errors), errors)
+
+    def test_real_content_marks_the_first_two_tickets(self):
+        import yaml
+        root = Path(__file__).resolve().parents[2] / "content" / "seasons" / "s01-first-week" / "tickets"
+        flagged = sorted(d.name for d in root.iterdir() if (yaml.safe_load((d / "ticket.yaml").read_text()) or {}).get("tutorial"))
+        self.assertEqual(flagged, ["t01-welcome", "t02-menu-prices"])

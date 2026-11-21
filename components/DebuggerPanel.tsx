@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { checkLabel, diffLocals, resultCaption, stepCaption, timelineLength } from "@/lib/debugger/timeline";
 import { explainResult } from "@/lib/runner/explain";
 import type { TraceResult } from "@/lib/runner/types";
+import { InlineMarkdown } from "./Markdown";
 
 type Props = {
   trace: TraceResult;
@@ -16,7 +17,37 @@ type Props = {
   onClose: () => void;
   /** The code was edited after this trace was recorded. */
   stale: boolean;
+  /** The recorded code, path -> text, to show the current line inside the panel. */
+  files?: Record<string, string>;
 };
+
+/**
+ * The line that runs next, with one line of context either side, so the code and
+ * the variables can be read together (on a phone the editor is a screen away).
+ */
+function CurrentLine({ text, line }: { text: string; line: number }) {
+  const lines = text.split("\n");
+  if (line < 1 || line > lines.length) return null;
+  const from = Math.max(1, line - 1);
+  const to = Math.min(lines.length, line + 1);
+  return (
+    <div data-testid="debugger-code" className="mb-2 overflow-hidden rounded-md border border-slate-800 bg-[#1e1e1e] py-1 font-mono text-xs">
+      {Array.from({ length: to - from + 1 }, (_, i) => from + i).map((n) => (
+        <div
+          key={n}
+          data-current={n === line || undefined}
+          className={`flex ${n === line ? "bg-yellow-400/15 text-white" : "text-slate-400"}`}
+        >
+          <span className={`w-8 shrink-0 pr-2 text-right select-none ${n === line ? "text-yellow-300" : "text-slate-500"}`}>
+            {n === line ? "▶" : ""}
+            {n}
+          </span>
+          <span className="min-w-0 flex-1 pr-2 whitespace-pre-wrap [overflow-wrap:anywhere]">{lines[n - 1] || " "}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /** Arrow keys step, unless the learner is typing in the editor or a form field. */
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -24,7 +55,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return target.isContentEditable || !!target.closest("input, textarea, select, .monaco-editor");
 }
 
-export default function DebuggerPanel({ trace, position, onPosition, onClose, stale }: Props) {
+export default function DebuggerPanel({ trace, position, onPosition, onClose, stale, files }: Props) {
   const total = timelineLength(trace);
   const last = total - 1;
   const atEnd = position >= last;
@@ -114,9 +145,10 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
       <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2">
         {!atEnd && step && (
           <div className="mb-1 font-mono text-xs text-amber-200">
-            📍 {step.file} line {step.line} <span className="text-slate-400">· highlighted in the editor</span>
+            📍 {step.file} line {step.line} <span className="text-slate-400">· also highlighted in the editor</span>
           </div>
         )}
+        {!atEnd && step && files?.[step.file] !== undefined && <CurrentLine text={files[step.file]} line={step.line} />}
         <p data-testid="debugger-caption" aria-live="polite" className="break-words text-slate-100">
           {caption}
         </p>
@@ -129,7 +161,11 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
             <p className="mt-1 text-emerald-300">Everything matched what the check expected.</p>
           ) : (
             <>
-              {explained?.summary && <p className="mt-1 text-xs text-slate-300">{explained.summary}</p>}
+              {explained?.summary && (
+                <p className="mt-1 text-xs text-slate-300">
+                  <InlineMarkdown text={explained.summary} />
+                </p>
+              )}
               <p className="mt-1 font-mono text-xs break-words text-amber-200">{trace.message}</p>
             </>
           )}

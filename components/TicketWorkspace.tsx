@@ -3,8 +3,10 @@
 //
 // Desktop (≥1024px): two columns. Left, the brief: goal first ("Your task" +
 // "Done when"), then Byte's suggestion, the story (2 lines + Read more) and the
-// 2-minute lesson. Right, the editor with a feedback strip (Run · check pill ·
-// hints) and the CI checks (or the debugger) under it.
+// 2-minute lesson. On the first visit to a ticket the story comes before Byte,
+// unfolded, and Byte's card stays folded to a teaser until the first test run
+// (so the first call is made with evidence). Right, the editor with a feedback
+// strip (Run · check pill · hints) and the CI checks (or the debugger) under it.
 //
 // Phone (<1024px): the same pieces as a 3-step flow (Brief / Code / Checks)
 // with Run in a sticky bottom bar. Running switches to Checks.
@@ -14,11 +16,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import AskByte from "./AskByte";
 import BountyReveal from "./BountyReveal";
-import ByteSuggestionCard from "./ByteSuggestion";
+import ByteSuggestionCard, { ByteTeaser } from "./ByteSuggestion";
 import CodeEditor from "./CodeEditor";
 import DebuggerPanel from "./DebuggerPanel";
 import { HintsButton } from "./HintPanel";
-import IncidentPanel from "./IncidentPanel";
+import IncidentPanel, { LogsChip } from "./IncidentPanel";
 import Markdown from "./Markdown";
 import Quiz from "./Quiz";
 import ReviewPanel from "./ReviewPanel";
@@ -28,7 +30,7 @@ import TestResults, { CheckPill } from "./TestResults";
 import { listChecks } from "@/lib/content/checks";
 import type { Ticket } from "@/lib/content/types";
 import { checkReview, incidentBonus, incidentXp, quizXp, readTicketXp, solveXp, type TicketXp } from "@/lib/game/rules";
-import { actions, byteActions, ticketProgress, useProgress } from "@/lib/progress/store";
+import { actions, byteActions, ticketProgress, useProgress, visitActions } from "@/lib/progress/store";
 import { PythonRunner } from "@/lib/runner/client";
 import { useIsClient } from "@/lib/useIsClient";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/useMediaQuery";
@@ -76,6 +78,20 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const isClient = useIsClient();
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const locked = prevTicketId !== null && !ticketProgress(progress, prevTicketId).solved;
+
+  // ----- first visit: the story leads, Byte waits for evidence -----
+  // Decided once per page visit (the "opened" mark below would flip it mid-visit).
+  const [firstVisit, setFirstVisit] = useState<boolean | null>(null);
+  if (isClient && !locked && firstVisit === null) {
+    setFirstVisit(!progress.openedTickets?.includes(ticket.id) && tp.runs === 0 && !tp.solved && !tp.byteSuggestion);
+  }
+  useEffect(() => {
+    if (isClient && !locked) visitActions.opened(ticket.id);
+  }, [isClient, locked, ticket.id]);
+  const [bytePeeked, setBytePeeked] = useState(false);
+  const byteShown = !firstVisit || bytePeeked || tp.runs > 0 || tp.solved || !!tp.byteSuggestion;
+  // Phone: while stepping through, the editor shrinks to its code so the debugger sits right under it.
+  const [codeHeight, setCodeHeight] = useState<number | null>(null);
 
   // ----- files -----
   const editable = useMemo(() => new Set(ticket.filesEditable), [ticket.filesEditable]);
@@ -416,27 +432,33 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                 )}
               </section>
 
-              {/* 2. Byte's suggestion, right under the goal. */}
-              {ticket.byte?.suggestion && !noRunner && !exam && (
+              {/* First visit: the story, unfolded, before anything else is asked of the learner. */}
+              {firstVisit && <Story text={ticket.story} defaultOpen />}
+
+              {/* 2. Byte's suggestion, right under the goal (folded until the first run on a first visit). */}
+              {ticket.byte?.suggestion && !noRunner && !exam && (byteShown ? (
                 <ByteSuggestionCard
                   ticketId={ticket.id}
                   suggestion={ticket.byte.suggestion}
                   tp={tp}
                   currentText={fileText(ticket.byte.suggestion.file)}
                   autocomplete={ticket.seasonId === "s01"}
+                  tutorial={ticket.tutorial === true}
                   onApplied={(path) => {
                     setActiveFile(path);
                     setStep("code");
                   }}
                 />
-              )}
+              ) : (
+                <ByteTeaser autocomplete={ticket.seasonId === "s01"} onOpen={() => setBytePeeked(true)} />
+              ))}
 
               {/* 3. Practice formats from formats.yaml: predict the output, break Byte's
                   code, put the lines in order. Renders nothing for tickets without them. */}
               {!exam && <TaskFormats ticket={ticket} tp={tp} getRunner={() => runnerRef.current} />}
 
-              {/* 4. The story, folded to two lines. */}
-              <Story text={ticket.story} />
+              {/* 4. The story, folded to two lines (after the first visit). */}
+              {!firstVisit && <Story text={ticket.story} />}
 
               {/* 5. The lesson, folded. */}
               {ticket.concept && !exam && !bounty && <Lesson concept={ticket.concept} newConcept={ticket.newConcept} />}
@@ -482,10 +504,17 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
         </div>
       ) : (
         <section className="flex min-h-0 min-w-0 flex-col gap-3">
-          {isDesktop && incident}
+          {isDesktop && incident && <div className="shrink-0">{incident}</div>}
+          {/* Phone: the logs are in the Brief step; a chip keeps them one tap away while coding. */}
+          {!isDesktop && ticket.incident && phoneStep === "code" && <LogsChip logs={ticket.incident.logs} />}
           <div
             {...stepPanel("code")}
-            className={`${stepClass(phoneStep === "code")} h-[calc(100dvh-13rem)] min-h-[320px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e1e1e] lg:h-auto lg:min-h-[380px] lg:flex-1`}
+            className={`${stepClass(phoneStep === "code")} h-[calc(100dvh-13rem)] min-h-[320px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e1e1e] lg:h-auto lg:flex-1 ${
+              ticket.incident ? "lg:min-h-[240px]" : "lg:min-h-[380px]"
+            }`}
+            // Phone + debugger: just tall enough for the code (tab bar ~37px), so the debugger isn't a screen away.
+            style={!isDesktop && debug && codeHeight ? { height: `min(calc(100dvh - 13rem), ${Math.max(160, codeHeight + 38)}px)`, minHeight: 0 } : undefined}
+            data-testid="code-panel"
           >
             <div className="flex items-center border-b border-slate-800 bg-slate-950 px-2">
               <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
@@ -540,6 +569,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                   onRun={isRead ? undefined : runTests}
                   highlightLine={debugStep && debugStep.file === activeFile ? debugStep.line : undefined}
                   compact={!isDesktop}
+                  onContentHeight={isDesktop ? undefined : setCodeHeight}
                 />
               )}
             </div>
@@ -574,6 +604,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                 onPosition={(pos) => goToStep(debug.trace, pos)}
                 onClose={() => setDebug(null)}
                 stale={debugStale}
+                files={debug.files}
               />
             </div>
           )}
@@ -625,9 +656,9 @@ function ExamBanner() {
   );
 }
 
-/** The ticket's story, folded to about two lines with "Read more". */
-function Story({ text }: { text: string }) {
-  const [open, setOpen] = useState(false);
+/** The ticket's story, folded to about two lines with "Read more" (unfolded on a first visit). */
+function Story({ text, defaultOpen = false }: { text: string; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <section aria-labelledby="story-title">
       <h2 id="story-title" className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">

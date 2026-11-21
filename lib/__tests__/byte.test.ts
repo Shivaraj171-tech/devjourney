@@ -80,9 +80,25 @@ const sample: ByteTicketState[] = [
 
 test("hitlScore counts every kind of decision", () => {
   assert.deepEqual(hitlScore(sample), {
-    caught: 2, wavedThrough: 1, trusted: 1, doubted: 1, pending: 1, bestPrompts: 1, promptsTried: 2,
+    caught: 2, wavedThrough: 1, trusted: 1, doubted: 1, pending: 1, bestPrompts: 1, promptsTried: 2, practice: 0,
   });
-  assert.deepEqual(hitlScore([]), { caught: 0, wavedThrough: 0, trusted: 0, doubted: 0, pending: 0, bestPrompts: 0, promptsTried: 0 });
+  assert.deepEqual(hitlScore([]), { caught: 0, wavedThrough: 0, trusted: 0, doubted: 0, pending: 0, bestPrompts: 0, promptsTried: 0, practice: 0 });
+});
+
+test("hitlScore leaves tutorial (practice) decisions out", () => {
+  const practiceTrap = { ...rec("accept", false), tutorial: true as const };
+  const s = hitlScore([
+    { runs: 2, solved: true, byteSuggestion: practiceTrap }, // would be "waved through"
+    { runs: 2, solved: true, byteSuggestion: { ...rec("reject", false), tutorial: true as const } }, // would be "caught"
+    { runs: 0, solved: false, byteSuggestion: rec("reject", false) }, // caught, counts
+  ]);
+  assert.equal(s.practice, 2);
+  assert.equal(s.caught, 1);
+  assert.equal(s.wavedThrough, 0);
+  assert.equal(hitlSummary(s), "Caught 1 of 1 of Byte's bugs");
+  assert.equal(hitlAccuracy(s), 1);
+  // Practice rounds still earn their XP.
+  assert.equal(byteXp({ runs: 2, solved: true, byteSuggestion: { ...rec("reject", false), tutorial: true } }), CATCH_XP);
 });
 
 test("hitlSummary and hitlAccuracy", () => {
@@ -99,7 +115,7 @@ test("badges: Bug Catcher and Prompt Pro", () => {
   const get = (id: string) => BADGES.find((b) => b.id === id)!;
   const ctx = (caught: number, bestPrompts: number): BadgeContext => ({
     solved: [], streak: 0, seasonTicketCounts: {},
-    hitl: { caught, wavedThrough: 0, trusted: 0, doubted: 0, pending: 0, bestPrompts, promptsTried: bestPrompts },
+    hitl: { caught, wavedThrough: 0, trusted: 0, doubted: 0, pending: 0, bestPrompts, promptsTried: bestPrompts, practice: 0 },
   });
   assert.equal(get("bug-catcher").earned(ctx(2, 0)), false);
   assert.equal(get("bug-catcher").earned(ctx(3, 0)), true);

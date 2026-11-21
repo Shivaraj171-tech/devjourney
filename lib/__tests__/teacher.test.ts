@@ -24,7 +24,7 @@ import {
   studentsFromCodes,
 } from "../teacher/classroom.ts";
 
-const HITL = { caught: 3, wavedThrough: 1, trusted: 2, doubted: 0, pending: 1, bestPrompts: 2, promptsTried: 3 };
+const HITL = { caught: 3, wavedThrough: 1, trusted: 2, doubted: 0, pending: 1, bestPrompts: 2, promptsTried: 3, practice: 0 };
 
 function input(over: Partial<ReportInput> = {}): ReportInput {
   const solved = new Set(["a1", "a2", "b1"]);

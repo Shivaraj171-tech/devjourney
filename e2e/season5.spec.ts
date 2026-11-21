@@ -10,6 +10,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   editorValue,
   readProgress,
+  revealByteCard,
   runTests,
   seasonTickets,
   seedSolved,
@@ -43,6 +44,7 @@ async function xpTotal(page: Page) {
 async function openTicket(page: Page, t: TicketInfo) {
   await seedSolved(page, [...earlier, ...season5.slice(0, season5.indexOf(t))]);
   await page.goto(ticketUrl(t.id));
+  await revealByteCard(page);
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "undecided");
 }
 

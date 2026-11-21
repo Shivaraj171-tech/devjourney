@@ -38,6 +38,12 @@ export default function HumanInTheLoop({ score, compact = false }: { score: Hitl
           ))}
         </ul>
       )}
+      {score.practice > 0 && (
+        <p className="mt-2 text-xs text-slate-400" data-testid="hitl-practice">
+          Your first {score.practice === 1 ? "Byte call was a practice round" : `${score.practice} Byte calls were practice rounds`} and
+          {score.practice === 1 ? " doesn't" : " don't"} count here.
+        </p>
+      )}
       {score.pending > 0 && (
         <p className="mt-2 text-xs text-slate-400">
           {score.pending} of Byte&apos;s suggestion{score.pending === 1 ? " is" : "s are"} applied but not tested yet.
