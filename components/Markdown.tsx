@@ -30,6 +30,14 @@ function inline(text: string, keyPrefix: string): ReactNode[] {
   return out;
 }
 
+/**
+ * One line of content text (a quiz prompt, a choice, an error note): `code`,
+ * **bold** and *italic* rendered, no paragraphs.
+ */
+export function InlineMarkdown({ text }: { text: string }) {
+  return <>{inline(text, "i")}</>;
+}
+
 /** Split text into prose and ``` fenced code blocks. */
 function blocks(text: string): { code: boolean; body: string }[] {
   const out: { code: boolean; body: string }[] = [];

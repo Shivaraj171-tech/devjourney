@@ -6,12 +6,15 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import ShareButton from "./ShareButton";
+import { InlineMarkdown } from "./Markdown";
 import { currentSiteUrl } from "@/lib/basePath";
 import type { SkillsCheck as SkillsCheckContent, SkillsCheckItem } from "@/lib/content/types";
 import { shuffledOrder } from "@/lib/game/shuffle";
 import {
   comparisonText,
   certificateStatus,
+  NOT_SURE,
+  TYPICAL_BASELINE,
   makeResult,
   nextAttempt,
   skillsShareText,
@@ -207,6 +210,20 @@ function Question({ item, seed, picked, onPick }: { item: SkillsCheckItem; seed:
             </button>
           );
         })}
+        {/* Honest beats lucky: counts as wrong, but nobody has to guess. */}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={picked === NOT_SURE}
+          data-testid="skills-not-sure"
+          data-choice={NOT_SURE}
+          onClick={() => onPick(NOT_SURE)}
+          className={`min-w-0 rounded-xl border border-dashed p-3 text-left text-sm transition ${codeChoices ? "md:col-span-3" : "sm:col-span-2"} ${
+            picked === NOT_SURE ? "border-violet-400 bg-violet-500/20 text-white" : "border-slate-600 text-slate-300 hover:border-cyan-400/60"
+          }`}
+        >
+          🤷 Not sure yet <span className="text-xs text-slate-400">(counts as wrong, and that&apos;s fine: it&apos;s honest)</span>
+        </button>
       </div>
     </section>
   );
@@ -222,6 +239,11 @@ function Results({ check, sc, finalUnlocked, certificateReady }: { check: Skills
         <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl" data-testid="skills-comparison">
           {line ?? "Not taken yet"}
         </h1>
+        {!final && sc?.baseline && (
+          <p className="mt-2 font-semibold text-cyan-100" data-testid="skills-baseline-context">
+            Most people starting out score {TYPICAL_BASELINE}. You&apos;ll take it again at the end.
+          </p>
+        )}
         <p className="mt-2 text-slate-300">
           {final
             ? "Here's every question with the right answer and why."
@@ -229,6 +251,7 @@ function Results({ check, sc, finalUnlocked, certificateReady }: { check: Skills
               ? "The final check is open."
               : "That's your starting point. The answers stay hidden until your final check (before the final exam), so the re-test is fair."}
         </p>
+
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link href="/" className="rounded-xl bg-emerald-500 px-5 py-3 text-center font-semibold text-slate-950 hover:bg-emerald-400">
             Back to the office
@@ -260,12 +283,15 @@ function Results({ check, sc, finalUnlocked, certificateReady }: { check: Skills
                 <p className="mt-2 text-sm text-slate-200">
                   Right answer: <code className="rounded bg-slate-950 px-1.5 py-0.5 font-mono whitespace-pre-wrap text-emerald-200">{item.choices[item.answer]}</code>
                 </p>
-                {!right && mine !== undefined && (
+                {!right && mine === NOT_SURE && <p className="mt-1 text-sm text-slate-300">You answered: Not sure yet</p>}
+                {!right && mine !== undefined && mine !== NOT_SURE && (
                   <p className="mt-1 text-sm text-slate-300">
                     You picked: <code className="rounded bg-slate-950 px-1.5 py-0.5 font-mono whitespace-pre-wrap text-red-200">{item.choices[mine]}</code>
                   </p>
                 )}
-                <p className="mt-2 text-sm text-slate-300">{item.explain}</p>
+                <p className="mt-2 text-sm text-slate-300">
+                  <InlineMarkdown text={item.explain} />
+                </p>
               </li>
             );
           })}

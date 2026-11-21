@@ -22,6 +22,13 @@ test("the goal comes first: task and Done when above Byte's card and the folded 
   await expect(goal).toContainText("Your task");
   await expect(goal.getByTestId("acceptance-checklist")).toBeVisible();
   await expect(goal).toBeInViewport({ ratio: 1 });
+  // First visit: the story is unfolded right under the goal, and Byte waits (playtest2.spec.ts).
+  await expect(page.getByTestId("ticket-story")).toHaveAttribute("data-open", "true");
+  expect(await top(page, "ticket-story")).toBeLessThan(await top(page, "byte-teaser"));
+
+  // Later visits: Byte's card under the goal, the story folded below it.
+  await page.reload();
+  await expect(page.getByTestId("byte-suggestion")).toBeVisible();
   expect(await top(page, "ticket-goal")).toBeLessThan(await top(page, "byte-suggestion"));
   expect(await top(page, "byte-suggestion")).toBeLessThan(await top(page, "ticket-story"));
   // Byte's buttons are on the first screen at 1440×900.

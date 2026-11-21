@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { PROGRESS_KEY, seasonTickets, trackPageErrors } from "./helpers";
 
-const tickets = seasonTickets();
+// From s01-t03 on: Byte calls on the tutorial tickets (s01-t01/t02) are practice and don't count.
+const tickets = seasonTickets().slice(2);
 
 type Student = {
   name: string;

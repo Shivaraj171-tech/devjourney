@@ -23,9 +23,11 @@ type Props = {
   highlightLine?: number;
   /** Phone: wrap long lines and use a slimmer gutter, so code never scrolls sideways. */
   compact?: boolean;
+  /** Called with the height (px) the code needs, e.g. to size a phone editor to its content. */
+  onContentHeight?: (height: number) => void;
 };
 
-export default function CodeEditor({ path, value, readOnly, onChange, onRun, highlightLine, compact = false }: Props) {
+export default function CodeEditor({ path, value, readOnly, onChange, onRun, highlightLine, compact = false, onContentHeight }: Props) {
   // onMount runs once, so keep the latest onRun in a ref.
   const onRunRef = useRef(onRun);
   useEffect(() => {
@@ -73,6 +75,19 @@ export default function CodeEditor({ path, value, readOnly, onChange, onRun, hig
     highlightRef.current = highlightLine;
     applyRef.current?.();
   }, [highlightLine, path]);
+
+  // Content height (changes with wrapping, edits and file switches).
+  const heightRef = useRef(onContentHeight);
+  useEffect(() => {
+    heightRef.current = onContentHeight;
+  }, [onContentHeight]);
+  useEffect(() => {
+    if (!editor) return;
+    const report = () => heightRef.current?.(editor.getContentHeight());
+    report();
+    const sub = editor.onDidContentSizeChange(report);
+    return () => sub.dispose();
+  }, [editor]);
 
   return (
     <Editor

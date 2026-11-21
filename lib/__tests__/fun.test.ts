@@ -19,7 +19,7 @@ import { parseSnapshot, roomChanges } from "../game/rooms.ts";
 import { teamChat, type ChatInput, type ChatTicket } from "../game/teamChat.ts";
 import type { HitlScore } from "../game/byte.ts";
 
-const NO_HITL: HitlScore = { caught: 0, wavedThrough: 0, trusted: 0, doubted: 0, pending: 0, bestPrompts: 0, promptsTried: 0 };
+const NO_HITL: HitlScore = { caught: 0, wavedThrough: 0, trusted: 0, doubted: 0, pending: 0, bestPrompts: 0, promptsTried: 0, practice: 0 };
 
 function solvedAt(minute: number, extra: Partial<FlowTicket> = {}): FlowTicket {
   return {

@@ -98,6 +98,18 @@ export async function editorValue(page: Page, ticketId: string, path: string): P
   }, `/${ticketId}/${path}`);
 }
 
+/**
+ * On a first visit Byte's card is folded to a teaser until the first test run.
+ * Open it with "Peek now" (no run, so XP and run counts stay as they were).
+ */
+export async function revealByteCard(page: Page) {
+  const card = page.getByTestId("byte-suggestion");
+  const teaser = page.getByTestId("byte-teaser-open");
+  await expect(card.or(teaser)).toBeVisible();
+  if (await teaser.isVisible()) await teaser.click();
+  await expect(card).toBeVisible();
+}
+
 /** Click Run and wait for a finished result (summary or error). */
 export async function runTests(page: Page) {
   await waitForPython(page);
@@ -115,9 +127,15 @@ export async function answerQuiz(page: Page, questions: Question[]) {
     const q = page.getByTestId(`question-${i}`);
     await expect(q).toBeVisible();
     // Choices are shown in a shuffled order, so click the right one by its text.
-    await q.getByRole("button", { name: questions[i].choices[questions[i].answer], exact: true }).click();
+    // Inline `code` renders as code, so the button's name has no backticks.
+    await q.getByRole("button", { name: plainText(questions[i].choices[questions[i].answer]), exact: true }).click();
     await expect(q.getByRole("button").first()).toBeDisabled();
   }
+}
+
+/** Content text as the page shows it: Markdown-style `code` and **bold** without their marks. */
+export function plainText(s: string): string {
+  return s.replace(/`([^`]+)`/g, "$1").replace(/\*\*([^*]+)\*\*/g, "$1");
 }
 
 export async function readProgress(page: Page) {

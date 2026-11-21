@@ -3,6 +3,7 @@ import { shuffledOrder } from "@/lib/game/shuffle";
 import { useState } from "react";
 import type { Question } from "@/lib/content/types";
 import { QUIZ_XP_PER_CORRECT } from "@/lib/game/rules";
+import { InlineMarkdown } from "./Markdown";
 
 type Props = {
   questions: Question[];
@@ -53,7 +54,7 @@ export default function Quiz({ questions, firstPicks, done, onAnswer, onComplete
         return (
           <div key={qi} data-testid={`question-${qi}`} className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
             <p className="mb-2 text-sm font-medium text-white">
-              {qi + 1}. {q.prompt}
+              {qi + 1}. <InlineMarkdown text={q.prompt} />
             </p>
             <div className="space-y-1.5">
               {shuffledOrder(q.choices.length, `${seed}:${qi}`).map((ci) => {
@@ -73,7 +74,7 @@ export default function Quiz({ questions, firstPicks, done, onAnswer, onComplete
                           : "border-slate-700 text-slate-200 hover:border-cyan-400/60 hover:bg-slate-800"
                     }`}
                   >
-                    {c}
+                    <InlineMarkdown text={c} />
                   </button>
                 );
               })}
@@ -81,7 +82,11 @@ export default function Quiz({ questions, firstPicks, done, onAnswer, onComplete
             {last !== undefined && last !== q.answer && !isCorrect && (
               <p className="mt-2 text-xs text-red-300">Not quite. Have another look at the code and try again.</p>
             )}
-            {isCorrect && <p className="mt-2 text-xs text-emerald-300">✔ {q.explain}</p>}
+            {isCorrect && (
+              <p className="mt-2 text-xs text-emerald-300">
+                ✔ <InlineMarkdown text={q.explain} />
+              </p>
+            )}
           </div>
         );
       })}

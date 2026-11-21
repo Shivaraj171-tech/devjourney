@@ -3,6 +3,7 @@ import { useState } from "react";
 import { runEncouragement } from "@/lib/game/feedback";
 import { explainResult, findLocation } from "@/lib/runner/explain";
 import type { RunResult, TestResult } from "@/lib/runner/types";
+import { InlineMarkdown } from "./Markdown";
 
 const ICON = { pass: "✅", fail: "❌", error: "💥" } as const;
 
@@ -127,7 +128,7 @@ function Explained({ result }: { result: RunResult["results"][number] }) {
               📍 {e.location.file} line {e.location.line}
             </span>
           )}
-          {e.summary}
+          {e.summary && <InlineMarkdown text={e.summary} />}
         </p>
       )}
       <div className="font-mono text-xs break-words text-amber-200">{result.message}</div>

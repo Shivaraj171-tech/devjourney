@@ -15,7 +15,15 @@ export type SuggestionRecord = {
   reason?: number;
   /** Only when the suggestion asks "why?": whether that reason was the right one. */
   reasonCorrect?: boolean;
+  /**
+   * Copied from ticket.yaml `tutorial: true`: a practice round on the first tickets.
+   * It still earns its XP, but the human-in-the-loop score leaves it out.
+   */
+  tutorial?: true;
 };
+
+/** Saves from before ticket.yaml had `tutorial`: these tickets' decisions were the practice rounds. */
+export const LEGACY_TUTORIAL_TICKETS: readonly string[] = ["s01-t01", "s01-t02"];
 
 /** The learner's first pick on a ticket's "Ask Byte" card (saved in progress). */
 export type PromptRecord = { firstPick: number; best: boolean };
@@ -109,13 +117,16 @@ export type HitlScore = {
   bestPrompts: number;
   /** Prompt cards answered. */
   promptsTried: number;
+  /** Practice decisions (tutorial tickets), not counted in anything above. */
+  practice: number;
 };
 
 /** The human-in-the-loop score across every ticket's progress. */
 export function hitlScore(tickets: ByteTicketState[]): HitlScore {
-  const score: HitlScore = { caught: 0, wavedThrough: 0, trusted: 0, doubted: 0, pending: 0, bestPrompts: 0, promptsTried: 0 };
+  const score: HitlScore = { caught: 0, wavedThrough: 0, trusted: 0, doubted: 0, pending: 0, bestPrompts: 0, promptsTried: 0, practice: 0 };
   for (const t of tickets) {
-    if (t.byteSuggestion) {
+    if (t.byteSuggestion?.tutorial) score.practice++;
+    else if (t.byteSuggestion) {
       const outcome = suggestionOutcome(t.byteSuggestion, t);
       if (outcome === "caught") score.caught++;
       else if (outcome === "waved-through") score.wavedThrough++;

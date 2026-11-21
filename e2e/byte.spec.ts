@@ -8,6 +8,7 @@ import {
   allSeasonTickets,
   editorValue,
   readProgress,
+  revealByteCard,
   runTests,
   seedSolved,
   setEditorFile,
@@ -59,7 +60,7 @@ async function xpTotal(page: Page) {
 async function openTicket(page: Page, t: TicketInfo) {
   await seedSolved(page, before(t));
   await page.goto(ticketUrl(t.id));
-  await expect(card(page)).toBeVisible();
+  await revealByteCard(page);
   await expect(card(page)).toHaveAttribute("data-outcome", "undecided");
 }
 
@@ -93,7 +94,7 @@ test("accepting a wrong suggestion: the next run fails and the lesson is shown",
   await runTests(page);
   await expect(page.getByTestId("run-summary")).not.toContainText("All checks passed");
   await expect(card(page)).toHaveAttribute("data-outcome", "waved-through");
-  await expect(page.getByTestId("byte-outcome")).toContainText("You accepted Byte's code without checking");
+  await expect(page.getByTestId("byte-outcome")).toContainText("you accepted it without checking");
   // The suggestion's own explanation is shown (Markdown backticks are rendered away).
   await expect(page.getByTestId("byte-outcome")).toContainText(sug.explain.replace(/`/g, "").slice(0, 25));
   await page.screenshot({ path: `${SHOTS}/byte-waved-through.png` });

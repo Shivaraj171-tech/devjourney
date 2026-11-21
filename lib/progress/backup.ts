@@ -177,6 +177,7 @@ const PROGRESS_FIELDS: Record<string, Check> = {
   warmupLog: (v) => Array.isArray(v) && v.every((a) => isRecord(a) && isStr(a.id) && isStr(a.day) && isBool(a.correct)),
   onboarded: isBool,
   skillsCheck: isRecord,
+  openedTickets: isStrArray,
   tickets: isRecord,
 };
 

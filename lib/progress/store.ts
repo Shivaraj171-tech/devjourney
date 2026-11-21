@@ -4,7 +4,7 @@
 // (private windows, disabled site data) and the app must still work.
 import { useSyncExternalStore } from "react";
 import { dayKey, WARMUP_XP } from "../game/rules";
-import { byteXp, type ByteDecision, type PromptRecord, type SuggestionRecord } from "../game/byte";
+import { byteXp, LEGACY_TUTORIAL_TICKETS, type ByteDecision, type PromptRecord, type SuggestionRecord } from "../game/byte";
 import {
   formatsXp,
   recordAttempt,
@@ -67,6 +67,11 @@ export type Progress = {
   onboarded?: boolean;
   /** The 12-question skills check: baseline and final results (optional: older saves have none). */
   skillsCheck?: SkillsCheckProgress;
+  /**
+   * Tickets the learner has opened at least once (the first visit shows the story
+   * unfolded, above Byte's card). Optional: older saves have none.
+   */
+  openedTickets?: string[];
   tickets: Record<string, TicketProgress>;
 };
 
@@ -95,9 +100,18 @@ function load(): Progress {
 
 /** Bring older saves up to date. Everything new is optional, so this only moves data. */
 function migrate(p: Progress): Progress {
-  if (!p.warmups) return p;
-  const next: Progress = { ...p, warmupLog: mergeWarmupHistory(p.warmupLog, p.warmups) };
-  delete next.warmups;
+  let next = p;
+  if (next.warmups) {
+    next = { ...next, warmupLog: mergeWarmupHistory(next.warmupLog, next.warmups) };
+    delete next.warmups;
+  }
+  // Byte decisions saved before ticket.yaml had `tutorial`: mark the practice rounds.
+  for (const id of LEGACY_TUTORIAL_TICKETS) {
+    const t = next.tickets[id];
+    if (t?.byteSuggestion && t.byteSuggestion.tutorial === undefined) {
+      next = { ...next, tickets: { ...next.tickets, [id]: { ...t, byteSuggestion: { ...t.byteSuggestion, tutorial: true } } } };
+    }
+  }
   return next;
 }
 
@@ -274,6 +288,14 @@ export const reviewActions = {
   },
 };
 
+export const visitActions = {
+  /** Remember that a ticket page was opened (not activity for the streak). */
+  opened(id: string) {
+    if (getSnapshot().openedTickets?.includes(id)) return;
+    update((p) => (p.openedTickets?.includes(id) ? p : { ...p, openedTickets: [...(p.openedTickets ?? []), id] }));
+  },
+};
+
 export const incidentActions = {
   /** Start the incident clock the first time the ticket is opened (no-op afterwards). */
   start(id: string) {
@@ -295,10 +317,11 @@ export const byteActions = {
     correct: boolean,
     apply?: { path: string; text: string },
     why?: { reason: number; reasonCorrect: boolean },
+    tutorial = false,
   ) {
     updateTicket(id, (t) => {
       if (t.byteSuggestion) return t;
-      const record: SuggestionRecord = { decision, correct, runsAtDecision: t.runs, ...why };
+      const record: SuggestionRecord = { decision, correct, runsAtDecision: t.runs, ...why, ...(tutorial ? { tutorial: true as const } : {}) };
       const code = apply ? { ...t.code, [apply.path]: apply.text } : t.code;
       return { ...t, code, byteSuggestion: record };
     });

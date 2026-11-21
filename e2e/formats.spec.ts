@@ -10,6 +10,7 @@ import {
   allSeasonTickets,
   editorValue,
   readProgress,
+  revealByteCard,
   runTests,
   seedSolved,
   ticketUrl,
@@ -268,6 +269,7 @@ async function openTicketWithWhy(page: Page, id: string) {
   const t = byId(id);
   await seedSolved(page, before(t));
   await page.goto(ticketUrl(t.id));
+  await revealByteCard(page);
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "undecided");
   await expect(page.getByTestId("byte-why")).toBeVisible();
 }

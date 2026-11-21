@@ -1,7 +1,7 @@
 "use client";
 // Incident tickets: a red "production is down" banner with a countdown and the
 // production logs. The timer only decides a speed bonus; it never blocks you.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Incident } from "@/lib/content/types";
 import { incidentSecondsLeft, INCIDENT_SPEED_BONUS } from "@/lib/game/rules";
 import { incidentActions, type TicketProgress } from "@/lib/progress/store";
@@ -96,16 +96,54 @@ export default function IncidentPanel({ ticketId, incident, tp, logsOpenAtStart 
       </div>
       {showLogs && (
         <div>
-          <div className="border-t border-red-500/20 px-4 pt-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">Logs · production</div>
-          <pre data-testid="incident-logs" className="max-h-56 overflow-auto px-4 pt-1 pb-3 font-mono text-xs leading-5">
-            {incident.logs.trimEnd().split("\n").map((line, i) => (
-              <div key={i} className={`whitespace-pre ${logTone(line)}`}>
-                {line || " "}
-              </div>
-            ))}
-          </pre>
+          <div className="border-t border-red-500/20 px-4 pt-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+            Logs · production <span className="font-normal normal-case">· newest at the bottom</span>
+          </div>
+          <IncidentLogs logs={incident.logs} />
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * The production logs. Opens scrolled to the end: a traceback is read from the
+ * bottom up, and the error line is the last one.
+ */
+export function IncidentLogs({ logs, className = "max-h-80 lg:max-h-[min(14rem,24vh)]" }: { logs: string; className?: string }) {
+  const ref = useRef<HTMLPreElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [logs]);
+  return (
+    <pre ref={ref} data-testid="incident-logs" tabIndex={0} aria-label="Production logs" className={`${className} overflow-auto px-4 pt-1 pb-3 font-mono text-xs leading-5`}>
+      {logs.trimEnd().split("\n").map((line, i) => (
+        <div key={i} className={`whitespace-pre ${logTone(line)}`}>
+          {line || " "}
+        </div>
+      ))}
+    </pre>
+  );
+}
+
+/** Phone: the logs live in the Brief step, so the Code step gets a "📜 Logs" chip that opens them in place. */
+export function LogsChip({ logs }: { logs: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border border-red-500/40 bg-red-950/40 lg:hidden" data-testid="logs-chip-panel">
+      <button
+        type="button"
+        data-testid="logs-chip"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-left text-sm font-semibold text-red-100"
+      >
+        <span aria-hidden>📜</span> Logs
+        <span className="font-normal text-red-200/80">· production</span>
+        <span aria-hidden className="ml-auto text-xs">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && <IncidentLogs logs={logs} className="max-h-[40dvh] border-t border-red-500/20" />}
     </div>
   );
 }

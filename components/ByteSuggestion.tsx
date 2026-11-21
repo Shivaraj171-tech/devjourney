@@ -23,6 +23,7 @@ import {
 } from "@/lib/game/byte";
 import { shuffledOrder } from "@/lib/game/shuffle";
 import { byteActions, type TicketProgress } from "@/lib/progress/store";
+import { InlineMarkdown } from "./Markdown";
 
 type Props = {
   ticketId: string;
@@ -34,9 +35,11 @@ type Props = {
   autocomplete: boolean;
   /** Called after Byte's code was written into the file (to show that file in the editor). */
   onApplied: (path: string) => void;
+  /** ticket.yaml `tutorial: true`: a practice round (kinder verdict, left out of the score). */
+  tutorial?: boolean;
 };
 
-export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentText, autocomplete, onApplied }: Props) {
+export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentText, autocomplete, onApplied, tutorial = false }: Props) {
   const record = tp.byteSuggestion;
   const outcome = record ? suggestionOutcome(record, tp) : null;
   const applied = applySuggestion(currentText, suggestion.find, suggestion.replace);
@@ -61,10 +64,10 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
   function decide(decision: ByteDecision, reason?: number) {
     const whyRecord = why && reason !== undefined ? { reason, reasonCorrect: reason === why.answer } : undefined;
     if (decision === "reject" || applied === null) {
-      byteActions.decide(ticketId, "reject", suggestion.correct, undefined, whyRecord);
+      byteActions.decide(ticketId, "reject", suggestion.correct, undefined, whyRecord, tutorial);
       return;
     }
-    byteActions.decide(ticketId, decision, suggestion.correct, { path: suggestion.file, text: applied }, whyRecord);
+    byteActions.decide(ticketId, decision, suggestion.correct, { path: suggestion.file, text: applied }, whyRecord, tutorial);
     onApplied(suggestion.file);
   }
 
@@ -165,7 +168,14 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
       )}
 
       {record && outcome && (
-        <OutcomeNote outcome={outcome} record={record} explain={suggestion.explain} file={suggestion.file} partial={suggestion.partial === true} />
+        <OutcomeNote
+          outcome={outcome}
+          record={record}
+          explain={suggestion.explain}
+          file={suggestion.file}
+          partial={suggestion.partial === true}
+          practice={tutorial || record.tutorial === true}
+        />
       )}
       {record && outcome && outcome !== "pending" && why && record.reason !== undefined && (
         <ReasonNote why={why} record={record} />
@@ -250,12 +260,15 @@ function OutcomeNote({
   explain,
   file,
   partial,
+  practice,
 }: {
   outcome: SuggestionOutcome;
   record: SuggestionRecord;
   explain: string;
   file: string;
   partial: boolean;
+  /** A tutorial ticket: the first time this can happen, so teach, don't scold. */
+  practice: boolean;
 }) {
   const decision = record.decision;
   // "why" mode: a good outcome only pays out with the right reason too.
@@ -276,9 +289,20 @@ function OutcomeNote({
       </Verdict>
     );
   }
+  if (outcome === "waved-through" && practice) {
+    return (
+      <Verdict tone="bad" title="Byte slipped one past you. That's why we start here.">
+        <p>Most new devs accept this one: it looks right, and Byte sounds sure. <InlineCode text={explain} /></p>
+        <p className="mt-2 font-semibold text-amber-100">
+          The habit to build: read the change, try one example in your head, and trust the tests, not the tone. Fix it now:
+          the ticket still counts, and this practice round doesn&apos;t go on your human-in-the-loop score.
+        </p>
+      </Verdict>
+    );
+  }
   if (outcome === "waved-through") {
     return (
-      <Verdict tone="bad" title="You accepted Byte's code without checking">
+      <Verdict tone="bad" title="Byte's bug slipped through: you accepted it without checking">
         <p><InlineCode text={explain} /></p>
         <p className="mt-2 font-semibold text-amber-100">
           The lesson: Byte sounds sure either way. Before you accept, read the change, try one example in your head, and
@@ -334,35 +358,55 @@ function DiffPreview({ find, replace }: { find: string; replace: string }) {
     ...replace.split("\n").map((text) => ({ sign: "+", text })),
   ];
   return (
-    <div className="mt-2 w-0 min-w-full overflow-x-auto rounded-lg border border-slate-800 bg-[#1e1e1e] py-1 font-mono text-xs" data-testid="byte-diff">
+    <div className="mt-2 w-0 min-w-full rounded-lg border border-slate-800 bg-[#1e1e1e] py-1 font-mono text-xs" data-testid="byte-diff">
       {rows.map((r, i) => (
         <div
           key={i}
-          className={`flex whitespace-pre ${r.sign === "-" ? "bg-red-500/10 text-red-200" : "bg-emerald-500/10 text-emerald-200"}`}
+          className={`flex ${r.sign === "-" ? "bg-red-500/10 text-red-200" : "bg-emerald-500/10 text-emerald-200"}`}
         >
           <span className="w-5 shrink-0 text-center select-none" aria-label={r.sign === "-" ? "removed" : "added"}>
             {r.sign}
           </span>
-          <span className="pr-3">{r.text}</span>
+          {/* Wrapped, never cut off: the detail that decides the call can be at the end of a line.
+              Hanging indent: the wrapped part lines up under the code, not under its indentation. */}
+          <span data-testid="byte-diff-line" className="flex min-w-0 flex-1 pr-3">
+            <span className="shrink-0 whitespace-pre">{r.text.match(/^\s*/)?.[0]}</span>
+            <span className="min-w-0 flex-1 whitespace-pre-wrap [overflow-wrap:anywhere]">{r.text.trimStart()}</span>
+          </span>
         </div>
       ))}
     </div>
   );
 }
 
-/** Text with `backtick` spans shown as code (content strings use Markdown-style backticks). */
-export function InlineCode({ text }: { text: string }) {
+/**
+ * Before the learner's first test run: Byte's card stays folded to one line, so the
+ * first decision of a ticket is made with evidence, not on Byte's tone.
+ */
+export function ByteTeaser({ autocomplete, onOpen }: { autocomplete: boolean; onOpen: () => void }) {
   return (
-    <>
-      {text.split(/(`[^`]+`)/).map((part, i) =>
-        part.startsWith("`") && part.endsWith("`") && part.length > 1 ? (
-          <code key={i} className="rounded bg-slate-950/70 px-1 font-mono text-[0.9em] text-amber-200">
-            {part.slice(1, -1)}
-          </code>
-        ) : (
-          <span key={i}>{part}</span>
-        ),
-      )}
-    </>
+    <section
+      data-testid="byte-teaser"
+      aria-label="Byte's suggestion (folded)"
+      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-dashed border-violet-400/40 bg-violet-500/5 px-3 py-2 text-sm"
+    >
+      <span className="min-w-0 flex-1 text-violet-100">
+        <span aria-hidden>🤖 </span>
+        {autocomplete ? "Byte's autocomplete" : "Byte"} has a suggestion. <span className="text-slate-300">Run the checks first, then decide.</span>
+      </span>
+      <button
+        type="button"
+        data-testid="byte-teaser-open"
+        onClick={onOpen}
+        className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold text-violet-200 hover:bg-violet-500/15 hover:text-white"
+      >
+        Peek now ▼
+      </button>
+    </section>
   );
+}
+
+/** Text with `backtick` (and **bold**) spans rendered like Markdown's inline text. */
+export function InlineCode({ text }: { text: string }) {
+  return <InlineMarkdown text={text} />;
 }
