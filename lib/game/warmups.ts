@@ -8,6 +8,9 @@
 //      warm-ups, wrong first picks in a ticket quiz, a wrong Byte suggestion
 //      waved through), most recent and most frequent first.
 //   3. Then other new warm-ups, then (only to fill the session) early practice.
+//   Concepts the learner's coding profile marks as weak (low mastery, see
+//   lib/game/profile.ts) count as struggled-with too ("Made for you"), and low
+//   mastery breaks ties between reviews.
 // The session mixes concepts: it avoids two items on the same concept while
 // another concept is available. Only concepts already unlocked are used.
 //
@@ -19,6 +22,8 @@ export const REVIEW_INTERVALS = [1, 3, 7, 14] as const;
 export const MAX_BOX = REVIEW_INTERVALS.length;
 /** A miss counts half as much after this many days. */
 const WEAKNESS_HALF_LIFE_DAYS = 14;
+/** Concepts under this mastery (lib/game/profile.ts FOCUS_BELOW) are weighted up. */
+export const LOW_MASTERY = 0.55;
 
 /** One answered warm-up: the first pick of that warm-up on that day (local YYYY-MM-DD). */
 export type WarmupAttempt = { id: string; day: string; correct: boolean };
@@ -42,6 +47,7 @@ export type MissSignal = { concept: string; source: MissSource; day: string; cou
 export type PlanReason =
   | { kind: "review"; lastCorrect: boolean; daysAgo: number }
   | { kind: "weak"; concept: string; source: MissSource; daysAgo: number }
+  | { kind: "focus"; concept: string }
   | { kind: "new"; concept: string }
   | { kind: "extra"; concept: string; daysAgo: number };
 
@@ -217,6 +223,11 @@ export function planWarmups<W extends WarmupItem>(input: {
   signals: MissSignal[];
   today: string;
   size?: number;
+  /**
+   * Optional: concept -> mastery 0-1 from the coding profile (only concepts with enough
+   * evidence). Low mastery weights a concept up, like a recent miss.
+   */
+  mastery?: Record<string, number>;
 }): WarmupSession<W> {
   const { warmups, solvedTicketIds, history, today } = input;
   const size = input.size ?? WARMUP_SESSION_SIZE;
@@ -226,7 +237,12 @@ export function planWarmups<W extends WarmupItem>(input: {
   const conceptOf = Object.fromEntries(warmups.map((w) => [w.id, w.concept]));
   const warmupMisses = missSignals(before, conceptOf, {}, {});
   const weakness = conceptWeakness([...warmupMisses, ...input.signals.filter((s) => s.day < today)], today);
-  const weak = (concept: string) => weakness.get(concept)?.score ?? 0;
+  // 0 (fine or unknown) .. 1 (mastery 0): how much the profile wants this concept practised.
+  const lowMastery = (concept: string) => {
+    const m = input.mastery?.[concept];
+    return m === undefined || m >= LOW_MASTERY ? 0 : (LOW_MASTERY - m) / LOW_MASTERY;
+  };
+  const weak = (concept: string) => (weakness.get(concept)?.score ?? 0) + 2 * lowMastery(concept);
 
   const reasonFor = (w: W): { tier: number; reason: PlanReason; key: number[] } => {
     const st = states.get(w.id);
@@ -239,11 +255,13 @@ export function planWarmups<W extends WarmupItem>(input: {
       };
     }
     const wk = weakness.get(w.concept);
-    if (!st && wk) {
+    if (!st && (wk || lowMastery(w.concept) > 0)) {
       return {
         tier: 1,
-        reason: { kind: "weak", concept: w.concept, source: wk.strongest.source, daysAgo: daysBetween(wk.strongest.day, today) },
-        key: [-wk.score],
+        reason: wk
+          ? { kind: "weak", concept: w.concept, source: wk.strongest.source, daysAgo: daysBetween(wk.strongest.day, today) }
+          : { kind: "focus", concept: w.concept },
+        key: [-weak(w.concept)],
       };
     }
     if (!st) return { tier: 2, reason: { kind: "new", concept: w.concept }, key: [] };
@@ -321,6 +339,8 @@ export function reasonText(reason: PlanReason, label: (concept: string) => strin
       if (reason.source === "byte") return `Practice: a wrong Byte suggestion on ${c} got past you ${ago(reason.daysAgo)}`;
       return `Practice: you missed a ${c} warm-up ${ago(reason.daysAgo)}`;
     }
+    case "focus":
+      return `Made for you: ${label(reason.concept)} is a focus area on your coding profile`;
     case "new":
       return `New: ${label(reason.concept)}`;
     case "extra":

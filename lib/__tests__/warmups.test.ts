@@ -166,3 +166,36 @@ test("everything seen and nothing due: early practice fills the session", () => 
   assert.ok(s.items.every((i) => i.reason.kind === "extra"));
   assert.equal(reasonText(s.items[0].reason, (c) => c).startsWith("Extra practice: "), true);
 });
+
+test("coding profile: a low-mastery concept is practised first, with a 'Made for you' reason", () => {
+  const without = plan([]);
+  const withProfile = plan([], { mastery: { loops: 0.15, strings: 0.9 } });
+  assert.equal(withProfile.items[0].warmup.concept, "loops");
+  assert.deepEqual(withProfile.items[0].reason, { kind: "focus", concept: "loops" });
+  assert.equal(reasonText(withProfile.items[0].reason, (c) => c), "Made for you: loops is a focus area on your coding profile");
+  // Still mixed: one item per concept, and the same size.
+  assert.equal(new Set(withProfile.items.map((i) => i.warmup.concept)).size, withProfile.items.length);
+  assert.equal(withProfile.items.length, without.items.length);
+  // High mastery changes nothing; no profile is the old behaviour.
+  assert.deepEqual(ids(plan([], { mastery: { strings: 0.95, numbers: 0.8 } })), ids(without));
+});
+
+test("coding profile: the weakest concept goes first, and low mastery adds to a real miss", () => {
+  const s = plan([], { mastery: { loops: 0.4, numbers: 0.05 } });
+  assert.deepEqual(
+    s.items.slice(0, 2).map((i) => i.warmup.concept),
+    ["numbers", "loops"],
+  );
+  // A quiz miss on conditionals keeps its own reason, but mastery decides the order between weak ones.
+  const signals = [{ concept: "conditionals", source: "quiz" as const, day: "2026-11-19", count: 1 }];
+  const both = plan([], { signals, mastery: { loops: 0.05 } });
+  assert.equal(both.items[0].warmup.concept, "loops");
+  assert.equal(both.items[1].reason.kind, "weak");
+});
+
+test("coding profile: due reviews still come first", () => {
+  const history: WarmupAttempt[] = [{ id: "s1", day: "2026-11-17", correct: false }];
+  const s = plan(history, { mastery: { loops: 0.05 } });
+  assert.equal(s.items[0].warmup.id, "s1");
+  assert.equal(s.items[1].warmup.concept, "loops");
+});

@@ -16,6 +16,7 @@ import {
 } from "../game/formats";
 import type { SkillsAttempt, SkillsCheckProgress, SkillsCheckResult } from "../game/skillsCheck";
 import { mergeWarmupHistory, type WarmupAttempt } from "../game/warmups";
+import { appendRun, cleanRunLog, runEntry, type RunLike, type RunLogEntry } from "../game/runLog";
 
 const KEY = "devjourney:progress:v1";
 
@@ -49,6 +50,13 @@ export type TicketProgress = {
   bytePrompt?: PromptRecord;
   /** Extra task formats (formats.yaml), keyed "predict:0", "break_it:0", "parsons:0"... */
   formats?: Record<string, FormatRecord>;
+  /**
+   * What the learner's code did on each test run (lib/game/runLog.ts): checks passed,
+   * failing check names, error kinds, a code hash. Never the code itself. Newest 20.
+   */
+  runLog?: RunLogEntry[];
+  /** Step through was used since the last logged run. */
+  steppedSinceRun?: boolean;
 };
 
 export type Progress = {
@@ -355,6 +363,32 @@ export const formatActions = {
   /** Trace table: "Watch it run" opened (the real values shown). */
   watch(id: string, key: string) {
     updateFormat(id, key, (rec) => recordWatched(rec));
+  },
+};
+
+// ---------- what the learner's code did (lib/game/runLog.ts) ----------
+
+export const codeRunActions = {
+  /**
+   * Log one test run: `files` is the code as run (starter + edits), `totalChecks` the
+   * ticket's number of checks. Runs that say nothing about the code (Python failed to
+   * load) are not logged. Doesn't touch runs/XP (actions.recordRun does that).
+   */
+  logRun(id: string, result: RunLike, files: Record<string, string>, totalChecks: number) {
+    const t = getSnapshot().tickets[id];
+    const log = cleanRunLog(t?.runLog);
+    const entry = runEntry({ prev: log.at(-1), result, files, totalChecks, stepped: !!t?.steppedSinceRun, now: Date.now() });
+    if (!entry) return;
+    patchTicket(id, (tp) => {
+      const next = { ...tp, runLog: appendRun(log, entry) };
+      delete next.steppedSinceRun;
+      return next;
+    });
+  },
+  /** Step through was used on this ticket (recorded on the next run's log entry). */
+  steppedThrough(id: string) {
+    if (getSnapshot().tickets[id]?.steppedSinceRun) return;
+    patchTicket(id, (t) => ({ ...t, steppedSinceRun: true }));
   },
 };
 

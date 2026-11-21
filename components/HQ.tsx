@@ -25,6 +25,9 @@ import SkillsCheckCard from "./SkillsCheckCard";
 import BackupReminder from "./BackupReminder";
 import BugBounty from "./BugBounty";
 import type { BountyCard } from "@/lib/game/bounty";
+// Personalization (coding profile, lib/game/profile.ts).
+import type { ProfileContent } from "@/lib/game/profile";
+import { usePersonalization } from "@/lib/useCodingProfile";
 
 export type TicketSummary = {
   id: string;
@@ -57,9 +60,11 @@ type Props = {
   hasSkillsCheck: boolean;
   /** The Bug Bounty board (side-quest tickets), shown apart from the floors. */
   bounties?: BountyCard[];
+  /** For the coding profile: concepts per ticket and warm-up (no code or answers). */
+  profileContent?: ProfileContent;
 };
 
-export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [] }: Props) {
+export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], profileContent }: Props) {
   const progress = useProgress();
   const xp = totalXp(progress);
   const [toggled, setToggled] = useState<Record<string, boolean>>({});
@@ -84,6 +89,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [] }: 
     }).map((t) => t.id),
   );
   const fresh = useRoomChanges({ solved: solved.map((t) => t.id), open: openIds }, isClient);
+  const personal = usePersonalization(progress, profileContent, now, warmups); // coding profile
 
   const hitl = hitlScore(Object.values(progress.tickets));
   const badgeCtx: BadgeContext = {
@@ -126,7 +132,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [] }: 
 
   // Today's warm-up session: ready, done, or not unlocked yet (hidden until there is one).
   const ticketConcepts = Object.fromEntries(allTickets.map((t) => [t.id, t.newConcept]));
-  const warmupPlan = now ? warmupSession(warmups, progress, solvedIds, ticketConcepts, now) : null;
+  const warmupPlan = now ? warmupSession(warmups, progress, solvedIds, ticketConcepts, now, personal.mastery) : null;
   const warmupAvailable = !!warmupPlan && warmupPlan.items.length > 0;
   const warmupStatus = warmupPlan?.done ? "done" : warmupAvailable ? "ready" : "none";
 
@@ -159,6 +165,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [] }: 
           streak={streak}
           warmup={warmupStatus}
           xp={xp}
+          focus={personal.focus}
         />
       ) : (
         <Pitch current={current} />
@@ -221,10 +228,11 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [] }: 
             const tp = ticketProgress(progress, id);
             return tp.solveXp + tp.quizXp;
           }}
+          recommended={personal.recommended}
         />
       )}
 
-      {now && warmupAvailable && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={solvedIds} ticketConcepts={ticketConcepts} now={now} />}
+      {now && warmupAvailable && <DailyWarmup warmups={warmups} progress={progress} solvedTicketIds={solvedIds} ticketConcepts={ticketConcepts} now={now} mastery={personal.mastery} />}
 
       {hitlHasData && <HumanInTheLoop score={hitl} />}
 
