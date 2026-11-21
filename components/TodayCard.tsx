@@ -19,9 +19,11 @@ type Props = {
   streak: number;
   warmup: "ready" | "done" | "none";
   xp: number;
+  /** One personalised line from the coding profile ("Focus this week: dictionaries — ..."). */
+  focus?: string | null;
 };
 
-export default function TodayCard({ playerName, next, nextFloor, nextIsExam = false, merged, total, streak, warmup, xp }: Props) {
+export default function TodayCard({ playerName, next, nextFloor, nextIsExam = false, merged, total, streak, warmup, xp, focus }: Props) {
   const { rank, next: nextRank, progress } = rankFor(xp);
   const name = playerName === "You" ? "dev" : playerName;
   const type = next ? TICKET_TYPE[next.type] : null;
@@ -72,7 +74,15 @@ export default function TodayCard({ playerName, next, nextFloor, nextIsExam = fa
         )}
       </div>
 
-      <ul className="mt-5 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4" aria-label="Your day">
+      <p className="mt-4 text-sm text-slate-200" data-testid="today-focus">
+        <span aria-hidden>🧭 </span>
+        {focus ? <span className="font-semibold text-white">{focus}</span> : <span className="text-slate-300">Your coding profile: what your runs say about you.</span>}{" "}
+        <Link href="/profile" data-testid="today-profile-link" className="font-semibold whitespace-nowrap text-cyan-300 hover:underline">
+          {focus ? "See why →" : "Open it →"}
+        </Link>
+      </p>
+
+      <ul className="mt-4 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4" aria-label="Your day">
         <Tile label="Streak" testId="today-streak">
           <span aria-hidden>🔥</span> {streak > 0 ? `${streak}-day streak` : "Start one today"}
         </Tile>

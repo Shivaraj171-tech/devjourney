@@ -3,6 +3,7 @@ import PythonPrefetch from "@/components/PythonPrefetch";
 import { loadSeasons, loadSkillsCheck, loadWarmups, sideQuestSeasons, storySeasons } from "@/lib/content/load";
 import type { BountyCard } from "@/lib/game/bounty";
 import { BASE_XP } from "@/lib/game/rules";
+import { profileContent } from "@/lib/content/profileContent";
 
 export default function Home() {
   // Only send what the office map needs to the browser (no code, no tests).
@@ -45,7 +46,7 @@ export default function Home() {
   );
   return (
     <>
-      <HQ seasons={seasons} bounties={bounties} warmups={loadWarmups()} hasSkillsCheck={loadSkillsCheck() !== null} />
+      <HQ seasons={seasons} bounties={bounties} warmups={loadWarmups()} hasSkillsCheck={loadSkillsCheck() !== null} profileContent={profileContent()} />
       <PythonPrefetch />
     </>
   );

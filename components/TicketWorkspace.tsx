@@ -33,6 +33,10 @@ import { PythonRunner } from "@/lib/runner/client";
 import { useIsClient } from "@/lib/useIsClient";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/useMediaQuery";
 import type { RunResult, TestResult, TraceResult } from "@/lib/runner/types";
+// Personalization (coding profile): run log, adaptive help, Byte nudge.
+import { codeRunActions } from "@/lib/progress/store";
+import AdaptiveHelpCard from "./AdaptiveHelp";
+import ByteTrustNudge from "./ByteTrustNudge";
 
 type Props = {
   ticket: Ticket;
@@ -154,6 +158,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
     setStep("checks"); // phone: show the results, not the keyboard
     const files = { ...ticket.starter, ...tp.code };
     const res = await runner.run(files, ticket.tests);
+    codeRunActions.logRun(ticket.id, res, files, listChecks(ticket.tests).length); // coding profile: no code stored
     if (!res.error) setPassHistory((h) => [...h, passCount(res)]);
     setResult(res);
     setRunning(false);
@@ -183,6 +188,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
       const runner = runnerRef.current;
       if (!runner || running || tracing) return;
       setTracing(`${check.file}:${check.name}`);
+      codeRunActions.steppedThrough(ticket.id); // coding profile
       setTraceError(null);
       const files = { ...ticket.starter, ...tp.code };
       const out = await runner.trace(files, ticket.tests, check.file, check.name);
@@ -417,6 +423,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               </section>
 
               {/* 2. Byte's suggestion, right under the goal. */}
+              {ticket.byte?.suggestion && !noRunner && !exam && <ByteTrustNudge tp={tp} />}
               {ticket.byte?.suggestion && !noRunner && !exam && (
                 <ByteSuggestionCard
                   ticketId={ticket.id}
@@ -588,6 +595,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
                   ⚠️ Couldn&apos;t step through that check: {traceError}
                 </div>
               )}
+              <AdaptiveHelpCard ticket={ticket} tp={tp} result={result} onStepThrough={pythonState === "ready" ? stepThrough : undefined} onShowBrief={() => setStep("brief")} />
               <TestResults result={result} running={running} onStepThrough={pythonState === "ready" ? stepThrough : undefined} tracing={tracing} />
             </div>
           )}

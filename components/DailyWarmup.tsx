@@ -10,13 +10,17 @@ import { dayKey, WARMUP_XP } from "@/lib/game/rules";
 import { missSignals, nextReviewDay, planWarmups, reasonText, daysBetween, type WarmupSession } from "@/lib/game/warmups";
 import { actions, warmupHistory, type Progress } from "@/lib/progress/store";
 
-/** Today's session for this learner. `ticketConcepts`: ticket id -> the concept it teaches. */
+/**
+ * Today's session for this learner. `ticketConcepts`: ticket id -> the concept it teaches.
+ * `mastery` (optional, from the coding profile): concept -> 0-1; low mastery is weighted up.
+ */
 export function warmupSession(
   warmups: Warmup[],
   progress: Progress,
   solvedTicketIds: Set<string>,
   ticketConcepts: Record<string, string>,
   now: Date,
+  mastery?: Record<string, number>,
 ): WarmupSession<Warmup> {
   const history = warmupHistory(progress);
   return planWarmups({
@@ -26,13 +30,22 @@ export function warmupSession(
     // Warm-up misses come from `history`; add quiz and Byte misses.
     signals: missSignals([], {}, progress.tickets, ticketConcepts),
     today: dayKey(now),
+    mastery,
   });
 }
 
-type Props = { warmups: Warmup[]; progress: Progress; solvedTicketIds: Set<string>; ticketConcepts: Record<string, string>; now: Date };
+type Props = {
+  warmups: Warmup[];
+  progress: Progress;
+  solvedTicketIds: Set<string>;
+  ticketConcepts: Record<string, string>;
+  now: Date;
+  /** From the coding profile (see warmupSession). */
+  mastery?: Record<string, number>;
+};
 
-export default function DailyWarmup({ warmups, progress, solvedTicketIds, ticketConcepts, now }: Props) {
-  const session = warmupSession(warmups, progress, solvedTicketIds, ticketConcepts, now);
+export default function DailyWarmup({ warmups, progress, solvedTicketIds, ticketConcepts, now, mastery }: Props) {
+  const session = warmupSession(warmups, progress, solvedTicketIds, ticketConcepts, now, mastery);
   // The item being looked at after answering it (its feedback stays until "Next").
   const [viewing, setViewing] = useState<string | null>(null);
   // Choice picked in this visit, per warm-up (to highlight a wrong pick).

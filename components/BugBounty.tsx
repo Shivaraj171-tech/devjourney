@@ -12,11 +12,20 @@ type Props = {
   isSolved: (ticketId: string) => boolean;
   /** XP earned on a solved bounty. */
   xpFor: (ticketId: string) => number;
+  /** Open bounties matching the learner's focus areas (coding profile), best first: shown first, marked "Recommended for you". */
+  recommended?: string[];
 };
 
-export default function BugBounty({ bounties, isSolved, xpFor }: Props) {
+export default function BugBounty({ bounties, isSolved, xpFor, recommended = [] }: Props) {
   if (bounties.length === 0) return null;
-  const cards = bounties.map((b) => ({ card: b, state: bountyState(b, isSolved) }));
+  // Recommended open ones first (in focus order); the rest keep the board's order.
+  const rank = (c: { card: BountyCard; recommended: boolean }) => (c.recommended ? recommended.indexOf(c.card.id) : recommended.length);
+  const cards = bounties
+    .map((b, i) => {
+      const state = bountyState(b, isSolved);
+      return { card: b, state, i, recommended: state === "open" && recommended.includes(b.id) };
+    })
+    .sort((a, b) => rank(a) - rank(b) || a.i - b.i);
   const { solved, open, total } = bountyProgress(cards.map((c) => c.state));
   return (
     <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-2xl border border-lime-500/30 bg-lime-950/20 p-4 sm:p-5">
@@ -33,15 +42,15 @@ export default function BugBounty({ bounties, isSolved, xpFor }: Props) {
         Optional, and they never block your next ticket.
       </p>
       <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map(({ card, state }) => (
-          <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} />
+        {cards.map(({ card, state, recommended: rec }) => (
+          <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} recommended={rec} />
         ))}
       </ul>
     </section>
   );
 }
 
-function BountyCardView({ card, state, xp }: { card: BountyCard; state: BountyState; xp: number }) {
+function BountyCardView({ card, state, xp, recommended = false }: { card: BountyCard; state: BountyState; xp: number; recommended?: boolean }) {
   const header = (
     <div className="flex items-center justify-between gap-2 text-xs font-semibold text-lime-100">
       <span>🐞 Mystery bug · ~{card.estimatedMinutes} min</span>
@@ -83,11 +92,16 @@ function BountyCardView({ card, state, xp }: { card: BountyCard; state: BountySt
     );
   }
   return (
-    <li data-testid={`bounty-${card.id}`} data-state="open">
+    <li data-testid={`bounty-${card.id}`} data-state="open" data-recommended={recommended || undefined}>
       <Link
         href={`/ticket/${card.id}`}
         className="block rounded-xl border-2 border-lime-400/60 bg-lime-500/10 p-3 transition hover:bg-lime-500/20"
       >
+        {recommended && (
+          <span data-testid="bounty-recommended" className="mb-1.5 inline-block rounded-full bg-cyan-400/15 px-2 py-0.5 text-[11px] font-semibold text-cyan-100">
+            ⭐ Recommended for you<span className="sr-only"> (from your coding profile)</span>
+          </span>
+        )}
         {header}
         {title}
         <span className="mt-2 inline-block rounded-lg bg-lime-400 px-2.5 py-1 text-xs font-semibold text-slate-950">Take the bounty →</span>

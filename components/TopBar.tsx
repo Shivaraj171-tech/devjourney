@@ -24,6 +24,7 @@ export default function TopBar() {
           <Link href="/" className="rounded-md px-2 py-1.5 text-slate-300 sm:px-3 hover:bg-slate-800 hover:text-white">Office</Link>
           <Link href="/skills" className="rounded-md px-2 py-1.5 text-slate-300 sm:px-3 hover:bg-slate-800 hover:text-white">Skills</Link>
           <Link href="/leaderboard" className="rounded-md px-2 py-1.5 text-slate-300 sm:px-3 hover:bg-slate-800 hover:text-white">Leaderboard</Link>
+          <Link href="/profile" data-testid="profile-link" className="hidden rounded-md px-3 py-1.5 text-slate-300 hover:bg-slate-800 hover:text-white md:block">Profile</Link>
         </nav>
         <div className="ml-auto flex items-center gap-2 text-sm sm:gap-3">
           <span title="Daily streak" data-testid="streak" className="whitespace-nowrap rounded-full bg-orange-500/10 px-2.5 py-1 font-semibold text-orange-300">
