@@ -19,6 +19,11 @@ import sys
 import traceback
 from pathlib import Path
 
+try:  # lab.py (next to this file): what Robotics Lab tests draw (viz.arm, viz.chart, ...)
+    import lab as _lab
+except ImportError:  # pragma: no cover - the runner also works on its own
+    _lab = None
+
 
 def _load_module(path, name):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -47,7 +52,12 @@ def run_tests(code_dir, tests_dir):
     status is "pass", "fail" (assertion failed) or "error" (any other exception,
     including failing to import the test file). "output" is anything the
     code printed while that test ran.
+
+    If the tests drew anything with `from lab import viz` (lab.py), the dict
+    also has "viz": the recorded items (only then, so other runs are unchanged).
     """
+    if _lab is not None:
+        _lab.reset()
     code_dir = str(Path(code_dir).resolve())
     sys.path.insert(0, code_dir)
     results = []
@@ -91,7 +101,11 @@ def run_tests(code_dir, tests_dir):
         sys.path.remove(code_dir)
 
     passed = bool(results) and all(r["status"] == "pass" for r in results)
-    return {"passed": passed, "results": results}
+    out = {"passed": passed, "results": results}
+    drawn = _lab.collect() if _lab is not None else []
+    if drawn:
+        out["viz"] = drawn
+    return out
 
 
 if __name__ == "__main__":

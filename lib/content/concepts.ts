@@ -33,6 +33,15 @@ const LABELS: Record<string, string> = {
   "nested-data": "Nested data",
   "tuples-and-sorting": "Tuples and sorting",
   "scope-creep": "Scope creep",
+  // Robotics Lab (side floor)
+  "forward-kinematics": "Forward kinematics",
+  "inverse-kinematics": "Inverse kinematics",
+  "joint-limits": "Joint limits and reachability",
+  trajectories: "Trajectories",
+  "pid-control": "PID control",
+  "q-learning": "Q-learning (reinforcement learning)",
+  "logistic-regression": "Logistic regression (and data leaks)",
+  "neural-networks": "Tiny neural networks (MLP)",
 };
 
 /** "mutable-shared-data" → "Mutable shared data". Unknown slugs are tidied, labels pass through. */

@@ -38,25 +38,36 @@ type Props = {
   gateFloor?: number;
   /** Extra links next to the review link (e.g. the certificate). */
   extra?: ReactNode;
+  /** A side floor's name instead of "🏢 Floor N · title", e.g. "🤖 Robotics Lab". */
+  label?: string;
+  /** What opens the floor, instead of "Floor <gateFloor>", e.g. "Floor 1". */
+  gateText?: string;
+  /** data-testid prefix of its rooms instead of room-<id> (e.g. "lab-room"). */
+  roomPrefix?: string;
+  /** Link Maya's performance review once the floor is done (default true; side floors have none). */
+  hasReview?: boolean;
+  /** data-testid instead of floor-<n>. */
+  testId?: string;
 };
 
-export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, onToggle, gateFloor = floor - 1, extra }: Props) {
+export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, onToggle, gateFloor = floor - 1, extra, label, gateText, testId, roomPrefix, hasReview = true }: Props) {
   // The final exam (season.yaml `final: true`) is shown as "Final exam", not a numbered floor.
   const exam = season.final;
   const done = rooms.filter((r) => r.state === "done");
   const next = rooms.filter((r) => r.state === "open");
   const backlog = rooms.filter((r) => r.state === "locked");
   const allDone = done.length === rooms.length;
-  const boardId = `floor-${floor}-board`;
+  const boardId = `${testId ?? `floor-${floor}`}-board`;
+  const gate = gateText ?? `Floor ${gateFloor}`;
   const status = allDone
     ? `✅ ${done.length}/${rooms.length} merged`
     : !floorOpen
-      ? `${rooms.length} tickets · 🔒 opens after Floor ${gateFloor}`
+      ? `${rooms.length} tickets · 🔒 opens after ${gate}`
       : `${done.length}/${rooms.length} merged`;
 
   return (
     <section
-      data-testid={exam ? "final-exam" : `floor-${floor}`}
+      data-testid={testId ?? (exam ? "final-exam" : `floor-${floor}`)}
       data-state={floorOpen ? "open" : "locked"}
       data-expanded={expanded}
       className={`rounded-2xl border ${expanded ? "border-slate-700 bg-slate-900/40 p-4 sm:p-5" : "border-slate-800 bg-slate-900/30 px-4 py-3"}`}
@@ -72,12 +83,12 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
           >
             <span className="font-bold text-white sm:text-lg">
               <span aria-hidden className="mr-1.5 inline-block w-3 text-slate-400">{expanded ? "▾" : "▸"}</span>
-              {exam ? <>🎓 Final exam · {season.title}</> : <>🏢 Floor {floor} · {season.title}</>}
+              {label ?? (exam ? <>🎓 Final exam · {season.title}</> : <>🏢 Floor {floor} · {season.title}</>)}
             </span>
             <span className={`text-sm ${allDone ? "text-emerald-300" : "text-slate-300"}`}>{status}</span>
           </button>
         </h2>
-        {allDone && (
+        {allDone && hasReview && (
           <Link href={`/review/${season.id}`} data-testid={`review-link-${season.id}`} className="text-sm font-semibold text-amber-300 hover:underline">
             📋 Your performance review →
           </Link>
@@ -91,7 +102,7 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
           <div
             className="mt-3 h-1.5 max-w-md overflow-hidden rounded-full bg-slate-800"
             role="progressbar"
-            aria-label={`Floor ${floor} progress`}
+            aria-label={`${label ?? `Floor ${floor}`} progress`}
             aria-valuemin={0}
             aria-valuemax={rooms.length}
             aria-valuenow={done.length}
@@ -107,23 +118,23 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
             {done.length === 0 ? (
               <Empty>Tickets you merge land here.</Empty>
             ) : (
-              <ol className="space-y-2">{done.map((r) => <RoomRow key={r.ticket.id} room={r} exam={exam} />)}</ol>
+              <ol className="space-y-2">{done.map((r) => <RoomRow key={r.ticket.id} room={r} exam={exam} prefix={roomPrefix} />)}</ol>
             )}
           </Lane>
           <Lane title="👉 Up next" className="order-1 lg:order-none">
             {next.length > 0 ? (
-              <ol className="space-y-2">{next.map((r) => <RoomRow key={r.ticket.id} room={r} big exam={exam} />)}</ol>
+              <ol className="space-y-2">{next.map((r) => <RoomRow key={r.ticket.id} room={r} big exam={exam} prefix={roomPrefix} />)}</ol>
             ) : allDone ? (
               <Empty>🎉 Floor complete. Every ticket merged.</Empty>
             ) : (
-              <Empty>🔒 Opens when you finish Floor {gateFloor}.</Empty>
+              <Empty>🔒 Opens when you finish {gate}.</Empty>
             )}
           </Lane>
           <Lane title="🔒 Backlog" count={backlog.length} className="order-2 lg:order-none">
             {backlog.length === 0 ? (
               <Empty>Nothing waiting on this floor.</Empty>
             ) : (
-              <ol className="space-y-2">{backlog.map((r) => <RoomRow key={r.ticket.id} room={r} exam={exam} />)}</ol>
+              <ol className="space-y-2">{backlog.map((r) => <RoomRow key={r.ticket.id} room={r} exam={exam} prefix={roomPrefix} />)}</ol>
             )}
           </Lane>
         </div>
@@ -148,7 +159,7 @@ function Empty({ children }: { children: ReactNode }) {
   return <p className="rounded-xl border border-dashed border-slate-700 px-3 py-4 text-center text-sm text-slate-300">{children}</p>;
 }
 
-function RoomRow({ room, big = false, exam = false }: { room: Room; big?: boolean; exam?: boolean }) {
+function RoomRow({ room, big = false, exam = false, prefix }: { room: Room; big?: boolean; exam?: boolean; prefix?: string }) {
   // Exam rooms name no concept (that would be a hint).
   const idea = exam ? "No hints · no lesson" : conceptLabel(room.ticket.newConcept);
   const { ticket: t, state, fresh } = room;
@@ -196,7 +207,7 @@ function RoomRow({ room, big = false, exam = false }: { room: Room; big?: boolea
   );
 
   return (
-    <li data-testid={`${exam ? "exam-room" : "room"}-${t.id}`} data-state={state} data-fresh={fresh} className="relative">
+    <li data-testid={`${prefix ?? (exam ? "exam-room" : "room")}-${t.id}`} data-state={state} data-fresh={fresh} className="relative">
       {state === "locked" ? body : <Link href={`/ticket/${t.id}`} className="block rounded-xl">{body}</Link>}
       {fresh && <RoomFlourish change={fresh} />}
     </li>

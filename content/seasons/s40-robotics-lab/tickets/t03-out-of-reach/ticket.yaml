@@ -1,0 +1,10 @@
+id: s40-t03
+title: "Out of reach"
+type: bug
+level: intern
+track: robotics
+concepts: [conditionals, boolean-logic, inverse-kinematics, joint-limits]
+new_concept: joint-limits
+estimated_minutes: 12
+tests_visible: true
+files_editable: [grabby/limits.py]

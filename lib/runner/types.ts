@@ -1,3 +1,5 @@
+import type { VizItem } from "../lab/viz";
+
 /** One test's outcome, as produced by lib/runner/test_runner.py. */
 export type TestResult = {
   file: string;
@@ -13,6 +15,8 @@ export type RunResult = {
   results: TestResult[];
   /** Set when the run itself failed (timeout, Python failed to load...). */
   error?: string;
+  /** What the tests drew with `from lab import viz` (Robotics Lab), cleaned by parseViz. Absent if nothing. */
+  viz?: VizItem[];
 };
 
 /** One recorded step of a traced check, as produced by lib/runner/tracer.py. */

@@ -1,0 +1,11 @@
+# Correct: Byte adds the inner edge of the ring and the elbow check.
+suggestion:
+  file: grabby/limits.py
+  find: "    return distance <= UPPER_ARM + FOREARM\n\n\ndef within_limits(shoulder_deg, elbow_deg):\n    \"\"\"True if both joints are inside their limits.\"\"\"\n    return SHOULDER_LIMITS[0] <= shoulder_deg <= SHOULDER_LIMITS[1]"
+  replace: "    return abs(UPPER_ARM - FOREARM) <= distance <= UPPER_ARM + FOREARM\n\n\ndef within_limits(shoulder_deg, elbow_deg):\n    \"\"\"True if both joints are inside their limits.\"\"\"\n    shoulder_ok = SHOULDER_LIMITS[0] <= shoulder_deg <= SHOULDER_LIMITS[1]\n    elbow_ok = ELBOW_LIMITS[0] <= elbow_deg <= ELBOW_LIMITS[1]\n    return shoulder_ok and elbow_ok"
+  correct: true
+  says: "Two one-sided checks: the ring needs its inner edge (0.2 m), and the elbow has limits too. Both fixed."
+  explain: >-
+    Correct. A box closer than 0.2 m is now refused before `inverse()` ever sees it, and a pose only passes
+    if the shoulder AND the elbow are inside their ranges. Each fix closes the "other end" of a check that
+    only looked one way.

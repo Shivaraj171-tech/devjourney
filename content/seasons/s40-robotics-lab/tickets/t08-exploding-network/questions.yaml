@@ -1,0 +1,22 @@
+questions:
+  - prompt: "Why is `prepare` turning 120 cm into 1.2 not just cosmetic?"
+    choices:
+      - "Every weight's nudge is multiplied by its input, and tanh can only tell small inputs apart"
+      - "Neural networks can only read numbers between 0 and 1, so 120 is rounded down to 1"
+      - "Centimetres use more memory than metres in Python, which slows down training"
+    answer: 0
+    explain: "Gradient descent multiplies each nudge to a first-layer weight by that weight's input. Inputs around 100 make the nudges about 100 times bigger, and tanh(100) and tanh(150) are both 1.0, so the hidden units can't tell those boxes apart."
+  - prompt: "A loss curve goes 0.4, 0.9, 3.1, 40, 2e5, inf, nan. What is the most likely cause?"
+    choices:
+      - "Too few hidden units to learn the problem"
+      - "Steps too big for the input scale: each update overshoots more than the last"
+      - "Not enough training updates yet: it will come down later"
+    answer: 1
+    explain: "A loss that GROWS, faster and faster, is the signature of overshooting: too high a learning rate for the size of the inputs. Too few hidden units gives a loss that falls and then levels off, it doesn't explode."
+  - prompt: "With the fixed setup, the loss falls to about 0.003. Which check shows the network really learned inverse kinematics?"
+    choices:
+      - "The loss on the training examples is below 0.01"
+      - "The gripper lands near boxes the network has never seen"
+      - "The loss curve goes down in every single block of 100 updates"
+    answer: 1
+    explain: "A low training loss can come from memorising the 200 examples. Running the network's angles through forward() on NEW boxes measures what we actually want: does Grabby reach them? (It lands about 5 cm away on average.)"

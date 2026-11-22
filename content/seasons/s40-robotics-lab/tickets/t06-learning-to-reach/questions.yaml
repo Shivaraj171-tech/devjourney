@@ -1,0 +1,23 @@
+questions:
+  - prompt: "With alpha = 0.5 and gamma = 0.9, Q is 2.0, the reward is -1 and the best Q of the next state is 6.0. What is Q after the update?"
+    choices:
+      - "3.2"
+      - "4.4"
+      - "2.5"
+      - "-0.5"
+    answer: 0
+    explain: "target = -1 + 0.9 * 6.0 = 4.4. Q moves halfway (alpha = 0.5) from 2.0 towards 4.4: 2.0 + 0.5 * (4.4 - 2.0) = 3.2."
+  - prompt: "Episodes last at most 40 moves. Why does +1 per move near the box beat +10 for reaching it?"
+    choices:
+      - "Sitting near the box for 35 moves earns 35 points, reaching it once earns only 10"
+      - "The learner can't see rewards bigger than 1, so the +10 for the box is clipped down to 1 as well"
+      - "Reaching the box is impossible on this grid"
+    answer: 0
+    explain: "The learner maximises the TOTAL reward of an episode. If being near pays every move and nothing ends the episode, hanging around near the box is simply the best-paid plan."
+  - prompt: "Why give every move that doesn't reach the box a small negative reward?"
+    choices:
+      - "So the learner can tell which states are near the box and which are far away"
+      - "So a short route to the box scores more than a long one, and wandering costs something"
+      - "Negative rewards make Q-learning run faster on the computer"
+    answer: 1
+    explain: "With -1 per move, a 4-move route totals 10 - 3 = 7 and a 10-move route 10 - 9 = 1, so the learner prefers the short one. With 0 per move, every route that eventually reaches the box looks just as good."

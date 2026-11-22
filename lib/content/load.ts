@@ -18,7 +18,7 @@ import type {
   Warmup,
 } from "./types";
 import { conceptLabel } from "./concepts";
-import { finalSeasonIndex, isSideQuest, mainSeasons, seasonGate } from "./order";
+import { finalSeasonIndex, isBountyBoard, isSideFloor, mainSeasons, seasonGate } from "./order";
 
 const CONTENT_DIR = join(process.cwd(), "content", "seasons");
 
@@ -264,24 +264,35 @@ export function loadSeasons(): Season[] {
   for (const slug of readdirSync(CONTENT_DIR).sort()) {
     const dir = join(CONTENT_DIR, slug);
     if (!statSync(dir).isDirectory()) continue;
-    const meta = readYaml<{ id: string; title: string; intro: string; tickets: string[]; chain?: boolean; final?: boolean }>(
-      join(dir, "season.yaml"),
-    );
+    const meta = readYaml<{
+      id: string;
+      title: string;
+      intro: string;
+      tickets: string[];
+      chain?: boolean;
+      final?: boolean;
+      requires?: string;
+      icon?: string;
+    }>(join(dir, "season.yaml"));
     const final = meta.final === true;
     const tickets = (meta.tickets ?? []).map((t, i) =>
       loadTicket(meta.id, join(dir, "tickets", t), t, i + 1, final),
     );
-    seasons.push({ id: meta.id, slug, title: meta.title, intro: meta.intro, chain: meta.chain !== false, final, tickets });
+    const season: Season = { id: meta.id, slug, title: meta.title, intro: meta.intro, chain: meta.chain !== false, final, tickets };
+    if (meta.requires) season.requires = meta.requires;
+    if (meta.icon) season.icon = meta.icon;
+    if (isSideFloor(season)) for (const t of tickets) t.sideFloor = { title: meta.title, icon: meta.icon ?? "🧪" };
+    seasons.push(season);
   }
   addBountyInfo(seasons);
   cache = seasons;
   return seasons;
 }
 
-/** Side-quest seasons (the Bug Bounty board): each ticket learns what it reveals and what opens it. */
+/** Bounty-board seasons (the Bug Bounty board): each ticket learns what it reveals and what opens it. */
 function addBountyInfo(seasons: Season[]) {
   const byId = new Map(seasons.flatMap((s) => s.tickets.map((t) => [t.id, t] as const)));
-  for (const season of seasons.filter(isSideQuest)) {
+  for (const season of seasons.filter(isBountyBoard)) {
     for (const t of season.tickets) {
       const meta = readYaml<TicketYaml>(join(CONTENT_DIR, season.slug, "tickets", t.slug, "ticket.yaml"));
       const required = meta.requires ? byId.get(meta.requires) : undefined;
@@ -293,9 +304,14 @@ function addBountyInfo(seasons: Season[]) {
   }
 }
 
-/** The side quests (e.g. the Bug Bounty board): off-chain seasons that aren't the final exam. */
+/** The bounty-board side quests (the Bug Bounty board): off-chain, not the final, no season-level `requires`. */
 export function sideQuestSeasons(): Season[] {
-  return loadSeasons().filter(isSideQuest);
+  return loadSeasons().filter(isBountyBoard);
+}
+
+/** The side floors (e.g. the Robotics Lab): off-chain floors opened as a whole by one ticket (season.yaml `requires`). */
+export function sideFloorSeasons(): Season[] {
+  return loadSeasons().filter(isSideFloor);
 }
 
 /** The story: on-chain seasons and the final exam, side quests left out. */

@@ -25,7 +25,7 @@ const CURRENT = new Set([ASSETS_CACHE, RUNNER_CACHE, APP_CACHE]);
 /** Keep the app cache from growing forever across deploys (oldest entries go first). */
 const APP_CACHE_MAX_ENTRIES = 250;
 
-const RUNNER_FILES = ["runner-worker.js", "runner/test_runner.py", "runner/tracer.py", "runner/formats.py"];
+const RUNNER_FILES = ["runner-worker.js", "runner/test_runner.py", "runner/tracer.py", "runner/formats.py", "runner/lab.py"];
 
 const inScope = (url, path) => url.href.startsWith(new URL(path, SCOPE).href);
 

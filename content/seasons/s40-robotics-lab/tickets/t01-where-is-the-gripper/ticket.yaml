@@ -1,0 +1,10 @@
+id: s40-t01
+title: "Where is the gripper?"
+type: bug
+level: intern
+track: robotics
+concepts: [functions, numbers, forward-kinematics]
+new_concept: forward-kinematics
+estimated_minutes: 12
+tests_visible: true
+files_editable: [grabby/arm.py]

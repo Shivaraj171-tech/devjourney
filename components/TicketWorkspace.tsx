@@ -21,6 +21,7 @@ import CodeEditor from "./CodeEditor";
 import DebuggerPanel from "./DebuggerPanel";
 import { HintsButton } from "./HintPanel";
 import IncidentPanel, { LogsChip } from "./IncidentPanel";
+import LabViewer from "./LabViewer";
 import Markdown from "./Markdown";
 import Quiz from "./Quiz";
 import ReviewPanel from "./ReviewPanel";
@@ -78,6 +79,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
   const exam = ticket.final === true;
   // Bug Bounty side quest: a mystery bug, so no concept chip and no lesson (revealed once solved).
   const bounty = ticket.bounty;
+  // Side floor (the Robotics Lab): opens as a whole after a story floor; runs can draw in the Lab viewer.
+  const sideFloor = ticket.sideFloor;
   // Progress only exists in the browser; until then we don't know if it's locked.
   const isClient = useIsClient();
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
@@ -249,7 +252,11 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
         <div className="text-5xl">🔒</div>
         <h1 className="mt-4 text-2xl font-bold text-white">This ticket is still in the backlog</h1>
         <p className="mt-2 text-slate-400">
-          {bounty ? "This bounty opens once you've solved the ticket that teaches what you need for it." : "Finish the previous ticket first. Maya likes one thing at a time."}
+          {bounty
+            ? "This bounty opens once you've solved the ticket that teaches what you need for it."
+            : sideFloor && ticket.number === 1
+              ? `The ${sideFloor.title} opens once you've finished the floor it builds on.`
+              : "Finish the previous ticket first. Maya likes one thing at a time."}
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <Link href={`/ticket/${prevTicketId}`} className="rounded-lg bg-violet-600 px-4 py-2 font-semibold text-white hover:bg-violet-500">
@@ -376,6 +383,11 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
             <span className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">⏱ ~{ticket.estimatedMinutes} min</span>
             {!exam && !bounty && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-cyan-300">New: {conceptLabel(ticket.newConcept)}</span>}
             {bounty && <span className="rounded-full bg-lime-500/10 px-2 py-0.5 text-lime-200">🐞 Mystery bug</span>}
+            {sideFloor && (
+              <span data-testid="side-floor-chip" className="rounded-full bg-slate-800 px-2 py-0.5 text-slate-200">
+                {sideFloor.icon} {sideFloor.title}
+              </span>
+            )}
             {tp.solved && (
               <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-300">
                 {review ? "✔ Reviewed" : isRead ? "✔ Done" : ticket.type === "incident" ? "✔ Resolved" : "✔ Merged"}
@@ -618,7 +630,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
           {!isRead && !debug && (
             <div
               {...stepPanel("checks")}
-              className={`${stepClass(phoneStep === "checks", "block")} max-h-[40%] min-h-[140px] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900/70 p-4 max-lg:max-h-none`}
+              className={`${stepClass(phoneStep === "checks", "block")} ${result?.viz ? "max-h-[62%]" : "max-h-[40%]"} min-h-[140px] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900/70 p-4 max-lg:max-h-none`}
             >
               <h2 className="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">CI checks</h2>
               {traceError && (
@@ -628,6 +640,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               )}
               <AdaptiveHelpCard ticket={ticket} tp={tp} result={result} onStepThrough={pythonState === "ready" ? stepThrough : undefined} onShowBrief={() => setStep("brief")} />
               <TestResults result={result} running={running} onStepThrough={pythonState === "ready" ? stepThrough : undefined} tracing={tracing} />
+              {/* Robotics Lab: what the run drew (`from lab import viz`), under the checks. A new run replays it. */}
+              {!running && result?.viz && <LabViewer key={passHistory.length} items={result.viz} />}
             </div>
           )}
         </section>

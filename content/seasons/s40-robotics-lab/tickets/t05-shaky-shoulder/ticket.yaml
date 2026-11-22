@@ -1,0 +1,11 @@
+id: s40-t05
+title: "The shaky shoulder"
+type: incident
+level: junior
+track: robotics
+concepts: [functions, dictionaries, numbers, pid-control]
+new_concept: pid-control
+estimated_minutes: 15
+tests_visible: true
+files_editable: [grabby/pid.py]
+time_limit_minutes: 15

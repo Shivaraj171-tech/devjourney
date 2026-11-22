@@ -1,0 +1,10 @@
+id: s40-t08
+title: "The exploding network"
+type: bug
+level: junior
+track: robotics
+concepts: [lists, loops, numbers, neural-networks]
+new_concept: neural-networks
+estimated_minutes: 15
+tests_visible: true
+files_editable: [grabby/ik_net.py]

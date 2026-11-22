@@ -1,0 +1,10 @@
+id: s40-t07
+title: "Too good to be true"
+type: bug
+level: junior
+track: robotics
+concepts: [lists, dictionaries, functions, logistic-regression]
+new_concept: logistic-regression
+estimated_minutes: 15
+tests_visible: true
+files_editable: [grabby/grasp_model.py]

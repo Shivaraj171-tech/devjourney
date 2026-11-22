@@ -1,0 +1,22 @@
+questions:
+  - prompt: "What does `max(-20, min(200, 250))` return?"
+    choices:
+      - "200"
+      - "250"
+      - "-20"
+    answer: 0
+    explain: "min(200, 250) is 200 (the upper limit wins), then max(-20, 200) is 200. That's clamp: the value, pushed back inside the range."
+  - prompt: "With links of 1.0 m and 0.8 m, which box is in Grabby's ring of reach?"
+    choices:
+      - "(0.1, 0.1), right next to the base"
+      - "(0.5, 0.5)"
+      - "(1.5, 1.5)"
+    answer: 1
+    explain: "The ring runs from 0.2 m to 1.8 m. (0.5, 0.5) is about 0.71 m away. (0.1, 0.1) is 0.14 m (too close) and (1.5, 1.5) is about 2.12 m (too far)."
+  - prompt: "(0.5, -0.2) is inside the ring, but plan_reach still says None. Why is that the right answer?"
+    choices:
+      - "Both elbow answers bend the elbow about 147°, past its 140° limit"
+      - "The box is below the x axis, and Grabby can never reach below the table line"
+      - "The ring check is wrong for boxes that are closer than 1 m to the shoulder"
+    answer: 0
+    explain: "inverse gives elbow +147.5 (down) and -147.5 (up). Both are past the ±140 limit, so there's no safe pose, even though the geometry has one. Being in the ring is necessary, not enough."

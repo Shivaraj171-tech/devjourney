@@ -1,0 +1,10 @@
+id: s40-t04
+title: "Smooth moves"
+type: bug
+level: junior
+track: robotics
+concepts: [loops, lists, numbers, trajectories]
+new_concept: trajectories
+estimated_minutes: 15
+tests_visible: true
+files_editable: [grabby/trajectory.py]

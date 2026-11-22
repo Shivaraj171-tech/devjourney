@@ -1,0 +1,17 @@
+# Wrong: Byte patches the crash, not the cause (atan vs atan2).
+suggestion:
+  file: grabby/ik.py
+  find: "    aim = math.atan(y / x)"
+  replace: "    aim = math.atan(y / x) if x != 0 else math.pi / 2"
+  correct: false
+  why:
+    choices:
+      - "Reject: it stops the crash, but boxes on the left (x < 0) still get aimed at the wrong side."
+      - "Accept: the ZeroDivisionError was the only failing check, and this removes it."
+      - "Reject: pi / 2 is in radians, but the shoulder angle must be in degrees."
+    answer: 0
+  says: "Easy one: x = 0 divides by zero, so I special-case it. Straight ahead is 90°, which is pi / 2. No more crash!"
+  explain: >-
+    The crash goes away, and straight ahead is right (pi / 2 radians, converted to degrees at the end). But
+    `atan(y / x)` still can't tell (-0.9, 0.9) from (0.9, -0.9), so every box on the left is missed. The
+    real fix is `math.atan2(y, x)`, which sees both signs and never divides.

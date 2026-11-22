@@ -9,6 +9,11 @@ export const metadata = {
 
 export default function TeacherPage() {
   // Floor names for the season ids found in report codes (same numbering as the HQ).
-  const floors = loadSeasons().map((s, i) => ({ id: s.id, short: s.final ? "Final exam" : `Floor ${i + 1}`, title: s.title }));
+  // A side floor (the Robotics Lab) goes by its name, as on the HQ.
+  const floors = loadSeasons().map((s, i) => ({
+    id: s.id,
+    short: s.final ? "Final exam" : s.requires ? s.title : `Floor ${i + 1}`,
+    title: s.title,
+  }));
   return <TeacherDashboard floors={floors} />;
 }

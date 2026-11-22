@@ -1,0 +1,11 @@
+2026-11-21 10:14:02 INFO  grabby  move shoulder 0.0 -> 90.0 deg (box #412, elbow 30.0)
+2026-11-21 10:14:02 INFO  grabby  pid gains kp=40.0 ki=10.0 kd=10.0 dt=0.01 (unchanged since 2026-11-20)
+2026-11-21 10:14:02 INFO  grabby  deploy: pid.py "tidy up derivative" (author: Byte)
+2026-11-21 10:14:03 DEBUG grabby  t=0.50s shoulder=27.3 deg speed=+92 deg/s torque=+300.0 (max)
+2026-11-21 10:14:03 DEBUG grabby  t=1.00s shoulder=83.4 deg speed=+126 deg/s torque=+300.0 (max)
+2026-11-21 10:14:03 WARN  grabby  t=1.06s shoulder past target: 91.0 > 90.0 at +128 deg/s, torque still +300.0
+2026-11-21 10:14:04 WARN  grabby  t=1.60s overshoot 56% (peak 140.3 deg, limit 5%)
+2026-11-21 10:14:04 DEBUG grabby  t=2.31s shoulder=89.1 deg speed=-117 deg/s torque=-300.0 (min)
+2026-11-21 10:14:04 ERROR grabby  t=2.50s e-stop: shoulder=65.5 deg, not within 1.0 deg of 90.0 after 2.5 s
+2026-11-21 10:14:04 ERROR grabby  box #412 dropped (bin 3), packing line paused
+2026-11-21 10:14:05 WARN  alerts  packing line down, paging on-call developer

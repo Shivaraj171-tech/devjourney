@@ -1,0 +1,16 @@
+trace:
+  - code: |
+      def blend(start, goal, steps):
+          path = []
+          for i in range(steps + 1):
+              t = i / steps
+              path.append(start + (goal - start) * t)
+          return path
+
+      poses = blend(10, 40, 3)
+    watch: [i, t]
+    rows: 8
+    explain: >-
+      `i` runs 0, 1, 2, 3 (that's `range(steps + 1)`), and each time `t = i / steps` gives the fraction of
+      the way: 0.0, 0.333..., 0.666..., 1.0. The poses are 10, 20, 30 and 40: both ends included, three
+      even steps of 10 in between.
