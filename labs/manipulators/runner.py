@@ -34,7 +34,12 @@ class Result:
 
     @property
     def ok(self) -> bool:
-        return self.tests > 0 and self.failures == 0 and self.errors == 0 and self.returncode == 0
+        # an all-skipped run (e.g. lab08 without MuJoCo) is NOT a pass
+        return self.passed > 0 and self.failures == 0 and self.errors == 0 and self.returncode == 0
+
+    @property
+    def all_skipped(self) -> bool:
+        return self.tests > 0 and self.skipped == self.tests
 
     def summary(self) -> str:
         s = f"{self.passed}/{self.tests - self.skipped} passed"

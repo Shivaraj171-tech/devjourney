@@ -1,6 +1,6 @@
 # Lab 02 · Euler angles (ZYX) and gimbal lock
 
-Module 1 · 100 XP · browser twin: Module 1, "Euler angles"
+Module 1 · 100 XP · browser twin: Module 1 of the web track
 
 ## Intuition
 

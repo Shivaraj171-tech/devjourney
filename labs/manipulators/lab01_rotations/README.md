@@ -1,6 +1,6 @@
 # Lab 01 · Rotation matrices and SO(3)
 
-Module 1 (rigid-body motion) · 100 XP · browser twin: Module 1, "Rotations"
+Module 1 (rigid-body motion) · 100 XP · browser twin: Module 1 of the web track
 
 ## Intuition
 

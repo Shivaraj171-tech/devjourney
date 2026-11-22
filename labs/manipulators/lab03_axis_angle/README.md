@@ -1,6 +1,6 @@
 # Lab 03 · Axis-angle, Rodrigues, exp and log
 
-Module 1 · 120 XP · browser twin: Module 1, "Exponential coordinates"
+Module 1 · 120 XP · browser twin: Module 1 of the web track
 
 ## Intuition
 

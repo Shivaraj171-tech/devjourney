@@ -25,6 +25,8 @@ def check(lab):
     problems = []
     sol = run_lab_tests(lab, "solution")
     sta = run_lab_tests(lab, "starter")
+    if sol.all_skipped and sta.all_skipped:
+        return sol, sta, None  # whole lab needs an optional dependency (MuJoCo)
     if not sol.ok:
         problems.append(f"solution: {sol.summary()}, failures {sol.messages[:3]}")
     if sta.errors:
@@ -50,10 +52,15 @@ def main(argv):
     except ImportError:
         print("MuJoCo NOT installed: simulator tests will be skipped.")
     print(f"{'lab':<22}{'solution':<26}{'starter':<26}{'time (sol/sta)':<16}status")
-    bad = 0
+    bad = skipped = 0
     for lab in labs:
         sol, sta, problems = check(lab)
-        status = "OK" if not problems else "FAIL"
+        if problems is None:
+            skipped += 1
+            status = f"SKIP ({sol.skip_reasons[0][1] if sol.skip_reasons else 'skipped'})"
+            problems = []
+        else:
+            status = "OK" if not problems else "FAIL"
         bad += bool(problems)
         sta_s = f"{sta.failures}/{sta.tests - sta.skipped} fail" + (
             f", {sta.skipped} skip" if sta.skipped else "")
@@ -61,7 +68,8 @@ def main(argv):
               f"{sol.seconds:>5.1f}s/{sta.seconds:>4.1f}s    {status}")
         for p in problems:
             print(f"    - {p}")
-    print(f"\n{len(labs) - bad}/{len(labs)} labs verified.")
+    print(f"\n{len(labs) - bad - skipped}/{len(labs)} labs verified"
+          + (f", {skipped} skipped (missing optional dependency)." if skipped else "."))
     return 1 if bad else 0
 
 

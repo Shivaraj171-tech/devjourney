@@ -1,6 +1,6 @@
 # Lab 07 · Product of exponentials (PoE): screws, exp on SE(3), DH == PoE
 
-Module 2 · 180 XP · browser twin: Module 2, "Product of exponentials"
+Module 2 · 180 XP · browser twin: Module 2 of the web track
 
 ## Intuition
 

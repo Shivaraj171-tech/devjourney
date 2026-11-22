@@ -14,8 +14,7 @@ def rodrigues(axis, theta: float) -> np.ndarray:
     k = np.asarray(axis, dtype=float)
     n = np.linalg.norm(k)
     if n < SMALL:
-        raise ValueError("rotation axis must be non-zero")
-        # (a zero axis has no direction; use exp_so3 for rotation vectors instead)
+        raise ValueError("rotation axis must be non-zero (use exp_so3 for rotation vectors)")
     K = skew(k / n)
     return np.eye(3) + np.sin(theta) * K + (1.0 - np.cos(theta)) * (K @ K)
 

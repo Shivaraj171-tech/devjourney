@@ -143,6 +143,10 @@ def cmd_check(args) -> int:
         print(c("  ✘ ", "31") + f"{name}: {msg}")
     for name, msg in res.skip_reasons:
         print(c("  ~ ", "33") + f"{name}: skipped ({msg})")
+    if res.all_skipped:
+        print(c(f"All {lab.key} tests were skipped: this lab needs MuJoCo "
+                "(pip install -r labs/manipulators/requirements.txt). Not counted.", "33"))
+        return 1
     data = progress.load()
     mujoco_ran = lab.needs_mujoco and res.skipped == 0
     gained, badges = progress.record_check(data, lab.key, res.ok, res.summary(), lab.xp, mujoco_ran)

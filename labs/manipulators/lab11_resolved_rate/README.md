@@ -61,11 +61,20 @@ as σᵢ → 0. λ = 0.01 is invisible away from singularities. Solve, don't inv
 
 **6. Why the MuJoCo run is harder.** In `MujocoSim` the arm has inertia, joint
 damping and motor armature; each joint is held by a stiff position servo
-(kp = 2000 N·m/rad) that tracks the *integrated* velocity command, with gravity
-compensation (`gravcomp`), roughly like an industrial controller in velocity
-mode. The servos lag, so pure feed-forward (K = 0) misses by ~1.6–1.8 mm in
-our runs; with K = 20 the feedback term pulls that down to ~0.6 mm path
-deviation and ~0.3 mm final error. On the numpy robot it's ~0.03 mm.
+(kp = 5000 N·m/rad, joint damping 100 N·m·s/rad, armature 0.1) that tracks
+the *integrated* velocity command, with gravity compensation (`gravcomp`),
+roughly like an industrial controller in velocity mode. Measured in our runs
+(MuJoCo 4.0.1, 3 s hold after the move):
+
+| gain K | max deviation during the move | error after the hold |
+|---|---|---|
+| 0 (feed-forward only) | 2.3 mm | 2.4 mm (servo lag is never corrected) |
+| 20 (default) | 0.14 mm | ~0 |
+| 60 | 0.33 mm | 0.2 mm and **ringing**: outer loop too fast for the servos |
+
+An earlier, softer servo tuning (kp = 2000, damping 30) looked fine for 2.5 s
+but slowly rang up after the move. That's why the MuJoCo test holds for 2 s
+before judging. The numpy robot tracks to ~0.03 mm.
 
 ## Task
 
@@ -75,6 +84,6 @@ Implement `quintic_time_scaling`, `straight_line_reference`, `dls_inverse`,
     python -m labs.manipulators check lab11
     python -m labs.manipulators visual lab11   # deviation from the line, numpy vs MuJoCo
 
-Stretch (no tests): set `gain=0` (pure feed-forward) and compare the MuJoCo
-deviation; aim the line through the base axis and watch the shoulder singularity
+Stretch (no tests): reproduce the table above with `gain=0` and `gain=60`
+(use `settle=3.0`); aim the line through the base axis and watch the shoulder singularity
 (lab 10) with `damping=0` vs `0.05`.

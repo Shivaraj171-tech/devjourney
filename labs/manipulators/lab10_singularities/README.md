@@ -1,6 +1,6 @@
 # Lab 10 · Singularities and manipulability
 
-Module 3 · 150 XP · browser twin: Module 3, "Singularities"
+Module 3 · 150 XP · browser twin: Module 3 of the web track
 
 ## Intuition
 

@@ -1,0 +1,8 @@
+# Exact versions installed and verified with Python 3.13 (Linux x86_64) on 2026-11-22.
+numpy==2.5.5
+pytest==9.2.0
+# Physics simulator (official DeepMind bindings). Optional: without it the simulator
+# tests are skipped and lab08 can't be completed.
+mujoco==4.0.1
+# Optional: PNG plots from `python -m labs.manipulators visual <lab>`.
+matplotlib==3.11.2

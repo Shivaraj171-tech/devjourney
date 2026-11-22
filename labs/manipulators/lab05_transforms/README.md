@@ -1,6 +1,6 @@
 # Lab 05 · Homogeneous transforms and frame chains
 
-Module 1 · 120 XP · browser twin: Module 1, "Rigid transforms"
+Module 1 · 120 XP · browser twin: Module 1 of the web track
 
 ## Intuition
 

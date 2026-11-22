@@ -1,6 +1,6 @@
 # Lab 09 · Velocity kinematics: space, body and geometric Jacobians
 
-Module 3 (velocity kinematics) · 180 XP · browser twin: Module 3, "The Jacobian"
+Module 3 (velocity kinematics) · 180 XP · browser twin: Module 3 of the web track
 
 ## Intuition
 

@@ -50,9 +50,9 @@ def test_path_deviation(impl):
     np.testing.assert_allclose(d, [1, 1, 1], err_msg="distance to the SEGMENT, not the line")
 
 
-def _run(impl, sim):
+def _run(impl, sim, settle=0.5):
     p0 = sim.ee_pose()[:3, 3].copy()
-    log = impl.run_straight_line(sim, p0 + MOVE)
+    log = impl.run_straight_line(sim, p0 + MOVE, settle=settle)
     for key in ("t", "p", "q", "rot_err", "p0", "p1"):
         assert key in log, f"run_straight_line must return key {key!r}"
     dev = np.asarray(impl.path_deviation(log["p"], log["p0"], log["p1"]))
@@ -70,8 +70,10 @@ def test_straight_line_on_kinematic_robot(impl):
 
 @pytest.mark.skipif(not mujoco_available(), reason="optional: needs mujoco")
 def test_straight_line_in_mujoco(impl):
-    log, dev, final = _run(impl, MujocoSim(UR5_DH, Q0))
-    assert dev < 3e-3, (f"MuJoCo: max deviation {dev * 1e3:.2f} mm (want < 3 mm). Is the feedback "
+    # settle 2 s: a closed loop that slowly rings up would show here, not in a short run
+    log, dev, final = _run(impl, MujocoSim(UR5_DH, Q0), settle=2.0)
+    assert dev < 1e-3, (f"MuJoCo: max deviation {dev * 1e3:.2f} mm (want < 1 mm). Is the feedback "
                         "term using the MEASURED pose sim.ee_pose() each step?")
-    assert final < 2e-3, f"MuJoCo: final error {final * 1e3:.2f} mm (want < 2 mm)"
-    assert np.max(log["rot_err"]) < np.radians(1.0)
+    assert final < 2e-4, (f"MuJoCo: error after a 2 s hold is {final * 1e3:.3f} mm (want < 0.2 mm); "
+                          "if it grows with time, your gain is too high for the servos")
+    assert np.max(log["rot_err"]) < np.radians(0.5)

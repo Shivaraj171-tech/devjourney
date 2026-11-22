@@ -1,6 +1,6 @@
 # Lab 06 · Forward kinematics with Denavit-Hartenberg
 
-Module 2 (forward kinematics) · 150 XP · browser twin: Module 2, "DH parameters"
+Module 2 (forward kinematics) · 150 XP · browser twin: Module 2 of the web track
 
 ## Intuition
 

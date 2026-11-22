@@ -54,7 +54,7 @@ class KinematicSim:
 class MujocoSim:
     name = "mujoco"
 
-    def __init__(self, dh, q0, kp: float = 2000.0, damping: float = 30.0,
+    def __init__(self, dh, q0, kp: float = 5000.0, damping: float = 100.0,
                  armature: float = 0.1, timestep: float = 0.002, gravity: bool = True):
         import mujoco
         from labs.manipulators.lab08_sim_fk.solution import dh_to_mjcf

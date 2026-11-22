@@ -1,6 +1,6 @@
 # Lab 04 · Quaternions
 
-Module 1 · 120 XP · browser twin: Module 1, "Quaternions"
+Module 1 · 120 XP · browser twin: Module 1 of the web track
 
 ## Intuition
 
