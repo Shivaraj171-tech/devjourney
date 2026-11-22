@@ -12,6 +12,8 @@ export const VIZ_LIMITS = {
   links: 6,
   grid: 40,
   text: 120,
+  transforms: 12,
+  lines: 24,
 } as const;
 
 export type Pt = [number, number];
@@ -78,7 +80,40 @@ export type PointsItem = {
   truncated: boolean;
 };
 
-export type VizItem = ArmItem | ChartItem | GridItem | PointsItem;
+/** A 3D point: [x, y, z]. */
+export type Vec3 = [number, number, number];
+/** The top three rows of a 4x4 homogeneous transform, row by row: [r00, r01, r02, px, r10, ..., pz]. */
+export type Mat34 = number[];
+export type Point3 = { x: number; y: number; z: number; label: string };
+
+/** 3D coordinate frames (viz.frames3d / viz.arm3d): 4x4 transforms per frame of the animation. */
+export type Frames3DItem = {
+  kind: "frames3d";
+  name: string;
+  title: string;
+  caption: string;
+  /** "arm": links drawn as a thick arm (viz.arm3d); "frames": thin links. */
+  style: "frames" | "arm";
+  /** One scene per animation frame; each a list of world poses (null: not a usable matrix). */
+  frames: (Mat34 | null)[][];
+  /** One per transform: draw its triad? */
+  axes: boolean[];
+  labels: string[];
+  /** Pairs of transform indices joined by a line (origin to origin). */
+  links: [number, number][];
+  points: Point3[];
+  lines: [Vec3, Vec3][];
+  target: { pose: Mat34 } | { point: Vec3 } | null;
+  /** Index of the transform whose origin leaves a trail. */
+  trail: number | null;
+  /** Triad length; null: picked from the scene's size. */
+  scale: number | null;
+  /** Some transform's bottom row was not [0, 0, 0, 1]. */
+  badBottom: boolean;
+  truncated: boolean;
+};
+
+export type VizItem = ArmItem | ChartItem | GridItem | PointsItem | Frames3DItem;
 
 type Raw = Record<string, unknown>;
 const isObj = (v: unknown): v is Raw => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -202,6 +237,66 @@ function parsePoints(r: Raw): PointsItem | null {
   return item;
 }
 
+function vec3(v: unknown): Vec3 | null {
+  if (!Array.isArray(v) || v.length !== 3) return null;
+  const out = v.map(num);
+  return out.every((x) => x !== null) ? (out as Vec3) : null;
+}
+
+function mat34(v: unknown): Mat34 | null {
+  if (!Array.isArray(v) || v.length !== 12) return null;
+  const out = v.map(num);
+  return out.every((x) => x !== null) ? (out as number[]) : null;
+}
+
+function parseFrames3d(r: Raw): Frames3DItem | null {
+  const frames = arr(r.frames, VIZ_LIMITS.frames)
+    .map((scene) => (Array.isArray(scene) ? arr(scene, VIZ_LIMITS.transforms).map(mat34) : null))
+    .filter((scene): scene is (Mat34 | null)[] => !!scene && scene.length > 0);
+  if (frames.length === 0 || frames.every((scene) => scene.every((m) => m === null))) return null;
+  const count = Math.max(...frames.map((scene) => scene.length));
+  const inRange = (i: unknown): i is number => typeof i === "number" && Number.isInteger(i) && i >= 0 && i < count;
+  const axesRaw = Array.isArray(r.axes) ? arr(r.axes, VIZ_LIMITS.transforms) : [];
+  const points: Point3[] = [];
+  for (const p of arr(r.points, VIZ_LIMITS.points).filter(isObj)) {
+    const x = num(p.x);
+    const y = num(p.y);
+    const z = num(p.z);
+    if (x !== null && y !== null && z !== null) points.push({ x, y, z, label: text(p.label) });
+  }
+  const lines = arr(r.lines, VIZ_LIMITS.lines)
+    .map((l) => (Array.isArray(l) && l.length === 2 ? [vec3(l[0]), vec3(l[1])] : null))
+    .filter((l): l is [Vec3, Vec3] => !!l && l[0] !== null && l[1] !== null);
+  let target: Frames3DItem["target"] = null;
+  if (isObj(r.target)) {
+    const pose = mat34(r.target.pose);
+    const point = vec3(r.target.point);
+    target = pose ? { pose } : point ? { point } : null;
+  }
+  const scale = num(r.scale);
+  const labels = Array.isArray(r.labels) ? r.labels : [];
+  return {
+    kind: "frames3d",
+    name: text(r.name),
+    title: text(r.title) || "Frames",
+    caption: text(r.caption),
+    style: r.style === "arm" ? "arm" : "frames",
+    frames,
+    axes: Array.from({ length: count }, (_, i) => (axesRaw.length ? axesRaw[i] === true : true)),
+    labels: Array.from({ length: count }, (_, i) => text(labels[i])),
+    links: arr(r.links, VIZ_LIMITS.transforms * 2)
+      .map((l) => (Array.isArray(l) && l.length === 2 && inRange(l[0]) && inRange(l[1]) ? ([l[0], l[1]] as [number, number]) : null))
+      .filter((l): l is [number, number] => !!l),
+    points,
+    lines,
+    target,
+    trail: inRange(r.trail) ? r.trail : null,
+    scale: scale !== null && scale > 0 ? scale : null,
+    badBottom: r.bad_bottom === true,
+    truncated: r.truncated === true,
+  };
+}
+
 /** The run's "viz" list, cleaned. Never throws; unknown or broken items are dropped. */
 export function parseViz(raw: unknown): VizItem[] {
   if (!Array.isArray(raw)) return [];
@@ -210,7 +305,7 @@ export function parseViz(raw: unknown): VizItem[] {
     if (out.length >= VIZ_LIMITS.items) break;
     if (!isObj(r)) continue;
     const item =
-      r.kind === "arm" ? parseArm(r) : r.kind === "chart" ? parseChart(r) : r.kind === "grid" ? parseGrid(r) : r.kind === "points" ? parsePoints(r) : null;
+      r.kind === "arm" ? parseArm(r) : r.kind === "chart" ? parseChart(r) : r.kind === "grid" ? parseGrid(r) : r.kind === "points" ? parsePoints(r) : r.kind === "frames3d" ? parseFrames3d(r) : null;
     if (item) out.push(item);
   }
   return out;

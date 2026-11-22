@@ -1,0 +1,17 @@
+# Wrong: transposes only R (good) but undoes the shift with -p instead of -R^T p.
+suggestion:
+  file: rigid/transform.py
+  find: "    # Byte: \"rotations are orthonormal, so the inverse is the transpose\"\n    return transpose(T)"
+  replace: "    Rt = transpose(rotation_of(T))\n    p = translation_of(T)\n    return make_T(Rt, [-p[0], -p[1], -p[2]])  # turn back, move back"
+  correct: false
+  why:
+    choices:
+      - "Reject: -p undoes the move along the world axes; the inverse needs -Rᵀp, which only equals -p when R = I."
+      - "Accept: transpose the turn, negate the move. The bottom row is [0, 0, 0, 1] now, so the inverse is right."
+      - "Reject: the rotation part of an inverse must be R itself, not Rᵀ, because a rotation keeps its own axes."
+    answer: 0
+  says: "Fair, the full transpose was sloppy. Proper version: transpose the rotation, negate the translation. Turn back, move back."
+  explain: >-
+    Half right: Rᵀ is the right rotation and the bottom row is fixed, so the pure-move check passes. But
+    solving p_world = R p_box + t gives p_box = Rᵀ p_world - Rᵀ t. The move must be undone in the box's
+    TURNED frame: -Rᵀ t. With the box turned 90°, -t points the wrong way, so T · T_inv(T) is not I.

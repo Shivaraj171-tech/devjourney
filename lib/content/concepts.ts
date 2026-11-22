@@ -42,6 +42,18 @@ const LABELS: Record<string, string> = {
   "q-learning": "Q-learning (reinforcement learning)",
   "logistic-regression": "Logistic regression (and data leaks)",
   "neural-networks": "Tiny neural networks (MLP)",
+  // Manipulators · Module 1: rigid-body motion (side floor)
+  "rotation-2d": "2D rotation matrices",
+  "matrix-composition": "Matrix products and the order of turns",
+  "rotation-matrices-3d": "3D rotations (orthonormal, det +1)",
+  "euler-angles": "Euler angles and gimbal lock",
+  "axis-angle": "Axis-angle (Rodrigues' formula)",
+  quaternions: "Quaternions",
+  slerp: "Slerp (blending orientations)",
+  "homogeneous-transforms": "Homogeneous transforms (4x4)",
+  "frame-chains": "Frames of reference and transform chains",
+  "pose-chains": "Debugging a pose chain",
+  "rigid-body-motion": "Rigid-body motion (module check)",
 };
 
 /** "mutable-shared-data" → "Mutable shared data". Unknown slugs are tidied, labels pass through. */

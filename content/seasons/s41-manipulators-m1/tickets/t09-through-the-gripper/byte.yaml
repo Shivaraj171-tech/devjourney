@@ -1,0 +1,11 @@
+# Right: Byte inverts the gripper's pose, so base coordinates turn into gripper coordinates.
+suggestion:
+  file: rigid/frames.py
+  find: "    return T_apply(T_base_gripper, p_box_base)"
+  replace: "    T_gripper_base = T_inv(T_base_gripper)\n    return T_apply(T_gripper_base, p_box_base)"
+  correct: true
+  says: "Name check: T_base_gripper times p_base has 'gripper' touching 'base'. We need T_gripper_base, so invert it."
+  explain: >-
+    Right, and for the right reason: the touching names must match. T_gripper_base = T_inv(T_base_gripper)
+    turns base coordinates into gripper coordinates, and the box comes out 0.30 m straight ahead of the
+    fingers. Naming the inverse makes the line check itself.

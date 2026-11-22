@@ -1,0 +1,23 @@
+questions:
+  - prompt: "With the fixed code, where does `rot_y(math.pi / 2)` send the x axis (1, 0, 0)?"
+    choices:
+      - "(0, 0, -1)"
+      - "(0, 0, 1)"
+      - "(0, 1, 0)"
+      - "(-1, 0, 0)"
+    answer: 0
+    explain: "Column 0 of Ry(90°) is (cos 90°, 0, -sin 90°) = (0, 0, -1). Right-hand rule about y: z goes to x, and x goes to -z."
+  - prompt: "A matrix R has R^T R = I. What can its determinant be?"
+    choices:
+      - "+1 or -1"
+      - "Only +1"
+      - "Any number between -1 and +1"
+    answer: 0
+    explain: "det(Rᵀ) det(R) = det(I) = 1 and det(Rᵀ) = det(R), so det(R)² = 1. Orthonormal alone allows mirrors (-1); a rotation needs +1."
+  - prompt: "Byte's broken `rot_y` passed `is_rotation` (even the fixed one). What does that tell you?"
+    choices:
+      - "is_rotation checks that R is SOME rotation, not the one you meant: you still need a test of which way it turns"
+      - "is_rotation must still be broken, since a properly fixed safety check would always have rejected Byte's matrix"
+      - "Byte's rot_y was actually correct all along, and the direction test in the checks is what's wrong"
+    answer: 0
+    explain: "Byte's rot_y(θ) is the real Ry(-θ): a genuine rotation, just the wrong one. Property checks (orthonormal, det +1) catch broken matrices; only a known input → known output test catches a wrong direction."

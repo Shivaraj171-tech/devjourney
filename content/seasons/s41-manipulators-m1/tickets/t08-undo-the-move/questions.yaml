@@ -1,0 +1,23 @@
+questions:
+  - prompt: "T is a pure turn (R = rot_z(30°), t = 0). Which of these equals T_inv(T)?"
+    choices:
+      - "The full 4x4 transpose of T: with t = 0 it happens to be right"
+      - "None of them: a pure turn has no inverse as a 4x4 matrix"
+      - "T itself, since every rotation matrix is its own inverse when it has no translation part"
+    answer: 0
+    explain: "With t = 0 the last column and bottom row are already 0 0 0 / 0 0 0 1, so the transpose only transposes R: Rᵀ = R⁻¹. That's why Byte's one-liner 'worked' in his quick test. Only half turns are their own inverse."
+  - prompt: "T moves by (1, 0, 0) and turns 90° about z. What is the translation part of T_inv(T)?"
+    choices:
+      - "(0, 1, 0)"
+      - "(-1, 0, 0)"
+      - "(1, 0, 0)"
+      - "(0, -1, 0)"
+    answer: 0
+    explain: "The translation of the inverse is -Rᵀ t. Rᵀ = rot_z(-90°) sends (1, 0, 0) to (0, -1, 0); negated, (0, 1, 0). Plain -t = (-1, 0, 0) would undo the shift along the WORLD axes, not the box's turned ones."
+  - prompt: "Why do points get a 1 as their 4th coordinate, while directions (like an axis) get a 0?"
+    choices:
+      - "The 4th coordinate multiplies the translation column: points get shifted, directions only get turned"
+      - "To keep every vector a unit vector after the transform, since a 1 makes the length come out right"
+      - "Directions are really 3D and points are really 4D, and the matrix product needs to be told which one it is multiplying"
+    answer: 0
+    explain: "T (x, y, z, w) = (R(x, y, z) + w·t, w). An arrow pointing 'up' is still 'up' after the box moves; only its turn matters."

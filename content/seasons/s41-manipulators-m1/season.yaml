@@ -1,0 +1,32 @@
+id: s41
+title: "Manipulators · Module 1: Rigid-body motion"
+icon: "🦾"
+# A deep side floor: module 1 of 8 of the manipulator track (see README). Its own
+# small codebase (the rigid/ package: a tiny matrix helper, rotations, Euler angles,
+# axis-angle, quaternions, homogeneous transforms), opened as a whole once Season 1
+# is done, never gating anything. `lesson: long`: each lesson goes Intuition → The
+# maths (derived step by step) → Worked example (verified by running) → Watch out → AI check.
+chain: false
+requires: s01-t10
+lesson: long
+short_title: "Manipulators · M1"
+intro: >
+  **Module 1 of 8: Rigid-body motion.** Grabby is moving up from the flat packing table to the 3D shelves, and boxes now have
+  to arrive the right way up, turned the right way round. Rosa is teaching it (and you)
+  how robots describe orientation and position: rotation matrices, Euler angles and their
+  gimbal lock, axis-angle, quaternions, and 4x4 homogeneous transforms chained from the
+  base to the gripper. Each ticket is one idea, taught intuition first, then the maths
+  step by step, then you implement it in plain Python and SEE it in the 3D Lab viewer.
+  Optional: it never blocks the main story.
+tickets:
+  - t01-turn-the-box
+  - t02-order-matters
+  - t03-which-way-is-up
+  - t04-gimbal-lock
+  - t05-one-axis-one-angle
+  - t06-the-drifting-wrist
+  - t07-smooth-turns
+  - t08-undo-the-move
+  - t09-through-the-gripper
+  - t10-wrong-tray
+  - t11-concept-check

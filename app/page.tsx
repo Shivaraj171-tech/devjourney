@@ -40,7 +40,7 @@ export default function Home() {
     const tickets = story[floor].tickets;
     const at = tickets.findIndex((t) => t.id === s.requires);
     const gateText = at === tickets.length - 1 ? `Floor ${floor + 1}` : `ticket #${tickets[at].number} of Floor ${floor + 1}`;
-    return [{ ...summary(s), requires: s.requires as string, gateText, icon: s.icon ?? "🧪" }];
+    return [{ ...summary(s), requires: s.requires as string, gateText, icon: s.icon ?? "🧪", label: s.shortTitle ?? s.title }];
   });
   const all = loadSeasons();
   const bounties: BountyCard[] = sideQuestSeasons().flatMap((s) =>

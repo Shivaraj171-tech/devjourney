@@ -1,0 +1,17 @@
+trace:
+  - code: |
+      def frame_after(names):
+          frame = names[0][0]
+          for a, b in names:
+              if a != frame:
+                  return "mismatch at " + a
+              frame = b
+          return frame
+
+      result = frame_after([("base", "shoulder"), ("shoulder", "wrist"), ("wrist", "gripper")])
+    watch: [frame, a, b]
+    rows: 7
+    explain: >-
+      This is the name rule as code: start in "base", and each transform must start where the last one ended
+      (the touching names match), then you are in its second frame: base → shoulder → wrist → gripper. A chain
+      in the wrong order would stop at the first mismatch.

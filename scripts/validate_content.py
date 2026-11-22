@@ -8,7 +8,9 @@ For each ticket it checks:
   4. questions.yaml (optional "check your understanding" quiz) is well formed:
      2-4 choices per question, answer is a valid 0-based index, explain present.
   4b. concept.md (optional "Learn" lesson) is non-empty, starts with a
-     **Title** line, and every ```python block is valid Python syntax.
+     **Title** line, every ```python block is valid Python syntax, and its
+     prose (outside ``` blocks) is at most 230 words: a 2-minute lesson.
+     A season may set `lesson: long` (see below) for deep lessons.
   5. The tests FAIL against starter/ (otherwise there is nothing to do).
   6. The tests PASS against solution/.
   7. Evolving codebase: every file in solution(N) appears unchanged in starter(N+1).
@@ -163,6 +165,21 @@ the Robotics Lab), opened as a whole once that ticket is solved:
     chain: false
     requires: s01-t10    # an on-chain ticket id: the whole floor opens once it is solved
     icon: "🤖"           # optional: the floor's icon on the HQ
+    short_title: "Manipulators · M1"   # optional: the floor's name on the HQ board and ticket chip
+
+A side floor may also set
+
+    lesson: long     # deep lessons (e.g. s41-manipulators-m1): every concept.md may have
+                     # up to 700 words of prose (code blocks not counted, at most 90 code
+                     # lines) and must have these section lines, in this order:
+                     #   **Intuition**  **The maths**  **Worked example**  **Watch out**  **AI check**
+                     # (a line starting with the bold name; "**Watch out:** ..." is fine).
+                     # Every ```python block must RUN cleanly (python3 -I, standard library
+                     # only), and at least one must end with an "# Output:" comment block:
+                     #     print(round(math.cos(0.5), 3))
+                     #     # Output:
+                     #     # 0.878
+                     # whose lines must be exactly what the block prints (a verified example).
 
 Its tickets are ordinary lesson tickets that open one after another: each needs a
 concept.md, `requires`/`bug_kind`/`tutorial` are not allowed, and there is no
@@ -369,11 +386,28 @@ def check_questions(path, min_questions=1):
 
 
 PYTHON_BLOCK = re.compile(r"^```python[ \t]*\n(.*?)^```[ \t]*$", re.MULTILINE | re.DOTALL)
+ANY_BLOCK = re.compile(r"^```[^\n]*\n(.*?)^```[ \t]*$", re.MULTILINE | re.DOTALL)
 TITLE_LINE = re.compile(r"^\*\*[^*].*\*\*$")
+MAX_SHORT_TITLE_CHARS = 40
+MAX_LESSON_WORDS = 230  # a 2-minute lesson (prose outside ``` blocks)
+MAX_LONG_LESSON_WORDS = 700  # season.yaml `lesson: long`
+MAX_LONG_LESSON_CODE_LINES = 90
+LONG_LESSON_SECTIONS = ("Intuition", "The maths", "Worked example", "Watch out", "AI check")
+LESSON_KINDS = ("short", "long")
+OUTPUT_MARK = "# Output:"
 
 
-def check_concept(path):
-    """Check a concept.md lesson. Returns a list of error strings."""
+def lesson_words(text):
+    """Words of prose in a lesson: everything outside ``` blocks."""
+    return len(ANY_BLOCK.sub(" ", text).split())
+
+
+def check_concept(path, long=False):
+    """Check a concept.md lesson. Returns a list of error strings.
+
+    long: the season sets `lesson: long` (deep lessons): more words, required sections,
+    and every python block is run (its "# Output:" comment, if any, must match).
+    """
     text = path.read_text(encoding="utf-8")
     if not text.strip():
         return ["concept.md is empty"]
@@ -386,6 +420,52 @@ def check_concept(path):
             compile(match.group(1), f"concept.md block {i}", "exec")
         except SyntaxError as exc:
             errors.append(f"concept.md: python block {i} has a syntax error: {exc.msg} (line {exc.lineno})")
+    words = lesson_words(text)
+    limit = MAX_LONG_LESSON_WORDS if long else MAX_LESSON_WORDS
+    if words > limit:
+        hint = "" if long else " (a deep floor can set `lesson: long` in season.yaml)"
+        errors.append(f"concept.md has {words} words of prose, at most {limit} allowed{hint}")
+    if long and not errors:
+        errors += check_long_lesson(text)
+    return errors
+
+
+def check_long_lesson(text):
+    """A deep lesson: its sections in order, and python blocks that run (worked examples verified)."""
+    errors = []
+    lines = [line.strip() for line in text.splitlines()]
+    at = []
+    for name in LONG_LESSON_SECTIONS:
+        found = [i for i, line in enumerate(lines) if line.startswith(f"**{name}")]
+        if not found:
+            errors.append(f"concept.md: missing the **{name}** section (a long lesson needs: "
+                          + ", ".join(LONG_LESSON_SECTIONS) + ")")
+        else:
+            at.append(found[0])
+    if not errors and at != sorted(at):
+        errors.append("concept.md: sections must come in this order: " + ", ".join(LONG_LESSON_SECTIONS))
+    code_lines = sum(len(m.group(1).splitlines()) for m in ANY_BLOCK.finditer(text))
+    if code_lines > MAX_LONG_LESSON_CODE_LINES:
+        errors.append(f"concept.md has {code_lines} lines in code blocks, at most {MAX_LONG_LESSON_CODE_LINES}")
+    verified = 0
+    for i, match in enumerate(PYTHON_BLOCK.finditer(text), start=1):
+        code = match.group(1)
+        out, error = run_python(code)
+        if error:
+            errors.append(f"concept.md: python block {i} does not run: {error}")
+            continue
+        block = code.rstrip("\n").splitlines()
+        if OUTPUT_MARK not in [line.strip() for line in block]:
+            continue
+        start = [line.strip() for line in block].index(OUTPUT_MARK)
+        expected = [line.strip()[1:].strip() if line.strip().startswith("#") else line for line in block[start + 1:]]
+        if normalize_output(out) != normalize_output("\n".join(expected)):
+            errors.append(f"concept.md: python block {i} prints {out.strip()!r}, but its # Output: says {chr(10).join(expected)!r}")
+        else:
+            verified += 1
+    if verified == 0 and not any("does not run" in e or "prints" in e for e in errors):
+        errors.append("concept.md: a long lesson needs a worked example: a python block ending in an "
+                      "'# Output:' comment with what it prints (checked by running it)")
     return errors
 
 
@@ -393,7 +473,7 @@ def check_concept(path):
 EXAM_FORBIDDEN = ["hints.md", "concept.md", "byte.yaml", "formats.yaml", "questions.yaml"]
 
 
-def check_ticket_meta(ticket_dir, final=False, side_quest=False, side_floor=False):
+def check_ticket_meta(ticket_dir, final=False, side_quest=False, side_floor=False, long_lesson=False):
     """Check files, ticket.yaml, hints and questions. Returns a list of error strings.
 
     final: the ticket belongs to the final exam (season.yaml `final: true`), so it
@@ -402,6 +482,7 @@ def check_ticket_meta(ticket_dir, final=False, side_quest=False, side_floor=Fals
     e.g. the Bug Bounty board: a "mystery bug" with no lesson (see check_side_quest_meta).
     side_floor: the ticket belongs to a side floor (a side quest with a season-level
     `requires`, e.g. the Robotics Lab): a normal lesson ticket, so concept.md is required.
+    long_lesson: the season sets `lesson: long`: concept.md is a deep lesson (check_long_lesson).
     """
     errors = []
     if final:
@@ -464,7 +545,7 @@ def check_ticket_meta(ticket_dir, final=False, side_quest=False, side_floor=Fals
     if questions_file.is_file():
         errors += check_questions(questions_file, MIN_READ_QUESTIONS if is_read else 1)
     if (ticket_dir / "concept.md").is_file():
-        errors += check_concept(ticket_dir / "concept.md")
+        errors += check_concept(ticket_dir / "concept.md", long=long_lesson)
     if ticket_type == "review":
         errors += check_review(ticket_dir)
     if ticket_type == "incident":
@@ -1223,6 +1304,18 @@ def validate_season(season_dir, prev=None):
             season_errors.append("season.yaml: 'requires' is only for side floors (`chain: false`, not final)")
         else:
             side_floor = True
+    long_lesson = season.get("lesson") == "long"
+    if "lesson" in season:
+        if season["lesson"] not in LESSON_KINDS:
+            season_errors.append(f"season.yaml: 'lesson' must be one of {list(LESSON_KINDS)}, got {season['lesson']!r}")
+        elif long_lesson and not side_floor:
+            season_errors.append("season.yaml: 'lesson: long' is only for side floors (deep optional modules)")
+            long_lesson = False
+    if "short_title" in season:
+        if not (is_nonempty_str(season["short_title"]) and len(season["short_title"]) <= MAX_SHORT_TITLE_CHARS):
+            season_errors.append(f"season.yaml: 'short_title' must be a short text, at most {MAX_SHORT_TITLE_CHARS} characters")
+        elif not side_floor:
+            season_errors.append("season.yaml: 'short_title' is only for side floors (their name on the HQ board)")
     if "icon" in season and not (is_nonempty_str(season["icon"]) and len(season["icon"]) <= MAX_ICON_CHARS):
         season_errors.append(f"season.yaml: 'icon' must be a short text (an emoji), at most {MAX_ICON_CHARS} characters")
     if not chain:
@@ -1242,7 +1335,7 @@ def validate_season(season_dir, prev=None):
             prev = None
             continue
         errors = check_ticket_meta(ticket_dir, final=final, side_quest=not chain and not final and not side_floor,
-                                   side_floor=side_floor)
+                                   side_floor=side_floor, long_lesson=long_lesson)
         if not errors and load_ticket_type(ticket_dir) not in NO_TEST_TYPES:
             errors += check_ticket_tests(ticket_dir)
             if (ticket_dir / "byte.yaml").is_file():

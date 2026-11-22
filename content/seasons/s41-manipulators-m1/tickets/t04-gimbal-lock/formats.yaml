@@ -1,0 +1,26 @@
+predict:
+  - code: |
+      import math
+      print(math.atan2(0.0, 0.0))
+      noise_y, noise_x = 1e-17, 6e-17   # what rounding leaves at the lock
+      print(round(math.degrees(math.atan2(noise_y, noise_x)), 1))
+    question: "What does this print?"
+    answer: |-
+      0.0
+      9.5
+    choices:
+      - |-
+        0.0
+        9.5
+      - |-
+        0.0
+        0.0
+      - |-
+        nan
+        9.5
+      - |-
+        ZeroDivisionError
+    explain: >-
+      atan2(0, 0) doesn't fail, it returns 0. And atan2 of two rounding errors returns a perfectly confident
+      9.5°: it only looks at their ratio. Near gimbal lock the "answer" is noise, which is why the code needs a
+      separate branch instead of trusting atan2.

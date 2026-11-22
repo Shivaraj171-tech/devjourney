@@ -1,0 +1,12 @@
+# Wrong: hides the drift in one function; the stored q still grows (and the half angle is untouched).
+suggestion:
+  file: rigid/quat.py
+  find: "    p = [0.0, v[0], v[1], v[2]]\n    w = q_mul(q_mul(q, p), conj(q))"
+  replace: "    q = normalize(q)\n    p = [0.0, v[0], v[1], v[2]]\n    w = q_mul(q_mul(q, p), conj(q))"
+  correct: false
+  says: "Vectors come out too long? Normalise q right where we use it. Safe everywhere, one line."
+  explain: >-
+    The vectors from `rotate` stop growing, but the orientation `spin` returns still drifts: its |q| is
+    1.05 after ten seconds, so the IMU check fails, and `to_matrix` (which the 3D view uses) still stretches.
+    Fix drift where it's produced, in `spin`, every step. And `from_axis_angle` still uses the full angle
+    instead of half.

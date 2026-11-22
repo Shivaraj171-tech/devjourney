@@ -480,7 +480,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, nextTicket }: Pr
               {!firstVisit && <Story text={ticket.story} />}
 
               {/* 5. The lesson, folded. */}
-              {ticket.concept && !exam && !bounty && <Lesson concept={ticket.concept} newConcept={ticket.newConcept} />}
+              {ticket.concept && !exam && !bounty && <Lesson concept={ticket.concept} newConcept={ticket.newConcept} deep={ticket.deepLesson === true} />}
             </div>
           )}
           {activeTab === "byte" && ticket.byte?.prompt && (
@@ -706,8 +706,8 @@ function Story({ text, defaultOpen = false }: { text: string; defaultOpen?: bool
   );
 }
 
-/** "📘 2-min lesson": the new concept, folded until asked for. */
-function Lesson({ concept, newConcept }: { concept: string; newConcept: string }) {
+/** "📘 2-min lesson" (or a deep lesson, season.yaml `lesson: long`): the new concept, folded until asked for. */
+function Lesson({ concept, newConcept, deep }: { concept: string; newConcept: string; deep: boolean }) {
   // Linked as /ticket/<id>/#lesson (e.g. from a solved Bug Bounty): open it and bring it into view.
   const [open, setOpen] = useState(() => window.location.hash === "#lesson");
   const ref = useRef<HTMLElement>(null);
@@ -726,14 +726,18 @@ function Lesson({ concept, newConcept }: { concept: string; newConcept: string }
         >
           <span aria-hidden>📘</span>
           <span className="flex-1">
-            2-min lesson: <b>{conceptLabel(newConcept)}</b>
+            {deep ? `Deep lesson (~${Math.max(3, Math.round(concept.split(/\s+/).length / 150))} min)` : "2-min lesson"}: <b>{conceptLabel(newConcept)}</b>
           </span>
           <span aria-hidden className="text-xs text-cyan-200">{open ? "▲" : "▼"}</span>
         </button>
       </h2>
       {open && (
         <div id="ticket-lesson" className="space-y-3 border-t border-cyan-500/20 px-3 pt-2 pb-3">
-          <p className="text-xs text-slate-400">New concept for this ticket. Free to read, no XP cost.</p>
+          <p className="text-xs text-slate-400">
+            {deep
+              ? "New concept for this ticket: intuition first, then the maths step by step, a worked example, and what to watch out for. Free to read, no XP cost."
+              : "New concept for this ticket. Free to read, no XP cost."}
+          </p>
           <Markdown text={concept} />
         </div>
       )}

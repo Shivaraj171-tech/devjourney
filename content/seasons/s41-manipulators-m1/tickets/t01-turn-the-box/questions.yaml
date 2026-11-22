@@ -1,0 +1,24 @@
+questions:
+  - prompt: "With the fixed `rot2`, what is `apply2(rot2(math.pi / 2), [0, 1])`, rounded?"
+    choices:
+      - "(-1, 0)"
+      - "(1, 0)"
+      - "(0, -1)"
+      - "(0, 1)"
+    answer: 0
+    explain: "The y axis turned 90° anticlockwise points left. It is also just the second column of R(90°) = [[0, -1], [1, 0]]: (-1, 0)."
+  - prompt: "Byte's matrix was the transpose of the right one. Why did the length check still pass?"
+    choices:
+      - "The transpose is a rotation too (by -θ): it keeps lengths, it just turns the other way"
+      - "The length check only looks at the x coordinate of the corner, which a transpose always leaves unchanged"
+      - "Transposing only flips the signs of the lengths, and the length check takes the absolute value"
+    answer: 0
+    explain: "R(θ)ᵀ = R(-θ). Its columns are still unit length and perpendicular, so every length survives. Wrong-direction bugs need a test that checks WHERE things go, not just how far."
+  - prompt: "Why is the matrix's FIRST COLUMN where the x axis ends up?"
+    choices:
+      - "R times (1, 0) picks out exactly the first column: 1 times column 0 plus 0 times column 1"
+      - "By convention we always list the turned axes in the first row, and Python stores rows as columns"
+      - "Only because cos θ is the larger number, and it has to come first"
+      - "The first column holds the angle θ itself, and the x axis is defined by that angle"
+    answer: 0
+    explain: "A matrix times a vector is a mix of its columns, weighted by the vector's entries. (1, 0) takes one of column 0 and none of column 1. So column k is always where axis k goes."

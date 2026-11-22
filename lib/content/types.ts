@@ -223,6 +223,8 @@ export type Ticket = {
    * `requires`, e.g. the Robotics Lab): the floor's name and icon. Absent elsewhere.
    */
   sideFloor?: { title: string; icon: string };
+  /** The season sets `lesson: long` (a deep floor): the lesson is a longer read (Intuition, maths, example...). */
+  deepLesson?: true;
 };
 
 /** What a Bug Bounty ticket reveals once solved, and what opens it. */
@@ -260,6 +262,8 @@ export type Season = {
   requires?: string;
   /** Side floors only: the floor's icon on the HQ, e.g. "🤖". */
   icon?: string;
+  /** Side floors only (season.yaml `short_title`): the name on the HQ board and the ticket chip, e.g. "Manipulators · M1". */
+  shortTitle?: string;
   tickets: Ticket[];
 };
 

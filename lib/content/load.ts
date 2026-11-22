@@ -273,6 +273,8 @@ export function loadSeasons(): Season[] {
       final?: boolean;
       requires?: string;
       icon?: string;
+      short_title?: string;
+      lesson?: string;
     }>(join(dir, "season.yaml"));
     const final = meta.final === true;
     const tickets = (meta.tickets ?? []).map((t, i) =>
@@ -281,7 +283,9 @@ export function loadSeasons(): Season[] {
     const season: Season = { id: meta.id, slug, title: meta.title, intro: meta.intro, chain: meta.chain !== false, final, tickets };
     if (meta.requires) season.requires = meta.requires;
     if (meta.icon) season.icon = meta.icon;
-    if (isSideFloor(season)) for (const t of tickets) t.sideFloor = { title: meta.title, icon: meta.icon ?? "🧪" };
+    if (meta.short_title) season.shortTitle = meta.short_title;
+    if (meta.lesson === "long") for (const t of tickets) t.deepLesson = true;
+    if (isSideFloor(season)) for (const t of tickets) t.sideFloor = { title: meta.short_title ?? meta.title, icon: meta.icon ?? "🧪" };
     seasons.push(season);
   }
   addBountyInfo(seasons);

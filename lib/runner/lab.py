@@ -9,6 +9,8 @@ Robotics Lab tickets draw their results in the Lab viewer next to the CI checks
     viz.chart("Loss", xs, ys, label="train")                  # a line chart (same name: one more line)
     viz.grid("Q-values", rows, path=[(0, 0), (0, 1)])        # a heat-map grid (e.g. a Q-table)
     viz.points("Grasps", [(x, y), ...], labels=[0, 1, ...])   # a scatter plot of labelled points
+    viz.frames3d("Box", [[T_world, T_box], ...])               # 3D coordinate frames (4x4 transforms), animated
+    viz.arm3d([[T_01, T_12, T_23], ...])                       # a 3D arm from link-to-link transforms
 
 Each call records one item, keyed by its name (calling again with the same name
 replaces it, except chart(), which adds a line). test_runner.run_tests() clears
@@ -33,6 +35,8 @@ MAX_SERIES = 6          # lines per chart
 MAX_LINKS = 6           # links per arm
 MAX_GRID = 40           # rows and columns per grid
 MAX_TEXT = 120          # characters per title / label / caption
+MAX_TRANSFORMS = 12     # 4x4 transforms per 3D frame
+MAX_LINES = 24          # static line segments per 3D item
 MAX_JSON = 200_000      # characters of JSON for the whole run
 DIGITS = 4              # decimals kept
 
@@ -96,6 +100,8 @@ def _thin_all(items):
     changed = False
     for item in items:
         for key in ("frames", "targets", "ghost", "points", "labels", "path"):
+            if item.get("kind") == "frames3d" and key in ("labels", "points"):
+                continue  # one per transform / static marks: never thinned
             if isinstance(item.get(key), list) and len(item[key]) > 8:
                 item[key] = _thin(item[key], max(8, len(item[key]) // 2))[0]
                 item["truncated"] = changed = True
@@ -221,6 +227,170 @@ class _Viz:
                 raise ValueError(f"viz.points: labels needs one entry per point ({len(pts)}), got {len(labels)}")
             item["labels"] = _thin(labels, MAX_POINTS)[0]
         _record(name, item)
+
+
+    def frames3d(self, name, frames, *, axes=True, links=True, labels=None, points=None, lines=None,
+                 target=None, trail=None, scale=None, title=None, caption=None):
+        """Animate 3D coordinate frames: each frame of the animation is a list of 4x4
+        homogeneous transforms (nested lists, rows first), each one a pose in the WORLD frame.
+
+        The viewer draws each transform as a triad at its origin: x red, y green, z blue,
+        each tip labelled "x", "y", "z". A single scene (a list of 4x4s) or a single 4x4
+        is fine too (one still frame).
+
+        axes:   True (a triad on every transform), False, or one True/False per transform.
+        links:  True (a line from each transform's origin to the next one's: a chain),
+                False, or a list of (i, j) index pairs to join.
+        labels: optional names, one per transform (e.g. ["base", "shoulder", "gripper"]).
+        points: optional static (x, y, z) or (x, y, z, label) points (a box, a bin...).
+        lines:  optional static ((x, y, z), (x, y, z)) segments (e.g. a rotation axis).
+        target: optional 4x4 pose (drawn as a dashed triad) or (x, y, z) point to reach.
+        trail:  optional transform index whose origin leaves a trail (e.g. -1: the last one).
+        scale:  triad length in metres (default: picked from the scene's size).
+
+        The matrices are drawn as they are, even when they are not proper rotations
+        (a quaternion that drifted shows as stretched axes). A bottom row that is not
+        [0, 0, 0, 1] is flagged in the viewer.
+        """
+        scenes = _scenes(frames)
+        count = max(len(s) for s in scenes)
+        item = {"kind": "frames3d", "style": "frames", "title": _text(title, _text(name) or "Frames"),
+                "caption": _text(caption), "truncated": False, "bad_bottom": False}
+        cleaned = []
+        for f, scene in enumerate(scenes):
+            row = []
+            for k, T in enumerate(scene):
+                rows, bad = _transform(T, f"viz.frames3d: frame {f}, transform {k}")
+                item["bad_bottom"] = item["bad_bottom"] or bad
+                row.append(rows)
+            cleaned.append(row)
+        item["frames"], item["truncated"] = _thin(cleaned, MAX_FRAMES)
+        item["axes"] = _per_transform(axes, count, "axes")
+        if labels is not None:
+            item["labels"] = [_text(lab) for lab in list(labels)[:MAX_TRANSFORMS]]
+        if links is True:
+            item["links"] = [[i, i + 1] for i in range(count - 1)]
+        elif links:
+            item["links"] = [[int(i) % count, int(j) % count] for i, j in list(links)[:MAX_TRANSFORMS * 2]]
+        else:
+            item["links"] = []
+        if points:
+            item["points"] = [_point3(p) for p in list(points)[:MAX_POINTS]]
+        if lines:
+            item["lines"] = [[_vec3(a), _vec3(b)] for a, b in list(lines)[:MAX_LINES]]
+        if target is not None:
+            item["target"] = _target3(target)
+        if trail is not None:
+            item["trail"] = int(trail) % count
+        if scale is not None:
+            item["scale"] = _num(scale)
+        _record(name, item)
+
+    def arm3d(self, frames, *, name="arm3d", local=True, labels=None, points=None, lines=None, target=None,
+              title=None, caption=None, scale=None, trail=True):
+        """A 3D arm: each frame is one pose, given as a list of 4x4 transforms.
+
+        local=True (default): the transforms are link to link (T_0_1, T_1_2, ...): the viewer
+                 gets their running product T_0_1, T_0_1 T_1_2, ... (each joint in the world).
+        local=False: they already are world poses of each joint.
+        The base (the identity) is added first, so the arm starts at the origin. Links are
+        drawn as a thick arm, with triads at the base and the gripper (the last transform).
+        """
+        poses = []
+        for f, pose in enumerate(_scenes(frames)):
+            joints = [_identity4()]
+            for k, T in enumerate(pose):
+                rows, _bad = _transform(T, f"viz.arm3d: frame {f}, transform {k}", keep_bottom=True)
+                joints.append(_mul4(joints[-1], rows) if local else rows)
+            poses.append(joints)
+        n = len(poses[0])
+        axes = [i == 0 or i == n - 1 for i in range(n)]
+        names = list(labels) if labels is not None else ["base"] + [f"joint {i}" for i in range(1, n - 1)] + ["gripper"]
+        if labels is not None and len(names) == n - 1:
+            names = ["base"] + names
+        self.frames3d(name, poses, axes=axes, links=True, labels=names, points=points, lines=lines, target=target,
+                      trail=(n - 1) if trail else None, scale=scale, title=_text(title, "Grabby's arm (3D)"),
+                      caption=caption)
+        if name in _items and _items[name]["kind"] == "frames3d":
+            _items[name]["style"] = "arm"
+
+
+# ---------- 3D helpers ----------
+
+def _is_matrix(value):
+    return isinstance(value, (list, tuple)) and len(value) > 0 and all(
+        isinstance(r, (list, tuple)) and len(r) > 0 and not isinstance(r[0], (list, tuple)) for r in value)
+
+
+def _scenes(frames):
+    """frames as a list of scenes (lists of transforms): accepts one 4x4, one scene, or many."""
+    frames = list(frames) if isinstance(frames, (list, tuple)) else frames
+    if not isinstance(frames, list) or not frames:
+        raise ValueError("viz.frames3d: frames is empty (give a list of frames, each a list of 4x4 transforms)")
+    if _is_matrix(frames):
+        frames = [[frames]]  # a single 4x4
+    elif all(_is_matrix(s) for s in frames):
+        frames = [frames]  # a single scene
+    scenes = []
+    for f, scene in enumerate(frames):
+        if not isinstance(scene, (list, tuple)) or not scene:
+            raise ValueError(f"viz.frames3d: frame {f} must be a non-empty list of 4x4 transforms")
+        scenes.append(list(scene)[:MAX_TRANSFORMS])
+    return scenes
+
+
+def _transform(T, where, keep_bottom=False):
+    """A 4x4 as its top three rows (12 numbers), and whether its bottom row was off."""
+    try:
+        rows = [list(r) for r in T]
+    except TypeError:
+        raise ValueError(f"{where} is not a 4x4 matrix (4 rows of 4 numbers), got {T!r}") from None
+    if len(rows) != 4 or any(len(r) != 4 for r in rows):
+        shape = f"{len(rows)} rows of {sorted({len(r) for r in rows})} numbers"
+        raise ValueError(f"{where} is not a 4x4 matrix (4 rows of 4 numbers), got {shape}")
+    nums = [[_num(v) for v in r] for r in rows]
+    bottom = nums[3]
+    bad = any(v is None for v in bottom) or any(abs(v - w) > 1e-6 for v, w in zip(bottom, (0, 0, 0, 1)) if v is not None)
+    if keep_bottom:
+        return [[0.0 if v is None else v for v in r] for r in nums], bad
+    return [v for r in nums[:3] for v in r], bad
+
+
+def _identity4():
+    return [[1.0 if i == j else 0.0 for j in range(4)] for i in range(4)]
+
+
+def _mul4(A, B):
+    return [[sum(A[i][k] * B[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+
+
+def _vec3(value):
+    try:
+        x, y, z = list(value)[:3]
+    except (TypeError, ValueError):
+        raise TypeError(f"expected an (x, y, z) point, got {value!r}") from None
+    return [_num(x), _num(y), _num(z)]
+
+
+def _point3(p):
+    p = list(p)
+    if len(p) < 3:
+        raise TypeError(f"viz.frames3d: a point needs (x, y, z), got {p!r}")
+    out = {"x": _num(p[0]), "y": _num(p[1]), "z": _num(p[2]), "label": _text(p[3]) if len(p) > 3 else ""}
+    return out
+
+
+def _target3(target):
+    if _is_matrix(target):
+        return {"pose": _transform(target, "viz.frames3d: target")[0]}
+    return {"point": _vec3(target)}
+
+
+def _per_transform(flag, count, key):
+    if flag is True or flag is False:
+        return [bool(flag)] * count
+    flags = [bool(v) for v in list(flag)[:MAX_TRANSFORMS]]
+    return flags + [False] * (count - len(flags))
 
 
 def _mark(m):

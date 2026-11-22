@@ -1,0 +1,10 @@
+id: s41-t08
+title: "Undo the move"
+type: bug
+level: junior
+track: robotics
+concepts: [functions, lists, homogeneous-transforms]
+new_concept: homogeneous-transforms
+estimated_minutes: 25
+tests_visible: true
+files_editable: [rigid/transform.py]

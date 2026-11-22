@@ -1,0 +1,23 @@
+questions:
+  - prompt: "What is the unit quaternion (w, x, y, z) for a 180° turn about the x axis?"
+    choices:
+      - "(0, 1, 0, 0)"
+      - "(1, 0, 0, 0)"
+      - "(-1, 0, 0, 0)"
+      - "(0.707, 0.707, 0, 0)"
+    answer: 0
+    explain: "Half the angle is 90°: (cos 90°, sin 90° · (1, 0, 0)) = (0, 1, 0, 0). (1, 0, 0, 0) and (-1, 0, 0, 0) are both no turn at all; (0.707, 0.707, 0, 0) is only 90°."
+  - prompt: "Why does `rotate(q, v)` scale v by |q|² when q isn't unit length?"
+    choices:
+      - "q appears twice in q (0, v) q*, and each copy multiplies lengths by |q|"
+      - "The conjugate q* has length 1/|q|, which undoes one copy of q but doubles the other one"
+      - "Only the w part of q scales v, and w gets squared when it multiplies itself in the sandwich"
+    answer: 0
+    explain: "|q (0, v) q*| = |q| |v| |q*| = |q|² |v|. With |q|² = 1.105 a 0.2 m vector comes out 0.221 m long."
+  - prompt: "Byte suggests renormalising inside `rotate()` instead of `spin()`. What's still wrong after that?"
+    choices:
+      - "The stored q keeps growing, so anything else that uses it, like to_matrix or the next product, is off"
+      - "Nothing at all: rotate() is the only place where q is ever used, so fixing it there fixes every caller"
+      - "rotate() would then turn every vector by twice the angle, since normalising halves the quaternion's length"
+    answer: 0
+    explain: "Normalising a copy at the point of use hides the symptom in one function. The orientation state itself still drifts, so fix it where it is produced: in spin, every step."

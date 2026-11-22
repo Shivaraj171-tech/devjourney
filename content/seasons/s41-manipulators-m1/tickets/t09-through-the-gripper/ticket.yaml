@@ -1,0 +1,10 @@
+id: s41-t09
+title: "Through the gripper's eyes"
+type: bug
+level: junior
+track: robotics
+concepts: [functions, homogeneous-transforms, frame-chains]
+new_concept: frame-chains
+estimated_minutes: 25
+tests_visible: true
+files_editable: [rigid/frames.py]

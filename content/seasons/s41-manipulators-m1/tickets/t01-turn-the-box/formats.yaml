@@ -1,0 +1,19 @@
+predict:
+  - code: |
+      import math
+      t = math.radians(90)
+      R = [[math.cos(t), -math.sin(t)],
+           [math.sin(t), math.cos(t)]]
+      v = [2, 0]
+      new = [R[0][0] * v[0] + R[0][1] * v[1], R[1][0] * v[0] + R[1][1] * v[1]]
+      print([round(c, 2) for c in new])
+    question: "What does this print?"
+    answer: "[0.0, 2.0]"
+    choices:
+      - "[0.0, 2.0]"
+      - "[0.0, -2.0]"
+      - "[2.0, 0.0]"
+      - "[-2.0, 0.0]"
+    explain: >-
+      (2, 0) is two steps along x. A quarter turn anticlockwise points x up, so it becomes two steps up:
+      (0, 2). `round` keeps floats, and cos(90°) is 6e-17, which rounds to 0.0.

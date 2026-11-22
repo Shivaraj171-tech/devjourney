@@ -1,0 +1,23 @@
+questions:
+  - prompt: "You have T_world_camera and T_camera_box. Which product gives the box's pose in the world?"
+    choices:
+      - "T_world_camera T_camera_box"
+      - "T_camera_box T_world_camera"
+      - "T_inv(T_world_camera) T_camera_box"
+    answer: 0
+    explain: "world_camera · camera_box: the touching names (camera, camera) cancel, leaving world_box."
+  - prompt: "Which expression gives a world point p_world in the CAMERA's frame?"
+    choices:
+      - "T_inv(T_world_camera) p_world"
+      - "T_world_camera p_world"
+      - "T_inv(p_world) T_world_camera"
+      - "T_world_camera T_inv(T_world_camera) p_world"
+    answer: 0
+    explain: "You need T_camera_world = T_inv(T_world_camera). Then camera_world · p_world: the names touch. The last option is just the identity times p_world: still world coordinates."
+  - prompt: "Ticket 2 put a new turn on the LEFT; `chain` puts each new transform on the RIGHT. Why are both right?"
+    choices:
+      - "Ticket 2 turned about the fixed world axes; a chain's transforms are each in the previous, moving frame"
+      - "They aren't both right: chain() should really multiply right to left too, exactly like then() does back in ticket 2"
+      - "Matrix products are commutative for 4x4 transforms, so the order chain() uses doesn't matter there"
+    answer: 0
+    explain: "Fixed-frame operations pre-multiply; moving (body) frame operations post-multiply. T_base_shoulder T_shoulder_gripper describes the gripper in the shoulder's own frame, which moves with the shoulder."

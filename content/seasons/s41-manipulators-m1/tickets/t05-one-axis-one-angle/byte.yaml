@@ -1,0 +1,18 @@
+# Partial: Byte normalises the axis, but the 180-degree case still divides 0 by 0.
+suggestion:
+  file: rigid/axis_angle.py
+  find: "    K = skew(axis)"
+  replace: "    K = skew(unit(axis))"
+  correct: true
+  partial: true
+  why:
+    choices:
+      - "Accept: the formula assumes a unit axis, so this is right, though the half-turn check will still fail."
+      - "Reject: unit() changes the axis's direction, so the box will turn about a different line."
+      - "Accept: this fixes every failing check, because the half turn also came from the stretched axis."
+    answer: 0
+  says: "The camera sends long axes, Rodrigues wants unit ones. One call to unit() and the stretch is gone."
+  explain: >-
+    Right as far as it goes: scaling the axis keeps its direction and makes R a real rotation, so the
+    stretched-axis and round-trip checks go green. The half turn is a different bug: at 180° R - Rᵀ is all
+    zeros and sin θ is 0, so `to_axis_angle` still returns (0, 0, 0). That needs the symmetric-part branch.

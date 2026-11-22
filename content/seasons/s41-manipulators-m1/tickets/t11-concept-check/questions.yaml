@@ -1,0 +1,69 @@
+questions:
+  - prompt: "R = [[0, 0, 1], [0, 1, 0], [-1, 0, 0]]. Where does it send the z axis, and which turn is it?"
+    choices:
+      - "To (1, 0, 0): it is rot_y(90°)"
+      - "To (-1, 0, 0): it is rot_y(-90°)"
+      - "To (0, 0, -1): it is a mirror, not a turn"
+      - "To (1, 0, 0): it is rot_x(90°)"
+    answer: 0
+    explain: "Column 2 is (1, 0, 0), so z goes to x. y stays put (column 1), and z → x is the positive turn about y: rot_y(90°). det = +1, so it is a rotation."
+  - prompt: "Turn a vector 90° about world z, then 90° about world x. Where does the y axis end up?"
+    choices:
+      - "(-1, 0, 0)"
+      - "(0, 0, 1)"
+      - "(1, 0, 0)"
+      - "(0, -1, 0)"
+    answer: 0
+    explain: "About z, y goes to -x. A turn about x leaves anything along x alone, so it stays at (-1, 0, 0). As one matrix: Rx(90°) Rz(90°), first turn on the right."
+  - prompt: "For ZYX Euler angles (yaw, pitch, roll), where is gimbal lock?"
+    choices:
+      - "pitch = ±90°: yaw and roll turn about the same axis"
+      - "yaw = ±90°: pitch and roll turn about the same axis"
+      - "roll = ±180°: the box is upside down and yaw flips sign"
+    answer: 0
+    explain: "At pitch ±90° the entries yaw and roll are read from all vanish, and only yaw - roll (or yaw + roll) is defined. Yaw and roll are free to be anything: the problem is the middle angle."
+  - prompt: "What is the trace (sum of the diagonal) of a 120° turn about ANY axis?"
+    choices:
+      - "0"
+      - "1"
+      - "-1"
+      - "It depends on the axis"
+    answer: 0
+    explain: "trace = 1 + 2 cos θ = 1 + 2 · (-1/2) = 0, whatever the axis. That's why the angle can be read straight from the trace."
+  - prompt: "What unit quaternion (w, x, y, z) is a 60° turn about the y axis?"
+    choices:
+      - "(0.866, 0, 0.5, 0)"
+      - "(0.5, 0, 0.866, 0)"
+      - "(0.866, 0.5, 0, 0)"
+      - "(0, 0, 1, 0)"
+    answer: 0
+    explain: "Half the angle is 30°: (cos 30°, sin 30° · (0, 1, 0)) = (0.866, 0, 0.5, 0). (0.5, 0, 0.866, 0) is a 120° turn: the full angle used by mistake."
+  - prompt: "q = (0.6, 0.8, 0, 0). What does -q = (-0.6, -0.8, 0, 0) describe?"
+    choices:
+      - "The same orientation as q"
+      - "The inverse turn of q"
+      - "Not a rotation, since w is negative"
+    answer: 0
+    explain: "q and -q always describe the same rotation (the double cover). That's why slerp flips q1 when the dot product is negative: same target, the short way round."
+  - prompt: "T has rotation rot_z(90°) and translation (1, 2, 0). Where is the WORLD point (1, 3, 0) in T's frame?"
+    choices:
+      - "(1, 0, 0)"
+      - "(0, 1, 0)"
+      - "(0, -1, 0)"
+      - "(-1, 0, 0)"
+    answer: 0
+    explain: "T_inv: subtract t to get (0, 1, 0), then undo the turn with Rᵀ = rot_z(-90°): (0, 1, 0) → (1, 0, 0). The point is 1 m along the frame's own x axis, which points along world y."
+  - prompt: "You have T_cam_box (the box, seen by the camera) and T_base_cam (the camera on Grabby's base). Which is T_base_box?"
+    choices:
+      - "T_base_cam · T_cam_box"
+      - "T_cam_box · T_base_cam"
+      - "T_inv(T_base_cam) · T_cam_box"
+    answer: 0
+    explain: "Touching names cancel: base_(cam) (cam)_box → base_box. In the other orders the touching names don't match."
+  - prompt: "What does slerp give you that normalised lerp doesn't?"
+    choices:
+      - "Constant angular speed: equal steps of t turn equal angles"
+      - "A unit quaternion: normalised lerp's results aren't unit length"
+      - "The short way round: normalised lerp always goes the long way"
+    answer: 0
+    explain: "Normalised lerp IS unit length, and either method needs the sign flip for the short way. Only the speed differs: lerp rushes through the middle of a big turn."

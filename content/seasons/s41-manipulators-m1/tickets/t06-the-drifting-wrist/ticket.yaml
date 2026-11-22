@@ -1,0 +1,10 @@
+id: s41-t06
+title: "The drifting wrist"
+type: bug
+level: junior
+track: robotics
+concepts: [functions, loops, quaternions]
+new_concept: quaternions
+estimated_minutes: 30
+tests_visible: true
+files_editable: [rigid/quat.py]

@@ -61,6 +61,8 @@ export type SideFloorSummary = SeasonSummary & {
   /** "Floor 1" (or "ticket #4 of Floor 1"): what to finish first. */
   gateText: string;
   icon: string;
+  /** The name on the board: season.yaml `short_title`, else the title (e.g. "Manipulators · M1"). */
+  label: string;
 };
 
 type Props = {
@@ -249,7 +251,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
               season={lab}
               rooms={rooms}
               floorOpen={labOpen}
-              label={`${lab.icon} ${lab.title}`}
+              label={`${lab.icon} ${lab.label}`}
               gateText={lab.gateText}
               testId={`side-floor-${lab.id}`}
               roomPrefix="lab-room"

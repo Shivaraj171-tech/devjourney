@@ -1,0 +1,24 @@
+questions:
+  - prompt: "Two unit quaternions have q0 · q1 = 0.5. What angle does the box turn from q0 to q1?"
+    choices:
+      - "120°"
+      - "60°"
+      - "30°"
+      - "240°"
+    answer: 0
+    explain: "cos Ω = 0.5 gives Ω = 60° on the sphere, and quaternions use half angles, so the box turns 2Ω = 120°."
+  - prompt: "Naive lerp (no normalising) between two orientations 160° apart, at t = 0.5: what goes wrong?"
+    choices:
+      - "The blend is shorter than 1, so as a 'rotation' it shrinks the box's axes"
+      - "Nothing: halfway along the chord is exactly the halfway rotation, already unit length"
+      - "It points the box halfway round the long way, because the chord always crosses over the far side"
+    answer: 0
+    explain: "The chord's midpoint is cos(40°) ≈ 0.77 from the centre. Its direction is the right halfway orientation (by symmetry), but it's not unit length, so to_matrix shrinks the axes. The 3D view shows it."
+  - prompt: "With the fixed slerp, `slerp(q0, q1, 0.25)` for a 100° turn: how far has the box turned?"
+    choices:
+      - "25°"
+      - "50°"
+      - "12.5°"
+      - "It depends on the axis"
+    answer: 0
+    explain: "Slerp's angle grows linearly with t: a quarter of the time, a quarter of the 100° turn. The axis doesn't matter."
