@@ -1,0 +1,12 @@
+# Partial: Byte's matmul is right, but then() still multiplies in reading order.
+suggestion:
+  file: rigid/mat.py
+  find: "    # TODO: row i of A dotted with column j of B, for every (i, j)\n    raise NotImplementedError(\"matmul is not written yet\")"
+  replace: "    rows, inner, cols = len(A), len(B), len(B[0])\n    return [[sum(A[i][k] * B[k][j] for k in range(inner)) for j in range(cols)] for i in range(rows)]"
+  correct: true
+  partial: true
+  says: "Here's matmul: row i of A dotted with column j of B, one comprehension. Your helper is complete!"
+  explain: >-
+    The product is right (and handles non-square shapes). But `then` still calls `matmul(first, second)`,
+    so "turn about z, then about x" comes out as "x, then z": the box lands on the wrong face. The turn
+    that happens first belongs on the RIGHT: `matmul(second, first)`.

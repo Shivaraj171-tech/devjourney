@@ -1,0 +1,10 @@
+2026-11-22 09:41:10 INFO  grabby   deploy: place.py "tidy up the chain: gripper first" (author: Byte)
+2026-11-22 09:41:57 INFO  planner  box #77 -> tray 3 at base (0.269, 0.465, 0.090), approach pointing down-forward
+2026-11-22 09:41:57 INFO  planner  joints yaw=60.0 deg pitch=30.0 deg roll=0.0 deg (unchanged since 2026-11-20)
+2026-11-22 09:41:58 DEBUG grabby   gripper_pose -> position (0.820, 0.000, 0.346), x axis (0.433, 0.866, -0.250)
+2026-11-22 09:41:58 WARN  grabby   commanded gripper 0.766 m from tray 3; position does not depend on yaw?
+2026-11-22 09:41:58 DEBUG grabby   self-test: yaw=0  -> (0.620, 0.000, 0.400)  expected (0.620, 0.000, 0.400)  OK
+2026-11-22 09:41:58 DEBUG grabby   self-test: yaw=90 -> (0.620, 0.000, 0.400)  expected (0.000, 0.620, 0.400)  FAIL
+2026-11-22 09:41:59 ERROR safety   gripper path crosses the shelf edge at x=0.80 m: motion aborted
+2026-11-22 09:41:59 ERROR grabby   box #77 released over the conveyor, not tray 3
+2026-11-22 09:42:00 WARN  alerts   packing line paused, paging on-call developer

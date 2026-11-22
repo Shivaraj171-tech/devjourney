@@ -1,0 +1,10 @@
+id: s41-t05
+title: "One axis, one angle"
+type: bug
+level: junior
+track: robotics
+concepts: [functions, lists, axis-angle]
+new_concept: axis-angle
+estimated_minutes: 30
+tests_visible: true
+files_editable: [rigid/axis_angle.py]

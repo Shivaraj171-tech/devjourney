@@ -1,0 +1,23 @@
+questions:
+  - prompt: "A rotation matrix has trace 1. What angle does it turn by?"
+    choices:
+      - "90°"
+      - "0°"
+      - "180°"
+      - "60°"
+    answer: 0
+    explain: "trace = 1 + 2 cos θ, so 1 = 1 + 2 cos θ gives cos θ = 0: θ = 90°. (Trace 3 is no turn, trace -1 is a half turn.)"
+  - prompt: "Why does Rodrigues' formula need a UNIT axis?"
+    choices:
+      - "Its derivation uses |u| = 1: u × (u × v) = -v_perp and 'u × v has the same length as v_perp' both need it"
+      - "Only so the angle comes out in radians; with a longer axis the same matrix would be in degrees"
+      - "A longer axis just makes the box turn faster, so it overshoots the requested angle but keeps its shape and size"
+    answer: 0
+    explain: "With |u| = 2, K² is 4 times too big and K twice too big: the 'rotation' stretches the box (the 3D view showed it). Normalise first."
+  - prompt: "What is the axis-angle of a half turn (180°) about u, compared with a half turn about -u?"
+    choices:
+      - "The same rotation: turning 180° one way or the other ends in the same place"
+      - "Opposite rotations: one is the inverse of the other, so applying both gives the identity twice"
+      - "Different by 90°, since flipping the axis also shifts the starting point of the turn by a quarter"
+    answer: 0
+    explain: "Turning by θ about -u equals turning by -θ about u. At θ = 180°, -180° and +180° land in the same place, so the sign of the axis can't be recovered (and doesn't need to be)."

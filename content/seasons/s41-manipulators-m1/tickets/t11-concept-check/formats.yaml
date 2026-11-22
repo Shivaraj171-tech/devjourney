@@ -1,0 +1,48 @@
+predict:
+  - code: |
+      def mv(R, v):
+          return [sum(R[i][k] * v[k] for k in range(3)) for i in range(3)]
+      Ry = [[0, 0, 1], [0, 1, 0], [-1, 0, 0]]   # 90° about y
+      Rz = [[0, -1, 0], [1, 0, 0], [0, 0, 1]]   # 90° about z
+      print(mv(Rz, mv(Ry, [0, 0, 1])))
+    question: "Turn z by 90° about y, then by 90° about z. What does this print?"
+    answer: "[0, 1, 0]"
+    choices:
+      - "[0, 1, 0]"
+      - "[1, 0, 0]"
+      - "[0, 0, 1]"
+      - "[0, -1, 0]"
+    explain: "About y, z goes to x. About z, x goes to y: [0, 1, 0]."
+  - code: |
+      import math
+      q = [math.cos(math.radians(45)), 0, 0, math.sin(math.radians(45))]
+      print(round(2 * math.degrees(math.acos(q[0]))))
+    question: "What turn angle (degrees) does this quaternion hold?"
+    answer: "90"
+    choices:
+      - "90"
+      - "45"
+      - "180"
+    explain: "w = cos(θ/2) = cos 45°, so θ/2 = 45° and θ = 90°. Undo the half angle when reading a quaternion."
+parsons:
+  - goal: >-
+      Write `inverse(T)` for a 4x4 homogeneous transform (a list of 4 rows): transpose the rotation, and make
+      the new translation -Rᵀ t. One line is Byte's slip: leave it out.
+    lines:
+      - "def inverse(T):"
+      - "    Rt = [[T[j][i] for j in range(3)] for i in range(3)]"
+      - "    t = [T[0][3], T[1][3], T[2][3]]"
+      - "    back = [-sum(Rt[i][k] * t[k] for k in range(3)) for i in range(3)]"
+      - "    return [Rt[i] + [back[i]] for i in range(3)] + [[0, 0, 0, 1]]"
+    distractors:
+      - line: "    back = [-t[i] for i in range(3)]"
+        replaces: 3
+        explain: >-
+          -t undoes the move along the WORLD axes. The inverse must undo it in the turned frame: -Rᵀ t. They
+          only agree when there is no turn.
+    check: |
+      T = [[0, -1, 0, 1], [1, 0, 0, 2], [0, 0, 1, 0], [0, 0, 0, 1]]
+      inv = inverse(T)
+      prod = [[sum(T[i][k] * inv[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+      assert prod == [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], prod
+    explain: "Rᵀ for the turn, -Rᵀ t for the move, and [0, 0, 0, 1] at the bottom: T · inverse(T) is exactly the identity."

@@ -1,0 +1,10 @@
+id: s41-t11
+title: "Module 1 concept check"
+type: read
+level: mid
+track: robotics
+concepts: [rotation-2d, matrix-composition, rotation-matrices-3d, euler-angles, axis-angle, quaternions, slerp, homogeneous-transforms, frame-chains, rigid-body-motion]
+new_concept: rigid-body-motion
+estimated_minutes: 20
+tests_visible: true
+files_editable: []

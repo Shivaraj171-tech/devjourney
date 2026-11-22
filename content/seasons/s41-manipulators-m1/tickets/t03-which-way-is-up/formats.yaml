@@ -1,0 +1,33 @@
+break_it:
+  - says: "Wrote a quick safety check: unit-length columns means it's a rotation. Tried it on rot_z(0.5): True!"
+    code: |
+      def looks_like_rotation(R):
+          for c in range(3):
+              length = sum(R[r][c] ** 2 for r in range(3)) ** 0.5
+              if abs(length - 1) > 1e-9:
+                  return False
+          return True
+    spec: >-
+      `looks_like_rotation(R)` returns True exactly when R is a proper rotation: columns of length 1,
+      perpendicular to each other, and det(R) = +1. Type a 3x3 matrix (a list of 3 rows) that fools it.
+    call: "looks_like_rotation({input})"
+    input_hint: "a 3x3 matrix, e.g. [[1, 0, 0], [0, 1, 0], [0, 0, 1]]"
+    helpers: |
+      def is_proper(R):
+          cols = [[R[r][c] for r in range(3)] for c in range(3)]
+          for i in range(3):
+              for j in range(3):
+                  d = sum(a * b for a, b in zip(cols[i], cols[j]))
+                  if abs(d - (1 if i == j else 0)) > 1e-9:
+                      return False
+          det = (R[0][0] * (R[1][1] * R[2][2] - R[1][2] * R[2][1]) - R[0][1] * (R[1][0] * R[2][2] - R[1][2] * R[2][0])
+                 + R[0][2] * (R[1][0] * R[2][1] - R[1][1] * R[2][0]))
+          return abs(det - 1) <= 1e-9
+    check: "result == is_proper({input})"
+    normal_input: "[[0, -1, 0], [1, 0, 0], [0, 0, 1]]"
+    example_input: "[[1, 0, 0], [0, 1, 0], [0, 0, -1]]"
+    miss: "That one it judges correctly. Unit columns are necessary, but are they enough? Try columns that are unit length but point the same way, or a mirror."
+    explain: >-
+      Unit length is one of three conditions. Two columns can both be unit length and point the same way
+      (not perpendicular), or all three can be perfect but left-handed (a mirror, det -1). Byte's check says
+      True to both. The full test is RᵀR = I AND det(R) = +1.

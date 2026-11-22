@@ -7,10 +7,11 @@
 //   - chart:  line charts (loss, reward, joint angle vs target), hover to read values.
 //   - grid:   a heat-map grid (a Q-table) with the policy's path.
 //   - points: a scatter plot of labelled points (grasp attempts).
+//   - frames3d: 3D coordinate frames / a 3D arm (Frames3DView.tsx): orbit, zoom, replay.
 // Every item has a plain-text summary under it, so nothing is colour-only or
 // picture-only. Colours: Tailwind's cyan-600 / amber-600 / violet-500 / lime-600
 // for series (checked for colour-blind separation on the slate-900 surface).
-import { useEffect, useId, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useId, useMemo, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import {
   armBounds,
   armFrameSummary,
@@ -29,7 +30,8 @@ import {
   type Pt,
   type VizItem,
 } from "@/lib/lab/viz";
-import { useReducedMotion } from "@/lib/useReducedMotion";
+import Frames3DView from "./Frames3DView";
+import { ReplayBar, useReplay } from "./LabReplay";
 
 /** Series colours, in a fixed order (never cycled past 4: a 5th+ line reuses the last with a dash). */
 const SERIES = [
@@ -53,13 +55,14 @@ export default function LabViewer({ items }: { items: VizItem[] }) {
             key={`${item.kind}-${item.name}-${i}`}
             data-testid={`lab-${item.kind}`}
             data-name={item.name}
-            className="min-w-0 rounded-lg border border-slate-800 bg-slate-900/70 p-2"
+            className={`min-w-0 rounded-lg border border-slate-800 bg-slate-900/70 p-2 ${item.kind === "frames3d" ? "sm:col-span-2" : ""}`}
           >
             <figcaption className="mb-1 text-sm font-semibold text-white">{item.title || item.name}</figcaption>
             {item.kind === "arm" && <ArmView item={item} />}
             {item.kind === "chart" && <ChartView item={item} />}
             {item.kind === "grid" && <GridView item={item} />}
             {item.kind === "points" && <PointsView item={item} />}
+            {item.kind === "frames3d" && <Frames3DView item={item} />}
             {item.truncated && <p className="mt-1 text-[11px] text-slate-400">Long recording: thinned to fit the viewer.</p>}
           </figure>
         ))}
@@ -70,32 +73,9 @@ export default function LabViewer({ items }: { items: VizItem[] }) {
 
 // ---------- the arm ----------
 
-const FPS = 30;
-
 function ArmView({ item }: { item: ArmItem }) {
-  const reduced = useReducedMotion();
-  const last = item.frames.length - 1;
-  // Reduced motion: no autoplay, start on the last frame (the result). Otherwise play once from the start.
-  const [frame, setFrame] = useState(() => (reduced ? last : 0));
-  const [playing, setPlaying] = useState(() => !reduced && last > 0);
-  const startRef = useRef<{ t: number; from: number } | null>(null);
-
-  useEffect(() => {
-    if (!playing) return;
-    let raf = 0;
-    startRef.current = null;
-    const tick = (t: number) => {
-      if (!startRef.current) startRef.current = { t, from: frame >= last ? 0 : frame };
-      const next = Math.min(last, startRef.current.from + Math.floor(((t - startRef.current.t) / 1000) * FPS));
-      setFrame(next);
-      if (next >= last) setPlaying(false);
-      else raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-    // `frame` is only read when playback (re)starts.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing, last]);
+  // Plays once from the start (reduced motion: shows the last frame, no autoplay).
+  const { frame, last, playing, toggle, scrub } = useReplay(item.frames.length);
 
   const { min, max } = useMemo(() => armBounds(item), [item]);
   const span = max - min;
@@ -179,42 +159,7 @@ function ArmView({ item }: { item: ArmItem }) {
           </g>
         )}
       </svg>
-      <div className="mt-1 flex items-center gap-2">
-        <button
-          type="button"
-          data-testid="lab-play"
-          onClick={() => {
-            if (playing) setPlaying(false);
-            else {
-              if (frame >= last) setFrame(0);
-              setPlaying(true);
-            }
-          }}
-          disabled={last === 0}
-          aria-label={playing ? "Pause" : frame >= last ? "Replay" : "Play"}
-          className="shrink-0 rounded-md bg-slate-800 px-2.5 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-40"
-        >
-          {playing ? "⏸" : frame >= last ? "↺" : "▶"}
-        </button>
-        <input
-          type="range"
-          min={0}
-          max={last}
-          step={1}
-          value={frame}
-          data-testid="lab-slider"
-          aria-label="Frame"
-          aria-valuetext={summary}
-          onChange={(e) => {
-            setPlaying(false);
-            setFrame(Number(e.target.value));
-          }}
-          className="min-w-0 flex-1 accent-cyan-500"
-        />
-        <span className="shrink-0 font-mono text-[11px] text-slate-400 tabular-nums">
-          {frame + 1}/{last + 1}
-        </span>
-      </div>
+      <ReplayBar frame={frame} last={last} playing={playing} onToggle={toggle} onScrub={scrub} valueText={summary} />
       <Legend
         entries={[
           { swatch: <span className="inline-block h-2.5 w-2.5 rounded-full bg-cyan-300" />, label: "gripper" },

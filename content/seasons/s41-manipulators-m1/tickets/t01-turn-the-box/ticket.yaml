@@ -1,0 +1,10 @@
+id: s41-t01
+title: "Turn the box"
+type: bug
+level: intern
+track: robotics
+concepts: [functions, lists, rotation-2d]
+new_concept: rotation-2d
+estimated_minutes: 20
+tests_visible: true
+files_editable: [rigid/rot2.py]

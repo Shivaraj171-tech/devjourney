@@ -1,0 +1,16 @@
+trace:
+  - code: |
+      def turn_angle(R):
+          trace = 0
+          for i in range(3):
+              trace = trace + R[i][i]
+          cos_t = (trace - 1) / 2
+          return cos_t
+
+      half_turn = turn_angle([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
+    watch: [i, trace, cos_t]
+    rows: 6
+    explain: >-
+      The trace adds the diagonal: 0 + 0 + (-1) = -1. Then cos θ = (trace - 1) / 2 = -1.0, so θ = 180°: the
+      flip about the diagonal from the half-turn check. At exactly that angle sin θ = 0, which is why the axis
+      must come from R + Rᵀ instead.

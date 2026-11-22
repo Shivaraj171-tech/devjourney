@@ -1,0 +1,23 @@
+questions:
+  - prompt: "At pitch = +90° (ZYX), which of these changes the box's orientation in a way NO yaw change could also produce?"
+    choices:
+      - "None of them: at the lock, a roll change can always be matched by a yaw change"
+      - "Changing roll by 20°, because roll turns about the box's own nose and yaw doesn't"
+      - "Changing roll by 20° while also changing yaw by -20° at the same time"
+    answer: 0
+    explain: "At θ = +90° only ψ - φ matters. Roll +20° is the same orientation as yaw -20°. Yaw and roll have collapsed into one degree of freedom."
+  - prompt: "With the fixed code, what pitch (in degrees) does `to_euler_zyx` report for a matrix with R[2][0] = -0.5?"
+    choices:
+      - "30"
+      - "-30"
+      - "60"
+      - "-60"
+    answer: 0
+    explain: "pitch = asin(-R[2][0]) = asin(0.5) = 30°. Byte's version used asin(R[2][0]) and reported -30°: tipped backward on the dashboard."
+  - prompt: "Why do the tests compare the rebuilt MATRIX rather than the returned angles at gimbal lock?"
+    choices:
+      - "At the lock many (yaw, roll) pairs are equally right, so only the orientation they build can be checked"
+      - "Comparing angles is too slow, since every angle needs a trig call before it can be compared at all"
+      - "At the lock the function switches to returning degrees, while the original angles in the test were given in radians"
+    answer: 0
+    explain: "(40°, 90°, -25°) and (65°, 90°, 0°) are the same orientation. A test that demands the original angles back would fail a correct converter."

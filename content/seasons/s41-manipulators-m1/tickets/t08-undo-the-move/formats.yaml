@@ -1,0 +1,28 @@
+break_it:
+  - says: "Wrote a quick inverse for poses. Tested it on a pure move by (0.5, 0, 0): T times inverse is the identity!"
+    code: |
+      def inverse(R, t):
+          Rt = [[R[j][i] for j in range(3)] for i in range(3)]
+          return Rt, [-t[0], -t[1], -t[2]]
+    spec: >-
+      `inverse(R, t)` returns (R_inv, t_inv) for the pose p_world = R p + t, so that applying the pose and then
+      its inverse gives every point back. Type a rotation R (3x3) and a translation t that break it.
+    call: "inverse({input})"
+    input_hint: "R, t (e.g. [[1, 0, 0], [0, 1, 0], [0, 0, 1]], [0.5, 0, 0])"
+    helpers: |
+      def undoes(R, t, result):
+          R_inv, t_inv = result
+          for p in ([0, 0, 0], [1, 2, 3]):
+              moved = [sum(R[i][k] * p[k] for k in range(3)) + t[i] for i in range(3)]
+              back = [sum(R_inv[i][k] * moved[k] for k in range(3)) + t_inv[i] for i in range(3)]
+              if max(abs(a - b) for a, b in zip(back, p)) > 1e-9:
+                  return False
+          return True
+    check: "undoes({input}, result)"
+    normal_input: "[[1, 0, 0], [0, 1, 0], [0, 0, 1]], [0.5, 0, 0]"
+    example_input: "[[0, -1, 0], [1, 0, 0], [0, 0, 1]], [1, 0, 0]"
+    miss: "That pose it undoes fine. Byte only tested a pose with no turn. What if the box is turned AND moved?"
+    explain: >-
+      With any turn plus a move, -t undoes the shift along the wrong axes. The inverse's translation is -Rᵀ t:
+      for a 90° turn about z and t = (1, 0, 0) that's (0, 1, 0), not (-1, 0, 0). Pure moves and pure turns
+      both pass, which is exactly why Byte's test didn't catch it.

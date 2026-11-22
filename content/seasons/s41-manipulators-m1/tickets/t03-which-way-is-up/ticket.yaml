@@ -1,0 +1,10 @@
+id: s41-t03
+title: "Which way is up?"
+type: bug
+level: junior
+track: robotics
+concepts: [functions, numbers, rotation-matrices-3d]
+new_concept: rotation-matrices-3d
+estimated_minutes: 25
+tests_visible: true
+files_editable: [rigid/rotations.py]

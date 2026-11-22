@@ -1,0 +1,19 @@
+predict:
+  - code: |
+      import math
+      q = [1.0, 0.0, 0.0, 0.0]          # no turn yet
+      for step in range(1000):
+          q[3] = q[3] + 0.5 * 2.0 * 0.01  # a sloppy gyro step: only ever adds to z
+      length = math.sqrt(sum(c * c for c in q))
+      print(round(length, 2))
+    question: "This sloppy integrator only ever ADDS to z and never normalises. What does it print?"
+    answer: "10.05"
+    choices:
+      - "10.05"
+      - "1.0"
+      - "1.05"
+      - "2.0"
+    explain: >-
+      Every step adds 0.01 to z and nothing shrinks w, so z reaches 10 and |q| = sqrt(1 + 100) ≈ 10.05.
+      The real update in `spin` is gentler (its step is perpendicular to q, so |q| only creeps up), but the
+      lesson is the same: integrating pushes q off the unit sphere unless you normalise.

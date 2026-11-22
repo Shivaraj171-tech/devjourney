@@ -1,0 +1,17 @@
+# Wrong: abs(det) == 1 lets mirrors through (and rot_y is untouched).
+suggestion:
+  file: rigid/rotations.py
+  find: "    return orthonormal"
+  replace: "    return orthonormal and abs(abs(det3(R)) - 1.0) <= tol"
+  correct: false
+  why:
+    choices:
+      - "Reject: a mirror has det -1, so |det| = 1 lets it straight through; the sign is what matters."
+      - "Accept: det 1 is exactly the missing condition, and the abs() just guards against rounding."
+      - "Reject: det3 is only defined for symmetric matrices, so this check will crash on most poses."
+    answer: 0
+  says: "Rotations have determinant 1, I'll add that. abs() so tiny negative rounding can't trip it."
+  explain: >-
+    The mirror's determinant is -1, and abs(-1) = 1: it passes, exactly like before. Rounding never turns
+    +1 into -1, so there's nothing to guard against. The test must be det(R) close to +1. (And rot_y still
+    turns z away from x.)

@@ -1,0 +1,11 @@
+id: s41-t10
+title: "The wrong tray"
+type: incident
+level: mid
+track: robotics
+concepts: [homogeneous-transforms, frame-chains, pose-chains]
+new_concept: pose-chains
+estimated_minutes: 20
+tests_visible: true
+files_editable: [rigid/place.py]
+time_limit_minutes: 20

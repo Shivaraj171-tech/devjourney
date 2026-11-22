@@ -1,0 +1,23 @@
+questions:
+  - prompt: "What shape is `matmul(A, B)` when A is 4x4 and B is 4x1 (a point written as a column)?"
+    choices:
+      - "4x1"
+      - "1x4"
+      - "4x4"
+      - "It can't be multiplied"
+    answer: 0
+    explain: "n×m times m×p is n×p: 4×4 times 4×1 gives 4×1, a column again. You'll multiply 4x4 transforms by points like this in ticket 8."
+  - prompt: "The box is turned by A, then by B, then by C (all about the world axes). Which single matrix does the whole move?"
+    choices:
+      - "C B A"
+      - "A B C"
+      - "B A C"
+    answer: 0
+    explain: "Each new turn goes on the LEFT of what was already done: A, then B A, then C B A. The first turn is next to the vector."
+  - prompt: "Why did `then(first, second)` never cause trouble on the flat packing table?"
+    choices:
+      - "All 2D turns are about the same axis, so they commute: R(a) R(b) = R(a + b) = R(b) R(a)"
+      - "matmul is only defined for square 3x3 matrices, so the flat-table code silently skipped the product"
+      - "2D matrices are symmetric, so the product comes out the same whichever order you use"
+    answer: 0
+    explain: "In the plane every turn is about the same (vertical) axis, and angles just add, in any order. 2D rotation matrices are NOT symmetric (one sine has a minus sign); they still commute."

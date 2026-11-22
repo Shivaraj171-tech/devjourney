@@ -1,0 +1,60 @@
+parsons:
+  - goal: >-
+      Write `matmul(A, B)` with plain loops: entry (i, j) of the result is row i of A dotted with column j
+      of B. It must work for non-square shapes too (a 2x3 times a 3x2). Two lines are Byte's slips: leave
+      them out.
+    lines:
+      - "def matmul(A, B):"
+      - "    C = []"
+      - "    for i in range(len(A)):"
+      - "        row = []"
+      - "        for j in range(len(B[0])):"
+      - "            total = 0"
+      - "            for k in range(len(B)):"
+      - "                total += A[i][k] * B[k][j]"
+      - "            row.append(total)"
+      - "        C.append(row)"
+      - "    return C"
+    distractors:
+      - line: "                total += A[i][k] * B[j][k]"
+        replaces: 7
+        explain: >-
+          `B[j][k]` walks along ROW j of B, not down column j. That computes A times B-transpose, which only
+          looks right when B is symmetric.
+      - line: "        for j in range(len(A[0])):"
+        replaces: 4
+        explain: >-
+          The result has as many columns as B, not as A. For square matrices you'd never notice; a 2x3 times
+          a 3x2 should give a 2x2.
+    check: |
+      assert matmul([[1, 2, 3], [4, 5, 6]], [[7, 8], [9, 10], [11, 12]]) == [[58, 64], [139, 154]]
+      assert matmul([[0, -1], [1, 0]], [[1], [0]]) == [[0], [1]]
+    explain: >-
+      Three loops: rows of A, columns of B, and the shared index k that runs along both. The inner sizes must
+      match: len(A[0]) == len(B).
+predict:
+  - code: |
+      Rz = [[0, -1, 0], [1, 0, 0], [0, 0, 1]]   # quarter turn about z
+      Rx = [[1, 0, 0], [0, 0, -1], [0, 1, 0]]   # quarter turn about x
+      def mv(R, v):
+          return [sum(R[i][k] * v[k] for k in range(3)) for i in range(3)]
+      x = [1, 0, 0]
+      print(mv(Rx, mv(Rz, x)))
+      print(mv(Rz, mv(Rx, x)))
+    question: "What does this print?"
+    answer: |-
+      [0, 0, 1]
+      [0, 1, 0]
+    choices:
+      - |-
+        [0, 0, 1]
+        [0, 1, 0]
+      - |-
+        [0, 0, 1]
+        [0, 0, 1]
+      - |-
+        [0, 1, 0]
+        [0, 0, 1]
+    explain: >-
+      z first sends x to y, then x sends y to z: [0, 0, 1]. The other order: the turn about x leaves x
+      alone, then z sends it to y: [0, 1, 0]. Same two turns, different order, different pose.

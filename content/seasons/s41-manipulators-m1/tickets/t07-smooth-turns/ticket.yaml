@@ -1,0 +1,10 @@
+id: s41-t07
+title: "Smooth turns"
+type: bug
+level: junior
+track: robotics
+concepts: [functions, numbers, slerp]
+new_concept: slerp
+estimated_minutes: 25
+tests_visible: true
+files_editable: [rigid/slerp.py]

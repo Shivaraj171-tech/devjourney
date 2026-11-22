@@ -1,0 +1,10 @@
+id: s41-t04
+title: "Gimbal lock"
+type: bug
+level: junior
+track: robotics
+concepts: [functions, numbers, euler-angles]
+new_concept: euler-angles
+estimated_minutes: 30
+tests_visible: true
+files_editable: [rigid/euler.py]

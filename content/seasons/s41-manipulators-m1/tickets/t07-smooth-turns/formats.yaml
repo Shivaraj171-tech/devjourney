@@ -1,0 +1,41 @@
+parsons:
+  - goal: >-
+      Write `slerp(q0, q1, t)` for two unit quaternions that are NOT almost equal: flip q1 when the dot is
+      negative (the short way), then blend along the sphere at constant speed. Two lines are Byte's slips:
+      leave them out.
+    lines:
+      - "def slerp(q0, q1, t):"
+      - "    d = sum(a * b for a, b in zip(q0, q1))"
+      - "    if d < 0:"
+      - "        q1 = [-c for c in q1]"
+      - "        d = -d"
+      - "    theta = math.acos(d)"
+      - "    a = math.sin((1 - t) * theta) / math.sin(theta)"
+      - "    b = math.sin(t * theta) / math.sin(theta)"
+      - "    return [a * x + b * y for x, y in zip(q0, q1)]"
+    distractors:
+      - line: "    a = (1 - t)"
+        replaces: 6
+        explain: >-
+          Weights of (1 - t) and t are a straight-line blend (a lerp): the result isn't unit length and its
+          speed is uneven. On the sphere the weights are sines.
+      - line: "    theta = 2 * math.acos(d)"
+        replaces: 5
+        explain: >-
+          2 acos(d) is the angle the BOX turns. The blend happens on the 4D sphere, where the angle between
+          q0 and q1 is acos(d): half of it.
+    check: |
+      import math
+      q0 = [1.0, 0.0, 0.0, 0.0]
+      h = math.radians(160) / 2
+      q1 = [math.cos(h), 0.0, 0.0, math.sin(h)]
+      for i in range(5):
+          q = slerp(q0, q1, i / 4)
+          turned = math.degrees(2 * math.acos(min(1.0, abs(q[0]))))
+          assert abs(turned - 40 * i) < 1e-6, (i, turned)
+          assert abs(sum(c * c for c in q) - 1) < 1e-9
+      q = slerp(q0, [-c for c in q1], 0.5)
+      assert abs(math.degrees(2 * math.acos(abs(q[0]))) - 80) < 1e-6
+    explain: >-
+      Flip for the short way, find the angle on the sphere, then weight q0 and q1 by sines: every quarter of the
+      time turns exactly 40°, and every result is a unit quaternion.

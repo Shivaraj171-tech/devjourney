@@ -1,0 +1,23 @@
+questions:
+  - prompt: "Why did Byte's version pass the 'all joints at 0' check?"
+    choices:
+      - "At 0 every rotation is the identity, and pure moves commute, so any order of factors gives the same pose"
+      - "The all-zero check had a much bigger tolerance than the others, so small errors in the chain slipped through"
+      - "The chain order only matters when the roll angle is non-zero, and the check used a roll of 0"
+    answer: 0
+    explain: "Identity rotations make every factor a pure translation, and translations add in any order. Home pose is the one pose where order bugs are invisible."
+  - prompt: "What is the translation part of Rot(θ) · Trans(d), where Rot has rotation R?"
+    choices:
+      - "R d"
+      - "d"
+      - "d + R d"
+      - "Rᵀ d"
+    answer: 0
+    explain: "Block product: [R 0; 0 1][I d; 0 1] = [R  R d; 0 1]. The other order, Trans(d) Rot(θ), has translation d."
+  - prompt: "In the fixed chain, why does changing the roll not move the fingertips?"
+    choices:
+      - "The wrist link walks TOOL first and then rolls, so the roll turns the gripper about its own origin"
+      - "Roll is about the z axis, which points straight up, so the fingertips stay at the same height"
+      - "The roll angle is always clamped to 0 by gripper_pose, so it never gets the chance to change anything"
+    answer: 0
+    explain: "T_wrist_gripper = Trans(TOOL) Rot_x(φ): translation TOOL, rotation Rot_x. The roll only changes which way the fingers face, not where they are."

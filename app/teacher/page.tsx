@@ -12,7 +12,7 @@ export default function TeacherPage() {
   // A side floor (the Robotics Lab) goes by its name, as on the HQ.
   const floors = loadSeasons().map((s, i) => ({
     id: s.id,
-    short: s.final ? "Final exam" : s.requires ? s.title : `Floor ${i + 1}`,
+    short: s.final ? "Final exam" : s.requires ? (s.shortTitle ?? s.title) : `Floor ${i + 1}`,
     title: s.title,
   }));
   return <TeacherDashboard floors={floors} />;
