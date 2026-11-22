@@ -1,0 +1,5 @@
+[
+  "rodrigues: k = axis / norm(axis), K = skew(k), R = I + sin(theta) K + (1 - cos(theta)) K @ K. exp_so3: theta = norm(omega); if theta is tiny return I + skew(omega), else rodrigues(omega / theta, theta).",
+  "log_so3 generic branch: omega = theta / (2 sin theta) * vee(R - R^T). Near identity: omega = vee(R - R^T) / 2.",
+  "log_so3 at theta ~ pi: B = (R + I) / 2 equals k k^T. Pick the column i with the largest B[i,i], k = B[:, i] / sqrt(B[i, i]), normalise, return pi * k (or theta * k)."
+]

@@ -1,0 +1,5 @@
+[
+  "make_transform: T = np.eye(4); T[:3, :3] = R; T[:3, 3] = p. split_transform: return T[:3, :3].copy(), T[:3, 3].copy().",
+  "transform_inverse: R, p = split_transform(T); return make_transform(R.T, -R.T @ p). transform_points: np.asarray(points) @ R.T + p works for both (3,) and (N, 3).",
+  "chain: functools.reduce(np.matmul, transforms, np.eye(4)). relative_transform: transform_inverse(T_wa) @ T_wb. is_transform: shape check, is_rotation_matrix(T[:3,:3]), np.allclose(T[3], [0,0,0,1])."
+]

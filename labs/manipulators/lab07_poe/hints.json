@@ -1,0 +1,5 @@
+[
+  "twist_to_matrix: zeros (4,4); top-left = skew(S[:3]); top-right column = S[3:]. adjoint: R and p from T; Ad[:3,:3] = R, Ad[3:,3:] = R, Ad[3:,:3] = skew(p) @ R. revolute_screw: w = axis/|axis|; concatenate(w, -np.cross(w, point)).",
+  "exp_se3: wn = |w|; if wn ~ 0 return make_transform(I, v*theta). Else w, v, theta = w/wn, v/wn, theta*wn; W = skew(w); G = I*theta + (1-cos)W + (theta-sin)W@W; return make_transform(exp_so3(w*theta), G @ v).",
+  "fk_space: T = I; for i: T = T @ exp_se3(Slist[:, i], q[i]); return T @ M. screws_from_dh: frames = fk_dh_frames(dh, zeros); Slist = column_stack([revolute_screw(T[:3,2], T[:3,3]) for T in frames[:-1]]); M = frames[-1]. log_se3: w = log_so3(R), th = |w|; G_inv as README step 4 with W = skew(w/th); return concat(w, G_inv @ p * th)."
+]

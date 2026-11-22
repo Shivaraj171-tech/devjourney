@@ -1,0 +1,5 @@
+[
+  "Start with the numerical ones (they're your safety net): for each i, e = zeros; e[i] = h; dT = (fk(q+e) - fk(q-e)) / (2h); space column = matrix_to_twist(dT @ transform_inverse(fk(q))); body column = matrix_to_twist(transform_inverse(fk(q)) @ dT).",
+  "jacobian_space: T = I; for i in range(n): J[:, i] = adjoint(T) @ S[:, i]; THEN T = T @ exp_se3(S[:, i], q[i]). jacobian_body: T = I; for i from n-1 down to 0: J[:, i] = adjoint(T) @ B[:, i]; then T = T @ exp_se3(B[:, i], -q[i]).",
+  "space_to_body_jacobian: adjoint(transform_inverse(T_sb)) @ J_s. geometric_jacobian: Js = jacobian_space(S, q); p = fk_space(M, S, q)[:3, 3]; return np.vstack([Js[3:] - skew(p) @ Js[:3], Js[:3]])."
+]

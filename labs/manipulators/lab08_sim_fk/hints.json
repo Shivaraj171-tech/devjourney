@@ -1,0 +1,5 @@
+[
+  "load_model: import mujoco; model = mujoco.MjModel.from_xml_string(xml); return model, mujoco.MjData(model). sim_site_pose: data.qpos[:] = q; mujoco.mj_kinematics(model, data); s = data.site(site); return make_transform(s.xmat.reshape(3, 3), s.xpos).",
+  "dh_to_mjcf: keep `prev = np.eye(4)`. For each row i: T_body = prev @ Rz(offset_i) (as 4x4); emit <body name='link{i+1}' pos=... quat=...>, a hinge joint axis='0 0 1', a sphere geom with mass; then prev = link_constant(a_i, alpha_i, d_i). After the loop emit the 'ee' site at prev, then close n </body> tags.",
+  "pose_error: dp = norm(p_a - p_b), dr = norm(log_so3(R_a.T @ R_b)). compare_with_sim: model, data = load_model(dh_to_mjcf(dh)); rng = default_rng(seed); loop: q = rng.uniform(-pi, pi, len(dh)); track max of pose_error(sim_site_pose(...), fk_dh(dh, q))."
+]
