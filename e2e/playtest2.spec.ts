@@ -182,6 +182,8 @@ test("parsons: the first failed check names the wrong lines; the second explains
 
 test("the badge toast closes itself after ~6 s, but not while hovered", async ({ page }) => {
   const t01 = byId("s01-t01");
+  // Control timers, so a slow machine can't let the 6 s auto-close fire before we look.
+  await page.clock.install();
   await seedSolved(page, []);
   await expect(page.getByTestId("office-map").first()).toBeVisible();
   await seedSolved(page, [t01]);
@@ -189,14 +191,16 @@ test("the badge toast closes itself after ~6 s, but not while hovered", async ({
   await expect(toast).toContainText("First Commit");
   await toast.hover();
   await expect(toast).toHaveAttribute("data-paused", "true");
-  await page.waitForTimeout(7000);
+  await page.clock.fastForward(7000);
   await expect(toast).toBeVisible();
   await page.mouse.move(5, 5);
-  await expect(toast).toHaveCount(0, { timeout: 9000 });
+  await page.clock.fastForward(7000);
+  await expect(toast).toHaveCount(0);
 });
 
 test("with reduced motion the toast doesn't animate and still closes itself", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.install();
   await seedSolved(page, []);
   await expect(page.getByTestId("office-map").first()).toBeVisible();
   await seedSolved(page, [byId("s01-t01")]);
@@ -204,7 +208,8 @@ test("with reduced motion the toast doesn't animate and still closes itself", as
   await expect(toast).toBeVisible();
   const anim = await toast.evaluate((el) => [getComputedStyle(el).animationName, getComputedStyle(el.querySelector(".badge-toast-timer")!).animationName]);
   expect(anim).toEqual(["none", "none"]);
-  await expect(toast).toHaveCount(0, { timeout: 9000 });
+  await page.clock.fastForward(7000);
+  await expect(toast).toHaveCount(0);
 });
 
 // ---------- 11: inline code in quizzes ----------
