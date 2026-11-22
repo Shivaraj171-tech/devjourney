@@ -1,0 +1,25 @@
+predict:
+  - code: |
+      kd = 10
+      dt = 0.01
+      prev_error = 5.0
+      error = 3.0
+      print(kd * (error - prev_error) / dt)
+      print(kd * (prev_error - error) / dt)
+    question: "What does this print?"
+    answer: |-
+      -2000.0
+      2000.0
+    choices:
+      - |-
+        -2000.0
+        2000.0
+      - |-
+        2000.0
+        -2000.0
+      - |-
+        -20.0
+        20.0
+    explain: >-
+      The error shrank from 5 to 3 in 0.01 s: changing at -200 per second, times KD = 10 gives -2000, a
+      brake. Flip the subtraction and the same numbers give +2000: the "brake" becomes an accelerator.

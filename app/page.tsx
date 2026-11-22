@@ -1,14 +1,14 @@
-import HQ, { type SeasonSummary } from "@/components/HQ";
+import HQ, { type SeasonSummary, type SideFloorSummary } from "@/components/HQ";
 import PythonPrefetch from "@/components/PythonPrefetch";
-import { loadSeasons, loadSkillsCheck, loadWarmups, sideQuestSeasons, storySeasons } from "@/lib/content/load";
+import { loadSeasons, loadSkillsCheck, loadWarmups, sideFloorSeasons, sideQuestSeasons, storySeasons } from "@/lib/content/load";
+import type { Season } from "@/lib/content/types";
 import type { BountyCard } from "@/lib/game/bounty";
 import { BASE_XP } from "@/lib/game/rules";
 import { profileContent } from "@/lib/content/profileContent";
 
-export default function Home() {
-  // Only send what the office map needs to the browser (no code, no tests).
-  // The floors are the story (side quests such as the Bug Bounty board are shown apart).
-  const seasons: SeasonSummary[] = storySeasons().map((s) => ({
+// Only send what the office map needs to the browser (no code, no tests).
+function summary(s: Season): SeasonSummary {
+  return {
     id: s.id,
     title: s.title,
     intro: s.intro,
@@ -26,7 +26,22 @@ export default function Home() {
       seasonId: t.seasonId,
       timeLimitMinutes: t.incident?.timeLimitMinutes,
     })),
-  }));
+  };
+}
+
+export default function Home() {
+  // The floors are the story (side quests such as the Bug Bounty board are shown apart).
+  const story = storySeasons();
+  const seasons: SeasonSummary[] = story.map(summary);
+  // Side floors (the Robotics Lab): their own board, opened as a whole by one story ticket.
+  const sideFloors: SideFloorSummary[] = sideFloorSeasons().flatMap((s) => {
+    const floor = story.findIndex((x) => x.tickets.some((t) => t.id === s.requires));
+    if (floor === -1) return [];
+    const tickets = story[floor].tickets;
+    const at = tickets.findIndex((t) => t.id === s.requires);
+    const gateText = at === tickets.length - 1 ? `Floor ${floor + 1}` : `ticket #${tickets[at].number} of Floor ${floor + 1}`;
+    return [{ ...summary(s), requires: s.requires as string, gateText, icon: s.icon ?? "🧪" }];
+  });
   const all = loadSeasons();
   const bounties: BountyCard[] = sideQuestSeasons().flatMap((s) =>
     s.tickets.map((t) => {
@@ -46,7 +61,7 @@ export default function Home() {
   );
   return (
     <>
-      <HQ seasons={seasons} bounties={bounties} warmups={loadWarmups()} hasSkillsCheck={loadSkillsCheck() !== null} profileContent={profileContent()} />
+      <HQ seasons={seasons} sideFloors={sideFloors} bounties={bounties} warmups={loadWarmups()} hasSkillsCheck={loadSkillsCheck() !== null} profileContent={profileContent()} />
       <PythonPrefetch />
     </>
   );

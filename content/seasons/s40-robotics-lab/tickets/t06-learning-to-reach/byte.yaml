@@ -1,0 +1,53 @@
+# Wrong: Byte adds the goal but keeps paying for hovering.
+suggestion:
+  file: grabby/reach_env.py
+  find: "    if distance_to_box(next_state) < NEAR_DISTANCE:"
+  replace: "    if distance_to_box(next_state) < GOAL_DISTANCE:\n        return next_state, 10.0, True\n    if distance_to_box(next_state) < NEAR_DISTANCE:"
+  correct: false
+  why:
+    choices:
+      - "Accept: now reaching the box ends the episode with a +10 bonus, which is the whole ticket."
+      - "Reject: done=True should never be returned by step(), only by the training loop."
+      - "Reject: hovering near the box still pays +1 a move, more over an episode than +10 once."
+    answer: 2
+  says: "Got it: reaching the box should end the episode with a bonus. I kept the 'near' reward, it helps it learn faster!"
+  explain: >-
+    Half right. Reaching the box now ends the episode, but every move near it still pays +1, so a learner
+    that wanders near the box for 35 moves scores 35, far more than the +10 for grabbing it. And moves
+    away from the box cost nothing, so a long route looks as good as a short one. Reward the result,
+    charge a little for every other move.
+prompt:
+  goal: "Ask Byte to fix the rewards in `step()`, so Grabby learns to grab the box instead of hovering near it."
+  options:
+    - prompt: "Grabby isn't learning, make it learn faster."
+      response_code: |
+        EPSILON = 0.05  # explore less, exploit more
+        ALPHA = 0.9     # learn faster from each move
+      verdict: vague
+      feedback: >-
+        Byte tuned the learning code, which was fine. The learner is learning perfectly well: it learned
+        the goal the rewards describe, which is hovering. A vague complaint gets a confident change in
+        the wrong file.
+    - prompt: "In grabby/reach_env.py, step() pays +1 for every move near the box and never ends the episode, so the learner hovers. Make reaching the box (distance < GOAL_DISTANCE) end the episode with +10, and make every other move cost -1. Don't change qlearn.py."
+      response_code: |
+        def step(state, action):
+            next_state = move(state, action)
+            if distance_to_box(next_state) < GOAL_DISTANCE:
+                return next_state, 10.0, True
+            return next_state, -1.0, False
+      verdict: good
+      feedback: >-
+        It says which file and function, what the learner does wrong and WHY (the rewards), and the rule
+        the rewards must follow. Byte's answer does exactly that, and you can check it against the tests.
+    - prompt: "Add a bigger reward for being near the box, like +5, so Grabby wants it more."
+      response_code: |
+        def step(state, action):
+            next_state = move(state, action)
+            if distance_to_box(next_state) < NEAR_DISTANCE:
+                return next_state, 5.0, False  # was 1.0
+            return next_state, 0.0, False
+      verdict: wrong
+      feedback: >-
+        This makes the bug worse: hovering near the box now pays +5 a move. Your prompt told Byte HOW to
+        fix it, and the how was wrong. Describe the behaviour you want (grab the box, quickly), not a tweak.
+  best: 1

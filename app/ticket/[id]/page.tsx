@@ -21,10 +21,13 @@ export default async function TicketPage({ params }: PageProps<"/ticket/[id]">) 
   // nearest on-chain season before it (lib/content/order.ts), so off-chain seasons
   // such as the final exam never block the main story. Side quests (the Bug Bounty
   // board) are outside the story: each opens on its own `requires` and has no "next".
+  // A side floor (the Robotics Lab) opens as a whole on its season's `requires`; inside it,
+  // tickets open one after another.
   const order: OrderSeason[] = loadSeasons().map((s) => ({
     id: s.id,
     chain: s.chain,
     final: s.final,
+    requires: s.requires ?? null,
     tickets: s.tickets.map((t) => ({ id: t.id, requires: t.bounty?.requires?.id ?? null })),
   }));
   const nextId = nextStoryTicketId(order, ticket.id);

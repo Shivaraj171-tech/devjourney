@@ -54,8 +54,19 @@ export type SeasonSummary = {
   tickets: TicketSummary[];
 };
 
+/** A side floor (e.g. the Robotics Lab): off the story, opened as a whole by one story ticket. */
+export type SideFloorSummary = SeasonSummary & {
+  /** The story ticket that opens the floor. */
+  requires: string;
+  /** "Floor 1" (or "ticket #4 of Floor 1"): what to finish first. */
+  gateText: string;
+  icon: string;
+};
+
 type Props = {
   seasons: SeasonSummary[];
+  /** Side floors (the Robotics Lab), shown after the story floors. Never block anything. */
+  sideFloors?: SideFloorSummary[];
   warmups: Warmup[];
   hasSkillsCheck: boolean;
   /** The Bug Bounty board (side-quest tickets), shown apart from the floors. */
@@ -64,7 +75,7 @@ type Props = {
   profileContent?: ProfileContent;
 };
 
-export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], profileContent }: Props) {
+export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], profileContent, sideFloors = [] }: Props) {
   const progress = useProgress();
   const xp = totalXp(progress);
   const [toggled, setToggled] = useState<Record<string, boolean>>({});
@@ -218,6 +229,36 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
           );
         })}
       </div>
+
+      {/* ---------- side floors: e.g. the Robotics Lab (open after a story floor, never block anything) ---------- */}
+      {returning &&
+        sideFloors.map((lab) => {
+          const labOpen = isSolved(lab.requires);
+          const rooms: Room[] = lab.tickets.map((t, i) => {
+            const tp = ticketProgress(progress, t.id);
+            const prevSolved = i === 0 ? labOpen : isSolved(lab.tickets[i - 1].id);
+            return { ticket: t, state: tp.solved ? "done" : prevSolved ? "open" : "locked", xp: tp.solveXp + tp.quizXp, quizWaiting: t.hasQuiz && !tp.quizDone };
+          });
+          // Folded to one line until it opens; then open while there's something left to do.
+          const started = rooms.some((r) => r.state === "done");
+          const defaultOpen = labOpen && (started || current === undefined) && rooms.some((r) => r.state !== "done");
+          return (
+            <FloorBoard
+              key={lab.id}
+              floor={0}
+              season={lab}
+              rooms={rooms}
+              floorOpen={labOpen}
+              label={`${lab.icon} ${lab.title}`}
+              gateText={lab.gateText}
+              testId={`side-floor-${lab.id}`}
+              roomPrefix="lab-room"
+              hasReview={false}
+              expanded={toggled[lab.id] ?? defaultOpen}
+              onToggle={() => setToggled((m) => ({ ...m, [lab.id]: !(m[lab.id] ?? defaultOpen) }))}
+            />
+          );
+        })}
 
       {/* ---------- side quest: the Bug Bounty board (never blocks anything) ---------- */}
       {returning && (

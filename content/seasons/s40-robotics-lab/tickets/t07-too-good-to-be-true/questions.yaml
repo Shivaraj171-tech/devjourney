@@ -1,0 +1,22 @@
+questions:
+  - prompt: "Why did the held-out logbook rows ALSO score about 97% with the leaky model?"
+    choices:
+      - "Held-out rows come from the same logbook, so they have the slip reading too"
+      - "The model memorised the held-out rows during training, so of course it scored as well on them"
+      - "97% is what logistic regression always scores on 3 features"
+    answer: 0
+    explain: "Keeping rows aside only helps if they look like real use. These rows were recorded after the grasp, slip reading included, so the leak works on them just as well. Tomorrow's grasps don't have it."
+  - prompt: "Which feature would be a leak for predicting whether a delivery will be late?"
+    choices:
+      - "The distance from the restaurant to the customer, in km"
+      - "Whether the customer complained about lateness"
+      - "The hour of the day the order was placed"
+    answer: 1
+    explain: "A lateness complaint only exists after the delivery was late: it contains the answer. Distance and order time are known when the prediction is needed."
+  - prompt: "`accuracy([1, 1, 1, 1], [1, 0, 1, 0])` with the function from the lesson: what does it return?"
+    choices:
+      - "0.5"
+      - "1.0"
+      - "0.25"
+    answer: 0
+    explain: "Two of the four guesses match (positions 0 and 2), so 2 / 4 = 0.5. Always guessing 'success' is right exactly as often as success happens: compare every model with that baseline."

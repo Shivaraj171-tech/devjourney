@@ -1,0 +1,23 @@
+questions:
+  - prompt: "Which pair of boxes does `math.atan(y / x)` aim at in exactly the same direction?"
+    choices:
+      - "(1, 1) and (-1, -1)"
+      - "(1, 1) and (1, -1)"
+      - "(1, 1) and (2, 3)"
+      - "None: every box gets its own direction"
+    answer: 0
+    explain: "1 / 1 and -1 / -1 are both 1, so atan gives 45 degrees for both, though (-1, -1) is behind and below. atan2(-1, -1) gives -135 degrees: it sees both signs."
+  - prompt: "Byte patches the crash with `math.atan(y / x) if x != 0 else math.pi / 2`. Which box is still reached wrongly?"
+    choices:
+      - "(0.0, 1.5), straight ahead"
+      - "(-0.9, 0.9), on the left"
+      - "(1.2, 0.5), on the right"
+    answer: 1
+    explain: "The patch only handles x = 0. For any box with x < 0, atan(y / x) still points into the opposite half of the table, so the left boxes stay wrong. Fixing a crash isn't the same as fixing the maths."
+  - prompt: "Grabby can reach (1.0, 1.0) with the elbow 'down' or 'up'. What do the two answers have in common?"
+    choices:
+      - "The same shoulder angle, with opposite elbow angles"
+      - "The same elbow angle size, bent in opposite directions"
+      - "Nothing: they are unrelated, and only one of them is right"
+    answer: 1
+    explain: "The law of cosines fixes the size of the elbow angle (it depends only on the distance); 'down' and 'up' bend it +a or -a. The shoulder angles differ to make up for it. Both put the gripper on the box."

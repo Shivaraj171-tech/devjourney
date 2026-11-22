@@ -218,6 +218,11 @@ export type Ticket = {
    * that isn't the final): no concept label or lesson until solved. Absent elsewhere.
    */
   bounty?: BountyInfo;
+  /**
+   * Tickets of a side floor (an off-chain season opened as a whole by season.yaml
+   * `requires`, e.g. the Robotics Lab): the floor's name and icon. Absent elsewhere.
+   */
+  sideFloor?: { title: string; icon: string };
 };
 
 /** What a Bug Bounty ticket reveals once solved, and what opens it. */
@@ -251,6 +256,10 @@ export type Season = {
   chain: boolean;
   /** true: the final exam ("Byte's Week Alone"). Default false. */
   final: boolean;
+  /** Side floors only (off-chain, not final): the ticket that opens the whole floor, e.g. "s01-t10". */
+  requires?: string;
+  /** Side floors only: the floor's icon on the HQ, e.g. "🤖". */
+  icon?: string;
   tickets: Ticket[];
 };
 

@@ -1,0 +1,26 @@
+break_it:
+  - says: "Wrote a train/test split: the last share of the rows becomes the test set. Tried it on 10 rows with 0.2, perfect!"
+    code: |
+      def split(rows, test_share):
+          n_test = round(len(rows) * test_share)
+          train = rows[:-n_test]
+          test = rows[-n_test:]
+          return train, test
+    spec: >-
+      `split(rows, test_share)` returns (train, test): test is the LAST round(len(rows) * test_share) rows,
+      train is all the rows before them. No row may be in both, and none may be lost.
+    call: "split({input})"
+    input_hint: "rows, test_share (e.g. [1, 2, 3, 4, 5], 0.2)"
+    helpers: |
+      def spec_ok(rows, test_share, result):
+          train, test = result
+          n_test = round(len(rows) * test_share)
+          return test == rows[len(rows) - n_test:] and train == rows[:len(rows) - n_test]
+    check: "spec_ok({input}, result)"
+    normal_input: "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 0.2"
+    example_input: "[1, 2, 3], 0.1"
+    miss: "That one splits fine. What happens when the test set should have 0 rows? Look at what rows[-0:] gives."
+    explain: >-
+      When round(len(rows) * test_share) is 0, `rows[-0:]` is `rows[0:]`: the WHOLE list becomes the test
+      set, and `rows[:-0]` is empty, so nothing is left to train on. Testing on the training data is a leak
+      of its own: the score means nothing. -0 is just 0 in Python, so negative slicing breaks at zero.

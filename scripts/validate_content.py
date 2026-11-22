@@ -157,6 +157,19 @@ other. Its tickets are "mystery bugs": no concept.md, and ticket.yaml has
 
 estimated_minutes is at most 10. `requires` and `bug_kind` are not allowed elsewhere.
 
+A side quest whose season.yaml sets `requires` is a SIDE FLOOR (e.g. s40-robotics-lab,
+the Robotics Lab), opened as a whole once that ticket is solved:
+
+    chain: false
+    requires: s01-t10    # an on-chain ticket id: the whole floor opens once it is solved
+    icon: "🤖"           # optional: the floor's icon on the HQ
+
+Its tickets are ordinary lesson tickets that open one after another: each needs a
+concept.md, `requires`/`bug_kind`/`tutorial` are not allowed, and there is no
+10-minute cap. The floor is a separate codebase: the evolving-codebase check runs
+INSIDE it (ticket to ticket, from its first ticket) but never across its borders.
+It never gates anything (the final exam stays gated on the last on-chain season).
+
 ticket.yaml may also set
 
     tutorial: true   # optional: Byte's suggestion here is a practice round (the first
@@ -247,7 +260,7 @@ REQUIRED_FIELDS = {
 ALLOWED = {
     "type": {"bug", "feature", "incident", "review", "read"},
     "level": {"intern", "junior", "mid", "senior"},
-    "track": {"foundations", "building", "debugging", "reading", "systems", "ai"},
+    "track": {"foundations", "building", "debugging", "reading", "systems", "ai", "robotics"},
 }
 
 
@@ -380,13 +393,15 @@ def check_concept(path):
 EXAM_FORBIDDEN = ["hints.md", "concept.md", "byte.yaml", "formats.yaml", "questions.yaml"]
 
 
-def check_ticket_meta(ticket_dir, final=False, side_quest=False):
+def check_ticket_meta(ticket_dir, final=False, side_quest=False, side_floor=False):
     """Check files, ticket.yaml, hints and questions. Returns a list of error strings.
 
     final: the ticket belongs to the final exam (season.yaml `final: true`), so it
     has no hints.md and must not have a lesson, Byte content or a quiz.
     side_quest: the ticket belongs to a side-quest season (`chain: false`, not final),
     e.g. the Bug Bounty board: a "mystery bug" with no lesson (see check_side_quest_meta).
+    side_floor: the ticket belongs to a side floor (a side quest with a season-level
+    `requires`, e.g. the Robotics Lab): a normal lesson ticket, so concept.md is required.
     """
     errors = []
     if final:
@@ -441,7 +456,9 @@ def check_ticket_meta(ticket_dir, final=False, side_quest=False):
     else:
         errors += [f"ticket.yaml: '{field}' is only for side-quest tickets (season.yaml `chain: false`, not final)"
                    for field in SIDE_QUEST_FIELDS if field in meta]
-    errors += check_tutorial_flag(ticket_dir, meta, final or side_quest)
+    errors += check_tutorial_flag(ticket_dir, meta, final or side_quest or side_floor)
+    if side_floor and not (ticket_dir / "concept.md").is_file():
+        errors.append("missing concept.md (every side-floor ticket teaches one new concept)")
     if has_tests and not list((ticket_dir / "tests").glob("test_*.py")):
         errors.append("tests/ has no test_*.py files")
     if questions_file.is_file():
@@ -542,6 +559,31 @@ def check_requires(seasons_root):
         if problems:
             report.setdefault(label, []).append(f"ticket.yaml: requires {required!r}, which " + " and ".join(problems))
     return report
+
+
+def check_season_requires(seasons_root):
+    """A side floor's season-level `requires` must be a ticket of an on-chain season.
+
+    Returns {season folder name: [errors]} for the seasons with a problem.
+    """
+    on_chain_ids = set()
+    floors = []
+    for season_dir in sorted(p for p in seasons_root.iterdir() if p.is_dir()):
+        chain, _final = season_flags(season_dir)
+        required = season_requires(season_dir)
+        if required:
+            floors.append((season_dir.name, required))
+        if not chain:
+            continue
+        for name in season_ticket_order(season_dir):
+            try:
+                meta = yaml.safe_load((season_dir / "tickets" / name / "ticket.yaml").read_text(encoding="utf-8"))
+            except (OSError, yaml.YAMLError):
+                continue
+            if isinstance(meta, dict) and isinstance(meta.get("id"), str):
+                on_chain_ids.add(meta["id"])
+    return {name: [f"season.yaml: requires {required!r}, which is not a ticket of an on-chain season"]
+            for name, required in floors if required not in on_chain_ids}
 
 
 def check_incident(ticket_dir, meta):
@@ -1137,6 +1179,19 @@ def season_flags(season_dir):
     return season.get("chain", True) is not False, season.get("final", False) is True
 
 
+MAX_ICON_CHARS = 8
+
+
+def season_requires(season_dir):
+    """season.yaml `requires` (a side floor's opening ticket), or None."""
+    try:
+        season = yaml.safe_load((season_dir / "season.yaml").read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError):
+        return None
+    value = season.get("requires") if isinstance(season, dict) else None
+    return value if is_nonempty_str(value) else None
+
+
 def validate_season(season_dir, prev=None):
     """Returns a dict {label: [errors]} for the season and each of its tickets.
 
@@ -1160,6 +1215,16 @@ def validate_season(season_dir, prev=None):
     chain, final = season_flags(season_dir)
     if final and chain:
         season_errors.append("season.yaml: a final season must be off-chain (add `chain: false`)")
+    side_floor = False
+    if "requires" in season:
+        if not is_nonempty_str(season["requires"]):
+            season_errors.append("season.yaml: 'requires' must be a ticket id, e.g. s01-t10")
+        elif chain or final:
+            season_errors.append("season.yaml: 'requires' is only for side floors (`chain: false`, not final)")
+        else:
+            side_floor = True
+    if "icon" in season and not (is_nonempty_str(season["icon"]) and len(season["icon"]) <= MAX_ICON_CHARS):
+        season_errors.append(f"season.yaml: 'icon' must be a short text (an emoji), at most {MAX_ICON_CHARS} characters")
     if not chain:
         prev = None
 
@@ -1176,7 +1241,8 @@ def validate_season(season_dir, prev=None):
             report[label] = ["listed in season.yaml but folder does not exist"]
             prev = None
             continue
-        errors = check_ticket_meta(ticket_dir, final=final, side_quest=not chain and not final)
+        errors = check_ticket_meta(ticket_dir, final=final, side_quest=not chain and not final and not side_floor,
+                                   side_floor=side_floor)
         if not errors and load_ticket_type(ticket_dir) not in NO_TEST_TYPES:
             errors += check_ticket_tests(ticket_dir)
             if (ticket_dir / "byte.yaml").is_file():
@@ -1184,7 +1250,8 @@ def validate_season(season_dir, prev=None):
         if prev is not None and (ticket_dir / "starter").is_dir():
             errors += check_evolution(prev, ticket_dir)
         report[label] = errors
-        prev = ticket_dir if chain else None
+        # On-chain: the chain continues. A side floor chains only inside itself.
+        prev = ticket_dir if chain or side_floor else None
     return report
 
 
@@ -1459,6 +1526,8 @@ def validate_content(content_dir):
         last = season_dir / "tickets" / order[-1] if order else None
         prev = last if last is not None and last.is_dir() else None
     for label, errors in check_requires(seasons_root).items():
+        report.setdefault(label, []).extend(errors)
+    for label, errors in check_season_requires(seasons_root).items():
         report.setdefault(label, []).extend(errors)
     warmups_dir = Path(content_dir) / "warmups"
     if warmups_dir.is_dir():

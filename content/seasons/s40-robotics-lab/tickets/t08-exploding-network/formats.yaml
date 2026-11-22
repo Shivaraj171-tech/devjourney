@@ -1,0 +1,23 @@
+predict:
+  - code: |
+      import math
+      print(math.tanh(150) == math.tanh(160))
+      print(math.tanh(1.5) == math.tanh(1.6))
+    question: "What does this print?"
+    answer: |-
+      True
+      False
+    choices:
+      - |-
+        True
+        False
+      - |-
+        False
+        False
+      - |-
+        False
+        True
+    explain: >-
+      tanh flattens out at 1.0 for big inputs: to a computer, tanh(150) and tanh(160) are exactly the same
+      number. A hidden unit fed boxes at 150 cm and 160 cm sees no difference at all. At 1.5 m and 1.6 m it
+      does (0.905 vs 0.922). That's why inputs are scaled before training.

@@ -1,0 +1,29 @@
+parsons:
+  - goal: >-
+      Write `update(q, reward, best_next, done)`: the Q-learning update with ALPHA = 0.5 and GAMMA = 0.9.
+      The target is the reward plus the discounted best next value, except when the episode is over:
+      then it is just the reward. Return the new Q. Two lines are Byte's slips: leave them out.
+    lines:
+      - "def update(q, reward, best_next, done):"
+      - "    target = reward"
+      - "    if not done:"
+      - "        target = reward + 0.9 * best_next"
+      - "    return q + 0.5 * (target - q)"
+    distractors:
+      - line: "    return q + 0.5 * target"
+        replaces: 4
+        explain: >-
+          That adds half the target on top of the old Q every time, so Q keeps growing even when the guess
+          was already right. The update moves Q a fraction of the GAP: `target - q`.
+      - line: "        target = reward + 0.9 * q"
+        replaces: 3
+        explain: >-
+          The future part must use the best value of the NEXT state, not this state's own Q: Q learns
+          "reward now plus what I can get from where I land".
+    check: |
+      assert update(0.0, -1.0, 10.0, False) == 4.0, update(0.0, -1.0, 10.0, False)
+      assert update(2.0, 10.0, 99.0, True) == 6.0, update(2.0, 10.0, 99.0, True)
+      assert update(4.0, -1.0, 10.0, False) == 6.0, update(4.0, -1.0, 10.0, False)
+    explain: >-
+      The target is what this move turned out to be worth: the reward, plus 0.9 times the best you can do
+      from where you landed, unless the episode is over. Q then moves halfway (ALPHA = 0.5) towards it.

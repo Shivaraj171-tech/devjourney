@@ -1,0 +1,43 @@
+# Correct: Byte spots the leak (and so should you, by checking the claim).
+suggestion:
+  file: grabby/grasp_model.py
+  find: "FEATURES = [\"width_cm\", \"force_n\", \"offset_deg\", \"slipped\"]"
+  replace: "FEATURES = [\"width_cm\", \"force_n\", \"offset_deg\"]"
+  correct: true
+  says: "Oops: `slipped` is measured during the lift, so the model was peeking at the answer. Dropping it."
+  explain: >-
+    Correct. Without the slip reading, the model has to use what's known beforehand (width, force,
+    offset). Its logbook accuracy drops a little (from 97% to about 93%), but on tomorrow's grasps it goes
+    from a coin flip to about 97%. An honest 93% beats a fake 97%.
+prompt:
+  goal: "Ask Byte to find out why the grasp model scores 97% in the notebook but about 55% on the packing line."
+  options:
+    - prompt: "The model is only 55% accurate. Make it more accurate."
+      response_code: |
+        def train(attempts, epochs=1000, learning_rate=2.0):
+            ...  # train longer and harder
+      verdict: vague
+      feedback: >-
+        Byte tuned training, which wasn't the problem: more epochs make the model lean on the leak even
+        harder. Without saying WHERE it scores 55% (and where it scores 97%), Byte can't see that the two
+        situations differ.
+    - prompt: "Add more features so the model has more to learn from: also use the bin it was dropped into."
+      response_code: |
+        FEATURES = ["width_cm", "force_n", "offset_deg", "slipped", "bin"]
+      verdict: wrong
+      feedback: >-
+        The bin is only known after the grasp too: another leak. Asking for more features without asking
+        WHEN each one is known makes a model that looks even better on paper and works no better.
+    - prompt: "grasp_model scores 97% on held-out logbook rows but about 55% on new grasps before they happen (no slip reading yet). List each feature in FEATURES and say whether it is known BEFORE the grasp; remove any that isn't."
+      response_code: |
+        # width_cm:   before (box size, from the camera)
+        # force_n:    before (we choose the grip force)
+        # offset_deg: before (we choose where to grab)
+        # slipped:    AFTER (the sensor fires during the lift): removed
+        FEATURES = ["width_cm", "force_n", "offset_deg"]
+      verdict: good
+      feedback: >-
+        It gives both numbers and what differs between the two situations, and asks for the one check that
+        matters for leaks: "would I have this value when I need the prediction?" Byte's answer shows its
+        reasoning, so you can verify it feature by feature.
+  best: 2

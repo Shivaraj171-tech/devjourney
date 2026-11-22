@@ -1,0 +1,23 @@
+questions:
+  - prompt: "The error was 6 last tick and is 4 now, with dt = 0.01. What is the derivative?"
+    choices:
+      - "-200.0"
+      - "200.0"
+      - "-2000.0"
+      - "-0.02"
+    answer: 0
+    explain: "(4 - 6) / 0.01 = -2 / 0.01 = -200. Negative: the error is shrinking, so the D term (KD * -200) brakes."
+  - prompt: "Byte's suggestion for a wobbly joint is to set KD to 0. What would happen here?"
+    choices:
+      - "The swing gets smaller, because the bad D term is gone and P alone is gentle"
+      - "It still overshoots a lot: with no brake at all, P drives the joint past the target"
+      - "Nothing changes, because KD only matters when the error is zero"
+    answer: 1
+    explain: "D is the only part that brakes before the target. Without it, P pushes at full force until the error reaches zero, the joint arrives fast and sails past. The flipped sign was the bug; removing D just trades one swing for another."
+  - prompt: "Why did nothing crash, even though the controller was badly wrong?"
+    choices:
+      - "Python only raises errors for wrong types, and a flipped sign is still a valid float"
+      - "The motor clipped every torque to ±300, and clipping hides Python's error messages from the logs"
+      - "The e-stop caught the exception before it could reach the logs, so the run looked clean"
+    answer: 0
+    explain: "`(prev - error) / dt` is valid arithmetic, so Python happily computes it. The program does exactly what it says, which is the opposite of what we meant. Only the behaviour (the swing in the chart, the overshoot check) shows the bug."

@@ -1,0 +1,10 @@
+id: s40-t02
+title: "Reach for the box"
+type: bug
+level: intern
+track: robotics
+concepts: [functions, numbers, forward-kinematics, inverse-kinematics]
+new_concept: inverse-kinematics
+estimated_minutes: 15
+tests_visible: true
+files_editable: [grabby/ik.py]

@@ -173,7 +173,7 @@ export async function seedSolved(page: Page, tickets: TicketInfo[]) {
   await page.reload();
 }
 
-type SeasonFlags = { chain?: boolean; final?: boolean };
+type SeasonFlags = { chain?: boolean; final?: boolean; requires?: string };
 
 function seasonDirs(): { slug: string; flags: SeasonFlags }[] {
   return readdirSync(SEASONS_DIR)
@@ -196,17 +196,28 @@ export function allSeasonTickets(): TicketInfo[] {
 export type BountyInfo = TicketInfo & { requires: string | null; bugKind: string | null; title: string };
 
 /**
- * The Bug Bounty board's tickets: side-quest seasons (`chain: false` without `final`),
- * shown as `bounty-<id>` cards on the HQ. Not part of allSeasonTickets().
+ * The Bug Bounty board's tickets: side-quest seasons (`chain: false` without `final`
+ * or a season-level `requires`), shown as `bounty-<id>` cards on the HQ.
+ * Not part of allSeasonTickets().
  */
 export function bountyTickets(): BountyInfo[] {
   return seasonDirs()
-    .filter((s) => s.flags.chain === false && s.flags.final !== true)
+    .filter((s) => s.flags.chain === false && s.flags.final !== true && !s.flags.requires)
     .flatMap((s) => seasonTickets(s.slug))
     .map((t) => {
       const meta = readYaml<{ requires?: string; bug_kind?: string; title: string }>(join(t.dir, "ticket.yaml"));
       return { ...t, requires: meta.requires ?? null, bugKind: meta.bug_kind ?? null, title: meta.title };
     });
+}
+
+/**
+ * A side floor (season.yaml `chain: false` + `requires`, e.g. the Robotics Lab): its slug,
+ * the ticket that opens it, and its tickets in order (rooms `lab-room-<id>` on the HQ).
+ */
+export function sideFloor(slug: string): { slug: string; requires: string; tickets: TicketInfo[] } {
+  const s = seasonDirs().find((d) => d.slug === slug);
+  if (!s?.flags.requires) throw new Error(`${slug} is not a side floor`);
+  return { slug, requires: s.flags.requires, tickets: seasonTickets(slug) };
 }
 
 /** The final exam's tickets (season.yaml `final: true`), shown as `exam-room-<id>` on the HQ. */

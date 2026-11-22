@@ -5,14 +5,29 @@
 // A side quest (off-chain and not the final, e.g. the Bug Bounty board) is never
 // gated as a whole: each of its tickets opens once its own `requires` ticket is
 // solved (or right away without one), and none of them gates anything.
+// A side FLOOR is a side quest opened as a whole by one ticket (season.yaml
+// `requires`, e.g. the Robotics Lab after Season 1): a floor of its own, with
+// lessons, whose tickets open one after another. It never gates anything either.
 // Pure functions on minimal shapes, so node can unit-test them.
 
 export type OrderTicket = { id: string; requires?: string | null };
-export type OrderSeason = { id: string; chain?: boolean; final?: boolean; tickets: OrderTicket[] };
+export type OrderSeason = { id: string; chain?: boolean; final?: boolean; requires?: string | null; tickets: OrderTicket[] };
 
-/** A side quest: off-chain but not the final exam (e.g. the Bug Bounty board). */
-export function isSideQuest(season: { chain?: boolean; final?: boolean }): boolean {
+type Flags = { chain?: boolean; final?: boolean; requires?: string | null };
+
+/** A side quest: off-chain but not the final exam (the Bug Bounty board, or a side floor). */
+export function isSideQuest(season: Flags): boolean {
   return season.chain === false && season.final !== true;
+}
+
+/** A side floor (e.g. the Robotics Lab): a side quest that one ticket opens as a whole (season.yaml `requires`). */
+export function isSideFloor(season: Flags): boolean {
+  return isSideQuest(season) && !!season.requires;
+}
+
+/** The Bug Bounty kind of side quest: loose cards, each opened by its own ticket's `requires`. */
+export function isBountyBoard(season: Flags): boolean {
+  return isSideQuest(season) && !season.requires;
 }
 
 /** The seasons of the story (on-chain floors and the final exam), side quests left out. */
@@ -28,7 +43,9 @@ export function previousChainSeasonIndex(seasons: OrderSeason[], index: number):
 
 /** The tickets that must all be solved before season `index` opens ([] = open from the start). */
 export function seasonGate(seasons: OrderSeason[], index: number): string[] {
-  if (isSideQuest(seasons[index] ?? {})) return [];
+  const season: Flags = seasons[index] ?? {};
+  if (isSideFloor(season)) return [season.requires as string];
+  if (isSideQuest(season)) return [];
   const prev = previousChainSeasonIndex(seasons, index);
   return prev === -1 ? [] : seasons[prev].tickets.map((t) => t.id);
 }
@@ -48,6 +65,7 @@ export function previousTicketId(seasons: OrderSeason[], ticketId: string): stri
   for (const [s, season] of seasons.entries()) {
     const i = season.tickets.findIndex((t) => t.id === ticketId);
     if (i === -1) continue;
+    if (isSideFloor(season)) return i > 0 ? season.tickets[i - 1].id : (season.requires as string);
     if (isSideQuest(season)) return season.tickets[i].requires ?? null;
     if (i > 0) return season.tickets[i - 1].id;
     const prev = previousChainSeasonIndex(seasons, s);
@@ -58,9 +76,12 @@ export function previousTicketId(seasons: OrderSeason[], ticketId: string): stri
 
 /**
  * The ticket after `ticketId` in the story ("Next ticket"), skipping side quests.
- * null for the last ticket, and for side-quest tickets (back to the office instead).
+ * null for the last ticket, and for bounty tickets (back to the office instead).
+ * Inside a side floor: the next ticket of that floor (null after its last one).
  */
 export function nextStoryTicketId(seasons: OrderSeason[], ticketId: string): string | null {
+  const floor = seasons.find((s) => isSideFloor(s) && s.tickets.some((t) => t.id === ticketId));
+  if (floor) return floor.tickets[floor.tickets.findIndex((t) => t.id === ticketId) + 1]?.id ?? null;
   const story = mainSeasons(seasons).flatMap((s) => s.tickets.map((t) => t.id));
   const i = story.indexOf(ticketId);
   return i === -1 ? null : (story[i + 1] ?? null);

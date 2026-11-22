@@ -1,0 +1,11 @@
+# Correct: Byte spots the flipped derivative.
+suggestion:
+  file: grabby/pid.py
+  find: "        derivative = (state[\"prev_error\"] - error) / dt"
+  replace: "        derivative = (error - state[\"prev_error\"]) / dt"
+  correct: true
+  says: "My bad: I flipped the derivative when I tidied up. It's new error minus old error, so D brakes when we close in."
+  explain: >-
+    Correct. With `error - prev_error`, a shrinking error gives a negative derivative and D brakes, so the
+    shoulder slows down before 90° instead of being pushed past it. One character of order in a subtraction
+    was the difference between a steady arm and a pendulum.

@@ -1,0 +1,23 @@
+id: s40
+title: "Robotics Lab"
+icon: "🤖"
+# A side floor: its own small codebase (the grabby/ package), opened as a whole
+# once Season 1 is done, never gating anything (the final exam stays on the story).
+chain: false
+requires: s01-t10
+intro: >
+  Orbit Orders just bought a packing robot arm for the kitchen: **Grabby**. Rosa,
+  our new robotics engineer, is teaching it to find boxes, reach them, move smoothly,
+  hold steady, learn by trial and error, and predict which grasps will work. Byte has
+  "helped" with every module. Each ticket teaches one robotics or machine-learning idea,
+  and the 🔭 Lab viewer shows what your code makes Grabby do after every run.
+  Optional: it never blocks the main story.
+tickets:
+  - t01-where-is-the-gripper
+  - t02-reach-for-the-box
+  - t03-out-of-reach
+  - t04-smooth-moves
+  - t05-shaky-shoulder
+  - t06-learning-to-reach
+  - t07-too-good-to-be-true
+  - t08-exploding-network

@@ -1,0 +1,22 @@
+questions:
+  - prompt: "A move of 10 steps: how many poses does the path need?"
+    choices:
+      - "9"
+      - "10"
+      - "11"
+    answer: 2
+    explain: "Steps are the gaps between poses, like fence panels between posts: 10 gaps need 11 posts, the start pose and the goal pose included."
+  - prompt: "The shoulder turns 30° and the elbow 120°, at most 3° per tick. How many steps does the move need?"
+    choices:
+      - "10, because the shoulder needs 30 / 3"
+      - "40, because the elbow needs 120 / 3"
+      - "50, one for each of 30 / 3 and 120 / 3 added together"
+    answer: 1
+    explain: "Both joints move at the same time, so the slowest one decides: the elbow needs 40 ticks of 3°. The shoulder then moves 0.75° per tick, well inside its limit."
+  - prompt: "What does `[i / 4 for i in range(4)]` give, and what's missing for a path?"
+    choices:
+      - "[0.0, 0.25, 0.5, 0.75]: the 1.0 (the goal) is missing"
+      - "[0.25, 0.5, 0.75, 1.0]: the 0.0 (the start) is missing"
+      - "[0.0, 0.25, 0.5, 0.75, 1.0]: nothing is missing"
+    answer: 0
+    explain: "range(4) is 0, 1, 2, 3, so t stops at 0.75. A path from start to goal needs t from 0 to 1 inclusive: range(steps + 1)."

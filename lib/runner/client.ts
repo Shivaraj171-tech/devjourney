@@ -2,6 +2,7 @@
 
 import { withBase } from "../basePath";
 import { whenServiceWorkerControls } from "../serviceWorker";
+import { parseViz } from "../lab/viz";
 import type { RunResult, TraceOutcome, TraceResult } from "./types";
 
 const TIMEOUT_MS = 8000;
@@ -70,7 +71,12 @@ export class PythonRunner {
   async run(files: Record<string, string>, tests: Record<string, string>): Promise<RunResult> {
     const answer = await this.request({ type: "run", files, tests });
     if ("error" in answer) return { passed: false, results: [], error: answer.error };
-    return answer.value as RunResult;
+    const result = answer.value as RunResult & { viz?: unknown };
+    if (result.viz === undefined) return result;
+    // Drawn by learner-reachable code: re-check shapes and limits (lib/lab/viz.ts).
+    const viz = parseViz(result.viz);
+    const { viz: _raw, ...rest } = result; // eslint-disable-line @typescript-eslint/no-unused-vars
+    return viz.length > 0 ? { ...rest, viz } : rest;
   }
 
   /** Run one check (test function `testName` in `testFile`) with tracing on. */
