@@ -1,0 +1,5 @@
+[
+  "Split q into scalar w = q[0] and vector v = q[1:]. Product: w = w1*w2 - v1@v2, v = w1*v2 + w2*v1 + np.cross(v1, v2). Conjugate: (w, -v). From axis-angle: (cos(theta/2), sin(theta/2) * k).",
+  "quat_rotate: p = (0, v); return quat_multiply(quat_multiply(q, p), quat_conjugate(q))[1:]. quat_to_matrix: the easy way is to rotate the three unit vectors with quat_rotate and stack them as columns.",
+  "matrix_to_quat: if trace is largest, s = 2*sqrt(1+trace) (= 4w), w = s/4, x = (R21-R12)/s, y = (R02-R20)/s, z = (R10-R01)/s; analogous branches for the largest diagonal entry. Finally flip the sign if w < 0. slerp: d = q0@q1; if d<0: q1, d = -q1, -d; omega = arccos(d); (sin((1-t)omega) q0 + sin(t omega) q1)/sin(omega)."
+]

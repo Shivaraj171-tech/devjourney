@@ -1,0 +1,5 @@
+[
+  "quintic: tau = clip(t/T, 0, 1); s = 10tau^3 - 15tau^4 + 6tau^5; sdot = (30tau^2 - 60tau^3 + 30tau^4)/T, and 0 outside [0, T]. dls_inverse: J.T @ np.linalg.solve(J @ J.T + lam**2 * I, I). path_deviation: s = clip((P - p0) @ d / (d @ d), 0, 1), distance to p0 + s d.",
+  "pose_error: concatenate(T_des[:3,3] - T[:3,3], log_so3(T_des[:3,:3] @ T[:3,:3].T)). resolved_rate_qdot: dls_inverse(J, damping) @ (v_ff + gain * err).",
+  "Loop: T0 = sim.ee_pose(); p0, R0 = ...; for k in range(steps + 1): t = k*dt; p_ref, v_ref = straight_line_reference(p0, p_goal, t, duration); T_ref = pose(R0, p_ref); T = sim.ee_pose(); log t, T[:3,3], sim.q, |log_so3(R0 @ T[:3,:3].T)|; if k == steps: break; qdot = resolved_rate_qdot(sim.jacobian(), concat(v_ref, zeros(3)), pose_error(T_ref, T), gain, damping); sim.step(qdot, dt)."
+]

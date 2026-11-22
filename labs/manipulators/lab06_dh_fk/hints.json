@@ -1,0 +1,5 @@
+[
+  "ARM3_DH = np.array([[0, np.pi/2, 0.30, 0], [0.40, 0, 0, 0], [0.30, 0, 0, 0]]). Columns are a, alpha, d, offset.",
+  "dh_transform: either build Rz(theta), Tz(d), Tx(a), Rx(alpha) as 4x4s and multiply, or use the closed-form matrix in README step 2. Row 3 is [0, sin(alpha), cos(alpha), d].",
+  "fk_dh_frames: frames = [np.eye(4)]; for (a, alpha, d, off), qi in zip(dh, q): frames.append(frames[-1] @ dh_transform(a, alpha, d, qi + off)). fk_dh returns frames[-1]."
+]

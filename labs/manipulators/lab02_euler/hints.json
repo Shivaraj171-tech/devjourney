@@ -1,0 +1,5 @@
+[
+  "Write R = Rz(yaw) Ry(pitch) Rx(roll) out symbolically (README step 2). Entry R[2,0] is -sin(pitch); column 0 is (c_y c_p, s_y c_p, -s_p); row 2 is (-s_p, c_p s_r, c_p c_r).",
+  "Normal branch: yaw = arctan2(R[1,0], R[0,0]), roll = arctan2(R[2,1], R[2,2]) (divide out cos(pitch) > 0 implicitly). Gimbal branch (cos_pitch < tol): roll = 0, yaw = arctan2(-R[0,1], R[1,1]).",
+  "euler_rate_matrix: np.column_stack([z, rot_z(yaw) @ y, rot_z(yaw) @ rot_y(pitch) @ x]) with x, y, z the unit vectors. is_gimbal_locked: abs(np.cos(pitch)) < tol."
+]
