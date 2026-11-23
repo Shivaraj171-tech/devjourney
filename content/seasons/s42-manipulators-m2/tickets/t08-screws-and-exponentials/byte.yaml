@@ -1,0 +1,11 @@
+# Wrong: Byte flips the sign of v in revolute_screw; exp_twist still uses v theta.
+suggestion:
+  file: kin/poe.py
+  find: "    return w + [-v[0], -v[1], -v[2]]"
+  replace: "    return w + v  # v = w x q: the minus sign was a typo"
+  correct: false
+  says: "The screw's v is just ω × q. Dropping the stray minus sign should put the arm back together."
+  explain: >-
+    The minus sign was right: a point p on the turning body moves with ω × (p - q) = ω × p - ω × q, so
+    v = -ω × q, and the axis-through-(1, 0, 0) test now even fails its screw check. The real bug is untouched:
+    exp_twist still moves points by v θ, a straight slide, instead of G(θ) v, the arc.

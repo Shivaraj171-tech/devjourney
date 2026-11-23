@@ -1,0 +1,10 @@
+id: s42-t08
+title: "Screws and exponentials"
+type: bug
+level: senior
+track: robotics
+concepts: [axis-angle, homogeneous-transforms, product-of-exponentials]
+new_concept: product-of-exponentials
+estimated_minutes: 35
+tests_visible: true
+files_editable: [kin/poe.py]

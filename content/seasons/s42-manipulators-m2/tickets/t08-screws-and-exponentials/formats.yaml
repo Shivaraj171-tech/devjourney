@@ -1,0 +1,42 @@
+predict:
+  - code: |
+      def screw(w, q):
+          wxq = [w[1] * q[2] - w[2] * q[1], w[2] * q[0] - w[0] * q[2], w[0] * q[1] - w[1] * q[0]]
+          return list(w) + [round(-c, 2) + 0.0 for c in wxq]
+
+      print(screw((0.0, -1.0, 0.0), (0, 0, 0.3)), screw((0.0, -1.0, 0.0), (0.4, 0, 0.3)))
+    question: "Ticket 3's shoulder and elbow axes at home (both along -y). What are their screw axes?"
+    answer: "[0.0, -1.0, 0.0, 0.3, 0.0, 0.0] [0.0, -1.0, 0.0, 0.3, 0.0, -0.4]"
+    choices:
+      - "[0.0, -1.0, 0.0, 0.3, 0.0, 0.0] [0.0, -1.0, 0.0, 0.3, 0.0, -0.4]"
+      - "[0.0, -1.0, 0.0, -0.3, 0.0, 0.0] [0.0, -1.0, 0.0, -0.3, 0.0, 0.4]"
+      - "[0.0, -1.0, 0.0, 0.0, 0.0, 0.0] [0.0, -1.0, 0.0, 0.0, 0.0, 0.0]"
+      - "[0.0, -1.0, 0.0, 0.3, 0.0, 0.0] [0.0, -1.0, 0.0, 0.3, 0.0, 0.0]"
+    explain: >-
+      v = -ω × q (the second choice forgot the minus). Same direction ω, but the elbow's axis is 0.4 m further out, so its v gains a z part: v tells
+      the exponential WHERE the axis is, not just which way it points. Two parallel axes, two different screws.
+parsons:
+  - goal: >-
+      Write `G(w, th)` for a unit axis w: the 3x3 matrix with e^([S] th)'s translation = G v. `skew(w)` and
+      `mm(A, B)` (3x3 product) exist. One line is Byte's slip: leave it out.
+    lines:
+      - "def G(w, th):"
+      - "    K = skew(w)"
+      - "    K2 = mm(K, K)"
+      - "    c, s = math.cos(th), math.sin(th)"
+      - "    return [[th * (i == j) + (1 - c) * K[i][j] + (th - s) * K2[i][j] for j in range(3)] for i in range(3)]"
+    distractors:
+      - line: "    return [[th * (i == j) for j in range(3)] for i in range(3)]"
+        replaces: 4
+        explain: "That's G for a slide (I θ): the translation becomes v θ, a straight line instead of the arc."
+    check: |
+      import math
+      def skew(w):
+          return [[0, -w[2], w[1]], [w[2], 0, -w[0]], [-w[1], w[0], 0]]
+      def mm(A, B):
+          return [[sum(A[i][k] * B[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+      g = G((0, 0, 1), math.pi / 2)
+      v = (0, -1, 0)
+      p = [sum(g[i][k] * v[k] for k in range(3)) for i in range(3)]
+      assert max(abs(a - b) for a, b in zip(p, (1, -1, 0))) < 1e-9, p
+    explain: "The series θ I + θ²/2! [ω] + θ³/3! [ω]² + ... collapses (with [ω]³ = -[ω]) to I θ + (1 - cos θ) [ω] + (θ - sin θ) [ω]²."
