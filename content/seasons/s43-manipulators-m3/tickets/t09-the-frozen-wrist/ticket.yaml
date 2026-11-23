@@ -1,0 +1,11 @@
+id: s43-t09
+title: "The frozen wrist"
+type: incident
+level: senior
+track: robotics
+concepts: [singularities, manipulability, condition-number]
+new_concept: condition-number
+estimated_minutes: 25
+tests_visible: true
+files_editable: [vel/monitor.py]
+time_limit_minutes: 25

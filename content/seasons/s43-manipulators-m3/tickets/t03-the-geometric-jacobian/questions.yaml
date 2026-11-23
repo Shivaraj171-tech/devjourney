@@ -17,7 +17,7 @@ questions:
   - prompt: "The radius p_e - p(i-1) uses p(i-1). What if you used ANOTHER point on the same axis?"
     choices:
       - "Same column: the difference is parallel to the axis, and crosses to zero"
-      - "A different column, scaled by the distance between the points"
+      - "A different column: the radius changes, so the column is scaled by the distance between the two points"
       - "The column flips sign"
     answer: 0
     explain: "Any two points on the axis differ by a multiple of z(i-1), and z × (k z) = 0."

@@ -1,0 +1,11 @@
+# Wrong: Byte flips the force to gravity's direction; the J vs J^T bug stays (and the force is now wrong too).
+suggestion:
+  file: vel/statics.py
+  find: "    return joint_torques(Jv, [0.0, 0.0, mass * G])"
+  replace: "    return joint_torques(Jv, [0.0, 0.0, -mass * G])  # gravity points down"
+  correct: false
+  says: "Gravity points DOWN, so the force should be negative. That's why the torques looked off."
+  explain: >-
+    Two wrongs. The force in τ = Jᵀ F is what the gripper EXERTS: to hold the box it pushes up, so +m g was
+    right. And the real bug is untouched: joint_torques still computes J F, so the shoulder still "holds nothing"
+    straight out. A plausible physical story is not a test result.

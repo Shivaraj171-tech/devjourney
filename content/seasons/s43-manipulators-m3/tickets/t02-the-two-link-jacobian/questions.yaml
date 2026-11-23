@@ -10,14 +10,14 @@ questions:
   - prompt: "Column 1 of the two-link Jacobian equals (-y, x). What does that say geometrically?"
     choices:
       - "Turning the shoulder moves the gripper perpendicular to the shoulder-gripper line, at speed |p|"
-      - "The gripper moves towards the shoulder when joint 1 turns"
+      - "The gripper moves straight towards the shoulder, at a speed of l1, when joint 1 turns"
       - "Joint 1 only moves the elbow, never the gripper"
     answer: 0
     explain: "(-y, x) is the position turned by 90°: a circle around the shoulder, with speed equal to the radius (at 1 rad/s)."
   - prompt: "Byte's Jacobian uses sin(q2) where the formula has sin(q1 + q2). At which poses does it still give the right answer?"
     choices:
       - "Exactly when q1 = 0 (and, by periodicity, multiples of 2π)"
-      - "At every pose, because sine is periodic"
+      - "At every pose: sine is periodic, so sin(q2) and sin(q1 + q2) always agree"
       - "Only at singular poses"
     answer: 0
     explain: "q1 + q2 = q2 only when q1 = 0. That's why testing at q1 = 0 alone hid the bug."

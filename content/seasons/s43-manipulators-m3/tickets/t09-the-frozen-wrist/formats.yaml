@@ -1,0 +1,18 @@
+predict:
+  - code: |
+      import math
+      sigmas = [2.06, 1.25, 1.0, 0.47, 0.27, 0.145]
+      kappa = sigmas[0] / sigmas[-1]
+      squared = sigmas[0] ** 2 / sigmas[-1] ** 2
+      action = lambda k: "stop" if k > 200 else "slow" if k > 50 else "go"
+      print(round(kappa, 1), action(kappa), round(squared), action(squared))
+    question: "The singular values at the frozen pose. What do the real and the squared monitor decide?"
+    answer: "14.2 go 202 stop"
+    choices:
+      - "14.2 go 202 stop"
+      - "14.2 go 202 slow"
+      - "202 stop 14.2 go"
+      - "14.2 slow 202 stop"
+    explain: >-
+      The real κ is 14: nowhere near trouble. Squared, it crosses the 200 stop line. Same pose, same arm, opposite
+      decisions.

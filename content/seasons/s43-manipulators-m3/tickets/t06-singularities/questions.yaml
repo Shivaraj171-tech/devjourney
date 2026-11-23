@@ -4,7 +4,7 @@ questions:
       - "rank J < 6: some gripper velocity can't be produced by any joint speeds"
       - "Some joint has reached its limit and can't turn any further"
       - "The arm is out of reach of every target"
-      - "J has a zero column: one joint has stopped doing anything"
+      - "J has a zero column: one of the joints has stopped moving the gripper at all"
     answer: 0
     explain: "Singular means the columns are dependent. That needs no limit, no zero column: two columns can simply become parallel."
   - prompt: "The UR5's home pose (all joints at 0) is..."
@@ -24,7 +24,7 @@ questions:
   - prompt: "Why are joints 4 and 6 the culprits of the UR5's wrist singularity?"
     choices:
       - "At q5 = 0 their axes are parallel, so they turn the flange about the same line"
-      - "They are the two fastest motors, so they reach their speed limits first"
+      - "They are the two fastest motors on the arm, so they always reach their speed limits first"
       - "They are the only joints whose axes are vertical at home"
     answer: 0
     explain: "Joint 5 sits between them. At q5 = 0 (or π) it lines their axes up: two columns of J become parallel, one direction of rotation is lost."

@@ -1,0 +1,37 @@
+predict:
+  - code: |
+      J = [[1.0, 2.0], [0.0, 3.0]]
+      F = [4.0, 5.0]
+      JF = [sum(J[r][c] * F[c] for c in range(2)) for r in range(2)]
+      JtF = [sum(J[r][c] * F[r] for r in range(2)) for c in range(2)]
+      print(JF, JtF)
+    question: "A small square J and a force. What are J F and Jᵀ F?"
+    answer: "[14.0, 15.0] [4.0, 23.0]"
+    choices:
+      - "[14.0, 15.0] [4.0, 23.0]"
+      - "[4.0, 23.0] [14.0, 15.0]"
+      - "[14.0, 15.0] [14.0, 15.0]"
+      - "[4.0, 15.0] [14.0, 23.0]"
+    explain: >-
+      Jᵀ F dots each COLUMN with F: (1, 0) · (4, 5) = 4 and (2, 3) · (4, 5) = 23. J F dots rows. Same shape,
+      different numbers: only a test with known torques tells them apart.
+break_it:
+  - says: "My holding-torque function: tested it with the arm straight out, shoulder 13.7 N m. Ship it?"
+    code: |
+      def shoulder_torque(q2, mass):
+          # Byte: lever arm = the whole reach, always
+          return mass * 9.81 * (0.4 + 0.3)
+    spec: "The shoulder's holding torque for the 3-DOF arm with a straight elbow (q3 = 0) and the shoulder at q2 rad: m g (a2 + a3) cos(q2). Give q2 (radians) and the mass (kg)."
+    call: "shoulder_torque({input})"
+    input_hint: "q2, mass"
+    helpers: |
+      import math
+      def spec_ok(q2, mass, result):
+          return abs(result - mass * 9.81 * 0.7 * math.cos(q2)) < 1e-6
+    check: "spec_ok({input}, result)"
+    normal_input: "0.0, 2.0"
+    example_input: "1.0, 2.0"
+    miss: "At q2 = 0 the arm is level and the lever is the whole reach. Tilt the arm up."
+    explain: >-
+      Tilt the shoulder and the horizontal lever arm shrinks with cos(q2): pointing straight up, the shoulder
+      holds no torque at all. That's Jᵀ F at work: the column's vertical component is (a2 + a3) cos(q2).

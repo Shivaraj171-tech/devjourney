@@ -1,0 +1,33 @@
+predict:
+  - code: |
+      import math
+      l1, l2 = 0.5, 0.4
+      def det_J(q2):
+          return l1 * l2 * math.sin(q2)
+      def speeds_needed(q2):
+          return round(1 / abs(det_J(q2)), 1)
+      print(speeds_needed(math.pi / 2), speeds_needed(0.1), speeds_needed(0.01))
+    question: "1 / |det J| roughly tracks how fast the joints must spin as the elbow straightens. What does it print?"
+    answer: "5.0 50.1 500.0"
+    choices:
+      - "5.0 50.1 500.0"
+      - "5.0 5.0 5.0"
+      - "0.2 0.02 0.002"
+      - "5.0 10.0 15.0"
+    explain: "det J ~ l1 l2 q2 for a small q2: ten times closer to straight, ten times faster joints."
+parsons:
+  - goal: >-
+      Write `torques(J, F)`: τ = Jᵀ F for a Jacobian given as a list of rows (m × n), one torque per joint. One
+      line is Byte's slip: leave it out.
+    lines:
+      - "def torques(J, F):"
+      - "    n = len(J[0])"
+      - "    return [sum(J[r][c] * F[r] for r in range(len(J))) for c in range(n)]"
+    distractors:
+      - line: "    return [sum(J[r][c] * F[c] for c in range(n)) for r in range(len(J))]"
+        replaces: 2
+        explain: "That's J F: it dots rows with F and returns one number per ROW, not per joint."
+    check: |
+      J = [[1.0, 2.0], [0.0, 1.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [1.0, 1.0]]
+      assert torques(J, [3.0, 4.0, 0.0, 0.0, 0.0, 0.5]) == [3.5, 10.5], torques(J, [3.0, 4.0, 0.0, 0.0, 0.0, 0.5])
+    explain: "One dot product per COLUMN (joint): Jᵀ F."

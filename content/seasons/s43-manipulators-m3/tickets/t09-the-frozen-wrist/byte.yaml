@@ -1,0 +1,17 @@
+# Right: Byte restores the square root in singular_values.
+suggestion:
+  file: vel/monitor.py
+  find: "    return [max(0.0, lam) for lam in values]\n"
+  replace: "    return [math.sqrt(max(0.0, lam)) for lam in values]\n"
+  correct: true
+  why:
+    choices:
+      - "Accept: Jᵀ J's eigenvalues are σ², so without the root κ is squared and trips the stop threshold at a true κ of 14."
+      - "Reject: lower the stop threshold to 14 instead; the squared κ is faster to compute."
+      - "Accept: square roots make the monitor more cautious, which is always safer."
+    answer: 0
+  says: "Rosa's hand calculation squared is my κ. My optimisation changed the units. Putting the root back."
+  explain: >-
+    Right, and diagnosed from the evidence: 14.2² ≈ 201. With the root, κ at q5 = 28° is 14 (go), the arm slows
+    near 7° and stops near 2°. "More cautious is safer" is wrong too: a monitor that freezes for nothing gets
+    switched off by ops, and then it protects nothing.

@@ -1,0 +1,10 @@
+id: s43-t08
+title: "Hold that box"
+type: bug
+level: mid
+track: robotics
+concepts: [geometric-jacobian, manipulability, statics]
+new_concept: statics
+estimated_minutes: 25
+tests_visible: true
+files_editable: [vel/statics.py]

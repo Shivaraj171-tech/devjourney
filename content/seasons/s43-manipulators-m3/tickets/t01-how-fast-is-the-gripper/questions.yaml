@@ -25,6 +25,6 @@ questions:
     choices:
       - "The caller's q changes, so later probes start from the wrong pose"
       - "Python raises an error: lists passed to a function are read-only"
-      - "Nothing: Python copies a list when you pass it to a function"
+      - "Nothing: Python copies a list when you pass it to a function, so the caller's q is safe"
     answer: 0
     explain: "Python passes the list itself, not a copy. Every probe after the first starts from a moved q, and the caller's q is left moved too."

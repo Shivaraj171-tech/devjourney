@@ -1,0 +1,29 @@
+questions:
+  - prompt: "A 6-joint arm's geometric Jacobian is 6 × 6. A 7-joint arm's is 6 × 7. For the 7-joint arm, how many numbers does τ = Jᵀ F have?"
+    choices:
+      - "7: one torque per joint"
+      - "6: one per wrench entry"
+      - "42: one per entry of J"
+    answer: 0
+    explain: "Jᵀ is 7 × 6, F has 6 entries (force and moment): τ has 7, one per joint. (J F wouldn't even multiply.)"
+  - prompt: "The gripper holds a 2 kg box still. What is F in τ = Jᵀ F?"
+    choices:
+      - "(0, 0, +19.6) N: the force the gripper exerts, upwards"
+      - "(0, 0, -19.6) N: gravity's pull on the box"
+      - "(0, 0, 2) kg"
+    answer: 0
+    explain: "F is what the gripper does to the world. To hold the box it pushes up with m g. Using gravity's force gives torques that would help gravity drop it."
+  - prompt: "Why does joint 1 (the base, a vertical axis) need no torque to hold the box?"
+    choices:
+      - "Its column is horizontal, so its dot product with a vertical F is 0"
+      - "Because it's the joint closest to the ground, so the weight goes straight into the floor"
+      - "Because its motor has a brake"
+    answer: 0
+    explain: "τ1 = (column 1) · F. Turning about a vertical axis moves the gripper horizontally only, so a vertical force doesn't load it."
+  - prompt: "A stretched-out arm is pulled along its length. Roughly how much joint torque resists that pull?"
+    choices:
+      - "Almost none: the pull is taken by the structure"
+      - "A huge amount: near a singularity torques blow up"
+      - "Exactly m g on every joint"
+    answer: 0
+    explain: "Stretched out, no column of J points along the arm, so Jᵀ F ≈ 0 for a pull along it. The arm can't MOVE that way and doesn't need torque to RESIST that way: the duality."

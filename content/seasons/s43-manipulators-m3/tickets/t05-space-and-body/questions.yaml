@@ -2,7 +2,7 @@ questions:
   - prompt: "In a space twist V_s = (w, v), what is v?"
     choices:
       - "The velocity of the body point passing through the BASE origin"
-      - "The velocity of the gripper's fingertips, in base axes"
+      - "The velocity of the gripper's fingertips, written in the base frame's axes"
       - "The velocity of the base frame itself"
     answer: 0
     explain: "Imagine the gripper's body extended to the base origin: v is how fast that point moves. The gripper point's velocity is v + w × p."

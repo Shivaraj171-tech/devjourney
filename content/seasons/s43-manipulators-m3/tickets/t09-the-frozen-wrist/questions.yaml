@@ -1,0 +1,30 @@
+questions:
+  - prompt: "The monitor reported κ = 200.9 at q5 = 28°, where the true σ_max / σ_min is 14.2. What explains it?"
+    choices:
+      - "It computed λ_max / λ_min of Jᵀ J, which is κ²"
+      - "The UR5's Jacobian is wrong at that pose"
+      - "κ depends on the joint speeds, which were high"
+      - "The threshold should have been 2000"
+    answer: 0
+    explain: "14.2² = 201.6 ≈ 200.9. The eigenvalues of Jᵀ J are the squared singular values."
+  - prompt: "Near the UR5's wrist flip, the same 0.2 rad/s spin needs joint 4 to turn at roughly..."
+    choices:
+      - "a speed that grows like 1 / sin(q5): 14 rad/s at q5 = 1°"
+      - "0.2 rad/s, whatever q5 is"
+      - "0 rad/s: joints 4 and 6 lock and stop moving at a wrist singularity"
+    answer: 0
+    explain: "σ_min shrinks with sin(q5), and q̇ = J⁻¹ V scales with 1/σ_min. The chart under the 3D view shows joints 4 and 6 racing in opposite directions."
+  - prompt: "Why is κ a better singularity monitor than manipulability w?"
+    choices:
+      - "κ doesn't depend on the arm's size, w does"
+      - "κ is cheaper to compute"
+      - "w can be negative"
+    answer: 0
+    explain: "Scale the arm and w changes by the cube (or more), κ not at all. A threshold on κ means the same thing for every arm."
+  - prompt: "Byte argued that dropping the square root keeps the ordering of the singular values. Why is that not enough?"
+    choices:
+      - "The monitor compares κ with fixed thresholds, and squaring moves where they trip"
+      - "Square roots of floats are inaccurate, so after the root the ordering of the σ can change"
+      - "It is enough: only the ordering matters for a monitor"
+    answer: 0
+    explain: "Ordering-only uses (sorting, finding the smallest) survive squaring; comparisons with a number tuned in real units don't."
