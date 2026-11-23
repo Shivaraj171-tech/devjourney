@@ -24,7 +24,7 @@ questions:
   - prompt: "What happens if λ is far too large (say 10 for a 1 m arm)?"
     choices:
       - "Every step is tiny: very slow convergence, even far from singularities"
-      - "Newton's quadratic convergence comes back"
+      - "Newton's quadratic convergence comes back, since the steps become exact"
       - "The steps explode"
     answer: 0
     explain: "For σ << λ every multiplier is about σ/λ²: safe but painfully slow. λ trades speed for robustness."

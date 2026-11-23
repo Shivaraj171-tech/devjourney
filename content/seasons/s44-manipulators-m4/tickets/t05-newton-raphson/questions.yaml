@@ -25,6 +25,6 @@ questions:
       - "Every step points away from the target: the error never falls"
       - "It converges, just more slowly"
       - "Python raises an error"
-      - "It converges to the other elbow"
+      - "It converges to the other elbow, because the sign flips which way it folds"
     answer: 0
     explain: "The step is exactly reversed. Nothing crashes; the arm just wanders. The log-scale error chart shows it at once."

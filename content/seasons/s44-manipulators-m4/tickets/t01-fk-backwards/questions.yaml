@@ -17,7 +17,7 @@ questions:
   - prompt: "Why does the brute-force grid search find CLUSTERS of poses instead of exact solutions?"
     choices:
       - "It keeps every grid pose within 3 cm, and several neighbours near each solution qualify"
-      - "Each solution of a two-link arm is a small region of joint space, not a point"
+      - "Each solution of a two-link arm is a whole small region of joint space, not a single point"
       - "Floating-point rounding spreads the solutions out"
     answer: 0
     explain: "The exact solutions are points; the grid only approximates them, so the poses close enough around each one form a cluster. Two clusters: two solutions."
@@ -26,6 +26,6 @@ questions:
       - "Up to 8 (shoulder × elbow × wrist choices)"
       - "Exactly 1"
       - "Up to 2, like the two-link arm"
-      - "Always infinitely many"
+      - "Always infinitely many, because six joints are more than enough"
     answer: 0
     explain: "Each of the three 'which side' choices doubles the count: 2 × 2 × 2 = 8. A 7-joint arm has infinitely many (a free elbow circle)."

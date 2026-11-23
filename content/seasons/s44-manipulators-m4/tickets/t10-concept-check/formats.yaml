@@ -1,0 +1,40 @@
+predict:
+  - code: |
+      import math
+      def solutions(shoulders, elbows, wrists):
+          return shoulders * elbows * wrists
+      print(solutions(1, 2, 1), solutions(2, 2, 1), solutions(2, 2, 2))
+    question: "Counting IK solutions: a two-link arm, the 3-DOF arm, a 6-DOF arm with a spherical wrist. What does it print?"
+    answer: "2 4 8"
+    choices:
+      - "2 4 8"
+      - "2 2 2"
+      - "1 2 6"
+      - "2 4 6"
+    explain: "Each independent 'which side' choice doubles the count: elbows, then base turns, then wrist flips."
+parsons:
+  - goal: >-
+      Write `ik_step(q, target)`: one robust numerical IK step, with `fk(q)`, `jac(q)`, `dls(J, e, lam)` and
+      `clamp(dq, m)` available. One line is Byte's slip: leave it out.
+    lines:
+      - "def ik_step(q, target):"
+      - "    e = [t - p for t, p in zip(target, fk(q))]"
+      - "    dq = clamp(dls(jac(q), e, 0.05), 0.2)"
+      - "    return [a + b for a, b in zip(q, dq)]"
+    distractors:
+      - line: "    e = [p - t for t, p in zip(target, fk(q))]"
+        replaces: 1
+        explain: "The error points from where we are to the target: target - p(q)."
+    check: |
+      def fk(q):
+          return [q[0], q[1]]
+      def jac(q):
+          return [[1.0, 0.0], [0.0, 1.0]]
+      def dls(J, e, lam):
+          return [x / (1 + lam * lam) for x in e]
+      def clamp(dq, m):
+          big = max(abs(x) for x in dq)
+          return dq if big <= m else [x * m / big for x in dq]
+      q = ik_step([0.0, 0.0], [1.0, 0.5])
+      assert abs(q[0] - 0.2) < 1e-12 and abs(q[1] - 0.1) < 1e-12, q
+    explain: "Error towards the target, a damped step, clamped by scaling: the whole of ticket 9 in four lines."

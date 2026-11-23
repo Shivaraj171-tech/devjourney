@@ -1,0 +1,11 @@
+id: s44-t09
+title: "The box at the edge of reach"
+type: incident
+level: senior
+track: robotics
+concepts: [damped-least-squares, body-twist-ik, robust-ik]
+new_concept: robust-ik
+estimated_minutes: 30
+tests_visible: true
+files_editable: [ik/reach_edge.py]
+time_limit_minutes: 30

@@ -1,0 +1,30 @@
+questions:
+  - prompt: "Why did box #413 work with plain Newton while #414, 3 cm away, didn't?"
+    choices:
+      - "#413 is reachable; #414 is beyond full stretch, so Newton chases a solution that doesn't exist"
+      - "#414 was heavier"
+      - "Newton is random, and #414 was unlucky"
+      - "The IK only works for boxes with an odd number"
+    answer: 0
+    explain: "With an exact solution and an invertible J nearby, Newton converges fast. Out of reach, at the singularity, it oscillates and occasionally explodes."
+  - prompt: "dq = (0.1, -0.6, 0.3) and MAX_STEP = 0.2. What does clamp_step return?"
+    choices:
+      - "(0.033, -0.2, 0.1)"
+      - "(0.1, -0.2, 0.2)"
+      - "(0.2, -0.2, 0.2)"
+    answer: 0
+    explain: "Scale the whole vector by 0.2 / 0.6: the biggest joint moves exactly 0.2, and the direction is kept. Clipping each joint (the second choice) changes the direction."
+  - prompt: "For the out-of-reach box, what does a correct robust solver end with?"
+    choices:
+      - "The arm stretched towards the box, about 1 cm short, error steady"
+      - "The box reached exactly, as long as it is given enough iterations to get there"
+      - "An exception: unreachable targets must raise an error"
+    answer: 0
+    explain: "The best the arm can do, reached calmly. The caller sees the remaining error and decides (skip the box, or ask for it to be moved)."
+  - prompt: "Damping makes the solver need more iterations for reachable boxes. Why keep it?"
+    choices:
+      - "It bounds every step near singularities, so the arm can never be told to whip round"
+      - "It makes the final answer more accurate"
+      - "It isn't needed if the target is always reachable, and the planner checks that it always is"
+    answer: 0
+    explain: "Robots meet edge cases daily. A few extra iterations (milliseconds) buy a guarantee that no step is wild."

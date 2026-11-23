@@ -1,0 +1,67 @@
+questions:
+  - prompt: "A two-link arm with l1 = l2 = 0.4. How many solutions for a target 0.8 m away? And for one at the shoulder itself?"
+    choices:
+      - "1 (stretched out); infinitely many (folded back, any q1)"
+      - "2; 0"
+      - "2; 2"
+      - "0; 1"
+    answer: 0
+    explain: "0.8 = l1 + l2: the outer edge. At r = 0 with equal links, folding back reaches the shoulder whatever q1 is."
+  - prompt: "For the two-link arm, c2 = 0.5. What are the two elbow angles?"
+    choices:
+      - "±60°"
+      - "±30°"
+      - "60° and 120°"
+    answer: 0
+    explain: "cos(q2) = 0.5 gives q2 = ±60°: one per elbow."
+  - prompt: "The 3-DOF arm's target is (0, -0.5, 0.3) with D1 = 0.3. What is the front solution's q1?"
+    choices:
+      - "-90°"
+      - "90°"
+      - "0°"
+      - "180°"
+    answer: 0
+    explain: "atan2(-0.5, 0) = -90°: face -y. (The back solution turns to +90° and reaches over the shoulder.)"
+  - prompt: "A spherical-wrist arm's target flange is at p with approach axis z6. Where must joints 1-3 put the wrist centre?"
+    choices:
+      - "p - D6 z6"
+      - "p + D6 z6"
+      - "p - D6 (0, 0, 1)"
+    answer: 0
+    explain: "Back off along the gripper's own approach axis. The last choice is only right when the gripper points straight up."
+  - prompt: "Newton's errors: 1e-1, 1e-2, 1e-3, 1e-4... What does that suggest?"
+    choices:
+      - "Linear convergence: probably damping, a wrong Jacobian, or a singular solution"
+      - "Healthy quadratic convergence: the error falls by the same factor every step, as it should"
+      - "Divergence"
+    answer: 0
+    explain: "Quadratic convergence squares the error (1e-2, 1e-4, 1e-8). A constant factor per step means the step isn't the true Newton step."
+  - prompt: "In full-pose IK with the body Jacobian J_b, which error twist is right?"
+    choices:
+      - "log(T_sb⁻¹ T_sd)"
+      - "log(T_sd T_sb⁻¹)"
+      - "(position difference, orientation difference)"
+    answer: 0
+    explain: "J_b dq is a body twist, so the error must be one: the target seen from the flange, T_sb⁻¹ T_sd."
+  - prompt: "With λ = 0.05, what is the largest multiplier damped least squares can ever apply to an error component?"
+    choices:
+      - "10 = 1/(2λ)"
+      - "20 = 1/λ"
+      - "Unbounded near singularities"
+      - "1"
+    answer: 0
+    explain: "σ / (σ² + λ²) peaks at σ = λ with value 1/(2λ) = 10."
+  - prompt: "dq = (0.4, -0.1, 0.0) and MAX_STEP = 0.2. The clamped step is..."
+    choices:
+      - "(0.2, -0.05, 0.0)"
+      - "(0.2, -0.1, 0.0)"
+      - "(0.4, -0.1, 0.0)"
+    answer: 0
+    explain: "Scale the whole step by 0.2 / 0.4 = 0.5: same direction, biggest joint exactly 0.2."
+  - prompt: "Current q = (0, 0, 0). Allowed candidates A = (1, -1, 0) and B = (0.6, 0.6, 0.6). Which does the controller pick?"
+    choices:
+      - "B: |B| ≈ 1.04 < |A| ≈ 1.41"
+      - "A: its differences sum to 0"
+      - "Either: they reach the same pose"
+    answer: 0
+    explain: "Joint-space distance is a norm. A's motions cancel only in a plain sum, not on the robot."

@@ -2,7 +2,7 @@ questions:
   - prompt: "What does the body twist error V_b = log(T_sb⁻¹ T_sd) represent?"
     choices:
       - "The constant twist that carries the flange onto the target in one second, in the flange's frame"
-      - "The difference of the two flange positions, in the base frame"
+      - "The difference of the two flange positions and of their orientations, both written in the base frame"
       - "The joint step that reaches the target"
     answer: 0
     explain: "A twist: an axis, an angle and a slide, in the body frame. The joint step comes from solving J_b dq = V_b."
@@ -15,8 +15,8 @@ questions:
     explain: "A twist's numbers change with the frame (the adjoint). Equating a body twist to a space twist is comparing apples to oranges."
   - prompt: "log_SE3 returns p instead of θ G⁻¹(θ) p. Why does Newton still converge?"
     choices:
-      - "Near the target θ → 0 and θ G⁻¹ ≈ I: the error is wrong only to second order, and both are zero at the solution"
-      - "Newton ignores the translation part"
+      - "Near the target θ ≈ 0 and θ G⁻¹ ≈ I: the error is wrong only to second order"
+      - "Newton ignores the translation part of the error, so only the rotation matters"
       - "It doesn't: Newton always diverges with a wrong error"
     answer: 0
     explain: "Same zero, slightly wrong slope: Newton still lands on the pose. Far from the target the numbers are wrong, which breaks damping, clamping and interpolation."

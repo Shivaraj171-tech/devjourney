@@ -2,7 +2,7 @@ questions:
   - prompt: "l1 = 0.5, l2 = 0.4 and the target is 0.6 m from the shoulder. What is cos(q2)?"
     choices:
       - "-0.125"
-      - "0.125"
+      - "+0.125"
       - "0.6"
       - "-0.6"
     answer: 0
@@ -10,7 +10,7 @@ questions:
   - prompt: "Why does the IK use atan2(s2, c2) rather than acos(c2) for the elbow?"
     choices:
       - "atan2 keeps the sign of s2, which is the elbow choice"
-      - "acos is slower to compute"
+      - "acos is slower to compute, and atan2 is the faster built-in function"
       - "acos only works in degrees"
     answer: 0
     explain: "acos(c2) is always in [0, π]: it can only ever give one elbow. atan2(±sqrt(1 - c2²), c2) gives both."
@@ -18,7 +18,7 @@ questions:
     choices:
       - "Accept it (a tiny tolerance), clamp c2 to 1 and return the stretched-out pose"
       - "Return None: |c2| > 1 means no triangle"
-      - "Return both elbows, since the target is reachable"
+      - "Return both elbow solutions, since a reachable target always has exactly two of them"
     answer: 0
     explain: "It's rounding, not geometry. Clamp, and the single solution is q2 = 0: both elbows coincide."
   - prompt: "Elbow up gives q2 = -1.596. What is q2 for elbow down, same target?"
