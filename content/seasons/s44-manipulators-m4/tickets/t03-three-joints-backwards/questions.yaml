@@ -1,0 +1,30 @@
+questions:
+  - prompt: "The box is at (0, 0.5, 0.3) and D1 = 0.3. What are q1 and the in-plane target (r, s)?"
+    choices:
+      - "q1 = 90°, (r, s) = (0.5, 0)"
+      - "q1 = 0°, (r, s) = (0.5, 0.3)"
+      - "q1 = 90°, (r, s) = (0.5, 0.3)"
+      - "q1 = 45°, (r, s) = (0.5, 0)"
+    answer: 0
+    explain: "atan2(0.5, 0) = 90°: face +y. r = 0.5, and the box is level with the shoulder: s = 0.3 - 0.3 = 0."
+  - prompt: "How many solutions does the 3-DOF arm have for a box comfortably inside its reach?"
+    choices:
+      - "4: two base angles (front, back) × two elbows"
+      - "2: elbow up and elbow down"
+      - "8: like the UR5"
+    answer: 0
+    explain: "Turning the base by π and reaching back over the shoulder gives a second pair."
+  - prompt: "The box is directly above the base, at (0, 0, 0.6). What goes wrong?"
+    choices:
+      - "q1 is undefined: any base angle works (a shoulder singularity)"
+      - "Nothing: atan2(0, 0) returns 0 and that's the only answer"
+      - "The box is out of reach"
+    answer: 0
+    explain: "Every base angle points the arm's plane through the box: infinitely many solutions. Python's atan2(0, 0) does return 0, which hides the problem rather than solving it."
+  - prompt: "Why can the base angle be solved first, alone?"
+    choices:
+      - "Shoulder and elbow only move the wrist within the plane the base points at"
+      - "The base is the first joint, and IK always goes from the base outwards"
+      - "The base motor is the strongest"
+    answer: 0
+    explain: "Decomposition works when a joint's job is separable: the base alone decides the plane, the others act inside it."

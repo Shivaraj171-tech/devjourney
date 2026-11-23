@@ -1,0 +1,10 @@
+id: s44-t02
+title: "The law of cosines"
+type: bug
+level: mid
+track: robotics
+concepts: [ik-solutions, inverse-kinematics, analytic-ik]
+new_concept: analytic-ik
+estimated_minutes: 25
+tests_visible: true
+files_editable: [ik/two_link_ik.py]

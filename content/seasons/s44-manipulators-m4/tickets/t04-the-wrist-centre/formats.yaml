@@ -1,0 +1,32 @@
+predict:
+  - code: |
+      import math
+      R0_3 = [[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]   # frame 3 turned 90° about z
+      R = [[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]      # the target: the same orientation
+      R3_6 = [[sum(R0_3[k][i] * R[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+      print(R3_6)
+    question: "The arm's first three joints already give the target orientation. What must the wrist add (R_3_6 = R_0_3ᵀ R)?"
+    answer: "[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]"
+    choices:
+      - "[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]"
+      - "[[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]"
+      - "[[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]]"
+    explain: "Nothing: R_0_3ᵀ R = I. If the arm already faces the right way, the wrist stays at its zero rotation."
+break_it:
+  - says: "My wrist centre: tested on 20 picks from above, all perfect."
+    code: |
+      def wrist_center(p, z6, d6=0.1):
+          return [p[0], p[1], p[2] + d6]
+    spec: "The wrist centre is d6 = 0.1 behind the flange position p along the flange's approach axis z6 (a unit vector): p - 0.1 z6. Give p and z6 as two lists."
+    call: "wrist_center({input})"
+    input_hint: "p, z6"
+    helpers: |
+      def spec_ok(p, z6, result):
+          return all(abs(r - (a - 0.1 * b)) < 1e-9 for r, a, b in zip(result, p, z6))
+    check: "spec_ok({input}, result)"
+    normal_input: "[0.5, 0.2, 0.3], [0.0, 0.0, -1.0]"
+    example_input: "[0.5, 0.2, 0.3], [1.0, 0.0, 0.0]"
+    miss: "That one points straight down, the case Byte tested. Tilt the gripper."
+    explain: >-
+      Any approach axis other than straight down breaks it: Byte hard-coded the one case it tested. The spec
+      uses z6 for a reason.

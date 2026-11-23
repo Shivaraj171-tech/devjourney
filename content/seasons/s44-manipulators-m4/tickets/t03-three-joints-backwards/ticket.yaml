@@ -1,0 +1,10 @@
+id: s44-t03
+title: "Three joints, backwards"
+type: bug
+level: mid
+track: robotics
+concepts: [fk-rrr, analytic-ik, rrr-ik]
+new_concept: rrr-ik
+estimated_minutes: 25
+tests_visible: true
+files_editable: [ik/rrr_ik.py]
