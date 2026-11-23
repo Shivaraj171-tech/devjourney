@@ -186,6 +186,8 @@ test("the badge toast closes itself after ~6 s, but not while hovered", async ({
   await page.clock.install();
   await seedSolved(page, []);
   await expect(page.getByTestId("office-map").first()).toBeVisible();
+  // Freeze time: from here only our fastForward calls move it, however slow the machine is.
+  await page.clock.pauseAt(new Date(Date.now() + 60_000));
   await seedSolved(page, [t01]);
   const toast = page.getByTestId("badge-toast");
   await expect(toast).toContainText("First Commit");
@@ -203,6 +205,7 @@ test("with reduced motion the toast doesn't animate and still closes itself", as
   await page.clock.install();
   await seedSolved(page, []);
   await expect(page.getByTestId("office-map").first()).toBeVisible();
+  await page.clock.pauseAt(new Date(Date.now() + 60_000));
   await seedSolved(page, [byId("s01-t01")]);
   const toast = page.getByTestId("badge-toast");
   await expect(toast).toBeVisible();
