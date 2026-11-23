@@ -1,0 +1,30 @@
+questions:
+  - prompt: "A revolute joint's axis points along x and passes through q = (0, 0, 0.5). What is its screw axis S = (ω, v)?"
+    choices:
+      - "(1, 0, 0, 0, 0.5, 0)"
+      - "(1, 0, 0, 0, -0.5, 0)"
+      - "(1, 0, 0, 0, 0, 0.5)"
+      - "(0, 0, 0.5, 1, 0, 0)"
+    answer: 0
+    explain: "v = -ω × q = -(x × 0.5 z) = -(-0.5 y) = (0, 0.5, 0). Angular part first: S = (1, 0, 0, 0, 0.5, 0)."
+  - prompt: "What does the PoE formula need that DH doesn't, and vice versa?"
+    choices:
+      - "PoE: screw axes at home in the base frame, and M. DH: a frame per link"
+      - "PoE needs the DH table first and converts it, so it always needs strictly more information"
+      - "They need exactly the same inputs, the four DH numbers per joint, just written in another order"
+    answer: 0
+    explain: "PoE needs no link frames at all: just each joint's axis (ω, v) at home, plus the home pose M. DH needs frames placed by its rules (and then 4 numbers per joint)."
+  - prompt: "In T(q) = e^([S1]q1) e^([S2]q2) M, why can S2 be measured at the HOME pose, even though joint 1 moves it?"
+    choices:
+      - "The rightmost factor acts first, while joint 1 is still at home"
+      - "Because joint 2's axis never moves, whatever joint 1 does to the rest of the arm"
+      - "It can't: S2 must be recomputed after every move of joint 1"
+    answer: 0
+    explain: "Apply right to left: e^([S2]q2) moves the gripper about joint 2's axis while joint 1 is at 0 (so that axis is where it was at home), then e^([S1]q1) carries everything, joint 2's axis included."
+  - prompt: "For which screws is the translation of e^([S] θ) simply v θ?"
+    choices:
+      - "Prismatic ones (ω = 0)"
+      - "Revolute ones whose axis passes through the point q = (1, 1, 1)"
+      - "Every screw, at small θ only"
+    answer: 0
+    explain: "With ω = 0 every power of [ω] vanishes, so G(θ) = I θ. For a revolute axis through the origin v = 0, so the translation is 0 either way; elsewhere the point moves round an arc, and only G(θ) v gets that right."

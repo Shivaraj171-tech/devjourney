@@ -1,0 +1,17 @@
+# Right: Byte takes joint i's axis from frame i-1 (frames 0..5), the DH rule.
+suggestion:
+  file: kin/ur5_poe.py
+  find: "    for T in frames[1:]:  # Byte: joint i turns about the z axis of frame i"
+  replace: "    for T in frames[:-1]:  # joint i turns about z of frame i-1: frames 0 .. n-1"
+  correct: true
+  why:
+    choices:
+      - "Accept: in DH, z(i-1) is joint i's axis, so the axes are frames 0 to 5 and the flange holds none."
+      - "Reject: the home pose already agreed, so the screws must have been right."
+      - "Accept: it just drops the base frame, which was a duplicate of frame 1."
+    answer: 0
+  says: "Off by one, sorry: joint 1 turns about the BASE's z axis. Frames 0 to 5 hold the six axes."
+  explain: >-
+    Right. Joint i turns about z(i-1) through o(i-1), so the screws come from frames 0 to 5, and the flange frame
+    6 holds no axis at all. The home pose agreed before only because e^([S] 0) = I for any S. Now DH and PoE give
+    the same 4x4 at every random pose, and with each joint moved alone.

@@ -1,0 +1,20 @@
+predict:
+  - code: |
+      d1, a2, a3, d4, d5, d6 = 0.089159, -0.425, -0.39225, 0.10915, 0.09465, 0.0823
+      # The "candle": q = (0, -90°, 0, -90°, 0, 0). The shoulder points the arm straight up,
+      # and wrist 1 at -90° points the d5 offset up as well. The d4 and d6 offsets still run along -y.
+      x = 0.0
+      y = -(d4 + d6)
+      z = d1 - a2 - a3 + d5
+      print(x, round(y, 3), round(z, 3))
+    question: "The UR5 standing upright, the 'candle' pose. Where is its flange (checked against ur5_fk)?"
+    answer: "0.0 -0.191 1.001"
+    choices:
+      - "0.0 -0.191 1.001"
+      - "-0.817 -0.191 -0.005"
+      - "0.0 0.0 1.001"
+      - "0.0 -0.191 -0.728"
+    explain: >-
+      The 0.817 m the arm reached along -x at home now points up: z = d1 + 0.425 + 0.39225, plus d5 since wrist 1
+      also points up. The sideways offsets d4 and d6 don't care about the shoulder: y stays -(d4 + d6). Reading a
+      table like this, offset by offset, is how you sanity-check FK code before trusting it.

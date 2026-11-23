@@ -1,0 +1,21 @@
+predict:
+  - code: |
+      import math
+      c, s = math.cos(math.radians(30)), math.sin(math.radians(30))
+      R = [[c, 0, s],
+           [0, 1, 0],
+           [-s, 0, c]]        # the gripper tipped 30° about y
+      p, d6 = [0.5, 0.0, 0.3], 0.1
+      col = [round(p[i] - d6 * R[i][2], 3) for i in range(3)]
+      row = [round(p[i] - d6 * R[2][i], 3) for i in range(3)]
+      print(col, row)
+    question: "The gripper tipped 30° about y. Wrist centre from the column, and from Byte's row: what prints?"
+    answer: "[0.45, 0.0, 0.213] [0.55, 0.0, 0.213]"
+    choices:
+      - "[0.45, 0.0, 0.213] [0.55, 0.0, 0.213]"
+      - "[0.45, 0.0, 0.213] [0.45, 0.0, 0.213]"
+      - "[0.55, 0.0, 0.213] [0.45, 0.0, 0.213]"
+      - "[0.5, 0.0, 0.2] [0.5, 0.0, 0.2]"
+    explain: >-
+      z6 (the third column) is (sin 30°, 0, cos 30°) = (0.5, 0, 0.866): backing off 0.1 along it moves x by -0.05.
+      The third row is (-0.5, 0, 0.866): the same height, but x moves the wrong way. 10 cm apart from one index swap.

@@ -1,0 +1,10 @@
+id: s42-t11
+title: "Module 2 concept check"
+type: read
+level: mid
+track: robotics
+concepts: [joints-and-dof, fk-composition, fk-rrr, dh-convention, dh-tables, ur5-fk, spherical-wrist, product-of-exponentials, dh-vs-poe, joint-offsets, forward-kinematics-module]
+new_concept: forward-kinematics-module
+estimated_minutes: 20
+tests_visible: true
+files_editable: []

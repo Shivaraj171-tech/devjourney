@@ -1,0 +1,10 @@
+id: s42-t06
+title: "Six joints: the UR5"
+type: bug
+level: mid
+track: robotics
+concepts: [dh-convention, dh-tables, ur5-fk]
+new_concept: ur5-fk
+estimated_minutes: 30
+tests_visible: true
+files_editable: [kin/ur5.py]

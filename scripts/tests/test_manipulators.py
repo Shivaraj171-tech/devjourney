@@ -192,6 +192,18 @@ class Frames3DTests(unittest.TestCase):
         self.assertEqual(item["axes"], [True, False, False, True])
         self.assertEqual(item["trail"], 3)
 
+    def test_arm3d_can_draw_a_triad_on_every_joint(self):
+        link = T(p=(0.5, 0, 0))
+        lab.viz.arm3d([[link, link, link]], axes=True, name="all")
+        lab.viz.arm3d([[link, link, link]], axes=[True, True], name="some")
+        lab.viz.arm3d([[link, link, link]], axes=False, name="none")
+        axes = [item["axes"] for item in lab.collect()]
+        self.assertEqual(axes, [[True] * 4, [True, True, False, False], [False] * 4])
+        # The default is unchanged: base and gripper only.
+        lab.reset()
+        lab.viz.arm3d([[link, link, link]])
+        self.assertEqual(lab.collect()[0]["axes"], [True, False, False, True])
+
     def test_limits(self):
         many = [[T(p=(i / 1000, j, 0)) for j in range(lab.MAX_TRANSFORMS + 4)] for i in range(1000)]
         lab.viz.frames3d("many", many)
@@ -249,6 +261,81 @@ class RealManipulatorsM1Tests(unittest.TestCase):
                 kinds = {item["kind"] for item in result.get("viz", [])}
                 self.assertIn("frames3d", kinds, f"{t.name}/{folder} drew no 3D frames")
                 self.assertLess(len(json.dumps(result["viz"])), lab.MAX_JSON)
+
+
+class RealManipulatorsM2Tests(unittest.TestCase):
+    """The real Module 2 floor (forward kinematics): opens after Module 1's last ticket."""
+
+    SEASON = REPO_ROOT / "content" / "seasons" / "s42-manipulators-m2"
+
+    def test_floor(self):
+        import yaml
+
+        season = yaml.safe_load((self.SEASON / "season.yaml").read_text())
+        self.assertIs(season["chain"], False)
+        self.assertEqual(season["requires"], "s41-t11")  # a SIDE FLOOR's ticket: modules open in sequence
+        self.assertEqual(season["lesson"], "long")
+        self.assertEqual(season["icon"], "🦾")
+        self.assertEqual(season["short_title"], "Manipulators · M2")
+        self.assertEqual(len(season["tickets"]), 11)
+        concepts, right, total, why, formats, questions, longest = set(), 0, 0, 0, 0, 0, 0
+        for name in season["tickets"]:
+            t = self.SEASON / "tickets" / name
+            meta = yaml.safe_load((t / "ticket.yaml").read_text())
+            concepts.add(meta["new_concept"])
+            qs = yaml.safe_load((t / "questions.yaml").read_text())["questions"]
+            self.assertGreaterEqual(len(qs), 3, name)
+            for q in qs:
+                questions += 1
+                lens = [len(c) for c in q["choices"]]
+                longest += lens[q["answer"]] > max(n for i, n in enumerate(lens) if i != q["answer"])
+            words = vc.lesson_words((t / "concept.md").read_text())
+            self.assertGreater(words, 300, f"{name}: a deep lesson, got {words} words")
+            self.assertEqual(len(vc.read_hints(t / "hints.md")), 3, name)
+            if (t / "byte.yaml").is_file():
+                sug = yaml.safe_load((t / "byte.yaml").read_text())["suggestion"]
+                total += 1
+                right += sug["correct"]
+                why += "why" in sug
+            formats += (t / "formats.yaml").is_file()
+        self.assertEqual(len(concepts), 11)
+        self.assertGreaterEqual(total, 6)
+        self.assertTrue(0.55 <= right / total <= 0.65, (right, total))
+        self.assertGreaterEqual(why, 3)
+        self.assertGreaterEqual(formats, 8)
+        self.assertLessEqual(longest, questions // 4, "the right answer is too often the longest choice")
+        report = vc.validate_content(REPO_ROOT / "content")
+        floor = {k: v for k, v in report.items() if k.startswith("s42-manipulators-m2")}
+        self.assertEqual(len(floor), 12)
+        self.assertTrue(all(v == [] for v in floor.values()), floor)
+
+    def test_starts_from_module_1s_rigid_package(self):
+        m1 = REPO_ROOT / "content" / "seasons" / "s41-manipulators-m1" / "tickets" / "t11-concept-check" / "starter" / "rigid"
+        m2 = self.SEASON / "tickets" / "t01-what-is-a-joint" / "starter" / "rigid"
+        for f in sorted(m1.glob("*.py")):
+            self.assertEqual((m2 / f.name).read_text(), f.read_text(), f.name)
+
+    def test_every_code_ticket_draws_the_arm_with_a_frame_on_every_joint(self):
+        for t in sorted((self.SEASON / "tickets").iterdir()):
+            if not (t / "tests").is_dir():
+                continue
+            for folder in ("starter", "solution"):
+                result = vc.run_ticket_tests(t / folder, t / "tests")
+                arms = [item for item in result.get("viz", []) if item["kind"] == "frames3d" and item["style"] == "arm"]
+                self.assertTrue(arms, f"{t.name}/{folder} drew no 3D arm")
+                for arm in arms:
+                    self.assertTrue(all(arm["axes"][:len(arm["frames"][0])]), f"{t.name}: every joint frame gets a triad")
+                self.assertLess(len(json.dumps(result["viz"])), lab.MAX_JSON)
+
+    def test_the_ur5_ticket_draws_six_joint_frames(self):
+        t = self.SEASON / "tickets" / "t06-the-ur5"
+        result = vc.run_ticket_tests(t / "solution", t / "tests")
+        arm = next(item for item in result["viz"] if item["kind"] == "frames3d")
+        self.assertEqual(len(arm["frames"][0]), 7)  # the base + six DH frames
+        self.assertEqual(arm["labels"][-1], "flange (frame 6)")
+        home = arm["frames"][0][-1]  # the animation starts at home: the flange's position
+        self.assertAlmostEqual(home[3], -0.81725, places=4)
+        self.assertAlmostEqual(home[7], -0.19145, places=4)
 
 
 if __name__ == "__main__":

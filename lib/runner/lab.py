@@ -287,7 +287,7 @@ class _Viz:
         _record(name, item)
 
     def arm3d(self, frames, *, name="arm3d", local=True, labels=None, points=None, lines=None, target=None,
-              title=None, caption=None, scale=None, trail=True):
+              title=None, caption=None, scale=None, trail=True, axes="ends"):
         """A 3D arm: each frame is one pose, given as a list of 4x4 transforms.
 
         local=True (default): the transforms are link to link (T_0_1, T_1_2, ...): the viewer
@@ -295,6 +295,8 @@ class _Viz:
         local=False: they already are world poses of each joint.
         The base (the identity) is added first, so the arm starts at the origin. Links are
         drawn as a thick arm, with triads at the base and the gripper (the last transform).
+        axes:    "ends" (default: base and gripper), True (a triad on EVERY joint frame, e.g. to
+                 see each DH frame), False, or one True/False per frame (base first).
         """
         poses = []
         for f, pose in enumerate(_scenes(frames)):
@@ -304,7 +306,8 @@ class _Viz:
                 joints.append(_mul4(joints[-1], rows) if local else rows)
             poses.append(joints)
         n = len(poses[0])
-        axes = [i == 0 or i == n - 1 for i in range(n)]
+        if axes == "ends":
+            axes = [i == 0 or i == n - 1 for i in range(n)]
         names = list(labels) if labels is not None else ["base"] + [f"joint {i}" for i in range(1, n - 1)] + ["gripper"]
         if labels is not None and len(names) == n - 1:
             names = ["base"] + names

@@ -1,0 +1,23 @@
+questions:
+  - prompt: "d1 = 0.3, a2 = 0.4, a3 = 0.3. Where is the wrist at q = (0°, 0°, 90°)?"
+    choices:
+      - "(0.4, 0, 0.6)"
+      - "(0.7, 0, 0.3)"
+      - "(0.4, 0.3, 0.3)"
+      - "(0.4, 0, 0.0)"
+    answer: 0
+    explain: "The upper arm points straight out to (0.4, 0, 0.3); positive q3 lifts the forearm, so it points straight up: 0.3 higher, at (0.4, 0, 0.6). (0.4, 0.3, 0.3) would be a forearm turned sideways."
+  - prompt: "Why does a test at the home pose (all joints 0) not catch a reversed chain?"
+    choices:
+      - "At zero angles the turns vanish and only translations along x and z remain"
+      - "Because Python evaluates matrix products right to left at zero, which happens to be the correct order"
+      - "It does catch it: a reversed chain always fails at the home pose, even when every angle is zero"
+    answer: 0
+    explain: "With q = 0 the yaw, shoulder and elbow are identities; what's left (Tz(d1), the fixed Rx(90°), Tx(a2), Tx(a3)) happens to give the same point in either order here. Moved joints don't."
+  - prompt: "What is the job of the fixed Rx(90°) in T_0_1?"
+    choices:
+      - "To tip z1 horizontal: it becomes the shoulder's joint axis"
+      - "To turn the whole robot 90° so its base faces the shelf, before the yaw"
+      - "To convert the joint angles from degrees to radians"
+    answer: 0
+    explain: "Each revolute joint turns about its frame's z axis. The shoulder's axis is horizontal, so z must be tipped over first: that fixed twist is part of the arm's geometry, not a joint."

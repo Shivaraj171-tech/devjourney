@@ -1,0 +1,11 @@
+# Right: Byte restores the datasheet's negative link lengths.
+suggestion:
+  file: kin/ur5.py
+  find: "    [0.425, 0.0, 0.0, 0.0],                # 2 shoulder (upper arm 0.425 m: lengths are positive, Byte)\n    [0.39225, 0.0, 0.0, 0.0],              # 3 elbow (forearm 0.39225 m)\n"
+  replace: "    [-0.425, 0.0, 0.0, 0.0],               # 2 shoulder (upper arm 0.425 m; a is signed: x2 points back)\n    [-0.39225, 0.0, 0.0, 0.0],             # 3 elbow (forearm 0.39225 m)\n"
+  correct: true
+  says: "Checked the datasheet this time: a2 and a3 are negative. The home x is a2 + a3, so that's our mirror."
+  explain: >-
+    Right, and checked the right way: against the datasheet, with a hand calculation of the home pose
+    (x = a2 + a3 = -0.81725). The random poses now match the independent numpy implementation too. A sign is
+    the cheapest typo to make in a DH table and the most expensive to find in a moving robot.

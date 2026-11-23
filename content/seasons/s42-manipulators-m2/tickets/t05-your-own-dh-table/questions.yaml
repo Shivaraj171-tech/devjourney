@@ -1,0 +1,23 @@
+questions:
+  - prompt: "Two consecutive joint axes are parallel (like a shoulder and an elbow). What can you say about α for the row between them?"
+    choices:
+      - "α = 0 (or 180°): parallel axes need no twist"
+      - "α = 90°: every row between two revolute joints needs a quarter twist"
+      - "α is the link's length, measured along the common normal"
+    answer: 0
+    explain: "α is the angle between z(i-1) and z_i about x_i. Parallel axes: 0 (or 180° if z flips). The link length between them is a."
+  - prompt: "In DH, which frame's z axis is joint 3's axis?"
+    choices:
+      - "Frame 2's"
+      - "Frame 3's"
+      - "Frame 4's"
+      - "The base frame's"
+    answer: 0
+    explain: "z(i-1) holds joint i's axis: z0 is joint 1, z1 joint 2, z2 joint 3. That off-by-one is why row i talks about frames i-1 and i."
+  - prompt: "Byte put the upper arm's 0.40 m in the d column of row 2. Where does the elbow end up at q = 0?"
+    choices:
+      - "0.40 m along z1, instead of along x2"
+      - "Exactly where it should be: a and d are both distances, so they give the same frame"
+      - "At the base, because d is only allowed on prismatic joints"
+    answer: 0
+    explain: "d slides along the OLD z axis (z1, the shoulder's axis); a walks along the NEW x axis (along the upper arm). With z1 still vertical in Byte's table, the elbow went straight up."

@@ -5,6 +5,7 @@ import type { Season } from "@/lib/content/types";
 import type { BountyCard } from "@/lib/game/bounty";
 import { BASE_XP } from "@/lib/game/rules";
 import { profileContent } from "@/lib/content/profileContent";
+import { floorGateText, sideFloorGate } from "@/lib/content/order";
 
 // Only send what the office map needs to the browser (no code, no tests).
 function summary(s: Season): SeasonSummary {
@@ -33,16 +34,18 @@ export default function Home() {
   // The floors are the story (side quests such as the Bug Bounty board are shown apart).
   const story = storySeasons();
   const seasons: SeasonSummary[] = story.map(summary);
-  // Side floors (the Robotics Lab): their own board, opened as a whole by one story ticket.
-  const sideFloors: SideFloorSummary[] = sideFloorSeasons().flatMap((s) => {
-    const floor = story.findIndex((x) => x.tickets.some((t) => t.id === s.requires));
-    if (floor === -1) return [];
-    const tickets = story[floor].tickets;
-    const at = tickets.findIndex((t) => t.id === s.requires);
-    const gateText = at === tickets.length - 1 ? `Floor ${floor + 1}` : `ticket #${tickets[at].number} of Floor ${floor + 1}`;
-    return [{ ...summary(s), requires: s.requires as string, gateText, icon: s.icon ?? "🧪", label: s.shortTitle ?? s.title }];
-  });
+  // Side floors (the Robotics Lab, the Manipulators modules): their own board, opened as a
+  // whole by one ticket: a story ticket, or another side floor's (modules open in sequence).
   const all = loadSeasons();
+  const floorName = (id: string) => {
+    const s = all.find((x) => x.id === id);
+    return s ? (s.shortTitle ?? s.title) : id;
+  };
+  const sideFloors: SideFloorSummary[] = sideFloorSeasons().flatMap((s) => {
+    const gate = sideFloorGate(all, all.findIndex((x) => x.id === s.id));
+    if (!gate) return [];
+    return [{ ...summary(s), requires: s.requires as string, gateText: floorGateText(gate, floorName), icon: s.icon ?? "🧪", label: s.shortTitle ?? s.title }];
+  });
   const bounties: BountyCard[] = sideQuestSeasons().flatMap((s) =>
     s.tickets.map((t) => {
       const req = t.bounty?.requires;

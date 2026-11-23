@@ -1,0 +1,10 @@
+id: s42-t07
+title: "The wrist centre"
+type: bug
+level: mid
+track: robotics
+concepts: [rotation-matrices-3d, dh-tables, spherical-wrist]
+new_concept: spherical-wrist
+estimated_minutes: 25
+tests_visible: true
+files_editable: [kin/wrist.py]

@@ -1,0 +1,31 @@
+questions:
+  - prompt: "What makes a wrist 'spherical'?"
+    choices:
+      - "Its last three joint axes intersect in one point"
+      - "Its gripper is mounted on a ball joint, which counts as three DOF in one joint"
+      - "All six joints of the arm are revolute"
+    answer: 0
+    explain: "Three revolute axes through one point act like a ball joint built from hinges. The UR5 has six revolute joints, but its wrist axes are offset, so it isn't spherical."
+  - prompt: "On an arm with a spherical wrist, which joints move the wrist centre?"
+    choices:
+      - "Only joints 1, 2 and 3"
+      - "Only joints 4, 5 and 6"
+      - "All six joints"
+      - "None: the wrist centre is a fixed point in the base frame"
+    answer: 0
+    explain: "Joints 4-6 turn about axes through the wrist centre, so they can't move it. Position comes from the arm (1-3), orientation from the wrist (4-6): the decoupling IK uses."
+  - prompt: "The flange is at p = (0.6, 0, 0.5), pointing straight down (z6 = (0, 0, -1)), d6 = 0.1. Where is the wrist centre?"
+    choices:
+      - "(0.6, 0, 0.6)"
+      - "(0.6, 0, 0.4)"
+      - "(0.5, 0, 0.5)"
+      - "(0.6, 0, 0.5)"
+    answer: 0
+    explain: "p_w = p - d6 z6 = (0.6, 0, 0.5) - 0.1 · (0, 0, -1) = (0.6, 0, 0.6): back off UP from a gripper that points down."
+  - prompt: "Why did Byte's wrist_center pass the home-pose test?"
+    choices:
+      - "At home R is symmetric enough that its third row equals its third column"
+      - "Because the home pose doesn't use the wrist joints, so z6 is never read at all"
+      - "It didn't: the home pose failed too"
+    answer: 0
+    explain: "Row 2 and column 2 agree whenever R[2][0] = R[0][2] and R[2][1] = R[1][2], as in many 'nice' poses. Random poses expose it, and so does the property test: wrist joints moving the wrist centre."

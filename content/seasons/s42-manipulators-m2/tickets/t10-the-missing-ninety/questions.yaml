@@ -1,0 +1,22 @@
+questions:
+  - prompt: "The logs show frame 3 matching the vendor sheet and frame 4 off. Where do you look first?"
+    choices:
+      - "Row 4 of the table, and anything that changes θ3 (the elbow's angle or offset)"
+      - "Row 1: an error at the base moves every frame, so the base is always the first suspect"
+      - "The planner: if a frame is wrong, the joint angles it sent must be wrong too"
+    answer: 0
+    explain: "Frame 4 = frame 3 · A4(θ4), and frame 3's ORIENTATION depends on θ3. The position of frame 3 can match while its axes are turned; the first frame that's off in position points at the step just before it. Here: the elbow offset."
+  - prompt: "Without the 0.12 m tool offset, by how much is the gripper off, and in which direction?"
+    choices:
+      - "0.12 m, along the flange's z axis, whatever the pose"
+      - "0.12 m straight down, since the tool always hangs below the flange"
+      - "It depends on the joint angles; it can be up to 0.84 m"
+    answer: 0
+    explain: "T_0_tool = T_0_6 Tz(0.12): the fingertips are always 0.12 m along z6, and z6 turns with the wrist. The 0.84 m in the logs came from the missing elbow offset."
+  - prompt: "Byte zeroed the offset because 'the UR5's offsets are all zero'. Why is that not a reason?"
+    choices:
+      - "Offsets depend on each arm's frames and its makers' choice of zero"
+      - "It is a reason: offsets are a convention that every robot vendor has to follow"
+      - "Offsets only matter for prismatic joints"
+    answer: 0
+    explain: "The θ offset bridges DH's frame rules and the vendor's chosen 'q = 0' pose. Grabby-6's elbow frames force a bent arm at θ3 = 0, so straight-out needs +90°. Different arm, different table."

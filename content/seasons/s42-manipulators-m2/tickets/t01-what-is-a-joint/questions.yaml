@@ -1,0 +1,31 @@
+questions:
+  - prompt: "A prismatic joint along z moves by q = 0.3. What does its 4x4 transform do to the frame after it?"
+    choices:
+      - "Slides it 0.3 m along z and leaves its axes unturned"
+      - "Turns it 0.3 rad about z, and leaves its origin exactly where it was"
+      - "Slides it 0.3 m along z and also turns it 0.3 rad"
+    answer: 0
+    explain: "Prismatic: rotation = identity, translation = 0.3 · z. Turning about z is what a revolute joint does; a 1-DOF joint never does both."
+  - prompt: "Grübler, in space: a serial arm with 5 revolute joints (6 links, counting the ground). How many DOF, and can it reach every pose in its workspace?"
+    choices:
+      - "5 DOF: no, a pose needs 6 numbers, so some orientations are missing"
+      - "6 DOF: yes, because the fixed ground link adds the one missing freedom to the arm"
+      - "11 DOF: yes, plenty"
+      - "5 DOF: yes, since the gripper's own roll adds the sixth one"
+    answer: 0
+    explain: "6 (6 - 1 - 5) + 5 = 5. Six numbers (x, y, z and three for orientation) need at least six independent joints; the ground never moves, so it adds nothing."
+  - prompt: "A planar four-bar linkage: the ground plus 3 moving links, joined in a loop by 4 hinges. How many DOF?"
+    choices:
+      - "1"
+      - "4"
+      - "3"
+      - "0: a loop can't move"
+    answer: 0
+    explain: "3 (4 - 1 - 4) + 4 = 1. Closing the loop takes freedoms away: one motor turning one crank drives the whole linkage."
+  - prompt: "Why do many collaborative arms (and your own arm) have 7 joints instead of 6?"
+    choices:
+      - "With one spare DOF the elbow can move while the hand holds its pose"
+      - "Because an arm with only 6 joints can reach poses that lie in one vertical plane"
+      - "A seventh joint makes forward kinematics unique"
+    answer: 0
+    explain: "7 > 6 is redundant: a one-parameter family of joint settings gives the same gripper pose (try holding a cup still and moving your elbow). FK is unique for any arm; it's the inverse that becomes a family."

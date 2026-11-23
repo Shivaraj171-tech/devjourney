@@ -1,0 +1,43 @@
+predict:
+  - code: |
+      import math
+      def row(a, alpha, d, theta):
+          ct, st, ca, sa = math.cos(theta), math.sin(theta), math.cos(alpha), math.sin(alpha)
+          return [[ct, -st * ca, st * sa, a * ct], [st, ct * ca, -ct * sa, a * st], [0, sa, ca, d], [0, 0, 0, 1]]
+      T = row(0.0, math.radians(90), 0.4, math.radians(0))
+      print([round(T[i][2], 2) + 0 for i in range(3)], [round(T[i][3], 2) + 0 for i in range(3)])
+    question: "One DH row: d = 0.4 and α = 90°. Where does the new frame's z axis point, and where is its origin?"
+    answer: "[0.0, -1.0, 0.0] [0.0, 0.0, 0.4]"
+    choices:
+      - "[0.0, -1.0, 0.0] [0.0, 0.0, 0.4]"
+      - "[0.0, 1.0, 0.0] [0.0, 0.0, 0.4]"
+      - "[0.0, 0.0, 1.0] [0.4, 0.0, 0.0]"
+      - "[0.0, -1.0, 0.0] [0.4, 0.0, 0.0]"
+    explain: >-
+      d slides 0.4 up the old z. Then Rx(+90°) tips z towards -y (y goes to z, z goes to -y): exactly row 1 of
+      ticket 3's arm, a vertical base axis meeting a horizontal shoulder axis.
+parsons:
+  - goal: >-
+      Write `fk(links)`: multiply a list of 4x4 link transforms from the base outwards and return the last
+      pose. `mul(A, B)` and the identity `I` exist. One line is Byte's slip: leave it out.
+    lines:
+      - "def fk(links):"
+      - "    T = I"
+      - "    for L in links:"
+      - "        T = mul(T, L)"
+      - "    return T"
+    distractors:
+      - line: "    for L in reversed(links):"
+        replaces: 2
+        explain: "Base outwards, not wrist inwards: reversed() builds T_2_3 T_1_2 T_0_1, which only agrees at special poses like home."
+    check: |
+      import math
+      def mul(A, B):
+          return [[sum(A[i][k] * B[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+      I = [[float(i == j) for j in range(4)] for i in range(4)]
+      def link(q, l):
+          c, s = math.cos(q), math.sin(q)
+          return [[c, -s, 0, l * c], [s, c, 0, l * s], [0, 0, 1, 0], [0, 0, 0, 1]]
+      T = fk([link(math.pi / 2, 0.5), link(-math.pi / 2, 0.4)])
+      assert abs(T[0][3] - 0.4) < 1e-9 and abs(T[1][3] - 0.5) < 1e-9, T
+    explain: "Start at the identity, post-multiply each link: the whole of forward kinematics in four lines."

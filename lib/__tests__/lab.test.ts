@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   finalSeasonIndex,
+  floorGateText,
   isBountyBoard,
   isSideFloor,
   isSideQuest,
@@ -12,6 +13,7 @@ import {
   previousTicketId,
   seasonGate,
   seasonOpen,
+  sideFloorGate,
   type OrderSeason,
 } from "../content/order.ts";
 import {
@@ -74,6 +76,62 @@ test("'Next ticket' stays inside the lab; the story skips it", () => {
   assert.equal(nextStoryTicketId(SEASONS, "s40-t03"), null);
   assert.equal(nextStoryTicketId(SEASONS, "s01-t10"), "s05-t01");
   assert.equal(nextStoryTicketId(SEASONS, "s05-t06"), "s99-t01");
+});
+
+// ---------- sequential side floors (Manipulators M2 opens after M1) ----------
+
+// The real shape with modules: M1 (s41) opens after Season 1, M2 (s42) after M1's last ticket.
+const MODULES: OrderSeason[] = [
+  { id: "s01", tickets: [{ id: "s01-t01" }, { id: "s01-t10" }] },
+  { id: "s05", tickets: [{ id: "s05-t01" }, { id: "s05-t06" }] },
+  { id: "s40", chain: false, requires: "s01-t10", tickets: [{ id: "s40-t01" }, { id: "s40-t02" }] },
+  { id: "s41", chain: false, requires: "s01-t10", tickets: [{ id: "s41-t01" }, { id: "s41-t11" }] },
+  { id: "s42", chain: false, requires: "s41-t11", tickets: [{ id: "s42-t01" }, { id: "s42-t02" }] },
+  { id: "s43", chain: false, requires: "s42-t01", tickets: [{ id: "s43-t01" }] },
+  { id: "s50", chain: false, tickets: [{ id: "s50-t01", requires: "s01-t01" }] },
+  { id: "s99", chain: false, final: true, tickets: [{ id: "s99-t01" }] },
+];
+
+test("a side floor may require another side floor's ticket: M2 opens only once M1 is done", () => {
+  assert.equal(isSideFloor(MODULES[4]), true);
+  assert.deepEqual(seasonGate(MODULES, 4), ["s41-t11"]);
+  const season1 = new Set(["s01-t01", "s01-t10"]);
+  assert.equal(seasonOpen(MODULES, 3, (id) => season1.has(id)), true); // M1 opens after Season 1
+  assert.equal(seasonOpen(MODULES, 4, (id) => season1.has(id)), false); // M2 doesn't
+  assert.equal(seasonOpen(MODULES, 4, (id) => season1.has(id) || id === "s41-t01"), false);
+  assert.equal(seasonOpen(MODULES, 4, (id) => season1.has(id) || id.startsWith("s41-")), true);
+  assert.equal(previousTicketId(MODULES, "s42-t01"), "s41-t11");
+  assert.equal(previousTicketId(MODULES, "s42-t02"), "s42-t01");
+  assert.equal(nextStoryTicketId(MODULES, "s41-t11"), null); // M1's "next" doesn't jump floors
+  assert.equal(nextStoryTicketId(MODULES, "s42-t01"), "s42-t02");
+});
+
+test("the HQ's gate line: a story floor, a ticket of one, or another side floor by name", () => {
+  const name = (id: string) => ({ s41: "Manipulators · M1", s42: "Manipulators · M2" })[id] ?? id;
+  assert.deepEqual(sideFloorGate(MODULES, 3), { kind: "story", floor: 1, ticketNumber: 2, wholeFloor: true });
+  assert.equal(floorGateText(sideFloorGate(MODULES, 3)!, name), "Floor 1");
+  assert.deepEqual(sideFloorGate(MODULES, 4), { kind: "side-floor", seasonId: "s41", ticketNumber: 2, wholeFloor: true });
+  assert.equal(floorGateText(sideFloorGate(MODULES, 4)!, name), "Manipulators · M1");
+  assert.equal(floorGateText(sideFloorGate(MODULES, 5)!, name), "ticket #1 of Manipulators · M2");
+  const midStory: OrderSeason[] = [MODULES[0], { id: "s40", chain: false, requires: "s01-t01", tickets: [{ id: "s40-t01" }] }];
+  assert.equal(floorGateText(sideFloorGate(midStory, 1)!, name), "ticket #1 of Floor 1");
+  // Not side floors, or nothing to point at: no gate line.
+  assert.equal(sideFloorGate(MODULES, 0), null);
+  assert.equal(sideFloorGate(MODULES, 6), null);
+  assert.equal(sideFloorGate([{ id: "s40", chain: false, requires: "s99-t01", tickets: [] }], 0), null);
+});
+
+test("sequential floors never block anything: the final exam, the bounty board and the Robotics Lab are unchanged", () => {
+  const index = finalSeasonIndex(MODULES);
+  assert.deepEqual(seasonGate(MODULES, index), ["s05-t01", "s05-t06"]);
+  const story = new Set(["s01-t01", "s01-t10", "s05-t01", "s05-t06"]); // no module ticket solved
+  assert.equal(seasonOpen(MODULES, index, (id) => story.has(id)), true);
+  assert.equal(previousTicketId(MODULES, "s99-t01"), "s05-t06");
+  assert.equal(nextStoryTicketId(MODULES, "s05-t06"), "s99-t01");
+  assert.deepEqual(seasonGate(MODULES, 2), ["s01-t10"]);
+  assert.deepEqual(seasonGate(MODULES, 6), []);
+  assert.equal(previousTicketId(MODULES, "s50-t01"), "s01-t01");
+  assert.deepEqual(mainSeasons(MODULES).map((s) => s.id), ["s01", "s05", "s99"]);
 });
 
 // ---------- viz parsing ----------
