@@ -1,0 +1,5 @@
+[
+  "critically_damped_gains: (wn**2, 2 * wn). quintic_reference: D = q1 - q0; inside def ref(t): s, sd, sdd = quintic_scaling(t, T); return q0 + s * D, sd * D, sdd * D; then return ref. scale_masses: out = dict(p), multiply the four keys. scale_links: tuple((m * f, com, tuple(np.asarray(I) * f)) for m, com, I in links). tracking_error: np.max(np.linalg.norm(Q - Q_ref, axis=1)).",
+  "computed_torque: q_d, qd_d, qdd_d = ref; v = qdd_d + Kd * (qd_d - qd) + Kp * (q_d - q); return mass_fn(q) @ v + bias_fn(q, qd). pd_gravity_tracking: Kp * (q_d - q) + Kd * (qd_d - qd) + g_fn(q).",
+  "error_response: t = np.asarray(t)[:, None]; return (e0 + (ed0 + wn * e0) * t) * np.exp(-wn * t) (broadcasts to (len(t), n)). scaled_model_offset: -delta / ((1 + delta) * Kp) * np.linalg.solve(mass_fn(q), g_fn(q))."
+]

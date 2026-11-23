@@ -7,6 +7,8 @@ Both expose the same tiny interface, so a controller written once runs on either
     sim.jacobian()   -> 6 x n geometric Jacobian [Jv; Jw] at the current q (measured)
     sim.step(qdot, dt)  -> command joint velocities for dt seconds
 
+(Module 7 adds MujocoDynamics at the bottom: M, bias and g evaluated by MuJoCo.)
+
 KinematicSim: pure numpy, joints follow the command perfectly (q += qdot dt).
 MujocoSim:    the arm is a real MuJoCo multibody with gravity, inertia, joint damping and
               motor armature; each joint is driven by a stiff position servo that tracks the
@@ -103,3 +105,44 @@ class MujocoSim:
         for _ in range(max(1, int(round(dt / self.model.opt.timestep)))):
             self._mj.mj_step(self.model, self.data)
         self._mj.mj_forward(self.model, self.data)  # refresh poses/Jacobian inputs for the new state
+
+
+class MujocoDynamics:
+    """MuJoCo as a fast calculator of M(q), C(q, qd) qd + g(q) and g(q) for the first n joints.
+
+    Not a simulator: it keeps its own MjData and only evaluates the model at the (q, qd) you
+    give it (mj_forward). Lab 19 showed your RNEA gives the same numbers to round-off; on the
+    6-DOF UR5 RNEA's M(q) costs ~2 ms in numpy against tens of microseconds here, which matters
+    at 500-1000 Hz. For models with extra joints (gripper fingers, a free box) only the arm's
+    n x n block is returned; the extra joints sit at `rest_qpos` (default: the model's qpos0).
+    """
+
+    def __init__(self, model, n=None, rest_qpos=None):
+        import mujoco
+        self._mj = mujoco
+        self.model = model
+        self.data = mujoco.MjData(model)
+        self.n = model.nu if n is None else n
+        if rest_qpos is not None:
+            self.data.qpos[:] = rest_qpos
+        self._M = np.zeros((model.nv, model.nv))
+
+    def _set(self, q, qd):
+        self.data.qpos[:self.n] = q
+        self.data.qvel[:] = 0.0
+        if qd is not None:
+            self.data.qvel[:self.n] = qd
+        self._mj.mj_forward(self.model, self.data)
+
+    def mass(self, q):
+        self._set(q, None)
+        self._mj.mj_fullM(self.model, self.data, self._M)
+        return self._M[:self.n, :self.n].copy()
+
+    def bias(self, q, qd):
+        self._set(q, qd)
+        return self.data.qfrc_bias[:self.n].copy()
+
+    def gravity(self, q):
+        self._set(q, None)
+        return self.data.qfrc_bias[:self.n].copy()

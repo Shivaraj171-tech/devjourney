@@ -1,0 +1,5 @@
+[
+  "as_matrix: K = np.asarray(K, float); ndim 0 -> K * np.eye(n), ndim 1 -> np.diag(K), else K. impedance_torque: n = J.shape[0]; F = as_matrix(K, n) @ (x0 - x) - as_matrix(D, n) @ (J @ qd); return J.T @ F + g. predicted_deflection: np.linalg.solve(as_matrix(K, len(f)), f).",
+  "xfrc_for_point_force: np.concatenate([force, np.cross(point - com, force)]) (force FIRST in MuJoCo). estimate_stiffness: F = forces.T, Dm = displacements.T (experiments as columns); K^T = np.linalg.lstsq(Dm.T, F.T, rcond=None)[0]; return its transpose.",
+  "contact_normal_force: a, b = model.geom(geom_a).id, model.geom(geom_b).id; f = np.zeros(6); for i in range(data.ncon): c = data.contact[i]; if {c.geom1, c.geom2} == {a, b}: mujoco.mj_contactForce(model, data, i, f); total += f[0]."
+]

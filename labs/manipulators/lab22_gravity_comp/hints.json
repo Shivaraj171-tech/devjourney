@@ -1,0 +1,5 @@
+[
+  "pd_gravity: return pd_torque(q, qd, q_des, Kp, Kd) + g_fn(q). pd_gravity_desired: the same with g_fn(q_des). make_gravity_fn: model = rnea_model(dh, links) once, then return lambda q: gravity_rnea(model, q, gravity).",
+  "lyapunov: e = q_des - q; return 0.5 * qd @ mass_fn(q) @ qd + 0.5 * e @ (Kp * e) (np.asarray(Kp) handles scalar or array). lyapunov_rate: -qd @ (Kd * qd).",
+  "model_error_offset: q = q_des.copy(); repeat iters times: q = q_des - (g_true(q) - g_model(q)) / Kp. Same shape as lab 21's gravity_droop, with g replaced by the model error."
+]

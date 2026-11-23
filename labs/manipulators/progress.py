@@ -100,11 +100,13 @@ def award_badges(data: dict) -> list[str]:
            and not v.get("revealed")) >= 3:
         earned.add("purist")
     for module, badge in ((1, "frame-wrangler"), (2, "chain-forger"), (3, "jacobian-whisperer"),
-                          (4, "pose-hunter"), (5, "smooth-operator"), (6, "equations-of-motion")):
+                          (4, "pose-hunter"), (5, "smooth-operator"), (6, "equations-of-motion"),
+                          (7, "steady-hand"), (8, "firm-grip")):
         if all(lab.key in passed for lab in LABS if lab.module == module):
             earned.add(badge)
     for key, badge in (("lab08", "sim-validated"), ("lab11", "straight-shooter"),
-                       ("lab19", "torque-matched"), ("lab20", "digital-twin")):
+                       ("lab19", "torque-matched"), ("lab20", "digital-twin"),
+                       ("lab25", "soft-touch"), ("lab28", "pick-and-place")):
         if labs.get(key, {}).get("passed") and labs[key].get("mujoco_ran"):
             earned.add(badge)
     if all(lab.key in passed for lab in LABS):

@@ -11,6 +11,9 @@ them explicitly where needed.
 Modules 4-6 (labs 12-20): IK (analytic, Newton, Levenberg-Marquardt), time scaling and
 trajectories, Lagrangian/Newton-Euler dynamics. Loaded lazily by name, like Modules 2-3.
 `toolbox.models` writes MuJoCo models with real inertias for the dynamics labs.
+Modules 7-8 (labs 21-28): PD, gravity compensation, computed torque, task-space and impedance
+control, contacts and grasp quality. `toolbox.models` adds torque motors and contact scenes
+(table, pinch rig, UR5 + gripper); `toolbox.sim.MujocoDynamics` evaluates M(q) and g(q) fast.
 """
 
 from labs.manipulators.lab01_rotations.solution import (  # noqa: F401
@@ -72,6 +75,36 @@ def __getattr__(name):
         "rnea_model": "lab19_newton_euler", "ad_twist": "lab19_newton_euler",
         "forward_dynamics": "lab20_forward_dynamics", "rk4_step": "lab20_forward_dynamics",
         "semi_implicit_euler_step": "lab20_forward_dynamics", "simulate": "lab20_forward_dynamics",
+        # Module 7: control
+        "pd_torque": "lab21_pd_control", "pd_gains": "lab21_pd_control",
+        "step_metrics": "lab21_pd_control", "gravity_droop": "lab21_pd_control",
+        "run_mujoco_control": "lab21_pd_control",
+        "pd_gravity": "lab22_gravity_comp", "pd_gravity_desired": "lab22_gravity_comp",
+        "make_gravity_fn": "lab22_gravity_comp", "lyapunov": "lab22_gravity_comp",
+        "critically_damped_gains": "lab23_computed_torque",
+        "quintic_reference": "lab23_computed_torque", "computed_torque": "lab23_computed_torque",
+        "tracking_error": "lab23_computed_torque", "scale_links": "lab23_computed_torque",
+        "scale_masses": "lab23_computed_torque",
+        "orientation_error": "lab24_task_space",
+        "jacobian_transpose_control": "lab24_task_space",
+        "task_space_inertia": "lab24_task_space",
+        "operational_space_control": "lab24_task_space",
+        "nullspace_projector": "lab24_task_space",
+        "impedance_torque": "lab25_impedance", "predicted_deflection": "lab25_impedance",
+        "xfrc_for_point_force": "lab25_impedance", "estimate_stiffness": "lab25_impedance",
+        "contact_normal_force": "lab25_impedance",
+        "contact_frame": "lab26_grasp_basics", "in_friction_cone": "lab26_grasp_basics",
+        "friction_cone_edges": "lab26_grasp_basics", "contact_wrench": "lab26_grasp_basics",
+        "grasp_matrix": "lab26_grasp_basics", "gravity_wrench": "lab26_grasp_basics",
+        "min_friction_two_finger": "lab26_grasp_basics",
+        "box_contact_forces": "lab26_grasp_basics",
+        "scaled_grasp_matrix": "lab27_grasp_quality",
+        "min_singular_value": "lab27_grasp_quality", "primitive_wrenches": "lab27_grasp_quality",
+        "epsilon_metric": "lab27_grasp_quality", "is_force_closure": "lab27_grasp_quality",
+        "tool_model": "lab28_pick_and_place", "tool_pose": "lab28_pick_and_place",
+        "grasp_yaw": "lab28_pick_and_place", "plan_waypoints": "lab28_pick_and_place",
+        "segment_reference": "lab28_pick_and_place",
+        "run_pick_and_place": "lab28_pick_and_place",
     }
     if name in lazy:
         import importlib
