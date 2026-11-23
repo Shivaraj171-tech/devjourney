@@ -1,0 +1,10 @@
+id: s42-t05
+title: "Your own DH table"
+type: feature
+level: mid
+track: robotics
+concepts: [lists, fk-rrr, dh-convention, dh-tables]
+new_concept: dh-tables
+estimated_minutes: 30
+tests_visible: true
+files_editable: [kin/arm3_dh.py]
