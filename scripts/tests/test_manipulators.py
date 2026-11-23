@@ -401,5 +401,118 @@ class RealManipulatorsM2Tests(unittest.TestCase):
         self.assertAlmostEqual(home[7], -0.19145, places=4)
 
 
+class _RealModuleChecks:
+    """Shared checks for the real Module 3 and 4 floors (mixin: set SEASON, REQUIRES, SHORT, PREVIOUS)."""
+
+    SEASON = None
+    REQUIRES = SHORT = PREVIOUS = PACKAGES = None
+
+    def test_floor(self):
+        import yaml
+
+        season = yaml.safe_load((self.SEASON / "season.yaml").read_text())
+        self.assertIs(season["chain"], False)
+        self.assertEqual(season["requires"], self.REQUIRES)  # the previous module's last ticket: in sequence
+        self.assertEqual(season["lesson"], "long")
+        self.assertEqual(season["icon"], "🦾")
+        self.assertEqual(season["short_title"], self.SHORT)
+        self.assertEqual(len(season["tickets"]), 10)
+        concepts, right, total, why, partial, formats, questions, longest = set(), 0, 0, 0, 0, 0, 0, 0
+        for name in season["tickets"]:
+            t = self.SEASON / "tickets" / name
+            meta = yaml.safe_load((t / "ticket.yaml").read_text())
+            concepts.add(meta["new_concept"])
+            qs = yaml.safe_load((t / "questions.yaml").read_text())["questions"]
+            self.assertGreaterEqual(len(qs), 3, name)
+            for q in qs:
+                questions += 1
+                lens = [len(c) for c in q["choices"]]
+                longest += lens[q["answer"]] > max(n for i, n in enumerate(lens) if i != q["answer"])
+            words = vc.lesson_words((t / "concept.md").read_text())
+            self.assertGreater(words, 300, f"{name}: a deep lesson, got {words} words")
+            self.assertEqual(len(vc.read_hints(t / "hints.md")), 3, name)
+            if (t / "byte.yaml").is_file():
+                sug = yaml.safe_load((t / "byte.yaml").read_text())["suggestion"]
+                total += 1
+                right += sug["correct"]
+                why += "why" in sug
+                partial += bool(sug.get("partial"))
+            formats += (t / "formats.yaml").is_file()
+        self.assertEqual(len(concepts), 10)
+        self.assertGreaterEqual(total, 6)
+        self.assertTrue(0.55 <= right / total <= 0.65, (right, total))
+        self.assertGreaterEqual(why, 3)
+        self.assertGreaterEqual(partial, 1)
+        self.assertGreaterEqual(formats, 8)
+        self.assertLessEqual(longest, questions // 4, "the right answer is too often the longest choice")
+        report = vc.validate_content(REPO_ROOT / "content")
+        floor = {k: v for k, v in report.items() if k.startswith(self.SEASON.name)}
+        self.assertEqual(len(floor), 11)
+        self.assertTrue(all(v == [] for v in floor.values()), floor)
+
+    def test_starts_from_the_previous_modules_code(self):
+        prev = self.PREVIOUS / "starter"
+        first = self.SEASON / "tickets" / sorted(p.name for p in (self.SEASON / "tickets").iterdir())[0] / "starter"
+        for package in self.PACKAGES:
+            for f in sorted((prev / package).glob("*.py")):
+                self.assertEqual((first / package / f.name).read_text(), f.read_text(), f"{package}/{f.name}")
+
+    def viz_of(self, ticket, folder="solution"):
+        t = self.SEASON / "tickets" / ticket
+        return vc.run_ticket_tests(t / folder, t / "tests").get("viz", [])
+
+    def test_every_code_ticket_draws_the_arm_in_3d(self):
+        for t in sorted((self.SEASON / "tickets").iterdir()):
+            if not (t / "tests").is_dir():
+                continue
+            for folder in ("starter", "solution"):
+                viz = self.viz_of(t.name, folder)
+                arms = [item for item in viz if item["kind"] == "frames3d" and item["style"] == "arm"]
+                self.assertTrue(arms, f"{t.name}/{folder} drew no 3D arm")
+                self.assertLess(len(json.dumps(viz)), lab.MAX_JSON)
+
+
+class RealManipulatorsM3Tests(_RealModuleChecks, unittest.TestCase):
+    """The real Module 3 floor (velocity kinematics): opens after Module 2's last ticket."""
+
+    SEASON = REPO_ROOT / "content" / "seasons" / "s43-manipulators-m3"
+    REQUIRES, SHORT = "s42-t11", "Manipulators · M3"
+    PREVIOUS = REPO_ROOT / "content" / "seasons" / "s42-manipulators-m2" / "tickets" / "t11-concept-check"
+    PACKAGES = ("rigid", "kin")
+
+    def test_velocities_and_ellipsoids_are_drawn(self):
+        for ticket in ("t01-how-fast-is-the-gripper", "t02-the-two-link-jacobian", "t04-the-ur5-jacobian", "t08-forces-through-the-jacobian"):
+            arm = next(i for i in self.viz_of(ticket) if i["kind"] == "frames3d")
+            self.assertTrue(all(arm["arrows"]), f"{ticket}: an arrow in every frame")
+        arm = next(i for i in self.viz_of("t07-manipulability") if i["kind"] == "frames3d")
+        radii = [frame[0]["radii"] for frame in arm["ellipsoids"]]
+        self.assertGreater(min(radii[0]), 0.01, "bent elbow: a round-ish ellipsoid")
+        self.assertLess(min(radii[-1]), 0.005, "stretched out: the ellipsoid goes flat")
+        self.assertEqual(len(arm["ellipsoids"]), len(arm["frames"]))
+
+
+class RealManipulatorsM4Tests(_RealModuleChecks, unittest.TestCase):
+    """The real Module 4 floor (inverse kinematics): opens after Module 3's last ticket."""
+
+    SEASON = REPO_ROOT / "content" / "seasons" / "s44-manipulators-m4"
+    REQUIRES, SHORT = "s43-t10", "Manipulators · M4"
+    PREVIOUS = REPO_ROOT / "content" / "seasons" / "s43-manipulators-m3" / "tickets" / "t10-concept-check"
+    PACKAGES = ("rigid", "kin", "vel")
+
+    def test_newton_converges_frame_by_frame(self):
+        viz = self.viz_of("t05-newton-raphson")
+        chart = next(i for i in viz if i["kind"] == "chart")
+        errors = chart["series"][0]["ys"]
+        self.assertGreater(errors[0], 0.1)
+        self.assertLess(errors[-1], 1e-6)
+        arm = next(i for i in viz if i["kind"] == "frames3d")
+        self.assertEqual(len(arm["frames"]), 6 * len(errors), "six animation frames per Newton iterate")
+
+    def test_damping_settles_at_the_edge(self):
+        for ticket in ("t07-damped-least-squares", "t09-edge-of-reach"):
+            arm = next(i for i in self.viz_of(ticket) if i["kind"] == "frames3d")
+            self.assertTrue(all(len(e) == 1 for e in arm["ellipsoids"]), f"{ticket}: the velocity ellipsoid in every frame")
+
+
 if __name__ == "__main__":
     unittest.main()

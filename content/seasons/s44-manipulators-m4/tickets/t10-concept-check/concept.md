@@ -2,7 +2,7 @@
 
 **Intuition**
 
-Inverse kinematics runs forward kinematics backwards, and the reverse of a function isn't a function: a target can have no joint solution, one, a handful, or infinitely many. Two families of methods find them. Analytic IK splits the arm into problems with closed-form answers (a triangle, a base plane, a wrist centre) and returns ALL the solutions at once, exactly. Numerical IK guesses and corrects with the Jacobian, works for any arm, returns the one solution near its guess, and needs guard rails near singularities and outside the workspace.
+Inverse kinematics runs forward kinematics backwards, and the reverse of a function isn't a function: a target can have no joint solution, one, a handful, or infinitely many. Two families of methods find them. Analytic IK splits the arm into problems with closed-form answers (a triangle, a base plane, a wrist centre) and returns ALL the solutions at once, exactly. Numerical IK guesses and corrects with the Jacobian, works for any arm, returns the one solution near its guess, and needs guard rails near singularities and outside the workspace. Real controllers often use both: an analytic solver to list the candidates, joint limits and "closest to now" to choose one, and a damped numerical solver to polish it or to handle arms (offset wrists, seven joints) that have no tidy closed form.
 
 **The maths**
 
