@@ -57,7 +57,7 @@ def __getattr__(name):
         "multi_start_ik": "lab14_dls_ik", "select_solution": "lab14_dls_ik",
         "make_pose": "lab15_ur5_ik", "solve_ur5_pose": "lab15_ur5_ik",
         # Module 5: trajectories
-        "cubic_time_scaling": "lab16_time_scaling", "quintic_scaling": "lab16_time_scaling",
+        "cubic_scaling": "lab16_time_scaling", "quintic_scaling": "lab16_time_scaling",
         "trapezoid_profile": "lab16_time_scaling", "trapezoid_sample": "lab16_time_scaling",
         "min_time_polynomial": "lab16_time_scaling",
         "joint_trajectory": "lab17_trajectories", "cartesian_poses": "lab17_trajectories",
