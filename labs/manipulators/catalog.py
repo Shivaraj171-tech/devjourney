@@ -57,6 +57,8 @@ LABS = [
         needs_mujoco=True),
     Lab("lab24", "lab24_task_space", 7, "Task-space control: J^T, OSC, orientation", 220,
         needs_mujoco=True),
+    Lab("lab25", "lab25_impedance", 7, "Impedance control: push it, press a table", 220,
+        needs_mujoco=True),
 ]
 
 MODULE_NAMES = {1: "Rigid-body motion", 2: "Forward kinematics", 3: "Velocity kinematics",

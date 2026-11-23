@@ -87,6 +87,9 @@ def __getattr__(name):
         "task_space_inertia": "lab24_task_space",
         "operational_space_control": "lab24_task_space",
         "nullspace_projector": "lab24_task_space",
+        "impedance_torque": "lab25_impedance", "predicted_deflection": "lab25_impedance",
+        "xfrc_for_point_force": "lab25_impedance", "estimate_stiffness": "lab25_impedance",
+        "contact_normal_force": "lab25_impedance",
     }
     if name in lazy:
         import importlib
