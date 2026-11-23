@@ -1,0 +1,70 @@
+questions:
+  - prompt: "A robot has a turntable (R), a vertical lift (P), a horizontal telescopic arm (P) and a wrist roll (R), in a row. How many DOF, and can it reach any pose?"
+    choices:
+      - "4: no, a general pose needs 6"
+      - "6: yes, prismatic joints count double because they move in a straight line"
+      - "4: yes, the two slides cover the missing orientations"
+    answer: 0
+    explain: "An open chain: dof = sum of the joint freedoms = 4. Position plus one orientation angle; it can't tilt the gripper arbitrarily."
+  - prompt: "Two links, l1 = 0.5, l2 = 0.4, q1 = 90°, q2 = -90°. Where is the tip?"
+    choices:
+      - "(0.4, 0.5, 0)"
+      - "(0.5, 0.4, 0)"
+      - "(0, 0.9, 0)"
+      - "(0.9, 0, 0)"
+    answer: 0
+    explain: "The upper arm points along y to (0, 0.5); the forearm's heading is 90° - 90° = 0°, so it walks 0.4 along x: (0.4, 0.5, 0)."
+  - prompt: "Which product is the RRR arm's wrist pose?"
+    choices:
+      - "T_0_1 T_1_2 T_2_3"
+      - "T_2_3 T_1_2 T_0_1"
+      - "T_0_1 + T_1_2 + T_2_3"
+    answer: 0
+    explain: "Base outwards: touching names cancel. Each link transform is in the moving frame before it, so it post-multiplies. Adding transforms means nothing at all."
+  - prompt: "A DH row reads a = 0.3, α = 0, d = 0, θ = 90°. Where is the new frame's origin, in the old frame?"
+    choices:
+      - "(0, 0.3, 0)"
+      - "(0.3, 0, 0)"
+      - "(0, 0, 0.3)"
+      - "(0.3, 0.3, 0)"
+    answer: 0
+    explain: "Last column (a cos θ, a sin θ, d) = (0, 0.3, 0): turn x by 90° onto y, then walk a along the turned x."
+  - prompt: "In standard DH, joint 5 turns about the z axis of which frame?"
+    choices:
+      - "Frame 4"
+      - "Frame 5"
+      - "Frame 6"
+      - "The base frame"
+    answer: 0
+    explain: "z(i-1) is joint i's axis. It's the classic off-by-one: in ticket 9, taking frame i made PoE disagree everywhere except at home."
+  - prompt: "The UR5's flange at home is at (-0.817, -0.191, -0.005). What is -0.817 in terms of the table?"
+    choices:
+      - "a2 + a3"
+      - "d1 + d4 + d6"
+      - "a2 - a3"
+      - "d4 + d5 + d6"
+    answer: 0
+    explain: "At home the upper arm and forearm lie along the base's x axis: x = a2 + a3 = -0.425 - 0.39225. The signs come from where UR put x2 and x3."
+  - prompt: "Gripper pose T_0_6: position (0.5, 0, 0.6), z6 = third column = (0, 0, -1), d6 = 0.1. Where is the wrist centre?"
+    choices:
+      - "(0.5, 0, 0.7)"
+      - "(0.5, 0, 0.5)"
+      - "(0.4, 0, 0.6)"
+      - "(0.5, 0, 0.6)"
+    answer: 0
+    explain: "p_w = p - d6 z6 = (0.5, 0, 0.6) + (0, 0, 0.1) = (0.5, 0, 0.7). The gripper points down, so the wrist is above it."
+  - prompt: "A revolute screw axis along z through (0, 2, 0). What is v?"
+    choices:
+      - "(2, 0, 0)"
+      - "(-2, 0, 0)"
+      - "(0, 2, 0)"
+      - "(0, 0, 0)"
+    answer: 0
+    explain: "v = -ω × q = -(z × 2y) = -(2 · (-x)) = (2, 0, 0). Check: at the origin, spinning about that axis moves you along +x, which is v."
+  - prompt: "Byte's new PoE code matches DH at the home pose. Is that good evidence the screws are right?"
+    choices:
+      - "No: at q = 0 every exponential is I, so PoE gives M regardless"
+      - "Yes: the home pose depends on every screw axis, so it checks all of them at once"
+      - "Yes, if M is also right"
+    answer: 0
+    explain: "e^([S] 0) = I for any S. Only moved joints test the screws: random poses, and each joint alone."

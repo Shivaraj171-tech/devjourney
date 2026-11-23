@@ -1,0 +1,12 @@
+2026-11-23 07:58:12 INFO  grabby6  deploy: grabby6.py "tidy the DH table, one-call gripper_pose" (author: Byte)
+2026-11-23 08:02:40 INFO  grabby6  boot self-test: all joints at 0 deg (vendor sheet: arm straight out, fingertips at (1.150, 0.000, 0.400))
+2026-11-23 08:02:40 DEBUG grabby6  frame 3 (elbow)  at (0.500, 0.000, 0.400)
+2026-11-23 08:02:40 DEBUG grabby6  frame 4 (wrist)  at (0.500, 0.000, -0.050)    vendor sheet: (0.950, 0.000, 0.400)
+2026-11-23 08:02:40 DEBUG grabby6  frame 6 (flange) at (0.500, 0.000, -0.130)    vendor sheet: (1.030, 0.000, 0.400)
+2026-11-23 08:02:40 WARN  grabby6  self-test: gripper_pose -> (0.500, 0.000, -0.130), expected (1.150, 0.000, 0.400): FAIL (83.9 cm)
+2026-11-23 08:02:40 WARN  grabby6  self-test: gripper_pose == flange pose (tool offset 0.120 m not applied?)
+2026-11-23 08:05:03 INFO  planner  box #212 in tote 4 at base (0.430, 0.744, 0.146), pick straight down
+2026-11-23 08:05:03 INFO  planner  joints q = (60.0, 20.0, -50.0, 0.0, -60.0, 0.0) deg (same angles as last week)
+2026-11-23 08:05:04 DEBUG grabby6  gripper_pose -> (0.082, 0.143, 0.181), approach z (-0.500, -0.866, 0.000)
+2026-11-23 08:05:04 ERROR safety   gripper 69.6 cm from the pick point and pointing sideways: motion aborted
+2026-11-23 08:05:05 WARN  alerts   Grabby-6 commissioning paused, paging on-call developer

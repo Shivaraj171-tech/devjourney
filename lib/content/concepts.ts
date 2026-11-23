@@ -54,6 +54,18 @@ const LABELS: Record<string, string> = {
   "frame-chains": "Frames of reference and transform chains",
   "pose-chains": "Debugging a pose chain",
   "rigid-body-motion": "Rigid-body motion (module check)",
+  // Manipulators · Module 2: forward kinematics (side floor, opens after Module 1)
+  "joints-and-dof": "Joints, links and degrees of freedom",
+  "fk-composition": "Forward kinematics by composing transforms",
+  "fk-rrr": "Forward kinematics of a 3-DOF arm",
+  "dh-convention": "The Denavit-Hartenberg convention",
+  "dh-tables": "Building a DH table",
+  "ur5-fk": "6-DOF forward kinematics (UR5)",
+  "spherical-wrist": "Spherical wrist and wrist centre",
+  "product-of-exponentials": "Product of exponentials (screw axes)",
+  "dh-vs-poe": "DH and PoE agree",
+  "joint-offsets": "Joint offsets and tool frames",
+  "forward-kinematics-module": "Forward kinematics (module check)",
 };
 
 /** "mutable-shared-data" → "Mutable shared data". Unknown slugs are tidied, labels pass through. */
