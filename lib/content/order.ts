@@ -8,6 +8,9 @@
 // A side FLOOR is a side quest opened as a whole by one ticket (season.yaml
 // `requires`, e.g. the Robotics Lab after Season 1): a floor of its own, with
 // lessons, whose tickets open one after another. It never gates anything either.
+// Its `requires` may be another side floor's ticket (Manipulators M2 needs M1's last
+// ticket), so modules open in sequence; that only ever gates later side floors, never
+// the story or the final exam (sideFloorGate describes it for the HQ's lock line).
 // Pure functions on minimal shapes, so node can unit-test them.
 
 export type OrderTicket = { id: string; requires?: string | null };
