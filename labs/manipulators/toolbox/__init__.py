@@ -95,6 +95,9 @@ def __getattr__(name):
         "grasp_matrix": "lab26_grasp_basics", "gravity_wrench": "lab26_grasp_basics",
         "min_friction_two_finger": "lab26_grasp_basics",
         "box_contact_forces": "lab26_grasp_basics",
+        "scaled_grasp_matrix": "lab27_grasp_quality",
+        "min_singular_value": "lab27_grasp_quality", "primitive_wrenches": "lab27_grasp_quality",
+        "epsilon_metric": "lab27_grasp_quality", "is_force_closure": "lab27_grasp_quality",
     }
     if name in lazy:
         import importlib

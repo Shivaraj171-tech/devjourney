@@ -61,6 +61,7 @@ LABS = [
         needs_mujoco=True),
     Lab("lab26", "lab26_grasp_basics", 8, "Grasp basics: friction cones, two-finger pinch", 180,
         needs_mujoco=True),
+    Lab("lab27", "lab27_grasp_quality", 8, "Grasp quality: force closure, epsilon metric", 200),
 ]
 
 MODULE_NAMES = {1: "Rigid-body motion", 2: "Forward kinematics", 3: "Velocity kinematics",
