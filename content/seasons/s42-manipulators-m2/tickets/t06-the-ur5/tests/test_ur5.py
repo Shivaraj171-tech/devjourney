@@ -17,7 +17,7 @@ REFERENCE = [
     ([-1.7, -0.6, -1.9, 2.2, -0.5, 3.0], (-0.176411, 0.049941, 0.4618), (-0.92928, -0.341123, -0.14168)),
     ([2.5, -2.0, 0.7, -1.4, -2.3, -1.0], (0.051734, 0.029151, 0.912908), (0.14136, -0.937256, -0.318699)),
 ]
-LABELS = ["base", "frame 1", "frame 2", "frame 3", "frame 4", "frame 5", "flange (frame 6)"]
+LABELS = ["base", "frame 1", "frame 2", "3", "4", "5", "flange (frame 6)"]
 
 
 def fmt(v):
@@ -33,16 +33,17 @@ def column(T, j):
 
 
 def test_draw_the_ur5():
-    poses = [[0.0] * 6] + [q for q, _p, _z in REFERENCE[:2]] + [[0.0] * 6]
+    poses = [[0.0] * 6] + [q for q, _p, _z in REFERENCE[:2]]
     frames = []
     for a, b in zip(poses, poses[1:]):
         for i in range(30):
             s = i / 30
             frames.append(ur5_frames([x + (y - x) * s for x, y in zip(a, b)])[1:])
     frames.append(ur5_frames(poses[-1])[1:])
-    viz.arm3d(frames, local=False, axes=True, labels=LABELS, target=HOME, name="ur5",
+    goal = REFERENCE[1][1]
+    viz.arm3d(frames, local=False, axes=True, labels=LABELS, target=goal, name="ur5", scale=0.08,
               title="The UR5: six joints, six frames", points=[HOME + ("documented home",)],
-              caption="Every DH frame from YOUR table, home → two random poses → home. Right: the flange ends on the documented home pose.")
+              caption="YOUR table, from home (pink dot) to two random poses. Right: the flange starts on the dot and ends on the target.")
     assert len(frames[0]) == 6, "six joints: six DH frames after the base"
 
 

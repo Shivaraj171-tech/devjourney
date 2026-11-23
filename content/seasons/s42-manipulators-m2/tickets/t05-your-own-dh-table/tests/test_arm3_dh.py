@@ -35,7 +35,7 @@ def test_draw_your_table():
     goal = translation_of(rrr_fk(*goal_q))
     viz.arm3d(frames, local=False, axes=True, labels=["base", "frame 1", "frame 2", "frame 3 (wrist)"], target=goal,
               name="arm3 dh", title="Your DH table, drawn", points=[tuple(goal) + ("ticket 3's wrist",)],
-              caption="Every frame comes from YOUR ARM3_DH. Right: frame 1's z (blue) lies flat, along the shoulder's axis, and the wrist meets ticket 3's answer.")
+              caption="Frames from YOUR ARM3_DH. Right: frame 1's z (blue) lies flat and the wrist meets ticket 3's answer.")
     assert len(ARM3_DH) == 3, f"the 3-DOF arm has 3 joints, so 3 rows, got {len(ARM3_DH)}"
 
 

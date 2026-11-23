@@ -23,7 +23,7 @@ def test_draw_the_pick():
     frames = [arm_frames([a * i / 40 for a in PICK])[1:] for i in range(41)]
     viz.arm3d(frames, local=False, axes=True, labels=LABELS, target=BOX_212, name="pick",
               points=[BOX_212 + ("box #212",)], title="Grabby-6 reaching for box #212",
-              caption="Every joint frame from YOUR grabby6.py, home → the planner's pick angles. Right: the fingertips end on the box, pointing straight down.")
+              caption="YOUR grabby6.py, home to the pick angles. Right: the fingertips end on the box, pointing straight down.")
     assert len(frames[0]) == 7, f"arm_frames gives the base, 6 joint frames and the fingertips (8), got {len(frames[0]) + 1}"
 
 

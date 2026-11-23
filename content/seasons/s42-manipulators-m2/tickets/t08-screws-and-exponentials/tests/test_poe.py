@@ -44,7 +44,7 @@ def test_draw_the_arm_by_screws():
     goal = translation_of(rrr_fk(*goal_q))
     viz.arm3d(frames, local=False, axes=True, labels=["base", "shoulder", "elbow", "wrist"], lines=axes, target=goal,
               name="poe", title="Ticket 3's arm, by the product of exponentials",
-              caption="Grey lines: the three screw axes at home. Each frame is e^[S1]q1 … e^[Sk]qk M_k from YOUR exp_twist. Right: the wrist lands on ticket 3's answer.")
+              caption="Grey: the screw axes at home. Frames from YOUR exp_twist. Right: the wrist lands on ticket 3's answer.")
     assert len(frames) == 41
 
 

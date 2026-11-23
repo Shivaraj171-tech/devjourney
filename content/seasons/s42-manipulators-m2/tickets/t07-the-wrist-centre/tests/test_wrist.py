@@ -17,7 +17,7 @@ def dist(a, b):
     return math.dist(a, b)
 
 
-ARM = [math.radians(35), math.radians(25), math.radians(-40)]  # joints 1-3: the arm
+ARM = [math.radians(-55), math.radians(25), math.radians(-40)]  # joints 1-3: the arm
 
 
 def random_poses(n=6):
@@ -40,7 +40,7 @@ def test_draw_the_wrist_spinning():
               points=[tuple(true) + ("wrist centre",), tuple(yours) + ("your wrist centre",)],
               lines=[(translation_of(T), yours)],
               title="A spherical wrist: joints 4-6 spin about one point",
-              caption="Only joints 4, 5, 6 move: the gripper turns, frames 4 and 5 stay on the wrist centre. Right: your wrist centre (backed off d6 from the flange) sits on it.")
+              caption="Only joints 4-6 move: the gripper turns about the wrist centre. Right: your wrist centre stays on it.")
     assert len(frames[0]) == 6
 
 

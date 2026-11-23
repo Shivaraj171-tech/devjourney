@@ -37,7 +37,7 @@ def test_draw_the_arm():
     goal = by_geometry(*target)
     viz.arm3d(frames, local=False, axes=True, labels=["base", "shoulder", "elbow", "wrist"], target=goal, name="rrr",
               title="Three joints: yaw, shoulder, elbow", points=[goal + ("wrist must be here",)],
-              caption="The wrist is drawn from YOUR rrr_fk(); the shoulder and elbow from the links. Right: the wrist lands on the target and the arm is in one piece.")
+              caption="The wrist comes from YOUR rrr_fk(). Right: it lands on the target and the arm stays in one piece.")
     assert len(frames) == 41
 
 

@@ -333,7 +333,7 @@ class RealManipulatorsM2Tests(unittest.TestCase):
         arm = next(item for item in result["viz"] if item["kind"] == "frames3d")
         self.assertEqual(len(arm["frames"][0]), 7)  # the base + six DH frames
         self.assertEqual(arm["labels"][-1], "flange (frame 6)")
-        home = arm["frames"][-1][-1]  # the last animation frame ends at home: the flange's position
+        home = arm["frames"][0][-1]  # the animation starts at home: the flange's position
         self.assertAlmostEqual(home[3], -0.81725, places=4)
         self.assertAlmostEqual(home[7], -0.19145, places=4)
 

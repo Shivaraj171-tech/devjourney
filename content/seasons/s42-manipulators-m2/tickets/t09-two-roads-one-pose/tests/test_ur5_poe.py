@@ -33,10 +33,10 @@ def test_draw_both_roads():
     for S, T in zip(screws, ur5_frames([0.0] * 6)[:-1]):
         o = translation_of(T)
         lines.append((tuple(o), tuple(o[i] + 0.15 * S[i] for i in range(3))))  # each screw axis, at home
-    viz.arm3d(frames, local=False, axes=True, name="dh vs poe", target=ur5_poe(q), lines=lines,
-              labels=["base", "frame 1", "frame 2", "frame 3", "frame 4", "frame 5", "flange (DH)"],
+    viz.arm3d(frames, local=False, axes=True, name="dh vs poe", target=ur5_poe(q), lines=lines, scale=0.08,
+              labels=["base", "frame 1", "frame 2", "3", "4", "5", "flange (DH)"],
               title="Two roads, one pose: DH frames vs the PoE target",
-              caption="The arm: DH frames. Dashed: YOUR PoE flange pose for the same angles. Grey: your screw axes at home. Right: the flange ends ON the dashed triad, 0° turned.")
+              caption="Arm: DH frames. Dashed: YOUR PoE pose. Grey: your screw axes at home. Right: the flange sits ON the dashed triad.")
     assert len(screws) == 6, f"six joints: six screw axes, got {len(screws)}"
 
 
