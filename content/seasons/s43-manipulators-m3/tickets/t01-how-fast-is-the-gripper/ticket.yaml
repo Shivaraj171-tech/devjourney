@@ -1,0 +1,10 @@
+id: s43-t01
+title: "How fast is the gripper?"
+type: bug
+level: mid
+track: robotics
+concepts: [fk-composition, mutable-shared-data, velocity-kinematics]
+new_concept: velocity-kinematics
+estimated_minutes: 25
+tests_visible: true
+files_editable: [vel/numeric.py]

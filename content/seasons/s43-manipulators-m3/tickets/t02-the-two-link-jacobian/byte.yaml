@@ -1,0 +1,11 @@
+# Right: Byte uses the forearm's absolute angle q1 + q2.
+suggestion:
+  file: vel/jacobian2.py
+  find: "    s12, c12 = math.sin(q2), math.cos(q2)  # the forearm's angle (Byte)"
+  replace: "    s12, c12 = math.sin(q1 + q2), math.cos(q1 + q2)  # the forearm's angle in the base frame"
+  correct: true
+  says: "Re-checked at q1 = 0.3 this time. q2 is relative to the upper arm, so the forearm's angle is q1 + q2."
+  explain: >-
+    Right, and for the right reason: the chain rule puts q1 inside every forearm term. The numeric Jacobian now
+    agrees at every pose, and det J comes out as l1 l2 sin(q2), the structural check from the lesson. Testing at
+    q1 = 0 only is what let the bug through.

@@ -1,0 +1,10 @@
+id: s43-t03
+title: "One column per joint"
+type: bug
+level: mid
+track: robotics
+concepts: [dh-convention, analytic-jacobian, geometric-jacobian]
+new_concept: geometric-jacobian
+estimated_minutes: 30
+tests_visible: true
+files_editable: [vel/geometric.py]

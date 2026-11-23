@@ -1,0 +1,30 @@
+questions:
+  - prompt: "The joints of an arm double their speeds, at the same pose. What happens to the gripper's velocity?"
+    choices:
+      - "It doubles: v = J(q) q̇ is linear in q̇"
+      - "It quadruples: kinetic energy goes with the square of the speed"
+      - "It depends on how far the gripper is from the base"
+    answer: 0
+    explain: "At a fixed pose J(q) is a fixed matrix, so v = J q̇ scales with q̇. The pose matters for WHICH matrix, not for the scaling."
+  - prompt: "Why is a central difference (p(q + h) - p(q - h)) / 2h more accurate than a forward one (p(q + h) - p(q)) / h?"
+    choices:
+      - "Its first error terms cancel: the error shrinks like h², not h"
+      - "It calls forward kinematics twice, so it averages out rounding noise"
+      - "It uses a smaller step, h / 2 on each side"
+      - "It isn't: both have the same error for the same h"
+    answer: 0
+    explain: "Expand p(q ± h) in a Taylor series: the h² terms are equal and cancel in the difference, so what's left is of order h². The forward difference keeps an error of order h."
+  - prompt: "Column 2 of the Jacobian of a two-link arm is..."
+    choices:
+      - "the gripper's velocity when joint 2 turns alone at 1 rad/s"
+      - "the position of joint 2"
+      - "how fast joint 2 turns when the gripper moves at 1 m/s along y"
+    answer: 0
+    explain: "J's columns are the joints' contributions: v = J q̇ = q̇1 column 1 + q̇2 column 2. The last choice describes the INVERSE problem (Module 4's)."
+  - prompt: "A helper does `q[i] += h` on the list it was given. What goes wrong in a central difference?"
+    choices:
+      - "The caller's q changes, so later probes start from the wrong pose"
+      - "Python raises an error: lists passed to a function are read-only"
+      - "Nothing: Python copies a list when you pass it to a function"
+    answer: 0
+    explain: "Python passes the list itself, not a copy. Every probe after the first starts from a moved q, and the caller's q is left moved too."

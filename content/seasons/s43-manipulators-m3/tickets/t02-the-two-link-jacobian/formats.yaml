@@ -1,0 +1,48 @@
+predict:
+  - code: |
+      import math
+      l1, l2 = 0.5, 0.4
+      for q2 in (math.pi / 2, 0.3, 0.0):
+          print(round(l1 * l2 * math.sin(q2), 3), end=" ")
+    question: "det J = l1 l2 sin(q2) as the elbow straightens (q2 = 90°, 0.3 rad, 0). What does it print?"
+    answer: "0.2 0.059 0.0"
+    choices:
+      - "0.2 0.059 0.0"
+      - "0.0 0.059 0.2"
+      - "0.2 0.191 0.0"
+      - "0.9 0.3 0.0"
+    explain: >-
+      Biggest at a right-angled elbow, zero when stretched. The ellipse in the 3D view shrinks the same way:
+      its area is π det J (for joint speeds of size 1).
+trace:
+  - code: |
+      def det2(J):
+          return J[0][0] * J[1][1] - J[0][1] * J[1][0]
+
+      cols = []
+      for J in ([[0, 0], [0.9, 0.4]], [[-0.4, 0], [0.5, 0.4]]):
+          d = det2(J)
+          cols.append(d)
+    watch: [d]
+    rows: 2
+    explain: >-
+      The first matrix is the stretched arm (both columns along y): det 0. The second is folded at 90° at the
+      elbow: det = -0.4 x 0.4 - 0 = -0.16, nonzero, so the gripper can move every way.
+parsons:
+  - goal: >-
+      Write `jac(q1, q2)`: the two-link Jacobian with l1 = 0.5, l2 = 0.4 (math is imported). One line is Byte's
+      slip: leave it out.
+    lines:
+      - "def jac(q1, q2):"
+      - "    s1, c1 = math.sin(q1), math.cos(q1)"
+      - "    s12, c12 = math.sin(q1 + q2), math.cos(q1 + q2)"
+      - "    return [[-0.5 * s1 - 0.4 * s12, -0.4 * s12], [0.5 * c1 + 0.4 * c12, 0.4 * c12]]"
+    distractors:
+      - line: "    s12, c12 = math.sin(q2), math.cos(q2)"
+        replaces: 2
+        explain: "q2 is measured from the upper arm: the forearm's direction is q1 + q2."
+    check: |
+      import math
+      J = jac(0.3, 0.9)
+      assert abs(J[0][0] + 0.5206) < 1e-4 and abs(J[1][1] - 0.1449) < 1e-4, J
+    explain: "Two angles, absolute ones in every forearm term: the chain rule in code."
