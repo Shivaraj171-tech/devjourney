@@ -1,0 +1,5 @@
+[
+  "body_twist_error: log_se3(transform_inverse(T_sb) @ T_sd). error_norms: (norm(V[:3]), norm(V[3:])). newton_step: np.linalg.lstsq(J, error, rcond=None)[0].",
+  "convergence_order: e = np.asarray(errors); return np.log(e[2:] / e[1:-1]) / np.log(e[1:-1] / e[:-2]). ik_newton_position is ik_newton with e = p_des - position_fn(q) and |e| instead of two norms.",
+  "ik_newton: q = copy(q0); history = []; loop max_iters + 1 times: V = body_twist_error(fk_body(M, Blist, q), T_sd); history.append(error_norms(V)); if both < tol: return q, True, history; if len(history) > max_iters: break; q = q + newton_step(jacobian_body(Blist, q), V). After the loop: return q, False, history."
+]

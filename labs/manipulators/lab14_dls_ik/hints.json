@@ -1,0 +1,5 @@
+[
+  "dls_step: J.T @ np.linalg.solve(J @ J.T + lam**2 * np.eye(J.shape[0]), e). clamp_to_limits: q = wrap_to_pi(q); return q if q_min is None else np.clip(q, q_min, q_max). within_limits: np.all(q >= q_min - tol) and np.all(q <= q_max + tol).",
+  "ik_lm: q = clamp(q0); V = body_twist_error(fk_body(M, B, q), T_sd); cost = V @ V; costs = [cost]; lambdas = []. for it in 1..max_iters: if error_norms(V) under tol: return q, True, info(it - 1); lambdas.append(lam); q_try = clamp(q + dls_step(jacobian_body(B, q), V, lam)); compute V_try and cost_try; accept (q, V, cost = ...; costs.append; lam = max(lam/10, 1e-12)) or reject (lam *= 10; break if lam > 1e6). After the loop success = error_norms(V) under tol, iterations = len(lambdas).",
+  "distinct_solutions: out = []; for q in sols: q = wrap_to_pi(q); keep if all(abs(wrap_to_pi(q - p)).max() >= tol for p in out). multi_start_ik: collect q for seeds where ik_lm succeeds, then distinct_solutions. select_solution: skip candidates failing within_limits; d = sqrt(sum(w * (q - qc)**2)); keep the smallest."
+]
