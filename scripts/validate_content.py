@@ -163,7 +163,10 @@ A side quest whose season.yaml sets `requires` is a SIDE FLOOR (e.g. s40-robotic
 the Robotics Lab), opened as a whole once that ticket is solved:
 
     chain: false
-    requires: s01-t10    # an on-chain ticket id: the whole floor opens once it is solved
+    requires: s01-t10    # an on-chain ticket id: the whole floor opens once it is solved.
+                         # Or a ticket of ANOTHER side floor (modules in sequence, e.g.
+                         # s42-manipulators-m2 has `requires: s41-t11`): it must exist,
+                         # not be the floor's own, and the floors' requires must not loop
     icon: "🤖"           # optional: the floor's icon on the HQ
     short_title: "Manipulators · M1"   # optional: the floor's name on the HQ board and ticket chip
 
@@ -643,28 +646,50 @@ def check_requires(seasons_root):
 
 
 def check_season_requires(seasons_root):
-    """A side floor's season-level `requires` must be a ticket of an on-chain season.
+    """A side floor's season-level `requires` must be a ticket of an on-chain season, or of
+    ANOTHER side floor (sequential modules: Manipulators M2 opens after M1's last ticket).
+
+    Following the floors' `requires` must always end on the story: no floor may require
+    one of its own tickets, and no chain of floors may loop back on itself (A needs B,
+    B needs A), or neither could ever open. Side floors never gate on-chain seasons or the
+    final exam (they only ever need tickets; nothing needs them except later floors).
 
     Returns {season folder name: [errors]} for the seasons with a problem.
     """
-    on_chain_ids = set()
-    floors = []
+    owner = {}  # ticket id -> (season folder name, "chain" | "floor" | "other")
+    floors = {}  # side floor folder name -> the ticket id it requires
     for season_dir in sorted(p for p in seasons_root.iterdir() if p.is_dir()):
-        chain, _final = season_flags(season_dir)
+        chain, final = season_flags(season_dir)
         required = season_requires(season_dir)
-        if required:
-            floors.append((season_dir.name, required))
-        if not chain:
-            continue
+        kind = "chain" if chain else ("floor" if required and not final else "other")
+        if kind == "floor":
+            floors[season_dir.name] = required
         for name in season_ticket_order(season_dir):
             try:
                 meta = yaml.safe_load((season_dir / "tickets" / name / "ticket.yaml").read_text(encoding="utf-8"))
             except (OSError, yaml.YAMLError):
                 continue
             if isinstance(meta, dict) and isinstance(meta.get("id"), str):
-                on_chain_ids.add(meta["id"])
-    return {name: [f"season.yaml: requires {required!r}, which is not a ticket of an on-chain season"]
-            for name, required in floors if required not in on_chain_ids}
+                owner[meta["id"]] = (season_dir.name, kind)
+    report = {}
+    for name, required in floors.items():
+        where, kind = owner.get(required, (None, None))
+        if kind not in ("chain", "floor"):
+            report[name] = [f"season.yaml: requires {required!r}, which is not a ticket of an on-chain season "
+                            "or of another side floor"]
+            continue
+        if where == name:
+            report[name] = [f"season.yaml: requires {required!r}, one of this floor's own tickets (it could never open)"]
+            continue
+        path, at = [name], where
+        while owner.get(floors.get(at, ""), (None, None))[1] == "floor" and at not in path:
+            path.append(at)
+            at = owner[floors[at]][0]
+        if at in path:
+            loop = " → ".join(path[path.index(at):] + [at])
+            report[name] = [f"season.yaml: requires {required!r}, but the side floors' requires go round in a "
+                            f"circle ({loop}), so none of them could ever open"]
+    return report
 
 
 def check_incident(ticket_dir, meta):

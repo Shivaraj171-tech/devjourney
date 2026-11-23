@@ -91,3 +91,36 @@ export function nextStoryTicketId(seasons: OrderSeason[], ticketId: string): str
 export function finalSeasonIndex(seasons: OrderSeason[]): number {
   return seasons.findIndex((s) => s.final === true);
 }
+
+/** What opens a side floor, for the HQ's "🔒 opens after …" line. */
+export type FloorGate =
+  /** A story ticket: floor = its 1-based story floor number. */
+  | { kind: "story"; floor: number; ticketNumber: number; wholeFloor: boolean }
+  /** A ticket of another side floor (sequential modules, e.g. Manipulators M2 after M1). */
+  | { kind: "side-floor"; seasonId: string; ticketNumber: number; wholeFloor: boolean };
+
+/**
+ * Where side floor `index`'s season-level `requires` lives: a story floor, or another
+ * side floor (a side floor may require a ticket of another side floor, so modules open
+ * one after another). wholeFloor: it is that floor's last ticket. null if unknown.
+ */
+export function sideFloorGate(seasons: OrderSeason[], index: number): FloorGate | null {
+  const season = seasons[index];
+  if (!season || !isSideFloor(season)) return null;
+  const story = mainSeasons(seasons);
+  for (const [s, other] of seasons.entries()) {
+    const at = other.tickets.findIndex((t) => t.id === season.requires);
+    if (at === -1 || s === index) continue;
+    const wholeFloor = at === other.tickets.length - 1;
+    if (!isSideQuest(other)) return { kind: "story", floor: story.indexOf(other) + 1, ticketNumber: at + 1, wholeFloor };
+    if (isSideFloor(other)) return { kind: "side-floor", seasonId: other.id, ticketNumber: at + 1, wholeFloor };
+    return null;
+  }
+  return null;
+}
+
+/** "Floor 1", "ticket #3 of Floor 2", "Manipulators · M1" or "ticket #4 of Manipulators · M1". */
+export function floorGateText(gate: FloorGate, sideFloorName: (seasonId: string) => string): string {
+  const where = gate.kind === "story" ? `Floor ${gate.floor}` : sideFloorName(gate.seasonId);
+  return gate.wholeFloor ? where : `ticket #${gate.ticketNumber} of ${where}`;
+}

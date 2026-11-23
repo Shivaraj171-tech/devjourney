@@ -192,6 +192,18 @@ class Frames3DTests(unittest.TestCase):
         self.assertEqual(item["axes"], [True, False, False, True])
         self.assertEqual(item["trail"], 3)
 
+    def test_arm3d_can_draw_a_triad_on_every_joint(self):
+        link = T(p=(0.5, 0, 0))
+        lab.viz.arm3d([[link, link, link]], axes=True, name="all")
+        lab.viz.arm3d([[link, link, link]], axes=[True, True], name="some")
+        lab.viz.arm3d([[link, link, link]], axes=False, name="none")
+        axes = [item["axes"] for item in lab.collect()]
+        self.assertEqual(axes, [[True] * 4, [True, True, False, False], [False] * 4])
+        # The default is unchanged: base and gripper only.
+        lab.reset()
+        lab.viz.arm3d([[link, link, link]])
+        self.assertEqual(lab.collect()[0]["axes"], [True, False, False, True])
+
     def test_limits(self):
         many = [[T(p=(i / 1000, j, 0)) for j in range(lab.MAX_TRANSFORMS + 4)] for i in range(1000)]
         lab.viz.frames3d("many", many)

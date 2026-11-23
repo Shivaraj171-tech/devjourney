@@ -111,6 +111,70 @@ class SideFloorTests(unittest.TestCase):
         self.floor()
         self.assertFalse(any("final" in e for e in self.report()["s40-lab"]))
 
+    # ---------- sequential side floors: a floor that opens after another floor ----------
+
+    def next_floor(self, requires="s40-t02"):
+        """A second one-ticket side floor (s41) that opens after a ticket of the first (s40)."""
+        write(self.seasons / "s41-next" / "season.yaml",
+              f"id: s41\ntitle: Next\nintro: I\nchain: false\nrequires: {requires}\ntickets: [t01]\n")
+        t = make_ticket(self.seasons / "s41-next" / "tickets", "t01", yaml_text=SIDE_TICKET.format(
+            tid="s41-t01", title="Next 1", concept="numbers", extra="").replace("debugging", "robotics"))
+        write(t / "concept.md", "**Numbers**\n\nText.\n")
+
+    def test_a_side_floor_may_require_another_side_floors_ticket(self):
+        self.floor()
+        self.next_floor("s40-t02")
+        report = self.report()
+        self.assertEqual(report["s41-next"], [])
+        self.assertEqual(report["s41-next/t01"], [])
+        self.assertEqual(report["s40-lab"], [])
+        # Not the last ticket is fine too ("opens after ticket #1 of ...").
+        shutil.rmtree(self.seasons / "s41-next")
+        self.next_floor("s40-t01")
+        self.assertEqual(self.report()["s41-next"], [])
+
+    def test_sequential_requires_must_exist(self):
+        self.floor()
+        self.next_floor("s40-t07")
+        errors = self.report()["s41-next"]
+        self.assertTrue(any("not a ticket of an on-chain season or of another side floor" in e for e in errors), errors)
+
+    def test_sequential_requires_never_names_the_final_or_a_bounty_ticket(self):
+        self.floor()
+        self.next_floor("s99-t01")
+        self.assertTrue(any("not a ticket of an on-chain season or of another side floor" in e for e in self.report()["s41-next"]))
+        shutil.rmtree(self.seasons / "s41-next")
+        write(self.seasons / "s50-bounty" / "season.yaml", "id: s50\ntitle: B\nintro: I\nchain: false\ntickets: [t01]\n")
+        make_ticket(self.seasons / "s50-bounty" / "tickets", "t01", yaml_text=SIDE_TICKET.format(
+            tid="s50-t01", title="Bug", concept="numbers", extra=""))
+        self.next_floor("s50-t01")
+        self.assertTrue(any("not a ticket of an on-chain season or of another side floor" in e for e in self.report()["s41-next"]))
+
+    def test_a_floor_cannot_require_its_own_ticket(self):
+        self.floor(requires="s40-t02")
+        errors = self.report()["s40-lab"]
+        self.assertTrue(any("one of this floor's own tickets" in e for e in errors), errors)
+
+    def test_side_floors_requires_must_not_loop(self):
+        self.floor(requires="s41-t01")  # s40 needs s41 ...
+        self.next_floor("s40-t02")  # ... and s41 needs s40: neither could ever open
+        report = self.report()
+        for name in ("s40-lab", "s41-next"):
+            self.assertTrue(any("go round in a circle" in e for e in report[name]), report[name])
+        self.assertTrue(any("s40-lab → s41-next → s40-lab" in e for e in report["s40-lab"]), report["s40-lab"])
+
+    def test_sequential_floors_never_block_the_story_or_the_final(self):
+        self.floor()
+        self.next_floor("s40-t02")
+        report = self.report()
+        self.assertEqual(report["s01-a"], [])
+        self.assertEqual(report["s99-final"], [])
+        self.assertEqual(report["s99-final/t01"], [])
+        # A story season can't require anything at all (so never a side floor's ticket).
+        season = self.seasons / "s01-a" / "season.yaml"
+        season.write_text(season.read_text() + "requires: s41-t01\n")
+        self.assertTrue(any("only for side floors" in e for e in self.report()["s01-a"]))
+
 
 class RealRoboticsLabTests(unittest.TestCase):
     """The real Robotics Lab floor: 8 lesson tickets, opened by the end of Season 1."""

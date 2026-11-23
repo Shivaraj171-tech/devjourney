@@ -216,6 +216,7 @@ export default function Frames3DView({ item }: { item: Frames3DItem }) {
           data-yaw={deg(cam.yaw)}
           data-pitch={deg(cam.pitch)}
           data-dist={cam.dist.toFixed(2)}
+          data-triads={item.axes.slice(0, item.frames[0]?.length ?? 0).filter(Boolean).length}
           tabIndex={0}
           role="img"
           aria-label={`${item.title}. ${summary}. ${view}. Drag or use the arrow keys to turn the view, plus and minus to zoom, 0 to reset.`}
