@@ -53,6 +53,10 @@ LABS = [
         needs_mujoco=True),
     Lab("lab22", "lab22_gravity_comp", 7, "PD + gravity compensation, Lyapunov", 180,
         needs_mujoco=True),
+    Lab("lab23", "lab23_computed_torque", 7, "Computed-torque control, 20% wrong masses", 220,
+        needs_mujoco=True),
+    Lab("lab24", "lab24_task_space", 7, "Task-space control: J^T, OSC, orientation", 220,
+        needs_mujoco=True),
 ]
 
 MODULE_NAMES = {1: "Rigid-body motion", 2: "Forward kinematics", 3: "Velocity kinematics",

@@ -1,0 +1,5 @@
+[
+  "planar2r_fk: [l1 cos q1 + l2 cos(q1+q2), l1 sin q1 + l2 sin(q1+q2)]; planar2r_jacobian: differentiate each line by q1 and q2. orientation_error: log_so3(R_d @ R.T). pose_error: np.concatenate([T_d[:3, 3] - T[:3, 3], orientation_error(T[:3, :3], T_d[:3, :3])]).",
+  "jacobian_transpose_control: F = Kp * e - Kd * (J @ qd); return J.T @ F + g. task_space_inertia: np.linalg.inv(J @ np.linalg.solve(M, J.T)).",
+  "operational_space_control: a = Kp * e - Kd * (J @ qd); return J.T @ (task_space_inertia(J, M) @ a) + g. nullspace_projector: Jbar = np.linalg.solve(M, J.T) @ task_space_inertia(J, M); return np.eye(J.shape[1]) - J.T @ Jbar.T."
+]

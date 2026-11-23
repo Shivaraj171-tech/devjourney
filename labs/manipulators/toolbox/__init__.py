@@ -78,6 +78,15 @@ def __getattr__(name):
         "run_mujoco_control": "lab21_pd_control",
         "pd_gravity": "lab22_gravity_comp", "pd_gravity_desired": "lab22_gravity_comp",
         "make_gravity_fn": "lab22_gravity_comp", "lyapunov": "lab22_gravity_comp",
+        "critically_damped_gains": "lab23_computed_torque",
+        "quintic_reference": "lab23_computed_torque", "computed_torque": "lab23_computed_torque",
+        "tracking_error": "lab23_computed_torque", "scale_links": "lab23_computed_torque",
+        "scale_masses": "lab23_computed_torque",
+        "orientation_error": "lab24_task_space",
+        "jacobian_transpose_control": "lab24_task_space",
+        "task_space_inertia": "lab24_task_space",
+        "operational_space_control": "lab24_task_space",
+        "nullspace_projector": "lab24_task_space",
     }
     if name in lazy:
         import importlib
