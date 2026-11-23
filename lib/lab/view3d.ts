@@ -3,7 +3,7 @@
 // draw (sorted back to front), and the plain-text summary of a frame.
 // World coordinates are z-up and right-handed, like the robotics lessons.
 // Pure functions, no DOM, so node can unit-test them.
-import type { Frames3DItem, Mat34, Vec3 } from "./viz";
+import { short, type Arrow3, type Ellipsoid3, type Frames3DItem, type Mat34, type Vec3 } from "./viz";
 
 /** An orbit camera: it looks at `target` from `dist` away, at a compass angle and a height angle. */
 export type Camera = {
@@ -90,6 +90,9 @@ export function sceneBounds(item: Frames3DItem): { center: Vec3; radius: number 
   for (const p of item.points) pts.push([p.x, p.y, p.z]);
   for (const [a, b] of item.lines) pts.push(a, b);
   if (item.target) pts.push("pose" in item.target ? originOf(item.target.pose) : item.target.point);
+  for (const scene of item.ellipsoids)
+    for (const e of scene) e.axes.forEach((a, k) => pts.push(add(e.center, scale3(a, e.radii[k])), sub(e.center, scale3(a, e.radii[k]))));
+  for (const scene of item.arrows) for (const a of scene) pts.push(a.start, add(a.start, a.vec));
   const lo: Vec3 = [Infinity, Infinity, Infinity];
   const hi: Vec3 = [-Infinity, -Infinity, -Infinity];
   for (const p of pts)
@@ -131,11 +134,83 @@ export function floorGrid(center: Vec3, radius: number): { step: number; lines: 
 
 /** What to draw for one frame, in world space. The viewer projects, sorts and paints them. */
 export type Shape =
-  | { kind: "segment"; a: Vec3; b: Vec3; role: "x" | "y" | "z" | "link" | "arm" | "trail" | "line" | "target-x" | "target-y" | "target-z" }
-  | { kind: "label"; at: Vec3; text: string; role: "x" | "y" | "z" | "name" | "point" | "target" }
+  | {
+      kind: "segment";
+      a: Vec3;
+      b: Vec3;
+      role: "x" | "y" | "z" | "link" | "arm" | "trail" | "line" | "target-x" | "target-y" | "target-z" | "ellipsoid" | "ellipsoid-axis";
+    }
+  | { kind: "arrow"; a: Vec3; b: Vec3; role: "arrow" }
+  | { kind: "label"; at: Vec3; text: string; role: "x" | "y" | "z" | "name" | "point" | "target" | "ellipsoid" | "arrow" }
   | { kind: "dot"; at: Vec3; role: "joint" | "point" | "target" | "origin" };
 
 export const AXIS_NAMES = ["x", "y", "z"] as const;
+
+/** The ellipsoids / arrows of frame `i` (clamped; a list shorter than the frames repeats its last entry). */
+export function ellipsoidsAt(item: Frames3DItem, i: number): Ellipsoid3[] {
+  const n = item.ellipsoids.length;
+  return n ? item.ellipsoids[Math.max(0, Math.min(i, n - 1))] : [];
+}
+export function arrowsAt(item: Frames3DItem, i: number): Arrow3[] {
+  const n = item.arrows.length;
+  return n ? item.arrows[Math.max(0, Math.min(i, n - 1))] : [];
+}
+
+/** The point of the ellipsoid in the unit-sphere direction `u` (u[k]: along axis k): center + Σ u_k r_k a_k. */
+export function ellipsoidPoint(e: Ellipsoid3, u: number[]): Vec3 {
+  let p = e.center;
+  e.axes.forEach((a, k) => {
+    p = add(p, scale3(a, e.radii[k] * (u[k] ?? 0)));
+  });
+  return p;
+}
+
+/** Latitudes (degrees) and longitudes of the wireframe. */
+export const ELLIPSOID_LATITUDES = [-60, -30, 0, 30, 60];
+export const ELLIPSOID_LONGITUDES = [0, 45, 90, 135];
+
+/**
+ * The wireframe of an ellipsoid as closed polylines (`steps` points each, the first not
+ * repeated): latitude rings about its third axis and longitude rings through its poles.
+ * A flat ellipse (2 axes) is one ring. A zero radius flattens the rings: that is the point.
+ */
+export function ellipsoidRings(e: Ellipsoid3, steps = 36): Vec3[][] {
+  const ring = (f: (t: number) => number[]) => Array.from({ length: steps }, (_, s) => ellipsoidPoint(e, f((2 * Math.PI * s) / steps)));
+  if (e.axes.length === 2) return [ring((t) => [Math.cos(t), Math.sin(t)])];
+  const rad = Math.PI / 180;
+  const out: Vec3[][] = [];
+  for (const lat of ELLIPSOID_LATITUDES) {
+    const c = Math.cos(lat * rad);
+    const s = Math.sin(lat * rad);
+    out.push(ring((t) => [c * Math.cos(t), c * Math.sin(t), s]));
+  }
+  for (const lon of ELLIPSOID_LONGITUDES) {
+    const c = Math.cos(lon * rad);
+    const s = Math.sin(lon * rad);
+    out.push(ring((t) => [c * Math.cos(t), s * Math.cos(t), Math.sin(t)]));
+  }
+  return out;
+}
+
+/** Condition number of an ellipsoid: largest radius / smallest (Infinity when flat). */
+export function ellipsoidCondition(e: Ellipsoid3): number {
+  const big = Math.max(...e.radii);
+  const small = Math.min(...e.radii);
+  if (big === 0) return Infinity;
+  return small <= big * 1e-9 ? Infinity : big / small;
+}
+
+/** "velocity: radii 0.52, 0.31, 0.020 · condition number 26" (flat: "∞, singular"). */
+export function ellipsoidSummary(e: Ellipsoid3): string {
+  const k = ellipsoidCondition(e);
+  const cond = Number.isFinite(k) ? `condition number ${short(k)}` : "condition number ∞ (flat: singular)";
+  return `${e.label || (e.axes.length === 2 ? "ellipse" : "ellipsoid")}: radii ${e.radii.map(short).join(", ")} · ${cond}`;
+}
+
+/** "v: (0.10, 0.00, -0.20), length 0.224". */
+export function arrowSummary(a: Arrow3): string {
+  return `${a.label || "arrow"} ${fmtVec(a.vec)}, length ${short(norm3(a.vec))}`;
+}
 
 /** Every shape of frame `i` (clamped), in world space. */
 export function frameShapes(item: Frames3DItem, i: number, triad: number): Shape[] {

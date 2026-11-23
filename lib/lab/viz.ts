@@ -14,6 +14,8 @@ export const VIZ_LIMITS = {
   text: 120,
   transforms: 12,
   lines: 24,
+  ellipsoids: 4,
+  arrows: 8,
 } as const;
 
 export type Pt = [number, number];
@@ -85,6 +87,13 @@ export type Vec3 = [number, number, number];
 /** The top three rows of a 4x4 homogeneous transform, row by row: [r00, r01, r02, px, r10, ..., pz]. */
 export type Mat34 = number[];
 export type Point3 = { x: number; y: number; z: number; label: string };
+/**
+ * An ellipsoid (e.g. a manipulability / velocity ellipsoid): its centre, its principal
+ * directions (2 or 3 unit-ish vectors; 2: a flat ellipse) and one radius per direction.
+ */
+export type Ellipsoid3 = { center: Vec3; axes: Vec3[]; radii: number[]; label: string };
+/** An arrow from `start` to `start + vec` (a velocity, a force). */
+export type Arrow3 = { start: Vec3; vec: Vec3; label: string };
 
 /** 3D coordinate frames (viz.frames3d / viz.arm3d): 4x4 transforms per frame of the animation. */
 export type Frames3DItem = {
@@ -110,6 +119,10 @@ export type Frames3DItem = {
   scale: number | null;
   /** Some transform's bottom row was not [0, 0, 0, 1]. */
   badBottom: boolean;
+  /** One list per animation frame (empty: none drawn). */
+  ellipsoids: Ellipsoid3[][];
+  /** One list per animation frame (empty: none drawn). */
+  arrows: Arrow3[][];
   truncated: boolean;
 };
 
@@ -249,6 +262,30 @@ function mat34(v: unknown): Mat34 | null {
   return out.every((x) => x !== null) ? (out as number[]) : null;
 }
 
+/** An ellipsoid: a centre, 2 or 3 axes and as many finite, non-negative radii; anything else is dropped. */
+export function parseEllipsoid(v: unknown): Ellipsoid3 | null {
+  if (!isObj(v)) return null;
+  const center = vec3(v.center);
+  if (!center || !Array.isArray(v.axes) || !Array.isArray(v.radii)) return null;
+  const axes = v.axes.map(vec3);
+  const radii = v.radii.map(num);
+  if ((axes.length !== 2 && axes.length !== 3) || radii.length !== axes.length) return null;
+  if (axes.some((a) => a === null) || radii.some((r) => r === null || r < 0)) return null;
+  return { center, axes: axes as Vec3[], radii: radii as number[], label: text(v.label) };
+}
+
+export function parseArrow(v: unknown): Arrow3 | null {
+  if (!isObj(v)) return null;
+  const start = vec3(v.start);
+  const vec = vec3(v.vec);
+  return start && vec ? { start, vec, label: text(v.label) } : null;
+}
+
+/** One list per frame, each capped; broken entries dropped. */
+function perFrame<T>(v: unknown, frames: number, cap: number, parse: (x: unknown) => T | null): T[][] {
+  return arr(v, frames).map((f) => arr(f, cap).map(parse).filter((x): x is T => x !== null));
+}
+
 function parseFrames3d(r: Raw): Frames3DItem | null {
   const frames = arr(r.frames, VIZ_LIMITS.frames)
     .map((scene) => (Array.isArray(scene) ? arr(scene, VIZ_LIMITS.transforms).map(mat34) : null))
@@ -293,6 +330,8 @@ function parseFrames3d(r: Raw): Frames3DItem | null {
     trail: inRange(r.trail) ? r.trail : null,
     scale: scale !== null && scale > 0 ? scale : null,
     badBottom: r.bad_bottom === true,
+    ellipsoids: perFrame(r.ellipsoids, VIZ_LIMITS.frames, VIZ_LIMITS.ellipsoids, parseEllipsoid),
+    arrows: perFrame(r.arrows, VIZ_LIMITS.frames, VIZ_LIMITS.arrows, parseArrow),
     truncated: r.truncated === true,
   };
 }
