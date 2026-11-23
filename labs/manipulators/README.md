@@ -199,5 +199,29 @@ and g(q) with MuJoCo for the UR5e controllers (equal to the lab 19 RNEA to 10⁻
 several hundred times faster than the numpy RNEA for the UR5e mass matrix: we measured
 4 µs against 2 ms).
 
+### Optional: the real-looking UR5e (MuJoCo Menagerie)
+
+Our MuJoCo arms are capsules built from the DH table. If you'd like to see the motion on
+the UR5e's real meshes, Google DeepMind's MuJoCo Menagerie has a UR5e model
+(`universal_robots_ur5e`, BSD-3-Clause, © 2018 ROS Industrial Consortium). It isn't in this
+repo; download it once (~30 MB, pinned commit, every file checksummed) into
+`~/.cache/devjourney/mujoco_menagerie` (or `$DEVJOURNEY_MENAGERIE_DIR`):
+
+```bash
+python labs/manipulators/tools/fetch_menagerie_ur5e.py
+python labs/manipulators/tools/menagerie_ur5e_replay.py          # capstone plan, headless report
+python labs/manipulators/tools/menagerie_ur5e_replay.py --view   # watch it (macOS: use mjpython)
+python labs/manipulators/tools/menagerie_ur5e_replay.py --mine   # with your lab 28 plan
+python -m pytest labs/manipulators/tools/tests                   # skipped if not downloaded
+```
+
+What we checked (MuJoCo 4.0.1): it loads headless with the same zero pose, joint directions
+and base frame as our `UR5E_DH`, and its flange stays within 1.5 mm of our DH FK (Menagerie
+rounds UR's offsets, e.g. 0.163 m for d₁ = 0.1625). Its masses are the older UR5-era values,
+not Universal Robots' UR5e ones, so it's a model to look at and replay joint plans on; the
+labs' dynamics use `toolbox/robots.py`. Replaying the capstone plan into Menagerie's own
+position servos (no gravity compensation) lags up to 0.19 rad mid-move and ends 0.007 rad
+low: compare that with lab 28's computed torque.
+
 Without MuJoCo, run `verify_all.py` in a venv with only numpy and pytest. It must
 report every lab except 08 as verified (27/28), with only the `needs mujoco` tests skipped.
