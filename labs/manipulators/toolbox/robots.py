@@ -38,8 +38,9 @@ PLANAR2R_L1, PLANAR2R_L2 = 1.0, 0.8
 
 # Joint limits used by the IK and trajectory labs (Modules 4-5). The real UR5 allows +-2 pi on
 # every joint; we use tighter, "safe cell" limits so that limits actually matter in the labs.
-# Velocity/acceleration limits: UR5 datasheet speed is 180 deg/s on all joints; the
-# acceleration limit is our own conservative choice.
+# Velocity/acceleration limits: 180 deg/s per joint is the UR5 (CB-series) datasheet speed as
+# we recall it (not re-checked against the datasheet); the acceleration limit is our own
+# conservative choice.
 UR5_Q_MIN = np.array([-np.pi, -np.pi, -np.pi, -np.pi, -np.pi, -np.pi])
 UR5_Q_MAX = -UR5_Q_MIN
 UR5_QD_MAX = np.full(6, np.pi)        # rad/s

@@ -63,8 +63,9 @@ differences (`np.gradient`) give
     q̇_k ≈ (q_{k+1} − q_{k−1}) / 2dt,    then the same again for q̈ and the jerk
 
 The limit check is the worst ratio max |q̇|/v_max and max |q̈|/a_max over all joints
-and samples (≤ 1 is OK). Our UR5 limits (`toolbox/robots.py`): 180°/s from the
-datasheet and an acceleration limit of 2π rad/s² that we chose ourselves. The Cartesian move
+and samples (≤ 1 is OK). Our UR5 limits (`toolbox/robots.py`): 180°/s (the UR5
+datasheet speed as we recall it) and an acceleration limit of 2π rad/s² that we chose
+ourselves. The Cartesian move
 over 2 s uses 30% of the velocity limit. Squeeze it into 0.4 s and it needs 7× the
 allowed acceleration. A task-space trajectory has to be checked in joint space.
 

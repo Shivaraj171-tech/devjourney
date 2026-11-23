@@ -64,6 +64,10 @@ def test_elbow_labels(impl):
     assert sols[("front", "up")][2] < 0, "front + elbow up means q3 < 0 for this arm"
     assert sols[("back", "up")][2] > 0, "...and for the back solutions the sign flips"
     assert impl.elbow_is_up(sols[("back", "up")]) and not impl.elbow_is_up(sols[("front", "down")])
+    elbow = lambda q: fk_dh(ARM3_DH[:2], q[:2])[:3, 3]  # noqa: E731
+    np.testing.assert_allclose(elbow(sols[("back", "up")]), elbow(sols[("front", "up")]), atol=1e-12,
+                               err_msg="no shoulder offset: back/up puts the elbow where front/up does "
+                                       "(README step 2); if not, your up/down labels are swapped")
     np.testing.assert_allclose(impl.arm3_ik(p, "front", "down"), sols[("front", "down")])
 
 
