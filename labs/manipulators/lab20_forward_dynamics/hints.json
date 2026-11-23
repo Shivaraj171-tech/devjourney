@@ -1,0 +1,5 @@
+[
+  "forward_dynamics: np.linalg.solve(mass_fn(q), tau - bias_fn(q, qd)). explicit: return q + dt*qd, qd + dt*f(q, qd, tau). semi-implicit: v = qd + dt*f(q, qd, tau); return q + dt*v, v. energy_drift: E = array of energy_fn(q, qd) over zip(Q, Qd); return E - E[0]. convergence_order: np.polyfit(np.log(dts), np.log(errors), 1)[0].",
+  "rk4_step: k1q, k1v = qd, f(q, qd, tau); k2q, k2v = qd + dt/2*k1v, f(q + dt/2*k1q, qd + dt/2*k1v, tau); k3 likewise from k2; k4q, k4v = qd + dt*k3v, f(q + dt*k3q, qd + dt*k3v, tau); q+ = q + dt/6 (k1q + 2k2q + 2k3q + k4q), same for qd.",
+  "simulate: step = globals()[STEPPERS[method]]; q, qd = arrays; Q, Qd = [q], [qd]; for k in range(steps): tau = zeros or tau_fn(k*dt, q, qd); q, qd = step(f, q, qd, dt, tau); append. simulate_mujoco: data = mujoco.MjData(model); data.qpos[:], data.qvel[:] = q0, qd0; per step: data.qfrc_applied[:] = tau; mujoco.mj_step(model, data); append data.qpos.copy(), data.qvel.copy()."
+]

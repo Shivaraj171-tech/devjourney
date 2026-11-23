@@ -68,8 +68,10 @@ def __getattr__(name):
         "planar2r_energy": "lab18_lagrange_2r",
         "spatial_inertia": "lab19_newton_euler", "com_frames": "lab19_newton_euler",
         "rnea": "lab19_newton_euler", "mass_matrix_rnea": "lab19_newton_euler",
-        "bias_forces_rnea": "lab19_newton_euler",
+        "bias_forces_rnea": "lab19_newton_euler", "gravity_rnea": "lab19_newton_euler",
+        "rnea_model": "lab19_newton_euler", "ad_twist": "lab19_newton_euler",
         "forward_dynamics": "lab20_forward_dynamics", "rk4_step": "lab20_forward_dynamics",
+        "semi_implicit_euler_step": "lab20_forward_dynamics", "simulate": "lab20_forward_dynamics",
     }
     if name in lazy:
         import importlib
