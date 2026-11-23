@@ -1,0 +1,33 @@
+id: s42
+title: "Manipulators · Module 2: Forward kinematics"
+icon: "🦾"
+# A deep side floor: module 2 of 8 of the manipulator track (see README). Its codebase
+# starts from Module 1's final rigid/ package and adds kin/ (joints, chains, DH tables,
+# the UR5, wrists, the product of exponentials). It opens once Module 1 is done: a side
+# floor's `requires` may name another side floor's ticket (modules in sequence). Like
+# every side floor, it never gates anything (the final exam stays on the story).
+chain: false
+requires: s41-t11
+lesson: long
+short_title: "Manipulators · M2"
+intro: >
+  **Module 2 of 8: Forward kinematics.** Grabby is getting a real six-joint arm. Given
+  the joint angles, where exactly is the gripper, and which way is it facing? That is
+  forward kinematics: one 4x4 transform per joint, multiplied from the base outwards.
+  Rosa takes you from a single joint to a two-link arm, a 3-DOF arm, Denavit-Hartenberg
+  tables, the real Universal Robots UR5 in full 6-DOF 3D, wrist geometry, and the
+  product of exponentials, and you prove that DH and PoE agree. Every ticket draws the
+  arm in the 3D view, with a frame on each joint so you SEE what the maths does.
+  Optional: it never blocks the main story.
+tickets:
+  - t01-what-is-a-joint
+  - t02-two-links-in-3d
+  - t03-three-joints
+  - t04-four-numbers
+  - t05-your-own-dh-table
+  - t06-the-ur5
+  - t07-the-wrist-centre
+  - t08-screws-and-exponentials
+  - t09-two-roads-one-pose
+  - t10-the-missing-ninety
+  - t11-concept-check
