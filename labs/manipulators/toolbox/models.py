@@ -27,9 +27,10 @@ def _fmt(x) -> str:
     return " ".join(f"{float(v):.17g}" for v in np.ravel(x))
 
 
-def _option(timestep: float, gravity: float, integrator: str) -> str:
+def _option(timestep: float, gravity: float, integrator: str, contact: bool = False) -> str:
+    flag = 'energy="enable"' if contact else 'contact="disable" energy="enable"'
     return (f'  <option timestep="{timestep!r}" gravity="0 0 {-gravity!r}" integrator="{integrator}">\n'
-            '    <flag contact="disable" energy="enable"/>\n  </option>')
+            f'    <flag {flag}/>\n  </option>')
 
 
 def dh_arm_mjcf(dh, links, name: str = "arm_dyn", gravity: float = 9.81,
