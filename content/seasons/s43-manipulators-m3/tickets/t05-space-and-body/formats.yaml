@@ -1,0 +1,38 @@
+predict:
+  - code: |
+      def cross(a, b):
+          return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+      w = [0.0, 0.0, 1.0]          # spinning about the base's z axis at 1 rad/s...
+      v_s = [0.0, -2.0, 0.0]       # ...about an axis through (2, 0, 0): v_s = -w x (2, 0, 0)
+      p = [2.0, 0.0, 0.5]          # the gripper sits right on that axis, 0.5 m up
+      wxp = cross(w, p)
+      print([a + b for a, b in zip(v_s, wxp)])
+    question: "A space twist, and a gripper that sits on the spin axis. How fast does the gripper point move?"
+    answer: "[0.0, 0.0, 0.0]"
+    choices:
+      - "[0.0, 0.0, 0.0]"
+      - "[0.0, -2.0, 0.0]"
+      - "[0.0, 2.0, 0.0]"
+      - "[0.0, -4.0, 0.0]"
+    explain: >-
+      v_s says the base origin (2 m from the axis) is dragged at 2 m/s. The gripper is ON the axis: it only
+      turns. v_s + w × p = 0. Big v_s, motionless gripper: that's why the 3D view draws v_s at the base origin.
+parsons:
+  - goal: >-
+      Write `adjoint(R, pR)`: the 6x6 adjoint for twists (w, v), given the 3x3 blocks R and pR = [p]R as lists
+      of rows. One line is Byte's slip: leave it out.
+    lines:
+      - "def adjoint(R, pR):"
+      - "    top = [R[i] + [0.0, 0.0, 0.0] for i in range(3)]"
+      - "    bottom = [pR[i] + R[i] for i in range(3)]"
+      - "    return top + bottom"
+    distractors:
+      - line: "    top = [R[i] + pR[i] for i in range(3)]"
+        replaces: 1
+        explain: "That's the (v, w) layout. For (w, v) the top rows (w) never depend on v: R and zeros."
+    check: |
+      I = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+      pR = [[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+      A = adjoint(I, pR)
+      assert A[0] == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0] and A[3] == [0.0, -1.0, 0.0, 1.0, 0.0, 0.0], A
+    explain: "w's rows: R and zeros. v's rows: the lever [p]R, then R."

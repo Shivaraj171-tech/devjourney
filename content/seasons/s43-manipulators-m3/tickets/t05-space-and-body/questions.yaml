@@ -1,0 +1,30 @@
+questions:
+  - prompt: "In a space twist V_s = (w, v), what is v?"
+    choices:
+      - "The velocity of the body point passing through the BASE origin"
+      - "The velocity of the gripper's fingertips, in base axes"
+      - "The velocity of the base frame itself"
+    answer: 0
+    explain: "Imagine the gripper's body extended to the base origin: v is how fast that point moves. The gripper point's velocity is v + w × p."
+  - prompt: "J_s and J_b of the same arm at the same pose are related by..."
+    choices:
+      - "J_b = Ad(T_sb⁻¹) J_s"
+      - "J_b = J_sᵀ"
+      - "J_b = T_sb J_s"
+      - "J_b = J_s: a Jacobian doesn't depend on the frame"
+    answer: 0
+    explain: "Each column is a twist; Ad(T⁻¹) rewrites a base-frame twist in the gripper's frame. (T is 4x4, J is 6 x n: they can't even be multiplied.)"
+  - prompt: "An adjoint with [p]R in the top-right block is..."
+    choices:
+      - "right for twists ordered (v, w), wrong for (w, v)"
+      - "always wrong"
+      - "always right: the two layouts are the same matrix transposed"
+    answer: 0
+    explain: "The block that mixes w into v must sit in v's rows and w's columns. Which corner that is depends on the ordering."
+  - prompt: "A test passes with T = (R, p = 0) but fails otherwise. Which adjoint bug fits?"
+    choices:
+      - "The [p]R block is missing or misplaced"
+      - "R and Rᵀ are swapped"
+      - "The twist is not normalised"
+    answer: 0
+    explain: "With p = 0 the [p]R block is zero, so a misplaced or missing one is invisible. That's why the adjoint test uses a frame 1 m away."

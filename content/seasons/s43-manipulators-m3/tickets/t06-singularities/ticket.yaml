@@ -1,0 +1,10 @@
+id: s43-t06
+title: "Where the arm gets stuck"
+type: bug
+level: senior
+track: robotics
+concepts: [ur5-jacobian, analytic-jacobian, singularities]
+new_concept: singularities
+estimated_minutes: 35
+tests_visible: true
+files_editable: [vel/linalg.py, vel/singular.py]

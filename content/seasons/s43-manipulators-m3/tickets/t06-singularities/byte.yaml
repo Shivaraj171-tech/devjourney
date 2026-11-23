@@ -1,0 +1,13 @@
+# Right as far as it goes (partial): Byte restores the sign flip in det; the wrist test still reads q4.
+suggestion:
+  file: vel/linalg.py
+  find: "            U[k], U[p] = U[p], U[k]  # Byte: swapping rows is harmless\n"
+  replace: "            U[k], U[p] = U[p], U[k]\n            sign = -sign  # a row swap flips the determinant's sign\n"
+  correct: true
+  partial: true
+  says: "Found it: a row swap flips the determinant's sign, and I wasn't counting them. That's the singularity bug fixed."
+  explain: >-
+    The det fix is right: the closed-form comparison passes at every pose now. But "that's the singularity bug
+    fixed" is an over-claim: singularity_kinds in vel/singular.py still tests sin(q4) for the wrist, so the
+    planner still never sees a wrist flip. Byte fixed one of two bugs and reported both done. Run the tests
+    before you believe a summary.

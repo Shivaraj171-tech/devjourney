@@ -1,0 +1,10 @@
+id: s43-t07
+title: "The ellipsoid goes flat"
+type: bug
+level: senior
+track: robotics
+concepts: [singularities, geometric-jacobian, manipulability]
+new_concept: manipulability
+estimated_minutes: 35
+tests_visible: true
+files_editable: [vel/ellipsoid.py]

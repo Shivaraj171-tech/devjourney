@@ -1,0 +1,30 @@
+questions:
+  - prompt: "At a singular pose of a 6-joint arm, which statement is true?"
+    choices:
+      - "rank J < 6: some gripper velocity can't be produced by any joint speeds"
+      - "Some joint has reached its limit and can't turn any further"
+      - "The arm is out of reach of every target"
+      - "J has a zero column: one joint has stopped doing anything"
+    answer: 0
+    explain: "Singular means the columns are dependent. That needs no limit, no zero column: two columns can simply become parallel."
+  - prompt: "The UR5's home pose (all joints at 0) is..."
+    choices:
+      - "singular twice over: stretched elbow (q3 = 0) and wrist flip (q5 = 0)"
+      - "regular: home poses are chosen to be far from singularities"
+      - "singular only at the shoulder"
+    answer: 0
+    explain: "det J contains sin(q3) sin(q5), and both are 0 at home. That's one reason robots rarely work AT home."
+  - prompt: "Gaussian elimination swapped rows 3 times. The diagonal of U multiplies to 0.25. What is det J?"
+    choices:
+      - "-0.25"
+      - "0.25"
+      - "0.75"
+    answer: 0
+    explain: "Each swap flips the sign: (-1)³ × 0.25 = -0.25."
+  - prompt: "Why are joints 4 and 6 the culprits of the UR5's wrist singularity?"
+    choices:
+      - "At q5 = 0 their axes are parallel, so they turn the flange about the same line"
+      - "They are the two fastest motors, so they reach their speed limits first"
+      - "They are the only joints whose axes are vertical at home"
+    answer: 0
+    explain: "Joint 5 sits between them. At q5 = 0 (or π) it lines their axes up: two columns of J become parallel, one direction of rotation is lost."
