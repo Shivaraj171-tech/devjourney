@@ -214,6 +214,69 @@ class Frames3DTests(unittest.TestCase):
         self.assertLessEqual(len(json.dumps(lab.collect())), lab.MAX_JSON)
 
 
+class EllipsoidArrowTests(unittest.TestCase):
+    """viz.frames3d / viz.arm3d(..., ellipsoids=..., arrows=...): manipulability and velocities."""
+
+    ELL = {"center": (1, 0, 0.5), "axes": ((1, 0, 0), (0, 1, 0), (0, 0, 1)), "radii": (0.4, 0.2, 0.1), "label": "v"}
+
+    def setUp(self):
+        lab.reset()
+
+    def test_static_ellipsoids_repeat_in_every_frame_axes_as_columns(self):
+        turned = dict(self.ELL, axes=((0, -1, 0), (1, 0, 0), (0, 0, 1)))
+        lab.viz.frames3d("e", [[T()] for _ in range(3)], ellipsoids=[turned], arrows=[{"start": (0, 0, 0), "vec": (0, 0, 1)}])
+        item = lab.collect()[0]
+        self.assertEqual(len(item["ellipsoids"]), 3)
+        self.assertEqual(item["ellipsoids"][2][0]["axes"], [[0, 1, 0], [-1, 0, 0], [0, 0, 1]])  # columns
+        self.assertEqual(item["ellipsoids"][0][0]["radii"], [0.4, 0.2, 0.1])
+        self.assertEqual(item["arrows"][1], [{"start": [0, 0, 0], "vec": [0, 0, 1], "label": ""}])
+
+    def test_per_frame_lists_and_none(self):
+        lab.viz.arm3d([[T(p=(0.5, 0, 0))], [T(p=(0.6, 0, 0))]], ellipsoids=[[self.ELL], None],
+                      arrows=[None, [{"start": (0, 0, 0), "vec": (1, 0, 0), "label": "v"}]])
+        item = lab.collect()[0]
+        self.assertEqual(item["style"], "arm")
+        self.assertEqual([len(e) for e in item["ellipsoids"]], [1, 0])
+        self.assertEqual([len(a) for a in item["arrows"]], [0, 1])
+
+    def test_a_flat_ellipse_has_two_axes(self):
+        lab.viz.frames3d("e", T(), ellipsoids=[{"center": (0, 0, 0), "axes": ((1, 0), (0, 0), (0, 1)), "radii": (0.3, 0.1)}])
+        self.assertEqual(lab.collect()[0]["ellipsoids"][0][0]["axes"], [[1, 0, 0], [0, 0, 1]])
+
+    def test_clear_errors(self):
+        with self.assertRaisesRegex(ValueError, "missing radii"):
+            lab.viz.frames3d("e", T(), ellipsoids=[{"center": (0, 0, 0), "axes": ((1, 0, 0),) * 3}])
+        with self.assertRaisesRegex(ValueError, "non-negative radii"):
+            lab.viz.frames3d("e", T(), ellipsoids=[dict(self.ELL, radii=(1, -1, 0))])
+        with self.assertRaisesRegex(ValueError, "finite"):
+            lab.viz.frames3d("e", T(), ellipsoids=[dict(self.ELL, radii=(1, float("nan"), 0))])
+        with self.assertRaisesRegex(ValueError, "3 rows"):
+            lab.viz.frames3d("e", T(), ellipsoids=[dict(self.ELL, axes=((1, 0, 0), (0, 1, 0)))])
+        with self.assertRaisesRegex(ValueError, "one list"):
+            lab.viz.frames3d("e", [[T()], [T()]], ellipsoids=[[self.ELL]])
+        with self.assertRaisesRegex(ValueError, "start"):
+            lab.viz.frames3d("e", T(), arrows=[{"vec": (1, 0, 0)}])
+
+    def test_caps_and_thinning_stay_in_step_with_the_frames(self):
+        n = lab.MAX_FRAMES + 50
+        lab.viz.frames3d("e", [[T(p=(i / n, 0, 0))] for i in range(n)],
+                         ellipsoids=[[dict(self.ELL, radii=(i, 0.2, 0.1))] * 9 for i in range(n)],
+                         arrows=[[{"start": (0, 0, 0), "vec": (i, 0, 0)}] * 20 for i in range(n)])
+        item = lab.collect()[0]
+        self.assertEqual(len(item["ellipsoids"]), len(item["frames"]))
+        self.assertEqual(len(item["arrows"]), len(item["frames"]))
+        self.assertEqual(len(item["ellipsoids"][0]), lab.MAX_ELLIPSOIDS)
+        self.assertEqual(len(item["arrows"][0]), lab.MAX_ARROWS)
+        for f, e in zip(item["frames"], item["ellipsoids"]):  # frame k's x position and radius both say k
+            self.assertAlmostEqual(f[0][3] * n, e[0]["radii"][0], places=0)
+        self.assertLessEqual(len(json.dumps(lab.collect())), lab.MAX_JSON)
+
+    def test_without_them_nothing_changes(self):
+        lab.viz.frames3d("e", T())
+        self.assertNotIn("ellipsoids", lab.collect()[0])
+        self.assertNotIn("arrows", lab.collect()[0])
+
+
 class RealManipulatorsM1Tests(unittest.TestCase):
     """The real Module 1 floor: 10 lesson tickets and a concept check, opened by the end of Season 1."""
 

@@ -3,7 +3,7 @@
 // draw (sorted back to front), and the plain-text summary of a frame.
 // World coordinates are z-up and right-handed, like the robotics lessons.
 // Pure functions, no DOM, so node can unit-test them.
-import { short, type Arrow3, type Ellipsoid3, type Frames3DItem, type Mat34, type Vec3 } from "./viz";
+import { short, type Arrow3, type Ellipsoid3, type Frames3DItem, type Mat34, type Vec3 } from "./viz.ts";
 
 /** An orbit camera: it looks at `target` from `dist` away, at a compass angle and a height angle. */
 export type Camera = {
@@ -263,12 +263,26 @@ export function frameShapes(item: Frames3DItem, i: number, triad: number): Shape
     }
     if (item.labels[k]) out.push({ kind: "label", at: o, text: item.labels[k], role: "name" });
   });
+  for (const e of ellipsoidsAt(item, f)) {
+    for (const ring of ellipsoidRings(e)) ring.forEach((p, s) => out.push({ kind: "segment", a: p, b: ring[(s + 1) % ring.length], role: "ellipsoid" }));
+    e.axes.forEach((a, k) => {
+      const d = scale3(a, e.radii[k]);
+      out.push({ kind: "segment", a: sub(e.center, d), b: add(e.center, d), role: "ellipsoid-axis" });
+    });
+    const top = e.axes.length === 3 ? ellipsoidPoint(e, [0, 0, 1]) : ellipsoidPoint(e, [0, 1]);
+    if (e.label) out.push({ kind: "label", at: top, text: e.label, role: "ellipsoid" });
+  }
+  for (const a of arrowsAt(item, f)) {
+    const tip = add(a.start, a.vec);
+    out.push({ kind: "arrow", a: a.start, b: tip, role: "arrow" });
+    if (a.label) out.push({ kind: "label", at: tip, text: a.label, role: "arrow" });
+  }
   return out;
 }
 
 /** Depth of a shape for painter's sorting (bigger: further away, drawn first). */
 export function shapeDepth(shape: Shape, cam: Camera, width: number, height: number): number | null {
-  if (shape.kind === "segment") {
+  if (shape.kind === "segment" || shape.kind === "arrow") {
     const a = project(shape.a, cam, width, height);
     const b = project(shape.b, cam, width, height);
     return a && b ? (a.depth + b.depth) / 2 : null;
@@ -314,6 +328,8 @@ export function frames3dSummary(item: Frames3DItem, i: number): string {
     parts.push(`target ${fmtVec(t)}, ${norm3(sub(originOf(m), t)).toFixed(3)} away`);
     if ("pose" in item.target) parts.push(`turned ${deg(angleBetween(m, item.target.pose))} from the target's orientation`);
   }
+  for (const e of ellipsoidsAt(item, f)) parts.push(ellipsoidSummary(e));
+  for (const a of arrowsAt(item, f)) parts.push(arrowSummary(a));
   return parts.join(" · ");
 }
 
