@@ -1,6 +1,6 @@
-"""Where the UR5 loses a direction: its singularities.
+"""Where the UR5e loses a direction: its singularities.
 
-The UR5's 6 x 6 geometric Jacobian has a closed-form determinant (labs/manipulators lab 10):
+The UR5e's 6 x 6 geometric Jacobian has a closed-form determinant (labs/manipulators lab 10):
 
     det J = a2 a3 sin(q3) sin(q5) (a2 cos q2 + a3 cos(q2 + q3) + d5 sin(q2 + q3 + q4))
 
@@ -11,12 +11,12 @@ Three factors, three kinds of singularity:
 """
 import math
 
-from kin.ur5 import UR5_DH
+from kin.ur5e import UR5E_DH
 
-A2, A3, D5 = UR5_DH[1][0], UR5_DH[2][0], UR5_DH[4][2]
+A2, A3, D5 = UR5E_DH[1][0], UR5E_DH[2][0], UR5E_DH[4][2]
 
 
-def ur5_det(q):
+def ur5e_det(q):
     """The closed-form determinant above."""
     _, q2, q3, q4, q5, _ = q
     return A2 * A3 * math.sin(q3) * math.sin(q5) * (A2 * math.cos(q2) + A3 * math.cos(q2 + q3) + D5 * math.sin(q2 + q3 + q4))

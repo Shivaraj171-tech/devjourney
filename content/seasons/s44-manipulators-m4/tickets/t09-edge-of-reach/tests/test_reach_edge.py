@@ -2,12 +2,12 @@ import math
 
 from lab import viz
 
-from ik.pose_newton import ur5_pose
+from ik.pose_newton import ur5e_pose
 from ik.reach_edge import MAX_STEP, clamp_step, reach
-from kin.ur5 import ur5_frames
+from kin.ur5e import ur5e_frames
 from rigid.transform import translation_of
 from vel.ellipsoid import velocity_ellipsoid
-from vel.ur5j import ur5_jacobian
+from vel.ur5ej import ur5e_jacobian
 
 Q_NOW = [0.2, -1.2, 0.9, -1.3, 0.9, 0.1]
 LABELS = ["base", "frame 1", "frame 2", "3", "4", "5", "flange"]
@@ -16,8 +16,8 @@ LABELS = ["base", "frame 1", "frame 2", "3", "4", "5", "flange"]
 def box_414():
     """Box #414, from the incident log: at the far edge of the tote, 1 cm beyond the stretched arm."""
     q_edge = [0.5, -0.7, 0.0, -0.9, 1.2, 0.4]
-    T = ur5_pose(q_edge)
-    F = ur5_frames(q_edge)
+    T = ur5e_pose(q_edge)
+    F = ur5e_frames(q_edge)
     shoulder, wrist = translation_of(F[1]), translation_of(F[3])
     d = [w - s for w, s in zip(wrist, shoulder)]
     n = math.sqrt(sum(x * x for x in d))
@@ -27,7 +27,7 @@ def box_414():
 
 
 BOX_414 = box_414()
-BOX_413 = ur5_pose([0.5, -0.7, 0.06, -0.9, 1.2, 0.4])  # the previous box: reachable, elbow almost straight
+BOX_413 = ur5e_pose([0.5, -0.7, 0.06, -0.9, 1.2, 0.4])  # the previous box: reachable, elbow almost straight
 _runs = {}
 
 
@@ -42,8 +42,8 @@ def test_draw_reaching_for_box_414():
     q, errors, path = run("414", BOX_414)
     frames, ellipsoids = [], []
     for qk in path:
-        F = ur5_frames(qk)
-        radii, axes = velocity_ellipsoid(ur5_jacobian(qk)[:3])
+        F = ur5e_frames(qk)
+        radii, axes = velocity_ellipsoid(ur5e_jacobian(qk)[:3])
         frames.append(F[1:])
         ellipsoids.append([{"center": translation_of(F[-1]), "axes": axes, "radii": [0.25 * r for r in radii], "label": "velocity"}])
     viz.arm3d(frames, local=False, axes=True, ellipsoids=ellipsoids, name="edge", target=BOX_414, scale=0.07, labels=LABELS,
@@ -70,7 +70,7 @@ def test_no_wild_swings_for_box_414():
     q, errors, path = run("414", BOX_414)
     worst = max(max(abs(a - b) for a, b in zip(p1, p2)) for p1, p2 in zip(path, path[1:]))
     assert worst <= MAX_STEP + 1e-9, (
-        f"one iteration moved a joint by {worst:.2f} rad (limit {MAX_STEP} rad): the log's 'joint 3 +24.05 rad in ONE step'. "
+        f"one iteration moved a joint by {worst:.2f} rad (limit {MAX_STEP} rad): the log's 'joint 3 -9.10 rad in ONE step'. "
         "Damp the step, then clamp it")
     assert all(abs(x) < 2 * math.pi for x in q), f"the joints must stay within one turn, ended at {[round(x, 2) for x in q]}"
 
@@ -79,5 +79,5 @@ def test_box_414_settles_as_close_as_it_can():
     q, errors, _ = run("414", BOX_414)
     tail = [e[1] for e in errors[-15:]]
     assert max(tail) - min(tail) < 1e-3, f"the error must settle, not oscillate: last values {', '.join(f'{x:.3f}' for x in tail)}"
-    miss = math.dist(translation_of(ur5_pose(q)), translation_of(BOX_414))
+    miss = math.dist(translation_of(ur5e_pose(q)), translation_of(BOX_414))
     assert miss < 0.015, f"the box is 1 cm out of reach: the flange should end within 1.5 cm of it, it is {miss * 100:.1f} cm away"

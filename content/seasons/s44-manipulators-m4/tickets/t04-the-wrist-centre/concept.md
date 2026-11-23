@@ -22,7 +22,7 @@ R_3_6 = R_0_3ᵀ R
 
 For this wrist R_3_6 has the structure of ZYZ Euler angles, so q4, q5, q6 come out by atan2 (q5 ≥ 0 here; -q5 with q4 + π and q6 + π is the other wrist solution).
 
-Step 4: the count. Two shoulder choices × two elbows from step 2, × two wrists from step 3: up to 8 solutions for one pose, like the UR5. (The UR5's wrist is NOT spherical: its axes are offset by d4, d5, d6. Its closed form exists but is messier; ticket 6 solves it numerically instead.)
+Step 4: the count. Two shoulder choices × two elbows from step 2, × two wrists from step 3: up to 8 solutions for one pose, like the UR5e. (The UR5e's wrist is NOT spherical: its axes are offset by d4, d5, d6. Its closed form exists but is messier; ticket 6 solves it numerically instead.)
 
 **Worked example**
 

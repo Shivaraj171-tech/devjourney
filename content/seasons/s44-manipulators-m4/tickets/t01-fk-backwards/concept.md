@@ -18,7 +18,7 @@ The gripper lives in a ring (in 3D, with a turning base, a thick spherical shell
 
 Step 3: counting. Strictly inside the ring, the triangle can be folded two ways: the elbow on one side of the shoulder-gripper line or the other (elbow up, elbow down). On the outer edge the triangle is flat (stretched out): one solution. On the inner edge it's flat the other way (folded back): one solution. Outside: none. And if l1 = l2, the target r = 0 (the shoulder itself) is reached by folding back at ANY q1: infinitely many.
 
-Step 4: why it matters for 6 joints. A 6-DOF arm like the UR5 has up to 8 solutions for a full pose (2 shoulders × 2 elbows × 2 wrists), and a 7-joint arm has infinitely many. Counting first tells you what the solver should return.
+Step 4: why it matters for 6 joints. A 6-DOF arm like the UR5e has up to 8 solutions for a full pose (2 shoulders × 2 elbows × 2 wrists), and a 7-joint arm has infinitely many. Counting first tells you what the solver should return.
 
 **Worked example**
 

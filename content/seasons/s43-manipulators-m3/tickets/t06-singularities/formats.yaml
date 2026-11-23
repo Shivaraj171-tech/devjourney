@@ -1,7 +1,7 @@
 predict:
   - code: |
       import math
-      a2, a3, d5 = -0.425, -0.39225, 0.09465
+      a2, a3, d5 = -0.425, -0.3922, 0.0997
       def kinds(q2, q3, q4, q5):
           out = []
           if abs(math.sin(q3)) < 1e-3: out.append("elbow")
@@ -9,7 +9,7 @@ predict:
           if abs(a2 * math.cos(q2) + a3 * math.cos(q2 + q3) + d5 * math.sin(q2 + q3 + q4)) < 1e-3: out.append("shoulder")
           return out
       print(kinds(0, 0, 0, 0), kinds(-1.2, 1.6, 0, 0.6), kinds(-1.2, 1.6, -1.9, math.pi))
-    question: "Three UR5 poses (q2, q3, q4, q5 in radians). Which singularities does each hit?"
+    question: "Three UR5e poses (q2, q3, q4, q5 in radians). Which singularities does each hit?"
     answer: "['elbow', 'wrist'] [] ['wrist']"
     choices:
       - "['elbow', 'wrist'] [] ['wrist']"

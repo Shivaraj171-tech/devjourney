@@ -53,7 +53,7 @@ No accounts, no setup: Python runs in your browser (Pyodide), and progress is sa
   | Module | Topic | Status |
   |---|---|---|
   | 1 | Rigid-body motion: rotations, composition order, Euler angles and gimbal lock, axis-angle (Rodrigues), quaternions and slerp, homogeneous transforms, frame chains | ✅ `s41-manipulators-m1` |
-  | 2 | Forward kinematics: joints and DOF, composing link transforms, Denavit-Hartenberg tables, the 6-DOF UR5, the spherical wrist, the product of exponentials, DH = PoE | ✅ `s42-manipulators-m2` |
+  | 2 | Forward kinematics: joints and DOF, composing link transforms, Denavit-Hartenberg tables, the 6-DOF UR5e, the spherical wrist, the product of exponentials, DH = PoE | ✅ `s42-manipulators-m2` |
   | 3 | Velocity kinematics: the Jacobian (numeric, analytic, geometric, space and body), singularities, manipulability ellipsoids, statics | ✅ `s43-manipulators-m3` |
   | 4 | Inverse kinematics: counting solutions, analytic (law of cosines, wrist centre), Newton-Raphson on position and full pose, damped least squares, choosing a solution | ✅ `s44-manipulators-m4` |
   | 5 | Trajectories: cubic and quintic polynomials, trapezoidal profiles, joint vs task space | planned |
@@ -77,7 +77,7 @@ No accounts, no setup: Python runs in your browser (Pyodide), and progress is sa
   | 10 | The wrong tray (incident, logs) | debugging a pose chain | chain multiplied gripper-first; arm walks before it tilts |
   | 11 | Module 1 concept check (read) | the module on one page | 9 mixed conceptual and numeric questions, predict and Parsons |
 
-  **Module 2: Forward kinematics** (`content/seasons/s42-manipulators-m2`, "🦾 Manipulators · M2" on the HQ): Orbit Orders buys a real six-joint arm, Grabby-6, and the team builds its forward kinematics from a single joint up to the full 6-DOF UR5 in 3D. A **sequential side floor**: `requires: s41-t11`, so the HQ shows "🔒 opens after Manipulators · M1" until Module 1 is done. Its codebase starts from Module 1's final `rigid/` and adds `kin/`; every code ticket draws the arm with `viz.arm3d(..., axes=True)`, a triad on every joint frame. The UR5 uses Universal Robots' nominal, uncalibrated DH parameters (the same values and sources as `labs/manipulators/toolbox/robots.py`), checked against the documented home pose and against the numpy laptop lab at random poses. Byte is right on 5 of 8 suggestions (2 partial), 4 with a "why" decision; 10 of 11 tickets have practice formats.
+  **Module 2: Forward kinematics** (`content/seasons/s42-manipulators-m2`, "🦾 Manipulators · M2" on the HQ): Orbit Orders buys a real six-joint arm, Grabby-6, and the team builds its forward kinematics from a single joint up to the full 6-DOF UR5e in 3D. A **sequential side floor**: `requires: s41-t11`, so the HQ shows "🔒 opens after Manipulators · M1" until Module 1 is done. Its codebase starts from Module 1's final `rigid/` and adds `kin/`; every code ticket draws the arm with `viz.arm3d(..., axes=True)`, a triad on every joint frame. The UR5e uses Universal Robots' nominal, uncalibrated DH parameters (the same values and sources as `labs/manipulators/toolbox/robots.py`), checked against the documented home pose and against the numpy laptop lab at random poses. Byte is right on 5 of 8 suggestions (2 partial), 4 with a "why" decision; 10 of 11 tickets have practice formats.
 
   | # | Ticket | Concept | Bug |
   |---|---|---|---|
@@ -86,21 +86,21 @@ No accounts, no setup: Python runs in your browser (Pyodide), and progress is sa
   | 3 | Three joints, one order | FK of a 3-DOF RRR arm (yaw, shoulder, elbow) | Byte multiplies the chain wrist-first: right at home, wrong everywhere else |
   | 4 | Four numbers per joint | the DH convention: θ, d, a, α and reading a table | a row unpacked as (a, α, offset, d): the 0.20 m pedestal becomes a 0.20 rad turn |
   | 5 | Your own DH table | deriving a DH table from frames | Byte's table: no 90° twist at the base, the upper arm's length in the d column |
-  | 6 | Six joints: the UR5 | 6-DOF FK from a datasheet table (six frames in 3D) | a2, a3 typed positive: the home pose is mirrored |
+  | 6 | Six joints: the UR5e | 6-DOF FK from a datasheet table (six frames in 3D) | a2, a3 typed positive: the home pose is mirrored |
   | 7 | The wrist centre | spherical wrist, wrist centre, position/orientation decoupling | z6 taken from the third row instead of the third column |
   | 8 | Screws and exponentials | product of exponentials: screw axes, e^([S]θ) in pure Python | the revolute twist's translation is v θ (a slide) instead of G(θ) v |
   | 9 | Two roads, one pose | DH and PoE agree (a proof, then random poses) | joint i's screw taken from frame i instead of frame i-1 |
   | 10 | The missing ninety (incident, logs) | joint offsets and tool frames | the elbow's 90° θ offset "tidied" away; the gripper returns the flange, not the fingertips |
   | 11 | Module 2 concept check (read) | the module on one page | 9 mixed questions, predict and Parsons |
 
-  **Module 3: Velocity kinematics** (`content/seasons/s43-manipulators-m3`, "🦾 Manipulators · M3" on the HQ, `requires: s42-t11`): Grabby-6 has to match a conveyor's speed, so the team builds its Jacobian: how joint speeds become gripper speeds, where the arm loses a direction, and the forces the same matrix sends back to the motors. Its codebase starts from Module 2's final `kin/` + `rigid/` and adds `vel/` (plain Python: the learners' own Gaussian elimination for det, rank and solve, Jacobi eigenvalues for the ellipsoid). Conventions match the laptop labs 09-10: geometric Jacobian [Jv; Jw], twists (w, v), J_b = Ad(T_sb⁻¹) J_s, the UR5's nominal DH and closed-form det J. Every code ticket draws in 3D with velocity arrows or the manipulability ellipsoid. Byte is right on 5 of 8 suggestions (2 partial), 4 with a "why" decision; all 10 tickets have practice formats.
+  **Module 3: Velocity kinematics** (`content/seasons/s43-manipulators-m3`, "🦾 Manipulators · M3" on the HQ, `requires: s42-t11`): Grabby-6 has to match a conveyor's speed, so the team builds its Jacobian: how joint speeds become gripper speeds, where the arm loses a direction, and the forces the same matrix sends back to the motors. Its codebase starts from Module 2's final `kin/` + `rigid/` and adds `vel/` (plain Python: the learners' own Gaussian elimination for det, rank and solve, Jacobi eigenvalues for the ellipsoid). Conventions match the laptop labs 09-10: geometric Jacobian [Jv; Jw], twists (w, v), J_b = Ad(T_sb⁻¹) J_s, the UR5e's nominal DH and closed-form det J. Every code ticket draws in 3D with velocity arrows or the manipulability ellipsoid. Byte is right on 5 of 8 suggestions (2 partial), 4 with a "why" decision; all 10 tickets have practice formats.
 
   | # | Ticket | Concept | Bug |
   |---|---|---|---|
   | 1 | How fast is the gripper? | velocity kinematics by central differences (2-link) | `step()` nudges the caller's list in place: a forward difference over 2h, half the speed |
   | 2 | The two-link Jacobian | the analytic Jacobian, det J = l1 l2 sin q2 (velocity ellipse in 3D) | sin(q2) where the forearm's angle is q1 + q2: right only at q1 = 0 |
   | 3 | One column per joint | geometric Jacobian z(i-1) × (p_e - p(i-1)), z(i-1) | joint i's axis taken from frame i: only the base column is wrong |
-  | 4 | Who checks the checker? | the UR5's 6x6 Jacobian vs finite differences (flange v and w arrows) | the checker's w = vee(Rᵀ Ṙ) is the flange-frame spin, not the base frame's |
+  | 4 | Who checks the checker? | the UR5e's 6x6 Jacobian vs finite differences (flange v and w arrows) | the checker's w = vee(Rᵀ Ṙ) is the flange-frame spin, not the base frame's |
   | 5 | Two frames, one motion | space and body Jacobians, the adjoint | a (v, w) adjoint ([p]R top-right) in a (w, v) codebase |
   | 6 | Where the arm gets stuck | singularities: rank, det, the stretched elbow and the wrist flip in 3D | no sign flip on a row swap; the wrist test reads q4 instead of q5 |
   | 7 | The ellipsoid goes flat | manipulability (Yoshikawa) and the velocity ellipsoid, flattening in 3D | eigenvalues used as radii; w = det(J Jᵀ) without the root |
@@ -117,10 +117,10 @@ No accounts, no setup: Python runs in your browser (Pyodide), and progress is sa
   | 3 | Three joints, backwards | base angle + planar arm, four solutions | the in-plane height measured from the floor, not the shoulder |
   | 4 | Find the wrist first | wrist-centre decoupling for a spherical wrist | the wrist assumed D6 above the flange: right only for picks from above |
   | 5 | Newton, step by step | Newton-Raphson on position, quadratic convergence (frame by frame in 3D) | e = p(q) - target: every step walks away |
-  | 6 | Position and orientation | full-pose Newton on the UR5 with the body twist error | log_SE3 returns p instead of G⁻¹(θ) p θ (and Newton still converges) |
+  | 6 | Position and orientation | full-pose Newton on the UR5e with the body twist error | log_SE3 returns p instead of G⁻¹(θ) p θ (and Newton still converges) |
   | 7 | Damping the explosion | damped least squares | plain Newton (`solve(J, e)`): 170 rad steps 5 cm out of reach |
   | 8 | Which of the four? | joint limits, the closest solution | a signed sum as the distance; limits checked at one end only |
-  | 9 | The box at the edge of reach (boss incident, logs) | robust IK: damped and clamped steps | damping and the step clamp "simplified" away: the elbow thrashes, joint 3 jumps 24 rad |
+  | 9 | The box at the edge of reach (boss incident, logs) | robust IK: damped and clamped steps | damping and the step clamp "simplified" away: the elbow thrashes, joint 3 jumps 9 rad in one step |
   | 10 | Module 4 concept check (read) | the module on one page | 9 mixed questions, predict and Parsons |
 
   **Authoring the next modules**: copy the Module 1 floor's shape: a new `content/seasons/s45-manipulators-m5/season.yaml` with `chain: false`, `requires: s44-t10` (the previous module's last ticket: a side floor's `requires` may name another side floor's ticket; the validator checks it exists, isn't the floor's own and that the floors' requires never loop, and the HQ says "🔒 opens after Manipulators · M4"), `lesson: long`, `icon: "🦾"` and a `short_title`; it appears on the HQ and opens with no code change. Start its codebase from the previous module's final package (copy its last ticket's starter into the new t01 starter; the evolving-codebase check then runs inside the floor). One concept per ticket; each concept.md has the five sections and a worked example whose `# Output:` the validator runs; tests use tolerances and helpful messages; draw with `viz.arm3d` (link-to-link transforms per pose, which is exactly forward kinematics) or `viz.frames3d`, and `viz.chart` for joint trajectories, torques and errors. Add the concept slugs to `lib/content/concepts.ts`, a spec like `e2e/manipulators-m1.spec.ts`, and a row to the table above.

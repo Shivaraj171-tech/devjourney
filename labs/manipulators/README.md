@@ -217,8 +217,8 @@ python -m pytest labs/manipulators/tools/tests                   # skipped if no
 
 What we checked (MuJoCo 4.0.1): it loads headless with the same zero pose, joint directions
 and base frame as our `UR5E_DH`, and its flange stays within 1.5 mm of our DH FK (Menagerie
-rounds UR's offsets, e.g. 0.163 m for d₁ = 0.1625). Its masses are the older UR5-era values,
-not Universal Robots' UR5e ones, so it's a model to look at and replay joint plans on; the
+rounds UR's offsets, e.g. 0.163 m for d₁ = 0.1625). Its masses come from the older URDF it was converted from
+(close to the CB-series UR5's), not Universal Robots' UR5e ones, so it's a model to look at and replay joint plans on; the
 labs' dynamics use `toolbox/robots.py`. Replaying the capstone plan into Menagerie's own
 position servos (no gravity compensation) lags up to 0.19 rad mid-move and ends 0.007 rad
 low: compare that with lab 28's computed torque.

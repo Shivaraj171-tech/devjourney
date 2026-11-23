@@ -7,7 +7,7 @@ questions:
       - "J has a zero column: one of the joints has stopped moving the gripper at all"
     answer: 0
     explain: "Singular means the columns are dependent. That needs no limit, no zero column: two columns can simply become parallel."
-  - prompt: "The UR5's home pose (all joints at 0) is..."
+  - prompt: "The UR5e's home pose (all joints at 0) is..."
     choices:
       - "singular twice over: stretched elbow (q3 = 0) and wrist flip (q5 = 0)"
       - "regular: home poses are chosen to be far from singularities"
@@ -21,7 +21,7 @@ questions:
       - "0.75"
     answer: 0
     explain: "Each swap flips the sign: (-1)³ × 0.25 = -0.25."
-  - prompt: "Why are joints 4 and 6 the culprits of the UR5's wrist singularity?"
+  - prompt: "Why are joints 4 and 6 the culprits of the UR5e's wrist singularity?"
     choices:
       - "At q5 = 0 their axes are parallel, so they turn the flange about the same line"
       - "They are the two fastest motors on the arm, so they always reach their speed limits first"

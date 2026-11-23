@@ -13,7 +13,7 @@ questions:
       - "It depends on the joint angles; it can be up to 0.84 m"
     answer: 0
     explain: "T_0_tool = T_0_6 Tz(0.12): the fingertips are always 0.12 m along z6, and z6 turns with the wrist. The 0.84 m in the logs came from the missing elbow offset."
-  - prompt: "Byte zeroed the offset because 'the UR5's offsets are all zero'. Why is that not a reason?"
+  - prompt: "Byte zeroed the offset because 'the UR5e's offsets are all zero'. Why is that not a reason?"
     choices:
       - "Offsets depend on each arm's frames and its makers' choice of zero"
       - "It is a reason: offsets are a convention that every robot vendor has to follow"

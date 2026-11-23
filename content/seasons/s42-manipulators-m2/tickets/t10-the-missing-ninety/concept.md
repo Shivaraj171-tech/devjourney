@@ -48,7 +48,7 @@ With the DH twists of Grabby-6 the frame that holds the forearm points along x2 
 
 **Watch out**
 
-Offsets are the most "tidied" numbers in a DH table: they look like noise next to the geometry, they differ between robots of the same family (the UR5's are all zero), and some drivers apply them in software instead of the table. Never delete one without the vendor's home pose to check against. And a missing tool offset can't be seen in a frames-only view: draw the fingertips too.
+Offsets are the most "tidied" numbers in a DH table: they look like noise next to the geometry, they differ between robots of the same family (the UR5e's are all zero), and some drivers apply them in software instead of the table. Never delete one without the vendor's home pose to check against. And a missing tool offset can't be seen in a frames-only view: draw the fingertips too.
 
 **AI check**
 

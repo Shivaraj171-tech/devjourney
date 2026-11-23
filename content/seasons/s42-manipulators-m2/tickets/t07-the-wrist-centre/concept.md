@@ -6,7 +6,7 @@ Hold your forearm still and move only your wrist: your hand turns, but one point
 
 That gives the robot a clean division of labour. The first three joints (base, shoulder, elbow) decide **where the wrist centre is**: position. The last three decide **which way the gripper faces** about it: orientation. Six DOF, split three plus three. Forward kinematics doesn't need this, but it is why inverse kinematics of such arms has a closed form (Module 4): find the wrist centre from the target, solve the arm for it, then solve the wrist for the orientation.
 
-The UR5 is a counter-example: its wrist axes are offset by d5 (and d4, d6) and never meet. Its IK still has a closed form, but a messier one.
+The UR5e is a counter-example: its wrist axes are offset by d5 (and d4, d6) and never meet. Its IK still has a closed form, but a messier one.
 
 **The maths**
 

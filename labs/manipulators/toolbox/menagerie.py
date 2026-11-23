@@ -8,8 +8,10 @@ pose, joint directions and base frame as our UR5E_DH ("attachment_site" = DH fra
 UR base frame), with the flange within 1.5 mm of our DH FK over 200 random poses: Menagerie
 rounds the offsets (shoulder 0.163, wrist 0.127/0.1/0.1 m) where Universal Robots' table says
 0.1625, 0.1333, 0.0997, 0.0996. Its link masses (3.7, 8.393, 2.275, 1.219, 1.219, 0.1889 kg)
-are the older ur_e_description (CB-series UR5) values, NOT Universal Robots' UR5e masses in
-toolbox/robots.py (3.761, 8.058, 2.846, 1.37, 1.3, 0.365 kg). So we use it for looks and for a
+come with the older ur_e_description URDF it was converted from (its README). They are close to
+the CB-series UR5's (ur_description config/ur5: 3.7, 8.393, 2.33, 1.219, 1.219, 0.1879 kg) and
+are NOT Universal Robots' UR5e masses in toolbox/robots.py (3.761, 8.058, 2.846, 1.37, 1.3,
+0.365 kg). So we use it for looks and for a
 kinematic/servo replay, never as the dynamics referee.
 
     menagerie_root()        cache folder ($DEVJOURNEY_MENAGERIE_DIR or ~/.cache/devjourney/...)

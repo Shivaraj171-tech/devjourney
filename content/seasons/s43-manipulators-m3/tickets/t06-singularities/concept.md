@@ -2,7 +2,7 @@
 
 **Intuition**
 
-At most poses the UR5 can nudge its flange in any of the six directions (three moves, three turns). At a singularity it loses one: some direction needs infinite joint speed, or, put the other way, two joints end up doing the same job. Stretch your own arm straight out: you can't push your hand any further out, whatever your shoulder and elbow do. That's the elbow singularity. The wrist flip is subtler: when joint 5 is at 0, the axes of joints 4 and 6 become parallel, two motors spin the flange about the same line, and one turning direction is gone.
+At most poses the UR5e can nudge its flange in any of the six directions (three moves, three turns). At a singularity it loses one: some direction needs infinite joint speed, or, put the other way, two joints end up doing the same job. Stretch your own arm straight out: you can't push your hand any further out, whatever your shoulder and elbow do. That's the elbow singularity. The wrist flip is subtler: when joint 5 is at 0, the axes of joints 4 and 6 become parallel, two motors spin the flange about the same line, and one turning direction is gone.
 
 **The maths**
 
@@ -15,7 +15,7 @@ det J = (-1)^(number of swaps) × U[0][0] × U[1][1] × ... × U[5][5]
 rank J = number of pivots that aren't (nearly) zero
 ```
 
-Step 3: the UR5's determinant factors (the laptop lab derives it symbolically):
+Step 3: the UR5e's determinant factors (the laptop lab derives it symbolically):
 
 ```text
 det J = a2 a3 sin(q3) sin(q5) (a2 cos q2 + a3 cos(q2 + q3) + d5 sin(q2 + q3 + q4))
@@ -62,4 +62,4 @@ A determinant with the wrong sign still looks plausible, and it is zero in exact
 
 **AI check**
 
-An AI asked for "the UR5's singularities" will usually list the three families correctly, then attach them to the wrong joints or forget that the home pose is singular (q3 = q5 = 0). Check its claims against det J computed numerically at a pose from each family.
+An AI asked for "the UR5e's singularities" will usually list the three families correctly, then attach them to the wrong joints or forget that the home pose is singular (q3 = q5 = 0). Check its claims against det J computed numerically at a pose from each family.

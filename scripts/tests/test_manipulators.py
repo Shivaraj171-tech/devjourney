@@ -399,15 +399,15 @@ class RealManipulatorsM2Tests(unittest.TestCase):
                     self.assertTrue(all(arm["axes"][:len(arm["frames"][0])]), f"{t.name}: every joint frame gets a triad")
                 self.assertLess(len(json.dumps(result["viz"])), lab.MAX_JSON)
 
-    def test_the_ur5_ticket_draws_six_joint_frames(self):
-        t = self.SEASON / "tickets" / "t06-the-ur5"
+    def test_the_ur5e_ticket_draws_six_joint_frames(self):
+        t = self.SEASON / "tickets" / "t06-the-ur5e"
         result = vc.run_ticket_tests(t / "solution", t / "tests")
         arm = next(item for item in result["viz"] if item["kind"] == "frames3d")
         self.assertEqual(len(arm["frames"][0]), 7)  # the base + six DH frames
         self.assertEqual(arm["labels"][-1], "flange (frame 6)")
         home = arm["frames"][0][-1]  # the animation starts at home: the flange's position
-        self.assertAlmostEqual(home[3], -0.81725, places=4)
-        self.assertAlmostEqual(home[7], -0.19145, places=4)
+        self.assertAlmostEqual(home[3], -0.8172, places=4)
+        self.assertAlmostEqual(home[7], -0.2329, places=4)
 
 
 class _RealModuleChecks:
@@ -490,7 +490,7 @@ class RealManipulatorsM3Tests(_RealModuleChecks, unittest.TestCase):
     PACKAGES = ("rigid", "kin")
 
     def test_velocities_and_ellipsoids_are_drawn(self):
-        for ticket in ("t01-how-fast-is-the-gripper", "t02-the-two-link-jacobian", "t04-the-ur5-jacobian", "t08-forces-through-the-jacobian"):
+        for ticket in ("t01-how-fast-is-the-gripper", "t02-the-two-link-jacobian", "t04-the-ur5e-jacobian", "t08-forces-through-the-jacobian"):
             arm = next(i for i in self.viz_of(ticket) if i["kind"] == "frames3d")
             self.assertTrue(all(arm["arrows"]), f"{ticket}: an arrow in every frame")
         arm = next(i for i in self.viz_of("t07-manipulability") if i["kind"] == "frames3d")

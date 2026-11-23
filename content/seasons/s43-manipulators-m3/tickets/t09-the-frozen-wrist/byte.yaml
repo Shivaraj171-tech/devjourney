@@ -12,6 +12,6 @@ suggestion:
     answer: 0
   says: "Rosa's hand calculation squared is my κ. My optimisation changed the units. Putting the root back."
   explain: >-
-    Right, and diagnosed from the evidence: 14.2² ≈ 201. With the root, κ at q5 = 28° is 14 (go), the arm slows
+    Right, and diagnosed from the evidence: 14.3² ≈ 204. With the root, κ at q5 = 28° is 14 (go), the arm slows
     near 7° and stops near 2°. "More cautious is safer" is wrong too: a monitor that freezes for nothing gets
     switched off by ops, and then it protects nothing.

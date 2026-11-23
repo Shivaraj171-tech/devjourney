@@ -1,6 +1,6 @@
 # Right: Byte takes joint i's axis from frame i-1 (frames 0..5), the DH rule.
 suggestion:
-  file: kin/ur5_poe.py
+  file: kin/ur5e_poe.py
   find: "    for T in frames[1:]:  # Byte: joint i turns about the z axis of frame i"
   replace: "    for T in frames[:-1]:  # joint i turns about z of frame i-1: frames 0 .. n-1"
   correct: true

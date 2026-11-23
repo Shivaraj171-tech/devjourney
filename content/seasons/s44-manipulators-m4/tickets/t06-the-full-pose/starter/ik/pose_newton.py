@@ -1,4 +1,4 @@
-"""Full-pose Newton-Raphson for the UR5, on the BODY TWIST error.
+"""Full-pose Newton-Raphson for the UR5e, on the BODY TWIST error.
 
 The error between where the flange is (T_sb) and where it should be (T_sd) is a pose,
 not a vector. Turn it into one: the body twist that would carry the flange onto the
@@ -19,15 +19,15 @@ from rigid.axis_angle import skew, to_axis_angle
 from rigid.mat import matmul
 from rigid.transform import T_inv, T_mul, rotation_of, translation_of
 from kin.poe import fk_poe
-from kin.ur5 import UR5_DH
-from kin.ur5_poe import screws_from_dh
+from kin.ur5e import UR5E_DH
+from kin.ur5e_poe import screws_from_dh
 from vel.linalg import solve
 from vel.screw_jac import body_jacobian
 
-M, SCREWS = screws_from_dh(UR5_DH)
+M, SCREWS = screws_from_dh(UR5E_DH)
 
 
-def ur5_pose(q):
+def ur5e_pose(q):
     return fk_poe(M, SCREWS, q)
 
 
@@ -59,7 +59,7 @@ def newton_pose(T_sd, q0, iters=12, tol=1e-9):
     q = list(q0)
     errors, path = [], []
     for _ in range(iters + 1):
-        V = body_twist_error(ur5_pose(q), T_sd)
+        V = body_twist_error(ur5e_pose(q), T_sd)
         errors.append(error_norms(V))
         path.append(list(q))
         if max(errors[-1]) < tol:

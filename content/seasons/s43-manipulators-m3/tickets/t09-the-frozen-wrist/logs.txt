@@ -1,13 +1,13 @@
 2026-11-23 13:40:02 INFO  deploy   motion: monitor.py "singular values without the sqrt: same ordering, faster" (author: Byte)
 2026-11-23 14:12:07 INFO  planner  tote 7: turn box #388 about the vertical, 0.2 rad/s, while tilting the wrist (q5 40.0 -> 1.0 deg)
 2026-11-23 14:12:07 INFO  motion   resolved-rate start  q = (22.9, -68.8, 91.7, -108.9, 40.0, 17.2) deg
-2026-11-23 14:12:08 DEBUG monitor  q5 = 40.0 deg  kappa = 117.4  joint speeds |q4| = 0.28 |q6| = 0.31 rad/s
-2026-11-23 14:12:08 WARN  monitor  kappa 117.4 > 50 (KAPPA_SLOW): scaling speed to 40%
-2026-11-23 14:12:09 DEBUG monitor  q5 = 35.0 deg  kappa = 141.2  joint speeds |q4| = 0.34 |q6| = 0.35 rad/s
-2026-11-23 14:12:10 DEBUG monitor  q5 = 30.0 deg  kappa = 179.3  joint speeds |q4| = 0.41 |q6| = 0.40 rad/s
-2026-11-23 14:12:11 DEBUG monitor  q5 = 28.0 deg  kappa = 200.9  joint speeds |q4| = 0.45 |q6| = 0.43 rad/s
-2026-11-23 14:12:11 ERROR monitor  kappa 200.9 > 200 (KAPPA_STOP): near singularity, motion FROZEN
+2026-11-23 14:12:08 DEBUG monitor  q5 = 40.0 deg  kappa = 120.5  joint speeds |q4| = 0.28 |q6| = 0.31 rad/s
+2026-11-23 14:12:08 WARN  monitor  kappa 120.5 > 50 (KAPPA_SLOW): scaling speed to 40%
+2026-11-23 14:12:09 DEBUG monitor  q5 = 35.0 deg  kappa = 144.3  joint speeds |q4| = 0.34 |q6| = 0.35 rad/s
+2026-11-23 14:12:10 DEBUG monitor  q5 = 30.0 deg  kappa = 182.6  joint speeds |q4| = 0.42 |q6| = 0.40 rad/s
+2026-11-23 14:12:11 DEBUG monitor  q5 = 28.0 deg  kappa = 204.4  joint speeds |q4| = 0.45 |q6| = 0.43 rad/s
+2026-11-23 14:12:11 ERROR monitor  kappa 204.4 > 200 (KAPPA_STOP): near singularity, motion FROZEN
 2026-11-23 14:12:11 ERROR motion   Grabby-6 holding position, box #388 half turned
 2026-11-23 14:14:30 WARN  ops      third freeze today, all with the wrist well away from the flip (q5 > 25 deg)
-2026-11-23 14:15:02 INFO  rosa     by hand at q5 = 28 deg: sigma_max = 2.06, sigma_min = 0.145. Ratio 14.2?!
+2026-11-23 14:15:02 INFO  rosa     by hand at q5 = 28 deg: sigma_max = 2.06, sigma_min = 0.144. Ratio 14.3?!
 2026-11-23 14:15:40 WARN  alerts   Grabby-6 paused by ops, paging on-call developer

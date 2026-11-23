@@ -38,8 +38,9 @@ def test_menagerie_kinematics_match_the_official_dh_table():
 
 
 def test_menagerie_masses_are_not_the_official_ur5e_ones():
-    # Documented in toolbox/menagerie.py: Menagerie keeps the older UR5-era inertials, so it is a
-    # visual/kinematic model only; the dynamics labs use Universal Robots' UR5e values.
+    # Documented in toolbox/menagerie.py: Menagerie keeps the older URDF's inertials (close to
+    # the CB-series UR5's), so it is a visual/kinematic model only; the dynamics labs use
+    # Universal Robots' UR5e values.
     model, _ = LOADED
     np.testing.assert_allclose(model.body_mass[2:8], [3.7, 8.393, 2.275, 1.219, 1.219, 0.1889])
 

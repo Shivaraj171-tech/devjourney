@@ -1,6 +1,6 @@
 """Choosing among IK solutions: joint limits, then the one closest to where the arm is.
 
-An arm usually has several solutions (ticket 3: four for the 3-DOF arm; a UR5 has up to
+An arm usually has several solutions (ticket 3: four for the 3-DOF arm; a UR5e has up to
 eight). The controller must pick ONE:
   1. drop the ones outside the joint limits (low <= q_i <= high for EVERY joint);
   2. of the rest, take the one the arm reaches with the least joint motion: the smallest
