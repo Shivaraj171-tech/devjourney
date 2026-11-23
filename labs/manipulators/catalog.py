@@ -49,10 +49,15 @@ LABS = [
         needs_mujoco=True),
     Lab("lab20", "lab20_forward_dynamics", 6, "Forward dynamics: your own simulator", 250,
         needs_mujoco=True),
+    Lab("lab21", "lab21_pd_control", 7, "Independent joint PD: steps, gains, droop", 150,
+        needs_mujoco=True),
+    Lab("lab22", "lab22_gravity_comp", 7, "PD + gravity compensation, Lyapunov", 180,
+        needs_mujoco=True),
 ]
 
 MODULE_NAMES = {1: "Rigid-body motion", 2: "Forward kinematics", 3: "Velocity kinematics",
-                4: "Inverse kinematics", 5: "Trajectories", 6: "Dynamics"}
+                4: "Inverse kinematics", 5: "Trajectories", 6: "Dynamics", 7: "Control",
+                8: "Grasping"}
 
 HINT_COSTS = [5, 10, 20]   # XP per hint stage
 REVEAL_AFTER_FAILS = 3     # failed checks needed before --reveal works

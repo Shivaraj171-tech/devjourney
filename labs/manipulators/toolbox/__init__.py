@@ -72,6 +72,12 @@ def __getattr__(name):
         "rnea_model": "lab19_newton_euler", "ad_twist": "lab19_newton_euler",
         "forward_dynamics": "lab20_forward_dynamics", "rk4_step": "lab20_forward_dynamics",
         "semi_implicit_euler_step": "lab20_forward_dynamics", "simulate": "lab20_forward_dynamics",
+        # Module 7: control
+        "pd_torque": "lab21_pd_control", "pd_gains": "lab21_pd_control",
+        "step_metrics": "lab21_pd_control", "gravity_droop": "lab21_pd_control",
+        "run_mujoco_control": "lab21_pd_control",
+        "pd_gravity": "lab22_gravity_comp", "pd_gravity_desired": "lab22_gravity_comp",
+        "make_gravity_fn": "lab22_gravity_comp", "lyapunov": "lab22_gravity_comp",
     }
     if name in lazy:
         import importlib
