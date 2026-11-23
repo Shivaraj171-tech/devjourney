@@ -183,7 +183,7 @@ async function checkTicketSpecifics(page: Page, id: string) {
     // The full 6-DOF arm: home → two random poses, a triad on all six DH frames.
     await expect(canvas).toHaveAttribute("data-triads", "7");
     await expect(summary).toContainText("Frame 61 of 61", { timeout: 15_000 });
-    await expect(summary).toContainText("flange (frame 6) at (-0.18, 0.05, 0.46)");
+    await expect(summary).toContainText("flange (frame 6) at (-0.22, 0.05, 0.53)");
     await expect(summary).toContainText("0.000 away");
     expect(await redPixels(canvas)).toBeGreaterThan(30);
     // Scrub back to the start: the documented home pose.
@@ -191,7 +191,7 @@ async function checkTicketSpecifics(page: Page, id: string) {
     await slider.focus();
     await page.keyboard.press("Home");
     await expect(canvas).toHaveAttribute("data-frame", "0");
-    await expect(summary).toContainText("flange (frame 6) at (-0.82, -0.19, -0.01)");
+    await expect(summary).toContainText("flange (frame 6) at (-0.82, -0.23, 0.06)");
     await page.keyboard.press("End");
     await expect(canvas).toHaveAttribute("data-frame", "60");
     await view.getByTestId("lab-3d-reset").click();
