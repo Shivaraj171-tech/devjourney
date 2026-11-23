@@ -18,7 +18,7 @@ questions:
     choices:
       - "6; the first three give frame 3: the end of the forearm"
       - "7; the first three give the flange's orientation"
-      - "6; the first three are always the identity at home"
+      - "6; the first three multiply to the identity at the home pose"
     answer: 0
     explain: "One matrix per joint: T_0_6 = A1 ... A6. Every prefix A1 ... Ak is frame k's pose in the base: that's how the 3D view draws all six frames."
   - prompt: "You need millimetre accuracy on a real UR5. Are the datasheet's DH numbers enough?"
