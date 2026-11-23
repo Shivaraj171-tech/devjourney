@@ -72,6 +72,22 @@ def _num(value):
     return round(value, DIGITS)
 
 
+def _sig(value):
+    """Like _num, but keeping DIGITS significant digits (for log-scale charts)."""
+    value = _num_raw(value)
+    if value is None or value == 0:
+        return value
+    return float(f"{value:.{DIGITS}g}")
+
+
+def _num_raw(value):
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return None
+    return value if math.isfinite(value) else None
+
+
 def _text(value, default=""):
     if value is None:
         return default
@@ -186,7 +202,10 @@ class _Viz:
         if len(xs) != len(ys):
             raise ValueError(f"viz.chart: xs and ys must be the same length ({len(xs)} vs {len(ys)})")
         thin_xs, truncated = _thin([_num(x) for x in xs], MAX_POINTS)
-        thin_ys = _thin([_num(y) for y in ys], MAX_POINTS)[0]
+        # On a log scale small values matter (an IK error of 1e-9): keep significant digits there.
+        existing = _items.get(_text(name) or "chart")
+        on_log = log or bool(existing and existing.get("kind") == "chart" and existing.get("log"))
+        thin_ys = _thin([_sig(y) if on_log else _num(y) for y in ys], MAX_POINTS)[0]
         series = {"label": _text(label, _text(name)), "xs": thin_xs, "ys": thin_ys}
         key = _text(name) or "chart"
         item = _items.get(key)

@@ -49,7 +49,7 @@ def test_draw_the_columns():
         arrows.append(frame_arrows)
     viz.arm3d(frames, local=False, axes=True, arrows=arrows, name="columns", scale=0.08,
               labels=["base", "frame 1", "frame 2", "wrist (frame 3)"], title="Each column: one joint turning alone",
-              caption="Short arrows: the joint axes z0, z1, z2. Long arrows at the wrist: YOUR columns Jv_i (x 0.5). Each must be perpendicular to its joint's axis.")
+              caption="Short arrows: the joint axes z0, z1, z2. At the wrist: YOUR columns Jv_i (x 0.5), each perpendicular to its axis.")
     assert len(frames) == 31
 
 

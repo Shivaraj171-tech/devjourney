@@ -52,7 +52,7 @@ def test_draw_damping_at_the_edge():
         ellipsoids.append([{"center": origin(F[-1]), "axes": axes, "radii": [0.3 * r for r in radii], "label": "velocity"}])
     viz.arm3d(frames, local=False, axes=True, ellipsoids=ellipsoids, name="dls", target=TOO_FAR, scale=0.08,
               labels=["base", "frame 1", "frame 2", "wrist"], title="Reaching for a box just out of reach",
-              caption="YOUR dls_step, one iterate per frame. The arm stretches as far as it can and settles; the ellipsoid goes flat along the arm.")
+              caption="YOUR dls_step, one iterate per frame: the arm stretches as far as it can and settles. The ellipsoid goes flat.")
     viz.chart("IK error at the edge", list(range(len(errors))), errors, label="damped (yours)", x_label="iteration", y_label="error (m)")
     plain = plain_newton_errors(TOO_FAR, list(Q0), 24)
     viz.chart("IK error at the edge", list(range(len(plain))), plain, label="plain Newton")

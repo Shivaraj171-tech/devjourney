@@ -34,7 +34,7 @@ def test_draw_the_flange_velocity():
         arrows.append([{"start": p, "vec": v, "label": "v"}, {"start": p, "vec": [0.2 * x for x in w], "label": "w x 0.2"}])
     viz.arm3d(frames, local=False, axes=True, arrows=arrows, name="ur5", scale=0.07, labels=LABELS,
               title="The UR5's flange velocity, from J qdot",
-              caption="v (m/s, drawn 1 s long) and the angular velocity w (x 0.2) of the flange, from YOUR Jacobian. Right: v follows the trail.")
+              caption="The flange's v (m/s, drawn 1 s long) and angular velocity w (x 0.2), from the Jacobian. v follows the trail.")
     assert len(frames) == 31
 
 

@@ -30,7 +30,7 @@ def test_draw_the_shortest_move():
              for n, q in zip(names, sols)]
     viz.arm3d([rrr_links(*q) for q in poses], axes=True, name="choose", target=BOX, points=marks,
               labels=["base", "frame 1", "elbow", "wrist"], title="Four solutions, one move",
-              caption="Dots: the elbow of each IK solution, with its joint distance from where the arm is now. YOUR pick_solution decides which one the arm goes to.")
+              caption="Dots: each IK solution's elbow and its joint distance from now. YOUR pick_solution chooses where the arm goes.")
     assert len(sols) == 4
 
 

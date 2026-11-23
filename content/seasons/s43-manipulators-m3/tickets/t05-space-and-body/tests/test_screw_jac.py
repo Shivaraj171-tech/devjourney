@@ -59,7 +59,7 @@ def test_draw_the_two_velocities():
                        {"start": p, "vec": [0.2 * x for x in Vs[:3]], "label": "w x 0.2"}])
     viz.arm3d(frames, local=False, axes=True, arrows=arrows, name="twists", scale=0.07, labels=LABELS,
               title="One motion, two velocities",
-              caption="v_s is the velocity of the point at the BASE ORIGIN, as if it were bolted to the gripper. v_s + w x p gives the flange's own velocity.")
+              caption="v_s: the velocity of the point at the BASE ORIGIN, as if bolted to the gripper. v_s + w x p: the flange's own.")
     assert len(frames) == 31
 
 

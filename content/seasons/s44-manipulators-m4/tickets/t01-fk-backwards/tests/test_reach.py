@@ -30,7 +30,7 @@ def test_draw_fk_backwards():
     viz.arm3d([upright_links(q) for q in poses], axes=True, name="backwards", target=(TARGET[0], 0.0, TARGET[1]),
               labels=["base", "upright", "elbow", "gripper"], lines=ring(L1 + L2), points=elbows[:200],
               title="Forward kinematics, backwards", trail=False,
-              caption=f"{len(found)} grid poses land within 3 cm of the box. Their elbows (dots) form TWO clusters: elbow up and elbow down. The circle: the arm's full reach.")
+              caption=f"{len(found)} grid poses land within 3 cm of the box. Their elbows (dots): TWO clusters. Circle: full reach.")
     assert found, "the brute-force search should find grid poses near the box"
 
 

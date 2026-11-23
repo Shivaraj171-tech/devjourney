@@ -30,7 +30,7 @@ def test_draw_the_moving_arm():
         arrows.append([{"start": two_link_tip(q), "vec": v, "label": "v"}])
     viz.arm3d(frames, axes=True, arrows=arrows, name="speed", labels=["shoulder", "elbow", "gripper"],
               title="Joint speeds in, gripper velocity out",
-              caption="The arrow is YOUR tip_velocity (m/s, drawn 1 s long). Right: it is tangent to the path and reaches where the gripper will be a moment later.")
+              caption="The arrow: YOUR tip_velocity (m/s, drawn 1 s long). Right: tangent to the path, pointing where the gripper goes next.")
     assert len(frames) == 21
 
 

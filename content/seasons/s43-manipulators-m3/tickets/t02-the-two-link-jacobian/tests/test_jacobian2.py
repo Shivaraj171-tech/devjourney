@@ -38,7 +38,7 @@ def test_draw_columns_and_the_velocity_ellipse():
         ellipses.append([{"center": tip, "axes": axes, "radii": [r * 0.5 for r in radii], "label": "velocity"}])
     viz.arm3d(frames, axes=True, arrows=arrows, ellipsoids=ellipses, name="columns",
               labels=["shoulder", "elbow", "gripper"], title="The Jacobian's columns, and what they can reach",
-              caption="Arrows: YOUR J's columns (joint 1 alone, joint 2 alone, x 0.5). The ellipse: every velocity |qdot| <= 1 gives. Stretch the arm and watch it go flat.")
+              caption="Arrows: YOUR J's columns (each joint alone, x 0.5). The ellipse: every velocity |qdot| <= 1 gives. It goes flat.")
     assert len(frames) == 31
 
 

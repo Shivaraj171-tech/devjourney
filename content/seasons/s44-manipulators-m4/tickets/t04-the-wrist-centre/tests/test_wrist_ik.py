@@ -32,7 +32,7 @@ def test_draw_the_decoupling():
               points=[tuple(w) + ("YOUR wrist centre",)],
               arrows=[{"start": p, "vec": [a - b for a, b in zip(w, p)], "label": "back off d6"}],
               title="Position first, then orientation",
-              caption="The arrow backs off from the target flange to YOUR wrist centre. Joints 1-3 put the wrist there; joints 4-6 then turn the flange onto the dashed target.")
+              caption="Arrow: from the target flange back to YOUR wrist centre. Joints 1-3 put the wrist there, 4-6 turn the flange.")
     assert len(frames) == 31
 
 

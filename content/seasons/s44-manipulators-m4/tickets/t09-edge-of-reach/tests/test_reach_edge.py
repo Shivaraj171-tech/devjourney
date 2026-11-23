@@ -48,7 +48,7 @@ def test_draw_reaching_for_box_414():
         ellipsoids.append([{"center": translation_of(F[-1]), "axes": axes, "radii": [0.25 * r for r in radii], "label": "velocity"}])
     viz.arm3d(frames, local=False, axes=True, ellipsoids=ellipsoids, name="edge", target=BOX_414, scale=0.07, labels=LABELS,
               title="Box #414, at the edge of reach",
-              caption="YOUR reach(), one iteration per frame: the arm stretches out towards the dashed target and settles as close as it can. The flange's velocity ellipsoid flattens as the elbow straightens.")
+              caption="YOUR reach(), one iteration per frame: the arm stretches towards the target and settles. The ellipsoid flattens.")
     viz.chart("Position error, box #414", list(range(len(errors))), [e[1] for e in errors], label="|v| (m)",
               x_label="iteration", y_label="error (m)", log=True)
     assert frames

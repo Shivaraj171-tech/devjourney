@@ -271,6 +271,15 @@ class EllipsoidArrowTests(unittest.TestCase):
             self.assertAlmostEqual(f[0][3] * n, e[0]["radii"][0], places=0)
         self.assertLessEqual(len(json.dumps(lab.collect())), lab.MAX_JSON)
 
+    def test_log_charts_keep_small_values(self):
+        lab.viz.chart("err", [0, 1, 2], [0.26, 4.2e-8, 2.2e-15], log=True)
+        lab.viz.chart("err", [0, 1, 2], [0.3, 1.23456e-9, 0.0])  # a second line on the same log chart
+        lab.viz.chart("lin", [0, 1], [0.123456, 4.2e-8])
+        items = {i["name"]: i for i in lab.collect()}
+        self.assertEqual(items["err"]["series"][0]["ys"], [0.26, 4.2e-8, 2.2e-15])
+        self.assertEqual(items["err"]["series"][1]["ys"], [0.3, 1.235e-9, 0.0])
+        self.assertEqual(items["lin"]["series"][0]["ys"], [0.1235, 0.0])  # linear charts: unchanged
+
     def test_without_them_nothing_changes(self):
         lab.viz.frames3d("e", T())
         self.assertNotIn("ellipsoids", lab.collect()[0])

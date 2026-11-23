@@ -8,7 +8,7 @@ from vel.geometric import geometric_jacobian, origin
 from vel.linalg import det
 
 POSES = [[0.4, 0.5, -0.9], [-1.1, 1.2, 0.6], [2.0, -0.3, 1.4]]
-SHOW = 0.4  # draw the ellipsoid at 0.4 x its size (m/s per rad/s)
+SHOW = 0.25  # draw the ellipsoid at 0.25 x its size (m/s per rad/s)
 
 
 def Jv_at(q):
@@ -30,7 +30,7 @@ def test_draw_the_ellipsoid_flattening():
         w.append(manipulability(Jv_at(q)))
     viz.arm3d(frames, local=False, axes=True, ellipsoids=ellipsoids, name="ellipsoid", scale=0.08,
               labels=["base", "frame 1", "frame 2", "wrist"], title="The velocity ellipsoid goes flat",
-              caption="Every wrist velocity that joint speeds |qdot| <= 1 can make (x 0.4), from YOUR velocity_ellipsoid. Stretched out, it can't move along the arm.")
+              caption="Every wrist velocity |qdot| <= 1 can make (x 0.25), from YOUR velocity_ellipsoid. Stretched out: flat along the arm.")
     viz.chart("Manipulability", list(range(41)), w, label="w = sqrt(det(J J^T))", x_label="frame", y_label="w", hline=0.0)
     assert len(frames) == 41
 
