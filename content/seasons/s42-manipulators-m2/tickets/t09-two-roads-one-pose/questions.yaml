@@ -1,0 +1,23 @@
+questions:
+  - prompt: "From DH frames at home, which frame gives the UR5's joint 4 screw axis?"
+    choices:
+      - "Frame 3: its z axis and its origin"
+      - "Frame 4: its z axis and its origin"
+      - "Frame 4: its x axis and its origin"
+      - "The base frame, rotated by the first three joints"
+    answer: 0
+    explain: "Joint i turns about z(i-1): joint 4 about z3, through frame 3's origin. S4 = (z3, -z3 × o3)."
+  - prompt: "PoE and DH agree at the home pose. What does that tell you about the screw axes?"
+    choices:
+      - "Nothing: at q = 0, PoE returns M whatever the screws are"
+      - "They are all correct, because the home pose uses every one of them"
+      - "Only that joint 1's screw is right; the home pose doesn't check the other five"
+    answer: 0
+    explain: "e^([S] 0) = I for every S, so T(0) = M. A home-pose test checks M only. Random poses, and each joint moved alone, check the screws."
+  - prompt: "Why is P Rz(q) P⁻¹ (P a frame's pose at home) a turn about that frame's z axis, in base coordinates?"
+    choices:
+      - "P⁻¹ changes into frame P, Rz turns about its z, P changes back"
+      - "Because P and P⁻¹ cancel, leaving just Rz(q) about the base's own z axis"
+      - "Because every rotation commutes with every transform when the angle q is small"
+    answer: 0
+    explain: "Read right to left on a base point: P⁻¹ writes it in frame P, Rz(q) turns it about P's z, P writes it back in the base. They don't cancel: Rz(q) sits between them."

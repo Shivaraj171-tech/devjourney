@@ -1,0 +1,25 @@
+parsons:
+  - goal: >-
+      Write `screws(frames)`: from the DH frames at home ([frame 0, ..., frame n], each a 4x4), one revolute screw
+      per joint. `cross(a, b)` exists. One line is Byte's slip: leave it out.
+    lines:
+      - "def screws(frames):"
+      - "    out = []"
+      - "    for T in frames[:-1]:"
+      - "        z = [T[0][2], T[1][2], T[2][2]]"
+      - "        o = [T[0][3], T[1][3], T[2][3]]"
+      - "        out.append(z + [-c for c in cross(z, o)])"
+      - "    return out"
+    distractors:
+      - line: "    for T in frames[1:]:"
+        replaces: 2
+        explain: "Joint i turns about z of frame i-1: the six axes are frames 0 to 5. frames[1:] shifts every axis by one joint."
+    check: |
+      def cross(a, b):
+          return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+      I = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+      elbow = [[1, 0, 0, 0.5], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+      tip = [[1, 0, 0, 0.9], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+      S = screws([I, elbow, tip])
+      assert S == [[0, 0, 1, 0, 0, 0], [0, 0, 1, 0, -0.5, 0]], S
+    explain: "Frames 0 .. n-1, each giving (z, -z × o). For the two-link arm: the base axis, and the vertical axis through the elbow."
