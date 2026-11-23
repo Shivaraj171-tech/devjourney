@@ -1,0 +1,5 @@
+[
+  "Peaks: CUBIC_PEAKS = (1.5, 6.0), QUINTIC_PEAKS = (15/8, 10*sqrt(3)/3). cubic_coefficients: D = x1 - x0; [x0, v0, (3D - (2v0 + v1)T)/T^2, (-2D + (v0 + v1)T)/T^3]. Scalings: return (0,0,0) for t <= 0 and (1,0,0) for t >= T; else tau = t/T and the README step 3 formulas.",
+  "quintic_coefficients: rows [1,0,0,0,0,0], [0,1,0,0,0,0], [0,0,2,0,0,0], [1,T,T^2,T^3,T^4,T^5], [0,1,2T,3T^2,4T^3,5T^4], [0,0,2,6T,12T^2,20T^3]; right-hand side [x0, v0, a0, x1, v1, a1]. min_time_polynomial: cv, ca = peaks; max(cv |D| / vmax, sqrt(ca |D| / amax)).",
+  "trapezoid_profile: D = |D|; if D * amax < vmax^2: v = sqrt(D amax), ta = v/amax, T = 2ta; else ta = vmax/amax, T = D/vmax + ta, v = vmax. trapezoid_sample: compute for |D| with a = v/ta in the three phases of README step 5 (plus before/after), then multiply x, x', x'' by sign(D)."
+]

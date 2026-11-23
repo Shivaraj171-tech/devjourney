@@ -8,6 +8,9 @@ Module 1 (labs 01-05): rotations, Euler, exp/log, quaternions, transforms.
 Module 2 (labs 06-08): DH and PoE forward kinematics, MJCF generation.
 Module 3 helpers (Jacobians, sims) live in `toolbox.sim` and lab solutions; import
 them explicitly where needed.
+Modules 4-6 (labs 12-20): IK (analytic, Newton, Levenberg-Marquardt), time scaling and
+trajectories, Lagrangian/Newton-Euler dynamics. Loaded lazily by name, like Modules 2-3.
+`toolbox.models` writes MuJoCo models with real inertias for the dynamics labs.
 """
 
 from labs.manipulators.lab01_rotations.solution import (  # noqa: F401
@@ -43,6 +46,32 @@ def __getattr__(name):
         "jacobian_space": "lab09_jacobian", "jacobian_body": "lab09_jacobian",
         "geometric_jacobian": "lab09_jacobian", "space_to_body_jacobian": "lab09_jacobian",
         "manipulability": "lab10_singularities", "dls_inverse": "lab11_resolved_rate",
+        "path_deviation": "lab11_resolved_rate",
+        # Module 4: inverse kinematics
+        "wrap_to_pi": "lab12_analytic_ik", "arm3_ik_all": "lab12_analytic_ik",
+        "arm3_ik": "lab12_analytic_ik", "elbow_is_up": "lab12_analytic_ik",
+        "body_twist_error": "lab13_newton_ik", "error_norms": "lab13_newton_ik",
+        "ik_newton": "lab13_newton_ik", "ik_newton_position": "lab13_newton_ik",
+        "dls_step": "lab14_dls_ik", "ik_lm": "lab14_dls_ik", "clamp_to_limits": "lab14_dls_ik",
+        "within_limits": "lab14_dls_ik", "distinct_solutions": "lab14_dls_ik",
+        "multi_start_ik": "lab14_dls_ik", "select_solution": "lab14_dls_ik",
+        "make_pose": "lab15_ur5_ik", "solve_ur5_pose": "lab15_ur5_ik",
+        # Module 5: trajectories
+        "cubic_scaling": "lab16_time_scaling", "quintic_scaling": "lab16_time_scaling",
+        "trapezoid_profile": "lab16_time_scaling", "trapezoid_sample": "lab16_time_scaling",
+        "min_time_polynomial": "lab16_time_scaling",
+        "joint_trajectory": "lab17_trajectories", "cartesian_poses": "lab17_trajectories",
+        "cartesian_trajectory": "lab17_trajectories", "sync_trapezoid": "lab17_trajectories",
+        # Module 6: dynamics
+        "planar2r_mass_matrix": "lab18_lagrange_2r", "planar2r_coriolis_matrix": "lab18_lagrange_2r",
+        "planar2r_gravity": "lab18_lagrange_2r", "planar2r_inverse_dynamics": "lab18_lagrange_2r",
+        "planar2r_energy": "lab18_lagrange_2r",
+        "spatial_inertia": "lab19_newton_euler", "com_frames": "lab19_newton_euler",
+        "rnea": "lab19_newton_euler", "mass_matrix_rnea": "lab19_newton_euler",
+        "bias_forces_rnea": "lab19_newton_euler", "gravity_rnea": "lab19_newton_euler",
+        "rnea_model": "lab19_newton_euler", "ad_twist": "lab19_newton_euler",
+        "forward_dynamics": "lab20_forward_dynamics", "rk4_step": "lab20_forward_dynamics",
+        "semi_implicit_euler_step": "lab20_forward_dynamics", "simulate": "lab20_forward_dynamics",
     }
     if name in lazy:
         import importlib

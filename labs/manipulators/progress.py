@@ -99,13 +99,14 @@ def award_badges(data: dict) -> list[str]:
     if sum(1 for v in labs.values() if v.get("passed") and v.get("hints_used") == 0
            and not v.get("revealed")) >= 3:
         earned.add("purist")
-    for module, badge in ((1, "frame-wrangler"), (2, "chain-forger"), (3, "jacobian-whisperer")):
+    for module, badge in ((1, "frame-wrangler"), (2, "chain-forger"), (3, "jacobian-whisperer"),
+                          (4, "pose-hunter"), (5, "smooth-operator"), (6, "equations-of-motion")):
         if all(lab.key in passed for lab in LABS if lab.module == module):
             earned.add(badge)
-    if labs.get("lab08", {}).get("passed") and labs["lab08"].get("mujoco_ran"):
-        earned.add("sim-validated")
-    if labs.get("lab11", {}).get("passed") and labs["lab11"].get("mujoco_ran"):
-        earned.add("straight-shooter")
+    for key, badge in (("lab08", "sim-validated"), ("lab11", "straight-shooter"),
+                       ("lab19", "torque-matched"), ("lab20", "digital-twin")):
+        if labs.get(key, {}).get("passed") and labs[key].get("mujoco_ran"):
+            earned.add(badge)
     if all(lab.key in passed for lab in LABS):
         earned.add("graduate")
     new = sorted(b for b in earned if b in BADGES and b not in data["badges"])

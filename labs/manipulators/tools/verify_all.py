@@ -51,7 +51,7 @@ def main(argv):
         print(f"MuJoCo {mujoco.__version__} available: simulator tests will run.")
     except ImportError:
         print("MuJoCo NOT installed: simulator tests will be skipped.")
-    print(f"{'lab':<22}{'solution':<26}{'starter':<26}{'time (sol/sta)':<16}status")
+    print(f"{'lab':<24}{'solution':<26}{'starter':<26}{'time (sol/sta)':<16}status")
     bad = skipped = 0
     for lab in labs:
         sol, sta, problems = check(lab)
@@ -64,7 +64,7 @@ def main(argv):
         bad += bool(problems)
         sta_s = f"{sta.failures}/{sta.tests - sta.skipped} fail" + (
             f", {sta.skipped} skip" if sta.skipped else "")
-        print(f"{lab.folder:<22}{sol.summary():<26}{sta_s:<26}"
+        print(f"{lab.folder:<24}{sol.summary():<26}{sta_s:<26}"
               f"{sol.seconds:>5.1f}s/{sta.seconds:>4.1f}s    {status}")
         for p in problems:
             print(f"    - {p}")
