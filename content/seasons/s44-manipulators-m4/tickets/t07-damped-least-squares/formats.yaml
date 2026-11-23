@@ -1,0 +1,42 @@
+predict:
+  - code: |
+      lam = 0.1
+      for sigma in (1.0, 0.1, 0.01, 0.0):
+          newton = "inf" if sigma == 0 else round(1 / sigma, 1)
+          dls = round(sigma / (sigma ** 2 + lam ** 2), 2)
+          print(newton, dls, end=" | ")
+    question: "Newton's multiplier 1/σ and the DLS multiplier σ/(σ² + λ²), as σ falls to 0. What does it print?"
+    answer: "1.0 0.99 | 10.0 5.0 | 100.0 0.99 | inf 0.0 |"
+    choices:
+      - "1.0 0.99 | 10.0 5.0 | 100.0 0.99 | inf 0.0 |"
+      - "1.0 0.99 | 10.0 9.9 | 100.0 99.0 | inf 0.0 |"
+      - "1.0 1.0 | 10.0 10.0 | 100.0 100.0 | inf inf |"
+      - "1.0 0.5 | 10.0 5.0 | 100.0 50.0 | inf 0.0 |"
+    explain: >-
+      DLS follows Newton while σ >> λ, peaks at σ = λ (multiplier 5 = 1/(2λ)), then falls back to 0: the
+      impossible direction is simply not attempted.
+parsons:
+  - goal: >-
+      Write `dls(J, e, lam)`: the damped least-squares step for a list-of-rows J (`matmul`, `transpose`,
+      `mat_vec` and `solve` exist). One line is Byte's slip: leave it out.
+    lines:
+      - "def dls(J, e, lam):"
+      - "    A = matmul(J, transpose(J))"
+      - "    A = [[A[i][j] + (lam * lam if i == j else 0.0) for j in range(len(A))] for i in range(len(A))]"
+      - "    return mat_vec(transpose(J), solve(A, e))"
+    distractors:
+      - line: "    A = [[A[i][j] + (lam if i == j else 0.0) for j in range(len(A))] for i in range(len(A))]"
+        replaces: 2
+        explain: "λ squared: the cost is λ² |dq|², and the multiplier σ / (σ² + λ²)."
+    check: |
+      def transpose(A):
+          return [list(r) for r in zip(*A)]
+      def matmul(A, B):
+          return [[sum(A[i][k] * B[k][j] for k in range(len(B))) for j in range(len(B[0]))] for i in range(len(A))]
+      def mat_vec(A, v):
+          return [sum(a * b for a, b in zip(row, v)) for row in A]
+      def solve(A, b):
+          return [b[0] / A[0][0], b[1] / A[1][1]]
+      dq = dls([[1.0, 0.0], [0.0, 0.01]], [1.0, 1.0], 0.1)
+      assert abs(dq[0] - 1 / 1.01) < 1e-9 and abs(dq[1] - 0.01 / 0.0101) < 1e-9, dq
+    explain: "J Jᵀ plus λ² on the diagonal, solve, then back through Jᵀ."

@@ -1,0 +1,30 @@
+questions:
+  - prompt: "With λ = 0.1, how does DLS scale an error component along a direction with singular value σ = 0.1?"
+    choices:
+      - "By 5: σ / (σ² + λ²) = 0.1 / 0.02"
+      - "By 10: 1/σ, like Newton"
+      - "By 0: damping removes that direction"
+      - "By 0.1: σ itself"
+    answer: 0
+    explain: "σ = λ is exactly where the DLS multiplier peaks, at 1/(2λ) = 5: half of Newton's 10, and the most it ever gets."
+  - prompt: "Why is J Jᵀ + λ² I always invertible for λ > 0?"
+    choices:
+      - "Its eigenvalues are σ² + λ², all at least λ² > 0"
+      - "Because J is never exactly singular in practice"
+      - "Because adding the identity to any matrix makes it invertible"
+    answer: 0
+    explain: "J Jᵀ has eigenvalues σ² ≥ 0; adding λ² I lifts every one of them by λ². (Adding I to just any matrix can still give a singular one: try -I.)"
+  - prompt: "The box is 5 cm out of reach. What does DLS converge to?"
+    choices:
+      - "A stretched pose pointing at the box, a little short of the closest possible point"
+      - "The exact box, slowly"
+      - "Nothing: it oscillates like plain Newton"
+    answer: 0
+    explain: "No exact solution exists; DLS settles where the remaining error balances the damping, close to the best possible miss."
+  - prompt: "What happens if λ is far too large (say 10 for a 1 m arm)?"
+    choices:
+      - "Every step is tiny: very slow convergence, even far from singularities"
+      - "Newton's quadratic convergence comes back"
+      - "The steps explode"
+    answer: 0
+    explain: "For σ << λ every multiplier is about σ/λ²: safe but painfully slow. λ trades speed for robustness."

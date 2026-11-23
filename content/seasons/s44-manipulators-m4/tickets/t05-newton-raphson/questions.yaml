@@ -1,0 +1,30 @@
+questions:
+  - prompt: "Newton's errors so far are 1e-2, then 1e-4. Roughly what will the next one be, near a regular solution?"
+    choices:
+      - "About 1e-8: the error roughly squares"
+      - "About 1e-6: it keeps falling by the same factor of 100"
+      - "About 5e-5: it halves each step"
+    answer: 0
+    explain: "Quadratic convergence: e_new ≈ C e_old², so the number of correct digits doubles. A constant factor per step (linear convergence) is what damped or gradient methods give."
+  - prompt: "Which equation does each Newton step solve for dq?"
+    choices:
+      - "J(q) dq = p* - p(q)"
+      - "J(q)ᵀ dq = p* - p(q)"
+      - "dq = J(q) (p* - p(q))"
+    answer: 0
+    explain: "The linearised FK change J dq should equal the error. (J maps joint steps to gripper moves, not the other way round, so J times e is not a joint step; and Jᵀ is not J⁻¹.)"
+  - prompt: "Newton is started near the elbow-down solution. Which solution does it usually find?"
+    choices:
+      - "Elbow down, the one near the guess"
+      - "Elbow up, because it's listed first"
+      - "Both, one per iteration"
+    answer: 0
+    explain: "Newton is local: it slides into the solution whose basin of attraction holds the guess. That's why the arm's CURRENT pose is the usual guess."
+  - prompt: "Byte's Newton computes e = p(q) - p*. What happens?"
+    choices:
+      - "Every step points away from the target: the error never falls"
+      - "It converges, just more slowly"
+      - "Python raises an error"
+      - "It converges to the other elbow"
+    answer: 0
+    explain: "The step is exactly reversed. Nothing crashes; the arm just wanders. The log-scale error chart shows it at once."

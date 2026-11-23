@@ -1,0 +1,17 @@
+# Right: Byte flips the error to point from the wrist to the target.
+suggestion:
+  file: ik/newton.py
+  find: "        e = [x - t for t, x in zip(target, p)]  # Byte: the error is where we are minus where we want to be\n"
+  replace: "        e = [t - x for t, x in zip(target, p)]  # from where the wrist is to where it should be\n"
+  correct: true
+  why:
+    choices:
+      - "Accept: J dq = e moves the wrist by e, so e must point from the wrist to the target."
+      - "Reject: the step should be subtracted instead (q - dq); the error's sign is a matter of convention."
+      - "Accept: positive errors make Newton converge faster than negative ones."
+    answer: 0
+  says: "The first step made it worse, so the step points the wrong way. The error has to point at the target."
+  explain: >-
+    Right. (Subtracting the step would also work, which is why "Reject" sounds tempting, but the code has to
+    match the maths it claims: e = p* - p(q) and q + dq. Changing the error keeps the convention the lesson,
+    ticket 6 and ticket 7 all use.) With the fix: 2.6e-1, 8.4e-2, 1.1e-2, 1.6e-4, 4.2e-8, 2.2e-15.

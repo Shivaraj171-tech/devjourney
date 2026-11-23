@@ -1,0 +1,29 @@
+questions:
+  - prompt: "What does the body twist error V_b = log(T_sb⁻¹ T_sd) represent?"
+    choices:
+      - "The constant twist that carries the flange onto the target in one second, in the flange's frame"
+      - "The difference of the two flange positions, in the base frame"
+      - "The joint step that reaches the target"
+    answer: 0
+    explain: "A twist: an axis, an angle and a slide, in the body frame. The joint step comes from solving J_b dq = V_b."
+  - prompt: "Why must the error be a BODY twist when the Jacobian is J_b?"
+    choices:
+      - "J_b dq is a body-frame twist: both sides of J_b dq = V_b must be in the same frame"
+      - "Body twists are always smaller, so Newton converges faster"
+      - "It doesn't matter: twists are the same in every frame"
+    answer: 0
+    explain: "A twist's numbers change with the frame (the adjoint). Equating a body twist to a space twist is comparing apples to oranges."
+  - prompt: "log_SE3 returns p instead of θ G⁻¹(θ) p. Why does Newton still converge?"
+    choices:
+      - "Near the target θ → 0 and θ G⁻¹ ≈ I: the error is wrong only to second order, and both are zero at the solution"
+      - "Newton ignores the translation part"
+      - "It doesn't: Newton always diverges with a wrong error"
+    answer: 0
+    explain: "Same zero, slightly wrong slope: Newton still lands on the pose. Far from the target the numbers are wrong, which breaks damping, clamping and interpolation."
+  - prompt: "A pure translation T = (I, p). What is log(T)?"
+    choices:
+      - "(0, 0, 0, p): no turn, the slide is p itself"
+      - "(p, 0, 0, 0)"
+      - "Undefined: log needs a rotation"
+    answer: 0
+    explain: "θ = 0, so G(θ) v = v θ = p: the θ ≈ 0 branch."

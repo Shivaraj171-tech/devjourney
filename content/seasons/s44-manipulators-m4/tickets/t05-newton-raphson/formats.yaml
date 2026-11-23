@@ -1,0 +1,33 @@
+predict:
+  - code: |
+      import math
+      def newton_sqrt2(x, steps):
+          out = []
+          for _ in range(steps):
+              x = x - (x * x - 2) / (2 * x)
+              out.append(f"{abs(x - math.sqrt(2)):.0e}")
+          return out
+      print(newton_sqrt2(1.0, 4))
+    question: "Newton's method on x² = 2 from x = 1 (the same idea, one dimension). How fast does the error fall?"
+    answer: "['9e-02', '2e-03', '2e-06', '2e-12']"
+    choices:
+      - "['9e-02', '2e-03', '2e-06', '2e-12']"
+      - "['9e-02', '4e-02', '2e-02', '1e-02']"
+      - "['9e-02', '9e-03', '9e-04', '9e-05']"
+    explain: >-
+      The exponent doubles each step (3, 6, 12): quadratic convergence. A constant factor would look like the
+      other two choices.
+trace:
+  - code: |
+      def newton(target, x, steps):
+          for _ in range(steps):
+              e = target - x * x
+              x = x + e / (2 * x)
+          return x
+
+      root = newton(9.0, 4.0, 2)
+    watch: [e, x]
+    rows: 5
+    explain: >-
+      e = 9 - 16 = -7: x is too big, the step is negative, x = 4 - 0.875 = 3.125. Then e = -0.766, x = 3.0025.
+      The error points from where we are to where we want to be, and the step follows it.

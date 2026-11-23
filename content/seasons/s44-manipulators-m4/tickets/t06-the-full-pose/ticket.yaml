@@ -1,0 +1,10 @@
+id: s44-t06
+title: "Position and orientation"
+type: bug
+level: senior
+track: robotics
+concepts: [space-body-jacobian, newton-raphson-ik, body-twist-ik]
+new_concept: body-twist-ik
+estimated_minutes: 35
+tests_visible: true
+files_editable: [ik/pose_newton.py]
