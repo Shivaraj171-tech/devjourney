@@ -23,7 +23,7 @@ direction to direction, so the hand curves on its way to the target. **Operation
 control** (Khatib, 1987) fixes that by asking for a task-space *acceleration*
 and paying for it with the task-space mass matrix Λ. The hand then moves almost
 straight. We do both on the 2R arm and the 3-DOF arm, then a full **pose** (position and
-orientation) on the UR5.
+orientation) on the UR5e.
 
 ## Key maths, step by step
 
@@ -64,7 +64,7 @@ errors e_ω ≈ the angular displacement, so Kp e_ω behaves like a torsional sp
 used the *body* twist log(T_sb⁻¹T_sd) with the body Jacobian. The two are equivalent;
 here we pick world frames to match [Jv; Jw].)
 
-**5. Null space (brief).** With more joints than task dimensions (UR5, position
+**5. Null space (brief).** With more joints than task dimensions (UR5e, position
 only: 6 > 3), some torques move the elbow without disturbing the hand. The
 **dynamically consistent** projector
 
@@ -75,8 +75,8 @@ lets a secondary goal τ₀ (stay near a comfortable posture, avoid a joint limi
 underneath the primary task. With M⁻¹ in the definition (not just any pseudo-inverse),
 the secondary torque produces no hand *acceleration*, not merely no static force.
 
-**6. Fast dynamics for the UR5.** OSC needs M(q) every step. Lab 19's RNEA gives it
-in ~2 ms of numpy on the UR5, which is too slow for a 500 Hz loop in a test. `toolbox.sim.MujocoDynamics`
+**6. Fast dynamics for the UR5e.** OSC needs M(q) every step. Lab 19's RNEA gives it
+in ~2 ms of numpy on the UR5e, which is too slow for a 500 Hz loop in a test. `toolbox.sim.MujocoDynamics`
 asks MuJoCo for the same M(q) and g(q) (`mj_fullM`, `qfrc_bias`) in microseconds. We
 checked it against your RNEA: they agree to 2×10⁻¹⁵.
 
@@ -97,13 +97,13 @@ velocity terms we dropped in step 3 are large. Putting them back,
 3-DOF arm in MuJoCo (2 ms steps, RNEA gravity, Kp = 300 N/m, Kd = 40 N s/m, a 22 cm move):
 Jᵀ reaches 2×10⁻⁷ m in 1.5 s with an 11.5 mm detour; OSC (Kp = 100, Kd = 20) has a 3.7 mm detour.
 
-UR5 pose (MuJoCo, 2 ms): from the home pose, move 17 cm *and* rotate 0.54 rad. OSC with
-Kp = 100, Kd = 20 ends 1×10⁻⁶ m and 4×10⁻⁶ rad away after 1.5 s, deviating 1.3 mm from
-the straight line. **What failed first:** Jᵀ on the UR5. Its last joint has only
-1.7×10⁻⁴ kg m² about its axis (our approximate UR5 inertias, `robots.py`), so a rotational
-damping of 0.5 N m s/rad already made Kd·dt/J ≈ 3 and the simulation exploded in 10 ms. With
-gains small enough for the wrist, the heavy shoulder took > 2 s and still wobbled (6 mm,
-0.03 rad). OSC's Λ scales each direction by the inertia it actually moves, which is the same
+UR5e pose (MuJoCo, 2 ms): from the home pose, move 17 cm *and* rotate 0.54 rad. OSC with
+Kp = 100, Kd = 20 ends 1×10⁻⁶ m and 5×10⁻⁶ rad away after 1.5 s, deviating 1.4 mm from
+the straight line. **What failed first:** Jᵀ on the UR5e. Its last link has only
+2.6×10⁻⁴ kg m² about the joint axis (Universal Robots' official tensor, `robots.py`), so a
+rotational damping of 0.5 N m s/rad already makes Kd·dt/J ≈ 4 and the simulation explodes
+within 20 ms. With a wrist damping small enough (0.1), the heavy shoulder is left slow: after
+2 s the gripper was still 1.3 mm off and still moving (3.5 mm in the last 0.5 s). OSC's Λ scales each direction by the inertia it actually moves, which is the same
 lesson as lab 22, now in task space.
 
 ## Task

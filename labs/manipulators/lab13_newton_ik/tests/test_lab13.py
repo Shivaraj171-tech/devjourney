@@ -2,11 +2,11 @@ import numpy as np
 import pytest
 
 from labs.manipulators.toolbox import (
-    ARM3_DH, UR5_DH, body_screws, exp_se3, fk_body, fk_dh, geometric_jacobian, jacobian_body,
+    ARM3_DH, UR5E_DH, body_screws, exp_se3, fk_body, fk_dh, geometric_jacobian, jacobian_body,
     screws_from_dh,
 )
 
-M, S = screws_from_dh(UR5_DH)
+M, S = screws_from_dh(UR5E_DH)
 B = body_screws(M, S)
 Q_TRUE = np.array([0.3, -1.1, 1.4, -1.8, -1.4, 0.5])
 T_GOAL = fk_body(M, B, Q_TRUE)
@@ -64,7 +64,7 @@ def test_convergence_order(impl):
 
 def test_unreachable_target_reports_failure(impl):
     T = T_GOAL.copy()
-    T[:3, 3] = [1.2, 0.3, 0.4]  # 1.3 m away: the UR5 reaches ~0.85 m
+    T[:3, 3] = [1.2, 0.3, 0.4]  # 1.26 m from the shoulder: the UR5e's flange stays within 0.97 m
     q, ok, hist = impl.ik_newton(M, B, T, Q_TRUE, max_iters=25)
     assert ok is False, "an unreachable pose must return success = False"
     assert len(hist) == 26, "history = initial guess + max_iters iterates"
@@ -76,7 +76,7 @@ def test_seed_decides_which_solution(impl):
     q, ok, _ = impl.ik_newton(M, B, T_GOAL, q0)
     assert ok, "this seed still converges..."
     np.testing.assert_allclose(fk_body(M, B, q), T_GOAL, atol=1e-8)
-    assert np.abs(wrap(q - Q_TRUE)).max() > 0.5, "...but to a DIFFERENT one of the UR5's solutions"
+    assert np.abs(wrap(q - Q_TRUE)).max() > 0.5, "...but to a DIFFERENT one of the UR5e's solutions"
 
 
 def test_position_only_on_arm3(impl):

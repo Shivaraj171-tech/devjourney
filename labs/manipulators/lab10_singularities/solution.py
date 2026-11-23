@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from labs.manipulators.toolbox.robots import UR5_DH
+from labs.manipulators.toolbox.robots import UR5E_DH
 
 
 def singular_values(J) -> np.ndarray:
@@ -57,18 +57,18 @@ def lost_directions(J, tol: float = 1e-6):
     return U[:, small], Vt[small].T
 
 
-def ur5_jacobian_det(q) -> float:
-    """Closed-form det of the UR5 geometric Jacobian:
+def ur5e_jacobian_det(q) -> float:
+    """Closed-form det of the UR5e geometric Jacobian:
     a2 a3 sin(q3) sin(q5) (a2 cos q2 + a3 cos(q2+q3) + d5 sin(q2+q3+q4))."""
-    a2, a3, d5 = UR5_DH[1, 0], UR5_DH[2, 0], UR5_DH[4, 2]
+    a2, a3, d5 = UR5E_DH[1, 0], UR5E_DH[2, 0], UR5E_DH[4, 2]
     _, q2, q3, q4, q5, _ = q
     return float(a2 * a3 * np.sin(q3) * np.sin(q5)
                  * (a2 * np.cos(q2) + a3 * np.cos(q2 + q3) + d5 * np.sin(q2 + q3 + q4)))
 
 
-def classify_ur5_singularity(q, tol: float = 1e-6) -> set:
+def classify_ur5e_singularity(q, tol: float = 1e-6) -> set:
     """Which factors of the determinant vanish: subset of {"elbow", "wrist", "shoulder"}."""
-    a2, a3, d5 = UR5_DH[1, 0], UR5_DH[2, 0], UR5_DH[4, 2]
+    a2, a3, d5 = UR5E_DH[1, 0], UR5E_DH[2, 0], UR5E_DH[4, 2]
     _, q2, q3, q4, q5, _ = q
     kinds = set()
     if abs(np.sin(q3)) < tol:

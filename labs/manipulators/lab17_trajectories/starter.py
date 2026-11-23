@@ -1,4 +1,4 @@
-"""Lab 17: joint-space vs task-space (Cartesian) trajectories on the UR5.
+"""Lab 17: joint-space vs task-space (Cartesian) trajectories on the UR5e.
 
 Toolbox: quintic_scaling, trapezoid_profile, trapezoid_sample (lab 16), ik_lm (lab 14),
 matrix_to_quat / quat_slerp / quat_to_matrix (lab 04), make_transform, fk_dh.
@@ -13,10 +13,10 @@ from labs.manipulators.toolbox import (  # noqa: F401
     body_screws, fk_dh, ik_lm, make_transform, matrix_to_quat, quat_slerp, quat_to_matrix,
     quintic_scaling, screws_from_dh, trapezoid_profile, trapezoid_sample,
 )
-from labs.manipulators.toolbox.robots import UR5_DH
+from labs.manipulators.toolbox.robots import UR5E_DH
 
-M_UR5, S_UR5 = screws_from_dh(UR5_DH)
-B_UR5 = body_screws(M_UR5, S_UR5)
+M_UR5E, S_UR5E = screws_from_dh(UR5E_DH)
+B_UR5E = body_screws(M_UR5E, S_UR5E)
 
 
 def joint_trajectory(q0, q1, T, ts):
@@ -46,7 +46,7 @@ def cartesian_poses(T0, T1, s_values) -> np.ndarray:
 
 def cartesian_trajectory(T0, T1, T, ts, q_start):
     """(Q (N, 6), ok): quintic s(t), poses from cartesian_poses, joints by
-    ik_lm(M_UR5, B_UR5, T_d, q_prev) warm-started from the previous answer (q_start first).
+    ik_lm(M_UR5E, B_UR5E, T_d, q_prev) warm-started from the previous answer (q_start first).
     ok = every IK solve succeeded. np.unwrap(Q, axis=0) before returning."""
     # TODO: README step 4
     raise NotImplementedError("Cartesian trajectory via IK")
@@ -65,7 +65,7 @@ def limit_check(Qd, Qdd, vmax, amax) -> dict:
 
 
 def ee_positions(Q) -> np.ndarray:
-    """(N, 3) gripper positions, fk_dh(UR5_DH, q)[:3, 3] per row."""
+    """(N, 3) gripper positions, fk_dh(UR5E_DH, q)[:3, 3] per row."""
     # TODO
     raise NotImplementedError("gripper path")
 

@@ -36,7 +36,7 @@ J_b(q) Δq (lab 09). To first order, moving by Δq changes the error by
 
     J_b(q) Δq = V_b
 
-**3. Solve it, even when J_b isn't square or invertible.** For the 6-DOF UR5,
+**3. Solve it, even when J_b isn't square or invertible.** For the 6-DOF UR5e,
 J_b is 6×6 and usually invertible. In general take the least-squares,
 minimum-norm solution Δq = J_b⁺ V_b (the pseudo-inverse). Use
 `np.linalg.lstsq(J, V, rcond=None)[0]`: it's the same thing, but it doesn't
@@ -67,9 +67,9 @@ to first order at the solution, which is all the argument needs.)
 **6. Failure cases you'll see in the tests.**
 - **Unreachable target**: no q makes V_b = 0. The iteration never meets the
   tolerance, the error stalls or oscillates, and the joints can wind up
-  (we measured |q| > 100 rad on the UR5). Always cap the iterations and
+  (on the UR5e we measured |q| ≈ 85 rad after 25 iterations, over 3000 rad after 30). Always cap the iterations and
   report `success=False`.
-- **Seed decides the solution**: the UR5 has up to 8 IK solutions. Starting
+- **Seed decides the solution**: the UR5e has up to 8 IK solutions. Starting
   near q = 0 (a singular configuration: sin q₃ = sin q₅ = 0, lab 10) converges,
   but to a *different* solution than the one that generated the target.
   Newton finds *a* solution, not *the* one you wanted.

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from labs.manipulators.toolbox import UR5_DH, exp_so3
+from labs.manipulators.toolbox import UR5E_DH, exp_so3
 from labs.manipulators.toolbox.sim import KinematicSim, MujocoSim, mujoco_available
 
 Q0 = np.array([0.0, -1.2, 1.5, -1.9, -1.57, 0.0])  # elbow-up, away from singularities
@@ -61,7 +61,7 @@ def _run(impl, sim, settle=0.5):
 
 
 def test_straight_line_on_kinematic_robot(impl):
-    log, dev, final = _run(impl, KinematicSim(UR5_DH, Q0))
+    log, dev, final = _run(impl, KinematicSim(UR5E_DH, Q0))
     assert len(log["t"]) == 251, "log steps 0..250 inclusive (2.5 s at dt = 0.01)"
     assert dev < 5e-4, f"max deviation from the line {dev * 1e3:.2f} mm (want < 0.5 mm)"
     assert final < 5e-4, f"final position error {final * 1e3:.2f} mm (want < 0.5 mm)"
@@ -71,7 +71,7 @@ def test_straight_line_on_kinematic_robot(impl):
 @pytest.mark.skipif(not mujoco_available(), reason="optional: needs mujoco")
 def test_straight_line_in_mujoco(impl):
     # settle 2 s: a closed loop that slowly rings up would show here, not in a short run
-    log, dev, final = _run(impl, MujocoSim(UR5_DH, Q0), settle=2.0)
+    log, dev, final = _run(impl, MujocoSim(UR5E_DH, Q0), settle=2.0)
     assert dev < 1e-3, (f"MuJoCo: max deviation {dev * 1e3:.2f} mm (want < 1 mm). Is the feedback "
                         "term using the MEASURED pose sim.ee_pose() each step?")
     assert final < 2e-4, (f"MuJoCo: error after a 2 s hold is {final * 1e3:.3f} mm (want < 0.2 mm); "

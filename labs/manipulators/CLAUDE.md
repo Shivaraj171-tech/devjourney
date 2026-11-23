@@ -11,9 +11,12 @@ The person working here is learning. In this folder:
   (`python -m labs.manipulators hint <lab>`).
 - To check their work, run `python -m labs.manipulators check <lab>`. Don't edit tests
   to make them pass.
+- The 6-DOF arm is the Universal Robots UR5e: `toolbox/robots.py` (UR5E_DH, UR5E_LINKS, limits),
+  with sources. Its numbers are verified; don't replace them with remembered UR5 values.
 - Conventions: twists (omega, v); quaternions [w, x, y, z]; standard (distal) DH;
   the geometric Jacobian is [Jv; Jw]. Modules 4-6 add: wrenches (m, f); spatial
-  inertia diag(I, m, m, m); IK errors as the body twist log(T_sb^-1 T_sd); angles
+  inertia blockdiag(I, m 1) (I = diag of principal moments for our own arms, the full 3x3
+  tensor for the UR5e); IK errors as the body twist log(T_sb^-1 T_sd); angles
   wrapped to (-pi, pi]. Modules 7-8 add: a controller is `controller(t, q, qd) -> tau`
   (the same function drives lab 20's numpy `simulate` and MuJoCo torque `<motor>`s via
   `run_mujoco_control`); task-space errors are [p_d - p; log(R_d R^T)] in world axes,

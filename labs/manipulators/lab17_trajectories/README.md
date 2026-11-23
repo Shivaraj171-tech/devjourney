@@ -1,4 +1,4 @@
-# Lab 17 · Joint-space vs task-space trajectories on the UR5
+# Lab 17 · Joint-space vs task-space trajectories on the UR5e
 
 Module 5 (trajectories) · 220 XP (boss lab) · MuJoCo part runs if `mujoco` is installed
 
@@ -10,7 +10,7 @@ for both. There are two natural ways to get from one to the other:
 - **Joint space**: interpolate the joint angles, q(s) = q_A + s (q_B − q_A).
   It's cheap, always feasible between two valid configurations, never crosses a
   singularity it doesn't have to, and easy to keep within joint limits. But the
-  *gripper* moves along a curve. In our test move it bows **8 cm** away from
+  *gripper* moves along a curve. In our test move it bows **9 cm** away from
   the straight line, enough to hit the table or knock the part you're carrying.
 - **Task space** (Cartesian): interpolate the *pose*: position on a straight
   line, orientation by slerp (lab 04). The gripper does exactly what you'd draw.
@@ -63,17 +63,17 @@ differences (`np.gradient`) give
     q̇_k ≈ (q_{k+1} − q_{k−1}) / 2dt,    then the same again for q̈ and the jerk
 
 The limit check is the worst ratio max |q̇|/v_max and max |q̈|/a_max over all joints
-and samples (≤ 1 is OK). Our UR5 limits (`toolbox/robots.py`): 180°/s (the UR5
-datasheet speed as we recall it) and an acceleration limit of 2π rad/s² that we chose
-ourselves. The Cartesian move
+and samples (≤ 1 is OK). Our UR5e limits (`toolbox/robots.py`): 180°/s on every joint (Universal
+Robots' official joint limits, from the UR5e user manual) and an acceleration limit of
+2π rad/s² that we chose ourselves (UR doesn't publish one). The Cartesian move
 over 2 s uses 30% of the velocity limit. Squeeze it into 0.4 s and it needs 7× the
 allowed acceleration. A task-space trajectory has to be checked in joint space.
 
 **6. Tracking in MuJoCo.** Stream q_k to the servos of `MujocoSim` (lab 11) by
 commanding q̇ = (q_{k+1} − q_k)/dt for each step of dt. The servo lags the
 set-point a little (≈ 0.01 rad here, mostly *along* the path). The gripper's
-distance from the line stays at 0.1 mm for the Cartesian move and the joint-space
-move still bows 8 cm. The simulator confirms that the geometry, not the
+distance from the line stays under 0.2 mm for the Cartesian move and the joint-space
+move still bows 9 cm. The simulator confirms that the geometry, not the
 controller, makes the difference.
 
 ## Task

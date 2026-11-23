@@ -1,4 +1,4 @@
-"""Newton-Raphson IK on the UR5: error vs iteration for several initial guesses."""
+"""Newton-Raphson IK on the UR5e: error vs iteration for several initial guesses."""
 
 import numpy as np
 
@@ -8,9 +8,9 @@ def main(lab, outdir):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    from labs.manipulators.toolbox import UR5_DH, body_screws, fk_body, screws_from_dh
+    from labs.manipulators.toolbox import UR5E_DH, body_screws, fk_body, screws_from_dh
 
-    M, S = screws_from_dh(UR5_DH)
+    M, S = screws_from_dh(UR5E_DH)
     B = body_screws(M, S)
     q_true = np.array([0.3, -1.1, 1.4, -1.8, -1.4, 0.5])
     T_goal = fk_body(M, B, q_true)

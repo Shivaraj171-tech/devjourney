@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from labs.manipulators.toolbox import UR5_DH, is_transform, rot_x, rot_z
+from labs.manipulators.toolbox import UR5E_DH, is_transform, rot_x, rot_z
 
 
 def T_from(R=np.eye(3), p=(0, 0, 0)):
@@ -29,14 +29,14 @@ def test_dh_transform_is_product_of_four_moves(impl, rng):
 
 def test_fk_frames_shape_and_validity(impl, rng):
     q = rng.uniform(-np.pi, np.pi, size=6)
-    frames = impl.fk_dh_frames(UR5_DH, q)
+    frames = impl.fk_dh_frames(UR5E_DH, q)
     assert len(frames) == 7, "expect n+1 frames including the base (identity)"
     np.testing.assert_allclose(frames[0], np.eye(4))
     for T in frames:
         assert is_transform(T), "every frame must be a valid SE(3) matrix"
-    np.testing.assert_allclose(impl.fk_dh(UR5_DH, q), frames[-1], atol=1e-12)
+    np.testing.assert_allclose(impl.fk_dh(UR5E_DH, q), frames[-1], atol=1e-12)
     with pytest.raises(ValueError):
-        impl.fk_dh_frames(UR5_DH, q[:5])
+        impl.fk_dh_frames(UR5E_DH, q[:5])
 
 
 def test_arm3_table_filled_in(impl):
@@ -61,21 +61,21 @@ def test_arm3_closed_form(impl, rng):
         np.testing.assert_allclose(impl.arm3_position(q), independent_arm3_position(q), atol=1e-12)
 
 
-def test_ur5_home_pose(impl):
-    # At q = 0 the UR5 lies stretched out along -x. Reading the DH table by hand:
+def test_ur5e_home_pose(impl):
+    # At q = 0 the UR5e lies stretched out along -x. Reading the DH table by hand:
     # x = a2 + a3, y = -(d4 + d6), z = d1 - d5, and the tool z axis points along -y.
-    T = np.asarray(impl.fk_dh(UR5_DH, np.zeros(6)))
-    np.testing.assert_allclose(T[:3, 3], [-0.81725, -0.19145, -0.005491], atol=1e-9,
-                               err_msg="UR5 tool position at q = 0")
+    T = np.asarray(impl.fk_dh(UR5E_DH, np.zeros(6)))
+    np.testing.assert_allclose(T[:3, 3], [-0.8172, -0.2329, 0.0628], atol=1e-9,
+                               err_msg="UR5e tool position at q = 0")
     np.testing.assert_allclose(T[:3, 2], [0, -1, 0], atol=1e-12,
-                               err_msg="UR5 tool z axis at q = 0")
+                               err_msg="UR5e tool z axis at q = 0")
 
 
-def test_ur5_base_joint_spins_about_world_z(impl, rng):
+def test_ur5e_base_joint_spins_about_world_z(impl, rng):
     q = rng.uniform(-np.pi, np.pi, size=6)
-    T0 = np.asarray(impl.fk_dh(UR5_DH, q))
+    T0 = np.asarray(impl.fk_dh(UR5E_DH, q))
     q2 = q.copy()
     q2[0] += 0.5
-    T1 = np.asarray(impl.fk_dh(UR5_DH, q2))
+    T1 = np.asarray(impl.fk_dh(UR5E_DH, q2))
     np.testing.assert_allclose(T1, T_from(rot_z(0.5)) @ T0, atol=1e-12,
                                err_msg="turning joint 1 must rotate the whole arm about base z")

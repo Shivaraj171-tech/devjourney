@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 
 from labs.manipulators.toolbox import (
-    UR5_DH, euler_zyx_to_matrix, fk_dh, make_transform, pose_error, rot_x,
+    UR5E_DH, euler_zyx_to_matrix, fk_dh, make_transform, pose_error, rot_x,
 )
-from labs.manipulators.toolbox.robots import UR5_Q_MAX, UR5_Q_MIN
+from labs.manipulators.toolbox.robots import UR5E_Q_MAX, UR5E_Q_MIN
 from labs.manipulators.toolbox.sim import MujocoSim, mujoco_available
 
 Q0 = np.array([0.0, -1.2, 1.5, -1.9, -1.57, 0.0])
@@ -59,18 +59,18 @@ def test_ik_seeds(impl):
     s = np.asarray(impl.ik_seeds(Q0, 16))
     assert s.shape == (17, 6), "q_seed plus 16 random seeds"
     np.testing.assert_allclose(s[0], Q0, err_msg="the current configuration is the first seed")
-    assert np.all(s >= UR5_Q_MIN) and np.all(s <= UR5_Q_MAX)
+    assert np.all(s >= UR5E_Q_MIN) and np.all(s <= UR5E_Q_MAX)
     np.testing.assert_allclose(s, impl.ik_seeds(Q0, 16), err_msg="seeds must be reproducible")
 
 
 def test_solve_picks_the_closest_solution(impl, poses):
-    q, cands = impl.solve_ur5_pose(poses["pick_right"], Q0)
+    q, cands = impl.solve_ur5e_pose(poses["pick_right"], Q0)
     assert q is not None and len(cands) >= 4, "a reachable pose has several solutions"
     dists = [np.linalg.norm(np.asarray(c) - Q0) for c in cands]
     assert np.linalg.norm(np.asarray(q) - Q0) == pytest.approx(min(dists)), \
         "choose the candidate closest to the seed"
     for c in cands:
-        assert np.all(np.abs(pose_error(fk_dh(UR5_DH, c), poses["pick_right"])) < 1e-6)
+        assert np.all(np.abs(pose_error(fk_dh(UR5E_DH, c), poses["pick_right"])) < 1e-6)
 
 
 def test_campaign_rows(impl, rows):
@@ -87,9 +87,9 @@ def test_reachable_poses_are_solved_accurately(impl, rows, poses):
         assert r["success"], f"{r['name']} is reachable but IK failed"
         assert r["pos_err"] < 1e-6, f"{r['name']}: position error {r['pos_err'] * 1e3:.3g} mm"
         assert r["rot_err"] < 1e-6, f"{r['name']}: rotation error {np.degrees(r['rot_err']):.3g} deg"
-        dp, dr = pose_error(fk_dh(UR5_DH, r["q"]), poses[r["name"]])
+        dp, dr = pose_error(fk_dh(UR5E_DH, r["q"]), poses[r["name"]])
         assert r["pos_err"] == pytest.approx(dp, abs=1e-12), "errors come from DH FK at the chosen q"
-        assert np.all(np.asarray(r["q"]) >= UR5_Q_MIN - 1e-9) and np.all(np.asarray(r["q"]) <= UR5_Q_MAX + 1e-9)
+        assert np.all(np.asarray(r["q"]) >= UR5E_Q_MIN - 1e-9) and np.all(np.asarray(r["q"]) <= UR5E_Q_MAX + 1e-9)
 
 
 def test_unreachable_pose_is_reported(impl, rows):
@@ -102,7 +102,7 @@ def test_unreachable_pose_is_reported(impl, rows):
 def test_campaign_seeds_with_previous_solution(impl, rows, poses):
     rows = rows()
     q_prev = rows[0]["q"]
-    q, cands = impl.solve_ur5_pose(poses["pick_right"], q_prev)
+    q, cands = impl.solve_ur5e_pose(poses["pick_right"], q_prev)
     np.testing.assert_allclose(rows[1]["q"], q, atol=1e-6,
                                err_msg="pose 2 must be seeded with pose 1's solution, not with q_start")
 
@@ -129,7 +129,7 @@ def test_mujoco_kinematics_agree(impl, rows, poses):
 @needs_mujoco
 def test_mujoco_arm_physically_arrives(impl, rows, poses):
     rows = rows()
-    sim = MujocoSim(UR5_DH, Q0)
+    sim = MujocoSim(UR5E_DH, Q0)
     for r in rows[:-1]:
         T = impl.drive_mujoco(sim, r["q"])
         dp, dr = pose_error(T, poses[r["name"]])

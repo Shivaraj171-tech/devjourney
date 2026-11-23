@@ -2,12 +2,12 @@ import numpy as np
 import pytest
 
 from labs.manipulators.toolbox import (
-    ARM3_DH, UR5_DH, exp_so3, fk_space, forward_dynamics, geometric_jacobian, make_gravity_fn,
+    ARM3_DH, UR5E_DH, exp_so3, fk_space, forward_dynamics, geometric_jacobian, make_gravity_fn,
     mass_matrix_rnea, path_deviation, planar2r_coriolis_matrix, planar2r_gravity, planar2r_mass_matrix,
     rnea_model, run_mujoco_control, screws_from_dh, simulate,
 )
 from labs.manipulators.toolbox.models import dh_arm_mjcf, with_motors
-from labs.manipulators.toolbox.robots import ARM3_LINKS, PLANAR2R_DYN as P, UR5_LINKS
+from labs.manipulators.toolbox.robots import ARM3_LINKS, PLANAR2R_DYN as P, UR5E_LINKS
 from labs.manipulators.toolbox.sim import mujoco_available
 
 needs_mujoco = pytest.mark.skipif(not mujoco_available(), reason="optional: needs mujoco")
@@ -56,8 +56,8 @@ def test_orientation_and_pose_error(impl, rng):
 
 
 def test_task_inertia_and_null_space(impl, rng):
-    M_ur, S_ur = screws_from_dh(UR5_DH)
-    rm = rnea_model(UR5_DH, UR5_LINKS)
+    M_ur, S_ur = screws_from_dh(UR5E_DH)
+    rm = rnea_model(UR5E_DH, UR5E_LINKS)
     q = rng.uniform(-2, 2, 6)
     J = geometric_jacobian(M_ur, S_ur, q)[:3]   # position only: 3 tasks, 6 joints
     M = mass_matrix_rnea(rm, q)
@@ -103,13 +103,13 @@ def test_mujoco_arm3_jacobian_transpose(impl):
 
 
 @needs_mujoco
-def test_mujoco_ur5_pose_with_orientation(impl):
+def test_mujoco_ur5e_pose_with_orientation(impl):
     import mujoco
 
     from labs.manipulators.toolbox.sim import MujocoDynamics
-    model = mujoco.MjModel.from_xml_string(with_motors(dh_arm_mjcf(UR5_DH, UR5_LINKS, timestep=0.002), 6))
+    model = mujoco.MjModel.from_xml_string(with_motors(dh_arm_mjcf(UR5E_DH, UR5E_LINKS, timestep=0.002), 6))
     dyn = MujocoDynamics(model)
-    M6, S6 = screws_from_dh(UR5_DH)
+    M6, S6 = screws_from_dh(UR5E_DH)
     T0 = fk_space(M6, S6, Q_HOME)
     T_d = T0.copy()
     T_d[:3, 3] += [0.1, -0.1, -0.1]
@@ -123,7 +123,7 @@ def test_mujoco_ur5_pose_with_orientation(impl):
     _, Q, _, _ = run_mujoco_control(model, ctrl, Q_HOME, 1.5)
     e = impl.pose_error(fk_space(M6, S6, Q[-1]), T_d)
     assert np.linalg.norm(e[:3]) < 1e-4 and np.linalg.norm(e[3:]) < 1e-3, \
-        f"UR5 must reach position AND orientation (left: {np.linalg.norm(e[:3]):.1e} m, " \
+        f"UR5e must reach position AND orientation (left: {np.linalg.norm(e[:3]):.1e} m, " \
         f"{np.linalg.norm(e[3:]):.1e} rad)"
     X = np.array([fk_space(M6, S6, q)[:3, 3] for q in Q])
     dev = path_deviation(X, T0[:3, 3], T_d[:3, 3]).max()

@@ -1,4 +1,4 @@
-"""Lab 15: a UR5 IK campaign: solve a list of 6-DOF poses, verify with FK and in MuJoCo.
+"""Lab 15: a UR5e IK campaign: solve a list of 6-DOF poses, verify with FK and in MuJoCo.
 
 Toolbox: euler_zyx_to_matrix, make_transform, fk_dh, pose_error (lab 08: (pos m, rot rad)),
 multi_start_ik and select_solution (lab 14), dh_to_mjcf / load_model / sim_site_pose (lab 08).
@@ -12,10 +12,10 @@ from labs.manipulators.toolbox import (  # noqa: F401
     body_screws, euler_zyx_to_matrix, fk_dh, make_transform, multi_start_ik, pose_error,
     screws_from_dh, select_solution,
 )
-from labs.manipulators.toolbox.robots import UR5_DH, UR5_Q_MAX, UR5_Q_MIN  # noqa: F401
+from labs.manipulators.toolbox.robots import UR5E_DH, UR5E_Q_MAX, UR5E_Q_MIN  # noqa: F401
 
-M_UR5, S_UR5 = screws_from_dh(UR5_DH)
-B_UR5 = body_screws(M_UR5, S_UR5)
+M_UR5E, S_UR5E = screws_from_dh(UR5E_DH)
+B_UR5E = body_screws(M_UR5E, S_UR5E)
 
 
 def make_pose(p, rpy) -> np.ndarray:
@@ -25,14 +25,14 @@ def make_pose(p, rpy) -> np.ndarray:
 
 
 def ik_seeds(q_seed, n_random: int = 16, rng_seed: int = 0) -> np.ndarray:
-    """(n_random + 1, 6): q_seed first, then rng.uniform(UR5_Q_MIN, UR5_Q_MAX, size=(n_random, 6))
+    """(n_random + 1, 6): q_seed first, then rng.uniform(UR5E_Q_MIN, UR5E_Q_MAX, size=(n_random, 6))
     with rng = np.random.default_rng(rng_seed)."""
     # TODO
     raise NotImplementedError("IK seeds")
 
 
-def solve_ur5_pose(T_d, q_seed, n_random: int = 16):
-    """(q, candidates): candidates = multi_start_ik(M_UR5, B_UR5, T_d, ik_seeds(...), limits);
+def solve_ur5e_pose(T_d, q_seed, n_random: int = 16):
+    """(q, candidates): candidates = multi_start_ik(M_UR5E, B_UR5E, T_d, ik_seeds(...), limits);
     q = select_solution(candidates, q_seed, limits) (None if nothing valid)."""
     # TODO: README step 3
     raise NotImplementedError("solve one pose")
@@ -42,7 +42,7 @@ def ik_campaign(poses: dict, q_start, n_random: int = 16) -> list:
     """Solve poses (a dict name -> T_d) in order, seeding each with the previous solution.
 
     Row per pose: {"name", "success", "q", "n_solutions", "pos_err", "rot_err"}; errors are
-    pose_error(fk_dh(UR5_DH, q), T_d) (independent DH FK). Failed rows: q None, errors nan.
+    pose_error(fk_dh(UR5E_DH, q), T_d) (independent DH FK). Failed rows: q None, errors nan.
     A failed pose does not change the seed for the next one.
     """
     # TODO: README steps 3-5
@@ -50,7 +50,7 @@ def ik_campaign(poses: dict, q_start, n_random: int = 16) -> list:
 
 
 def mujoco_kinematic_errors(rows, poses: dict) -> list:
-    """[(pos_err, rot_err)] per row: MuJoCo's "ee" site (lab 08 model of UR5_DH, sim_site_pose)
+    """[(pos_err, rot_err)] per row: MuJoCo's "ee" site (lab 08 model of UR5E_DH, sim_site_pose)
     at row["q"] vs the target. (nan, nan) for failed rows. Import the lab 08 helpers inside
     the function (from labs.manipulators.toolbox import dh_to_mjcf, load_model, sim_site_pose),
     so this file loads without MuJoCo."""

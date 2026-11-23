@@ -8,11 +8,11 @@ def main(lab, outdir):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    from labs.manipulators.toolbox import UR5_DH
+    from labs.manipulators.toolbox import UR5E_DH
     from labs.manipulators.toolbox.sim import KinematicSim, MujocoSim, mujoco_available
 
     q0 = np.array([0.0, -1.2, 1.5, -1.9, -1.57, 0.0])
-    sims = [KinematicSim(UR5_DH, q0)] + ([MujocoSim(UR5_DH, q0)] if mujoco_available() else [])
+    sims = [KinematicSim(UR5E_DH, q0)] + ([MujocoSim(UR5E_DH, q0)] if mujoco_available() else [])
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
     for sim in sims:
         p0 = sim.ee_pose()[:3, 3]
@@ -28,7 +28,7 @@ def main(lab, outdir):
     ax2.set_aspect("equal")
     for ax in (ax1, ax2):
         ax.legend()
-    fig.suptitle("Resolved-rate control of the UR5 along a straight line")
+    fig.suptitle("Resolved-rate control of the UR5e along a straight line")
     fig.tight_layout()
     path = outdir / "lab11_straight_line.png"
     fig.savefig(path, dpi=120)

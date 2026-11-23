@@ -13,7 +13,7 @@ trajectories, Lagrangian/Newton-Euler dynamics. Loaded lazily by name, like Modu
 `toolbox.models` writes MuJoCo models with real inertias for the dynamics labs.
 Modules 7-8 (labs 21-28): PD, gravity compensation, computed torque, task-space and impedance
 control, contacts and grasp quality. `toolbox.models` adds torque motors and contact scenes
-(table, pinch rig, UR5 + gripper); `toolbox.sim.MujocoDynamics` evaluates M(q) and g(q) fast.
+(table, pinch rig, UR5e + gripper); `toolbox.sim.MujocoDynamics` evaluates M(q) and g(q) fast.
 """
 
 from labs.manipulators.lab01_rotations.solution import (  # noqa: F401
@@ -33,7 +33,7 @@ from labs.manipulators.lab05_transforms.solution import (  # noqa: F401
     chain, is_transform, make_transform, relative_transform, split_transform,
     transform_inverse, transform_points,
 )
-from labs.manipulators.toolbox.robots import ARM3_DH, UR5_DH  # noqa: F401
+from labs.manipulators.toolbox.robots import ARM3_DH, UR5E_DH  # noqa: F401
 
 
 def __getattr__(name):
@@ -58,7 +58,7 @@ def __getattr__(name):
         "dls_step": "lab14_dls_ik", "ik_lm": "lab14_dls_ik", "clamp_to_limits": "lab14_dls_ik",
         "within_limits": "lab14_dls_ik", "distinct_solutions": "lab14_dls_ik",
         "multi_start_ik": "lab14_dls_ik", "select_solution": "lab14_dls_ik",
-        "make_pose": "lab15_ur5_ik", "solve_ur5_pose": "lab15_ur5_ik",
+        "make_pose": "lab15_ur5e_ik", "solve_ur5e_pose": "lab15_ur5e_ik",
         # Module 5: trajectories
         "cubic_scaling": "lab16_time_scaling", "quintic_scaling": "lab16_time_scaling",
         "trapezoid_profile": "lab16_time_scaling", "trapezoid_sample": "lab16_time_scaling",

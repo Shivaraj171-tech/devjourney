@@ -1,7 +1,7 @@
 """Lab 06: Denavit-Hartenberg forward kinematics (standard / distal DH).
 
 DH table rows are (a, alpha, d, theta_offset); joint i adds q_i to theta.
-The UR5 table is given in labs/manipulators/toolbox/robots.py (with its source).
+The UR5e table is given in labs/manipulators/toolbox/robots.py (with its source).
 """
 
 from __future__ import annotations

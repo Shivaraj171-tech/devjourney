@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 
 from labs.manipulators.toolbox import (
-    UR5_DH, body_screws, body_twist_error, fk_body, jacobian_body, screws_from_dh,
+    UR5E_DH, body_screws, body_twist_error, fk_body, jacobian_body, screws_from_dh,
 )
 
-M, S = screws_from_dh(UR5_DH)
+M, S = screws_from_dh(UR5E_DH)
 B = body_screws(M, S)
 Q_TRUE = np.array([0.3, -1.1, 1.4, -1.8, -1.4, 0.5])
 T_GOAL = fk_body(M, B, Q_TRUE)
@@ -98,7 +98,7 @@ def test_distinct_solutions(impl):
 def test_multi_start_finds_all_eight(impl):
     seeds = np.random.default_rng(0).uniform(-np.pi, np.pi, (40, 6))
     sols = impl.multi_start_ik(M, B, T_GOAL, seeds)
-    assert len(sols) == 8, f"found {len(sols)} distinct UR5 solutions; a generic pose has 8"
+    assert len(sols) == 8, f"found {len(sols)} distinct UR5e solutions; a generic pose has 8"
     for q in sols:
         np.testing.assert_allclose(fk_body(M, B, q), T_GOAL, atol=1e-8)
 

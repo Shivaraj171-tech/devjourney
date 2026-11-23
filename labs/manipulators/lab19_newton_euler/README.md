@@ -6,7 +6,7 @@ MuJoCo part runs if `mujoco` is installed
 ## Intuition
 
 Lab 18's Lagrangian route is beautiful for 2 joints and hopeless for 6: M(q)
-of the UR5 written out by hand runs to pages. Controllers need τ for
+of the UR5e written out by hand runs to pages. Controllers need τ for
 *any* arm, a thousand times per second. The **recursive Newton–Euler algorithm**
 (RNEA; Luh, Walker & Paul, 1980) does it in O(n), using nothing but rigid-body
 physics, link by link:
@@ -30,8 +30,12 @@ orientation of DH frame i. At home (q = 0) its pose is Mᵢ (`com_frames`). Fram
 {n+1} is the end effector. Write M_{i−1,i} = M_{i−1}⁻¹ Mᵢ (frame 0 = base). Link i has
 **spatial inertia**
 
-    Gᵢ = [ Iᵢ  0  ]      (6×6 in (ω, v) order; Iᵢ = diag(Ixx, Iyy, Izz) about the COM)
+    Gᵢ = [ Iᵢ  0  ]      (6×6 in (ω, v) order; Iᵢ = the inertia tensor about the COM)
          [ 0  mᵢ𝟙 ]
+
+Our 3-DOF arm gives Iᵢ as principal moments, Iᵢ = diag(Ixx, Iyy, Izz). The UR5e's official
+tensors (Universal Robots' description package) have small products of inertia, so its links
+give a full symmetric 3×3 Iᵢ: `spatial_inertia` takes either.
 
 so its kinetic energy is ½ Vᵢᵀ Gᵢ Vᵢ and its momentum is Gᵢ Vᵢ (twists Vᵢ in frame {i}).
 Joint i's screw axis in frame {i} is Aᵢ = Ad_{Mᵢ⁻¹} Sᵢ (lab 07's Sᵢ, re-expressed).
@@ -81,15 +85,15 @@ statics falls out as a special case.
 (the generalised force that would produce qacc; with no damping, armature,
 contacts or passive forces in our model it is exactly τ). We confirmed the
 signature with `help(mujoco.mj_inverse)` in 4.0.1: "Inverse dynamics: qacc must
-be set before calling". Our measured agreement is 2×10⁻¹⁵ (3-DOF) and 3×10⁻¹⁴ N·m (UR5).
+be set before calling". Our measured agreement is 2×10⁻¹⁵ (3-DOF) and 4×10⁻¹⁴ N·m (UR5e).
 
 **8. The 2R arm again.** Lab 18's arm is a DH chain with rows
 (l₁, 0, 0, 0), (l₂, 0, 0, 0) in the horizontal x–y plane. With gravity along −y it's the
 same mechanism, and RNEA must reproduce lab 18's closed form to round-off.
 
-Model data: `toolbox/robots.py` (`ARM3_LINKS` are our own numbers; `UR5_LINKS` are
-UR5-like masses and centres of mass with our own cylinder inertias, see the comment
-there). MuJoCo models: `toolbox/models.py` (explicit `<inertial>`, no damping).
+Model data: `toolbox/robots.py` (`ARM3_LINKS` are our own numbers; `UR5E_LINKS` are
+Universal Robots' official UR5e masses, centres of mass and inertia tensors, with sources,
+see the comment there). MuJoCo models: `toolbox/models.py` (explicit `<inertial>`, no damping).
 
 ## Task
 

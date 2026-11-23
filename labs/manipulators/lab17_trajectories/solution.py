@@ -1,4 +1,4 @@
-"""Lab 17 reference solution: joint-space vs task-space trajectories on the UR5."""
+"""Lab 17 reference solution: joint-space vs task-space trajectories on the UR5e."""
 
 from __future__ import annotations
 
@@ -12,10 +12,10 @@ from labs.manipulators.lab14_dls_ik.solution import ik_lm
 from labs.manipulators.lab16_time_scaling.solution import (
     quintic_scaling, trapezoid_profile, trapezoid_sample,
 )
-from labs.manipulators.toolbox.robots import UR5_DH
+from labs.manipulators.toolbox.robots import UR5E_DH
 
-M_UR5, S_UR5 = screws_from_dh(UR5_DH)
-B_UR5 = body_screws(M_UR5, S_UR5)
+M_UR5E, S_UR5E = screws_from_dh(UR5E_DH)
+B_UR5E = body_screws(M_UR5E, S_UR5E)
 
 
 def joint_trajectory(q0, q1, T, ts):
@@ -68,7 +68,7 @@ def cartesian_trajectory(T0, T1, T, ts, q_start):
     q = np.asarray(q_start, dtype=float)
     Q, ok = [], True
     for T_d in cartesian_poses(T0, T1, s):
-        q, success, _ = ik_lm(M_UR5, B_UR5, T_d, q)
+        q, success, _ = ik_lm(M_UR5E, B_UR5E, T_d, q)
         ok &= success
         Q.append(q)
     return np.unwrap(np.array(Q), axis=0), bool(ok)
@@ -90,7 +90,7 @@ def limit_check(Qd, Qdd, vmax, amax) -> dict:
 
 def ee_positions(Q) -> np.ndarray:
     """(N, 3) end-effector positions by DH FK."""
-    return np.array([fk_dh(UR5_DH, q)[:3, 3] for q in Q])
+    return np.array([fk_dh(UR5E_DH, q)[:3, 3] for q in Q])
 
 
 def track_in_mujoco(sim, Q, dt):

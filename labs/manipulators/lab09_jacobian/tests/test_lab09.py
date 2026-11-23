@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 
 from labs.manipulators.toolbox import (
-    ARM3_DH, UR5_DH, body_screws, fk_body, fk_dh, fk_space, screws_from_dh,
+    ARM3_DH, UR5E_DH, body_screws, fk_body, fk_dh, fk_space, screws_from_dh,
 )
 
-M, S = screws_from_dh(UR5_DH)
+M, S = screws_from_dh(UR5E_DH)
 B = body_screws(M, S)
 
 
@@ -78,7 +78,7 @@ def test_arm3_geometric_jacobian(impl):
 def test_matches_mujoco_mj_jacSite(impl):
     mujoco = pytest.importorskip("mujoco", reason="optional: compare with MuJoCo's mj_jacSite")
     from labs.manipulators.toolbox import dh_to_mjcf
-    model = mujoco.MjModel.from_xml_string(dh_to_mjcf(UR5_DH))
+    model = mujoco.MjModel.from_xml_string(dh_to_mjcf(UR5E_DH))
     data = mujoco.MjData(model)
     jacp, jacr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
     for q in configs(5):

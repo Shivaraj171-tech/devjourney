@@ -24,9 +24,14 @@ def ad_twist(V) -> np.ndarray:
     return out
 
 
-def spatial_inertia(mass: float, inertia_diag) -> np.ndarray:
-    """6x6 G = diag(Ixx, Iyy, Izz, m, m, m) in a principal frame at the COM ((omega, v) order)."""
-    return np.diag(np.concatenate([np.asarray(inertia_diag, dtype=float), np.full(3, float(mass))]))
+def spatial_inertia(mass: float, inertia) -> np.ndarray:
+    """6x6 G = [[I, 0], [0, m 1]] at the COM ((omega, v) order). inertia: the principal moments
+    (Ixx, Iyy, Izz), so I = diag(...), or a full symmetric 3x3 tensor (the UR5e's)."""
+    I = np.asarray(inertia, dtype=float)
+    G = np.zeros((6, 6))
+    G[:3, :3] = np.diag(I) if I.ndim == 1 else I
+    G[3:, 3:] = float(mass) * np.eye(3)
+    return G
 
 
 def com_frames(dh, links) -> list:

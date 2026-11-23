@@ -6,15 +6,15 @@ Module 4 (inverse kinematics) · 200 XP · browser twin: Module 4 of the web tra
 
 Lab 13's Newton step trusts the linearisation completely. Near a singularity
 that trust is badly misplaced: J has a tiny singular value σ, so J⁺ contains
-1/σ and the step is huge. On the UR5 with sin q₅ ≈ 10⁻⁴ we measured a **70 rad**
-Newton step for an error of a few centimetres. The next linearisation is then
+1/σ and the step is huge. On the UR5e with sin q₅ ≈ 10⁻⁴ we measured a **316 rad**
+Newton step for a 2.8 cm error. The next linearisation is then
 taken somewhere absurd.
 
 **Damped least squares** (DLS) asks for a step that reduces the error *and*
 stays small. **Levenberg–Marquardt** (LM) tunes the damping on the fly: it
 damps hard when steps don't help, and barely at all when they do, so near
 the answer it's back to fast Newton convergence. Add **joint limits** (real
-arms have cables and hard stops) and a rule for **which of the 8 UR5 solutions
+arms have cables and hard stops) and a rule for **which of the 8 UR5e solutions
 to use**, and you have what a practical IK solver is made of.
 
 ## Key maths, step by step
@@ -61,7 +61,7 @@ Watch out: if a clipped joint lands on a singular value (clipping q₃ to 0
 stretches the elbow!) the solver can stall on the boundary. Re-seed from inside
 the limits. The tests show both cases.
 
-**5. Many solutions: find them, then choose.** A general UR5 pose has **8**
+**5. Many solutions: find them, then choose.** A general UR5e pose has **8**
 solutions (shoulder left/right × elbow up/down × wrist flip). One run returns
 one of them, decided by the seed (lab 13). Run LM from many seeds and remove
 duplicates (equal after wrapping, to a tolerance). Then **choose**:
@@ -76,7 +76,7 @@ is the real travel.
 
 **6. Unreachable targets, handled gracefully.** LM can't succeed, but since its
 cost never increases it ends at a *closest-approach* configuration with
-bounded joints (Newton wound up to 120 rad in lab 13). Reporting "unreachable,
+bounded joints (Newton wound up to thousands of radians in lab 13). Reporting "unreachable,
 best effort is this far off" is far more useful than garbage joint angles.
 
 ## Task

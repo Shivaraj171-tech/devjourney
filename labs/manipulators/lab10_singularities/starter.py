@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from labs.manipulators.toolbox.robots import UR5_DH  # noqa: F401  (a2 = UR5_DH[1,0], ...)
+from labs.manipulators.toolbox.robots import UR5E_DH  # noqa: F401  (a2 = UR5E_DH[1,0], ...)
 
 
 def singular_values(J) -> np.ndarray:
@@ -60,13 +60,13 @@ def lost_directions(J, tol: float = 1e-6):
     raise NotImplementedError("lost directions at a singularity")
 
 
-def ur5_jacobian_det(q) -> float:
-    """Closed-form det of the UR5 geometric Jacobian (README step 6)."""
+def ur5e_jacobian_det(q) -> float:
+    """Closed-form det of the UR5e geometric Jacobian (README step 6)."""
     # TODO: a2 a3 sin(q3) sin(q5) (a2 cos q2 + a3 cos(q2+q3) + d5 sin(q2+q3+q4))
-    raise NotImplementedError("UR5 Jacobian determinant")
+    raise NotImplementedError("UR5e Jacobian determinant")
 
 
-def classify_ur5_singularity(q, tol: float = 1e-6) -> set:
+def classify_ur5e_singularity(q, tol: float = 1e-6) -> set:
     """Subset of {"elbow", "wrist", "shoulder"}: which factor(s) of the determinant vanish."""
     # TODO
-    raise NotImplementedError("classify UR5 singularities")
+    raise NotImplementedError("classify UR5e singularities")

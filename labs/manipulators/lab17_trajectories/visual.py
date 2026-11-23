@@ -1,4 +1,4 @@
-"""Joint-space vs Cartesian move on the UR5: gripper paths (top view) and joint velocities."""
+"""Joint-space vs Cartesian move on the UR5e: gripper paths (top view) and joint velocities."""
 
 import numpy as np
 
@@ -8,11 +8,11 @@ def main(lab, outdir):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    from labs.manipulators.toolbox import UR5_DH, fk_dh
+    from labs.manipulators.toolbox import UR5E_DH, fk_dh
 
     qa = np.array([0.0, -1.2, 1.5, -1.9, -1.57, 0.0])
     qb = np.array([0.9, -1.7, 1.9, -1.6, -1.2, 0.8])
-    Ta, Tb = fk_dh(UR5_DH, qa), fk_dh(UR5_DH, qb)
+    Ta, Tb = fk_dh(UR5E_DH, qa), fk_dh(UR5E_DH, qb)
     dt, T = 0.01, 2.0
     ts = np.arange(0, T + 1e-9, dt)
     Qj = np.asarray(lab.joint_trajectory(qa, qb, T, ts)[0])

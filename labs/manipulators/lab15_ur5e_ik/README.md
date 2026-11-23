@@ -1,4 +1,4 @@
-# Lab 15 · UR5 IK: reach a set of poses, verify everywhere
+# Lab 15 · UR5e IK: reach a set of poses, verify everywhere
 
 Module 4 (inverse kinematics) · 220 XP (boss lab) · MuJoCo part runs if `mujoco` is installed
 
@@ -23,7 +23,7 @@ moves. That means:
 tool z axis along −z_world. Roll = π about x flips z, so `(yaw, 0, π)`, with
 yaw spinning the gripper about the vertical.
 
-**2. Reachability first.** The UR5's wrist centre can't be farther than about
+**2. Reachability first.** The UR5e's wrist centre can't be farther than about
 |a₂| + |a₃| ≈ 0.82 m from the shoulder. A target 1 m out is hopeless.
 LM will "fail gracefully" (lab 14), but the report must say **NO**, not print
 a pose that's 15 cm off.
@@ -60,18 +60,20 @@ Both are frame-independent scalars. Don't compare Euler angles: near gimbal lock
   in `toolbox/sim.py` and you'll see the servo sag instead.
 
 **6. What the numbers mean.** IK tolerance 10⁻⁹ rad / 10⁻⁹ m is far below anything
-physical: a real UR5 repeats to ~0.1 mm, and its calibrated kinematics differ from
-the nominal DH table by more than that. Report what you achieved, and remember
+physical: a real arm's repeatability is a matter of hundredths of a millimetre (see the
+UR5e datasheet), and its calibrated kinematics differ from the nominal DH table by more. Report what you achieved, and remember
 that a model only promises its own accuracy.
 
-Further reading: the UR5 also has a closed-form IK with 8 solutions (Hawkins,
-"Analytic Inverse Kinematics for the Universal Robots UR-5/UR-10 Arms", Georgia
-Tech technical report, 2013). It makes a good stretch exercise: compare it with your
+Further reading: the UR5e also has a closed-form IK with 8 solutions. Hawkins,
+"Analytic Inverse Kinematics for the Universal Robots UR-5/UR-10 Arms" (Georgia
+Tech technical report, 2013), derives it for the CB-series arms; the e-Series has the same
+joint layout with different DH numbers, and `ur_kinematics/src/ur_kin.cpp` in
+ros-industrial/universal_robot implements it with a `UR5e_PARAMS` table. It makes a good stretch exercise: compare it with your
 multi-start results.
 
 ## Task
 
-Implement `make_pose`, `ik_seeds`, `solve_ur5_pose`, `ik_campaign`,
+Implement `make_pose`, `ik_seeds`, `solve_ur5e_pose`, `ik_campaign`,
 `mujoco_kinematic_errors`, `drive_mujoco`, `format_report`.
 
     python -m labs.manipulators check lab15

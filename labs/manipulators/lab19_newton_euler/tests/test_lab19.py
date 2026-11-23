@@ -2,14 +2,14 @@ import numpy as np
 import pytest
 
 from labs.manipulators.toolbox import (
-    ARM3_DH, UR5_DH, body_screws, fk_dh, jacobian_body, planar2r_inverse_dynamics, screws_from_dh,
+    ARM3_DH, UR5E_DH, body_screws, fk_dh, jacobian_body, planar2r_inverse_dynamics, screws_from_dh,
 )
 from labs.manipulators.toolbox.models import dh_arm_mjcf
-from labs.manipulators.toolbox.robots import ARM3_LINKS, PLANAR2R_DYN as P, UR5_LINKS
+from labs.manipulators.toolbox.robots import ARM3_LINKS, PLANAR2R_DYN as P, UR5E_LINKS
 from labs.manipulators.toolbox.sim import mujoco_available
 
 needs_mujoco = pytest.mark.skipif(not mujoco_available(), reason="optional: needs mujoco")
-ARMS = [("ARM3", ARM3_DH, ARM3_LINKS), ("UR5", UR5_DH, UR5_LINKS)]
+ARMS = [("ARM3", ARM3_DH, ARM3_LINKS), ("UR5e", UR5E_DH, UR5E_LINKS)]
 
 
 def states(n, k=5, seed=0):
@@ -25,6 +25,11 @@ def test_ad_and_spatial_inertia(impl, rng):
                                err_msg="ad_V1 V2 = (w1 x w2, w1 x v2 - w2 x v1)")
     G = np.asarray(impl.spatial_inertia(2.0, [0.1, 0.2, 0.3]))
     np.testing.assert_allclose(G, np.diag([0.1, 0.2, 0.3, 2, 2, 2]), err_msg="(omega, v) order: I first")
+    I = np.array([[0.1, 0.01, -0.02], [0.01, 0.2, 0.03], [-0.02, 0.03, 0.3]])
+    G = np.asarray(impl.spatial_inertia(2.0, I))
+    np.testing.assert_allclose(G[:3, :3], I, err_msg="a full 3x3 tensor goes in as it is (UR5e links)")
+    np.testing.assert_allclose(G[3:, 3:], 2 * np.eye(3))
+    np.testing.assert_allclose(G[:3, 3:], 0)
 
 
 def test_com_frames(impl):
@@ -108,9 +113,9 @@ def test_matches_mj_inverse(impl, name, dh, links):
 @needs_mujoco
 def test_mass_matrix_and_bias_match_mujoco(impl):
     import mujoco
-    mj_model = mujoco.MjModel.from_xml_string(dh_arm_mjcf(UR5_DH, UR5_LINKS))
+    mj_model = mujoco.MjModel.from_xml_string(dh_arm_mjcf(UR5E_DH, UR5E_LINKS))
     data = mujoco.MjData(mj_model)
-    model = impl.rnea_model(UR5_DH, UR5_LINKS)
+    model = impl.rnea_model(UR5E_DH, UR5E_LINKS)
     for q, qd, _ in states(6, 3, seed=12):
         data.qpos[:], data.qvel[:] = q, qd
         mujoco.mj_forward(mj_model, data)

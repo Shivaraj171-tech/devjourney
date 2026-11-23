@@ -112,7 +112,7 @@ class MujocoDynamics:
 
     Not a simulator: it keeps its own MjData and only evaluates the model at the (q, qd) you
     give it (mj_forward). Lab 19 showed your RNEA gives the same numbers to round-off; on the
-    6-DOF UR5 RNEA's M(q) costs ~2 ms in numpy against tens of microseconds here, which matters
+    6-DOF UR5e RNEA's M(q) costs ~2 ms in numpy against tens of microseconds here, which matters
     at 500-1000 Hz. For models with extra joints (gripper fingers, a free box) only the arm's
     n x n block is returned; the extra joints sit at `rest_qpos` (default: the model's qpos0).
     """

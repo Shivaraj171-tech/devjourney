@@ -1,4 +1,4 @@
-"""3D stick figures of the UR5 and the 3-DOF arm, drawn from your fk_dh_frames."""
+"""3D stick figures of the UR5e and the 3-DOF arm, drawn from your fk_dh_frames."""
 
 import numpy as np
 
@@ -8,9 +8,9 @@ def main(lab, outdir):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    from labs.manipulators.toolbox import UR5_DH
+    from labs.manipulators.toolbox import UR5E_DH
 
-    arms = [("UR5", UR5_DH, np.array([0.3, -1.2, 1.6, -1.9, -1.57, 0.0]))]
+    arms = [("UR5e", UR5E_DH, np.array([0.3, -1.2, 1.6, -1.9, -1.57, 0.0]))]
     if lab.ARM3_DH is not None:
         arms.append(("3-DOF arm", lab.ARM3_DH, np.array([0.5, 0.6, -1.0])))
     fig = plt.figure(figsize=(5 * len(arms), 4.5))
