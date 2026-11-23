@@ -98,6 +98,10 @@ def __getattr__(name):
         "scaled_grasp_matrix": "lab27_grasp_quality",
         "min_singular_value": "lab27_grasp_quality", "primitive_wrenches": "lab27_grasp_quality",
         "epsilon_metric": "lab27_grasp_quality", "is_force_closure": "lab27_grasp_quality",
+        "tool_model": "lab28_pick_and_place", "tool_pose": "lab28_pick_and_place",
+        "grasp_yaw": "lab28_pick_and_place", "plan_waypoints": "lab28_pick_and_place",
+        "segment_reference": "lab28_pick_and_place",
+        "run_pick_and_place": "lab28_pick_and_place",
     }
     if name in lazy:
         import importlib

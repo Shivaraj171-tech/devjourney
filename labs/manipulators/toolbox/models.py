@@ -210,6 +210,9 @@ def ur5_gripper_mjcf(dh, links, box_pos, box_yaw: float = 0.0, box_mass: float =
     forces [N], positive closes). qpos layout: 6 arm joints, jl, jr, then the box's free joint
     (x, y, z, quaternion w x y z).
     Contacts: only pads, box and table collide (condim 4: torsional friction too, see lab 27).
+    The box geom has friction 0: MuJoCo uses the larger of two geoms' coefficients, so pad-box
+    contacts get the pads' mu and box-table contacts the table's 0.8. Elliptic cones and
+    impratio 10, as in pinch_mjcf.
     """
     mu, box_mass = float(mu), float(box_mass)
     xml = dh_arm_mjcf(dh, links, name="ur5_gripper", timestep=timestep,
@@ -243,7 +246,7 @@ def ur5_gripper_mjcf(dh, links, box_pos, box_yaw: float = 0.0, box_mass: float =
              f'    <body name="box" pos="{float(box_pos[0])!r} {float(box_pos[1])!r} {BOX_HALF!r}" '
              f'quat="{c!r} 0 0 {s!r}"><freejoint name="box"/>'
              f'<geom name="box" type="box" size="{BOX_HALF!r} {BOX_HALF!r} {BOX_HALF!r}" '
-             f'mass="{box_mass!r}" friction="0.5 0.01 0.0001" condim="4"/></body>')
+             f'mass="{box_mass!r}" friction="0 0 0" condim="4"/></body>')
     xml = xml.replace("  </worldbody>", world + "\n  </worldbody>", 1)
     xml = xml.replace('integrator="implicitfast"', 'integrator="implicitfast" cone="elliptic" '
                       'impratio="10"', 1)
