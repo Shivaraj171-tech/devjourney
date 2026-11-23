@@ -1,6 +1,6 @@
 import numpy as np
 
-from labs.manipulators.toolbox import ARM3_DH, UR5_DH, exp_so3, fk_dh, skew
+from labs.manipulators.toolbox import ARM3_DH, UR5E_DH, exp_so3, fk_dh, skew
 
 
 def series_expm(A, terms=40):
@@ -70,17 +70,17 @@ def test_revolute_screw_moves_points_correctly(impl):
     np.testing.assert_allclose((T @ [2, 0, 0, 1])[:3], [1, 1, 0], atol=1e-12)
 
 
-def test_poe_equals_dh_on_ur5(impl, rng):
-    M, Slist = impl.screws_from_dh(UR5_DH)
+def test_poe_equals_dh_on_ur5e(impl, rng):
+    M, Slist = impl.screws_from_dh(UR5E_DH)
     assert np.asarray(Slist).shape == (6, 6), "Slist must be 6 x n (one screw per column)"
     np.testing.assert_allclose(Slist[:, 0], [0, 0, 1, 0, 0, 0], atol=1e-12,
-                               err_msg="UR5 joint 1 spins about base z through the origin")
-    np.testing.assert_allclose(Slist[:, 1], [0, -1, 0, 0.089159, 0, 0], atol=1e-12,
-                               err_msg="UR5 joint 2: axis -y through (0, 0, d1)")
+                               err_msg="UR5e joint 1 spins about base z through the origin")
+    np.testing.assert_allclose(Slist[:, 1], [0, -1, 0, 0.1625, 0, 0], atol=1e-12,
+                               err_msg="UR5e joint 2: axis -y through (0, 0, d1)")
     for _ in range(30):
         q = rng.uniform(-np.pi, np.pi, size=6)
-        np.testing.assert_allclose(impl.fk_space(M, Slist, q), fk_dh(UR5_DH, q), atol=1e-9,
-                                   err_msg=f"PoE != DH on the UR5 at q = {np.round(q, 3)}")
+        np.testing.assert_allclose(impl.fk_space(M, Slist, q), fk_dh(UR5E_DH, q), atol=1e-9,
+                                   err_msg=f"PoE != DH on the UR5e at q = {np.round(q, 3)}")
 
 
 def test_poe_equals_dh_on_arm3(impl, rng):
@@ -91,7 +91,7 @@ def test_poe_equals_dh_on_arm3(impl, rng):
 
 
 def test_body_form_agrees(impl, rng):
-    M, Slist = impl.screws_from_dh(UR5_DH)
+    M, Slist = impl.screws_from_dh(UR5E_DH)
     Blist = impl.body_screws(M, Slist)
     for _ in range(10):
         q = rng.uniform(-np.pi, np.pi, size=6)

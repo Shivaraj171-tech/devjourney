@@ -1,8 +1,8 @@
 import numpy as np
 
-from labs.manipulators.toolbox import UR5_DH, geometric_jacobian, screws_from_dh
+from labs.manipulators.toolbox import UR5E_DH, geometric_jacobian, screws_from_dh
 
-M, S = screws_from_dh(UR5_DH)
+M, S = screws_from_dh(UR5E_DH)
 L1, L2 = 1.0, 0.8
 
 
@@ -70,18 +70,18 @@ def test_lost_directions_at_stretched_2r(impl):
                                err_msg="the joint motion in V must produce zero hand velocity")
 
 
-def test_ur5_det_formula_matches_numeric(impl):
+def test_ur5e_det_formula_matches_numeric(impl):
     rng = np.random.default_rng(4)
     for _ in range(10):
         q = rng.uniform(-np.pi, np.pi, 6)
         d = np.linalg.det(geometric_jacobian(M, S, q))
-        assert abs(impl.ur5_jacobian_det(q) - d) < 1e-10, "closed-form det disagrees with numpy"
+        assert abs(impl.ur5e_jacobian_det(q) - d) < 1e-10, "closed-form det disagrees with numpy"
 
 
-def test_ur5_singularities_found_by_rank(impl):
+def test_ur5e_singularities_found_by_rank(impl):
     base = np.array([0.3, -1.0, 1.2, -0.9, 0.8, 0.2])
     J = geometric_jacobian(M, S, base)
-    assert not impl.is_singular(J) and impl.classify_ur5_singularity(base) == set()
+    assert not impl.is_singular(J) and impl.classify_ur5e_singularity(base) == set()
     elbow = base.copy()
     elbow[2] = 0.0
     wrist = base.copy()
@@ -90,14 +90,14 @@ def test_ur5_singularities_found_by_rank(impl):
         J = geometric_jacobian(M, S, q)
         assert impl.numerical_rank(J) == 5, f"{kind} singularity should drop the rank to 5"
         assert impl.condition_number(J) > 1e8
-        assert kind in impl.classify_ur5_singularity(q)
+        assert kind in impl.classify_ur5e_singularity(q)
 
 
-def test_ur5_shoulder_singularity(impl):
-    a2, a3, d5 = UR5_DH[1, 0], UR5_DH[2, 0], UR5_DH[4, 2]
+def test_ur5e_shoulder_singularity(impl):
+    a2, a3, d5 = UR5E_DH[1, 0], UR5E_DH[2, 0], UR5E_DH[4, 2]
     q2, q3 = np.pi / 2, 0.1
     s234 = -(a2 * np.cos(q2) + a3 * np.cos(q2 + q3)) / d5
     q4 = np.arcsin(s234) - q2 - q3  # wrist centre placed on the base axis
     q = np.array([0.0, q2, q3, q4, 0.7, 0.0])
-    assert impl.classify_ur5_singularity(q) == {"shoulder"}
+    assert impl.classify_ur5e_singularity(q) == {"shoulder"}
     assert impl.is_singular(geometric_jacobian(M, S, q))

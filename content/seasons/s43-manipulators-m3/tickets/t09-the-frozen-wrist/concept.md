@@ -18,11 +18,11 @@ Step 2: the condition number:
 κ = σ_max / σ_min           1 = a perfect ball,   ∞ = singular
 ```
 
-Step 3: why it predicts trouble. Solving J q̇ = V, the worst-case amplification from V to q̇ is 1/σ_min, and relative errors in V can be amplified by up to κ. For the UR5 near the wrist flip, σ_min ≈ 0.33 sin(q5), shrinking with q5, so the speed of joints 4 and 6 grows like 1 / sin(q5).
+Step 3: why it predicts trouble. Solving J q̇ = V, the worst-case amplification from V to q̇ is 1/σ_min, and relative errors in V can be amplified by up to κ. For the UR5e near the wrist flip, σ_min ≈ 0.33 sin(q5), shrinking with q5, so the speed of joints 4 and 6 grows like 1 / sin(q5).
 
-Step 4: the forgotten square root. If you skip the root you report λ_max / λ_min = κ²: at a healthy κ = 14 you'd report 201 and cross a stop threshold of 200 nowhere near the singularity. A squared monitor is too cautious far away and much too jumpy near: thresholds tuned on it mean nothing.
+Step 4: the forgotten square root. If you skip the root you report λ_max / λ_min = κ²: at a healthy κ = 14.3 you'd report 204 and cross a stop threshold of 200 nowhere near the singularity. A squared monitor is too cautious far away and much too jumpy near: thresholds tuned on it mean nothing.
 
-Step 5: thresholds. For our UR5 path, the true κ crosses 50 around q5 = 7.5° (slow down) and 200 around q5 = 1.8° (stop), where joint 4 would need about 8 rad/s for a 0.2 rad/s spin.
+Step 5: thresholds. For our UR5e path, the true κ crosses 50 around q5 = 7.4° (slow down) and 200 around q5 = 1.8° (stop), where joint 4 would need about 8 rad/s for a 0.2 rad/s spin.
 
 **Worked example**
 

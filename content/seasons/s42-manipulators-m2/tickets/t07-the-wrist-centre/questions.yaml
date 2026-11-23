@@ -5,7 +5,7 @@ questions:
       - "Its gripper is mounted on a ball joint, which counts as three DOF in one joint"
       - "All six joints of the arm are revolute"
     answer: 0
-    explain: "Three revolute axes through one point act like a ball joint built from hinges. The UR5 has six revolute joints, but its wrist axes are offset, so it isn't spherical."
+    explain: "Three revolute axes through one point act like a ball joint built from hinges. The UR5e has six revolute joints, but its wrist axes are offset, so it isn't spherical."
   - prompt: "On an arm with a spherical wrist, which joints move the wrist centre?"
     choices:
       - "Only joints 1, 2 and 3"

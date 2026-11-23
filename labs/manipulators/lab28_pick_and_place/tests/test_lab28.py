@@ -3,7 +3,7 @@ import pytest
 
 from labs.manipulators.toolbox import fk_space, screws_from_dh
 from labs.manipulators.toolbox.models import BOX_HALF, GRIPPER_TCP
-from labs.manipulators.toolbox.robots import UR5_DH, UR5_Q_MAX, UR5_Q_MIN
+from labs.manipulators.toolbox.robots import UR5E_DH, UR5E_Q_MAX, UR5E_Q_MIN
 from labs.manipulators.toolbox.sim import mujoco_available
 
 needs_mujoco = pytest.mark.skipif(not mujoco_available(), reason="optional: needs mujoco")
@@ -31,7 +31,7 @@ def run(impl, seed, **kw):
 
 def test_tool_model_and_pose(impl):
     M_tool, S, B = impl.tool_model()
-    M, S0 = screws_from_dh(UR5_DH)
+    M, S0 = screws_from_dh(UR5E_DH)
     T_flange = fk_space(M, S0, Q_HOME)
     np.testing.assert_allclose(fk_space(M_tool, S, Q_HOME)[:3, 3], T_flange[:3, 3] + GRIPPER_TCP * T_flange[:3, 2],
                                atol=1e-12, err_msg="the TCP sits GRIPPER_TCP along the flange z axis")
@@ -59,7 +59,7 @@ def test_waypoints_reach_their_poses(impl):
     M_tool, S, _ = impl.tool_model()
     Ts = {n: fk_space(M_tool, S, wp[n]) for n in NAMES}
     for n in NAMES:
-        assert np.all(wp[n] >= UR5_Q_MIN - 1e-9) and np.all(wp[n] <= UR5_Q_MAX + 1e-9), f"{n}: within limits"
+        assert np.all(wp[n] >= UR5E_Q_MIN - 1e-9) and np.all(wp[n] <= UR5E_Q_MAX + 1e-9), f"{n}: within limits"
         np.testing.assert_allclose(Ts[n][:3, 2], [0, 0, -1], atol=1e-6, err_msg=f"{n}: gripper vertical")
     np.testing.assert_allclose(Ts["grasp"][:3, 3], [*bxy, BOX_HALF + 0.005], atol=1e-6,
                                err_msg="grasp: TCP over the box centre, pads 5 mm above the table")

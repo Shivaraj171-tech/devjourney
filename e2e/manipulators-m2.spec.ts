@@ -2,8 +2,8 @@
 // side floor that opens only once Module 1 is done (season.yaml `requires: s41-t11`: a
 // side floor may require another side floor's ticket, so the modules open in sequence).
 // Every ticket is played: starter fails, solution passes, the 3D arm renders with a frame
-// on every joint (six DH frames on the UR5), the quiz; the concept check is a read ticket;
-// the UR5 fits a 390px phone.
+// on every joint (six DH frames on the UR5e), the quiz; the concept check is a read ticket;
+// the UR5e fits a 390px phone.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test, type Locator, type Page } from "@playwright/test";
@@ -30,7 +30,7 @@ const season1 = seasonTickets("s01-first-week");
 const onChain = allSeasonTickets();
 const codeTickets = m2.tickets.filter((t) => t.type !== "read");
 const check = m2.tickets.find((t) => t.type === "read")!;
-const ur5 = m2.tickets.find((t) => t.id === "s42-t06")!;
+const ur5e = m2.tickets.find((t) => t.id === "s42-t06")!;
 
 const SHOTS = process.env.M2_SCREENSHOT_DIR ?? "test-results/e2e";
 mkdirSync(SHOTS, { recursive: true });
@@ -183,7 +183,7 @@ async function checkTicketSpecifics(page: Page, id: string) {
     // The full 6-DOF arm: home → two random poses, a triad on all six DH frames.
     await expect(canvas).toHaveAttribute("data-triads", "7");
     await expect(summary).toContainText("Frame 61 of 61", { timeout: 15_000 });
-    await expect(summary).toContainText("flange (frame 6) at (-0.18, 0.05, 0.46)");
+    await expect(summary).toContainText("flange (frame 6) at (-0.22, 0.05, 0.53)");
     await expect(summary).toContainText("0.000 away");
     expect(await redPixels(canvas)).toBeGreaterThan(30);
     // Scrub back to the start: the documented home pose.
@@ -191,11 +191,11 @@ async function checkTicketSpecifics(page: Page, id: string) {
     await slider.focus();
     await page.keyboard.press("Home");
     await expect(canvas).toHaveAttribute("data-frame", "0");
-    await expect(summary).toContainText("flange (frame 6) at (-0.82, -0.19, -0.01)");
+    await expect(summary).toContainText("flange (frame 6) at (-0.82, -0.23, 0.06)");
     await page.keyboard.press("End");
     await expect(canvas).toHaveAttribute("data-frame", "60");
     await view.getByTestId("lab-3d-reset").click();
-    await shotViewer(page, "m2-t06-ur5-desktop");
+    await shotViewer(page, "m2-t06-ur5e-desktop");
   }
   if (id === "s42-t07") {
     await expect(summary).toContainText("Frame 41 of 41", { timeout: 10_000 });
@@ -230,12 +230,12 @@ test(`plays ${check.id}: the module concept check (a read ticket with practice f
   expect(errors).toEqual([]);
 });
 
-test("390px phone: the 6-DOF UR5 fits, renders all six joint frames, turns with the keyboard, no sideways scrolling", async ({ page }) => {
+test("390px phone: the 6-DOF UR5e fits, renders all six joint frames, turns with the keyboard, no sideways scrolling", async ({ page }) => {
   const errors = trackPageErrors(page);
   await seedSolved(page, [...season1, ...m1.tickets, ...m2.tickets.slice(0, 5)]);
-  await page.goto(ticketUrl(ur5.id));
+  await page.goto(ticketUrl(ur5e.id));
   await waitForPython(page);
-  for (const path of ur5.filesEditable) await setEditorFile(page, ur5.id, path, solutionFile(ur5, path));
+  for (const path of ur5e.filesEditable) await setEditorFile(page, ur5e.id, path, solutionFile(ur5e, path));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByTestId("run-tests").click();
   await closeSolvedModal(page, "PR merged!");
@@ -258,7 +258,7 @@ test("390px phone: the 6-DOF UR5 fits, renders all six joint frames, turns with 
   await expect(canvas).toHaveAttribute("data-yaw", "20");
   await page.keyboard.press("0");
   await page.getByTestId("lab-3d").scrollIntoViewIfNeeded();
-  await page.screenshot({ path: join(SHOTS, "m2-t06-ur5-390.png") });
-  await page.getByTestId("lab-3d").screenshot({ path: join(SHOTS, "m2-t06-ur5-390-view.png") });
+  await page.screenshot({ path: join(SHOTS, "m2-t06-ur5e-390.png") });
+  await page.getByTestId("lab-3d").screenshot({ path: join(SHOTS, "m2-t06-ur5e-390-view.png") });
   expect(errors).toEqual([]);
 });

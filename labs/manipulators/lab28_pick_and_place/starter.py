@@ -1,8 +1,8 @@
-"""Lab 28 (capstone): pick and place with the UR5 in MuJoCo, held by friction alone.
+"""Lab 28 (capstone): pick and place with the UR5e in MuJoCo, held by friction alone.
 
 You bring together: ik_lm (lab 14), quintic_scaling (lab 16), run_mujoco_control (lab 21),
 computed_torque (lab 23), and the friction threshold of lab 26.
-Rig: toolbox.models.ur5_gripper_mjcf (UR5 + two-finger gripper + table + cube) and
+Rig: toolbox.models.ur5e_gripper_mjcf (UR5e + two-finger gripper + table + cube) and
 toolbox.sim.MujocoDynamics (M(q), bias of the arm block).
 """
 
@@ -15,7 +15,7 @@ from labs.manipulators.toolbox import (  # noqa: F401
     run_mujoco_control, screws_from_dh, wrap_to_pi,
 )
 from labs.manipulators.toolbox.models import BOX_HALF, GRIPPER_TCP  # noqa: F401
-from labs.manipulators.toolbox.robots import UR5_DH, UR5_Q_MAX, UR5_Q_MIN  # noqa: F401
+from labs.manipulators.toolbox.robots import UR5E_DH, UR5E_Q_MAX, UR5E_Q_MIN  # noqa: F401
 
 Q_HOME = np.array([0.0, -np.pi / 2, np.pi / 2, -np.pi / 2, -np.pi / 2, 0.0])
 HOME_YAW = np.pi / 2       # at Q_HOME the gripper's y axis (finger direction) is world -x
@@ -26,7 +26,7 @@ OPEN, CLOSE = -5.0, 15.0    # finger motor forces [N]: hold open against the sto
 
 
 def tool_model():
-    """(M_tool, S, B_tool): screws_from_dh(UR5_DH) with M moved GRIPPER_TCP along the flange z,
+    """(M_tool, S, B_tool): screws_from_dh(UR5E_DH) with M moved GRIPPER_TCP along the flange z,
     and the body screws recomputed for that M (README step 1)."""
     # TODO: README step 1
     raise NotImplementedError("tool model")

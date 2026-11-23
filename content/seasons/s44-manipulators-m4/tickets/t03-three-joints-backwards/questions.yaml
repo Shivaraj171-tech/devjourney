@@ -11,7 +11,7 @@ questions:
     choices:
       - "4: two base angles (front, back) × two elbows"
       - "2: elbow up and elbow down"
-      - "8: like the UR5, since every joint adds a choice of sign"
+      - "8: like the UR5e, since every joint adds a choice of sign"
     answer: 0
     explain: "Turning the base by π and reaching back over the shoulder gives a second pair."
   - prompt: "The box is directly above the base, at (0, 0, 0.6). What goes wrong?"

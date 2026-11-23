@@ -41,7 +41,7 @@ puts the links through exactly the same points as a front one (back/up matches
 front/up). Turning the base by π mirrors the arm's plane, and the shoulder angle
 π − q₂ mirrors it back. The joint vectors and the link *frames* differ (every
 motor housing is turned around), but the stick figure is identical, because our arm
-has no sideways shoulder offset. Give it one (the UR5's d₄) and the back solutions
+has no sideways shoulder offset. Give it one (the UR5e's d₄) and the back solutions
 become genuinely different shapes.
 
 If ρ = 0 (the target is on the base axis) q₁ is arbitrary, which gives

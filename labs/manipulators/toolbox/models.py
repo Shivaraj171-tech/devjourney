@@ -2,7 +2,7 @@
 
 Not a lab solution: this is the test rig (like `sim.py`). It writes MJCF in which every body
 has an explicit <inertial> element, so MuJoCo uses exactly the masses, centres of mass and
-inertias in `robots.py`. Geoms are visual only (contype/conaffinity 0; with an explicit
+inertias in `robots.py` (`diaginertia` for principal moments, `fullinertia` for a 3x3 tensor). Geoms are visual only (contype/conaffinity 0; with an explicit
 <inertial> MuJoCo does not take mass from geoms). No joint damping, armature, friction, limits
 or contacts, so MuJoCo's equations of motion are exactly
 
@@ -19,7 +19,7 @@ Module 7-8 additions (control and grasping):
     pendulum_mjcf(...)       one link of the 2R arm on its own (a 1-DOF joint for lab 21)
     arm3_table_mjcf(...)     the 3-DOF arm with a ball fingertip above a table (lab 25)
     pinch_mjcf(...)          two force-driven fingers squeezing a free box (lab 26)
-    ur5_gripper_mjcf(...)    the UR5 with a two-finger gripper, a table and a box (lab 28)
+    ur5e_gripper_mjcf(...)   the UR5e with a two-finger gripper, a table and a box (lab 28)
 
 Contact scenes keep the arm links collision-free (contype/conaffinity 0): only fingertips,
 finger pads, boxes and the table collide. Contact geoms in a body that has an explicit
@@ -66,9 +66,16 @@ def dh_arm_mjcf(dh, links, name: str = "arm_dyn", gravity: float = 9.81,
         lines.append(f'{inner}<joint name="j{i + 1}" type="hinge" axis="0 0 1"/>')
         L = make_transform(np.eye(3), [0, 0, d]) @ make_transform(rot_x(alpha), [a, 0, 0])
         com_body = L[:3, :3] @ np.asarray(com, dtype=float) + L[:3, 3]
-        lines.append(f'{inner}<inertial pos="{_fmt(com_body)}" '
-                     f'quat="{_fmt(matrix_to_quat(L[:3, :3]))}" mass="{float(mass)!r}" '
-                     f'diaginertia="{_fmt(inertia)}"/>')
+        I = np.asarray(inertia, dtype=float)
+        if I.ndim == 1:   # principal moments, axes parallel to DH frame i
+            lines.append(f'{inner}<inertial pos="{_fmt(com_body)}" '
+                         f'quat="{_fmt(matrix_to_quat(L[:3, :3]))}" mass="{float(mass)!r}" '
+                         f'diaginertia="{_fmt(I)}"/>')
+        else:             # full tensor in DH frame i axes: rotate it into the body frame
+            Ib = L[:3, :3] @ I @ L[:3, :3].T
+            full = [Ib[0, 0], Ib[1, 1], Ib[2, 2], Ib[0, 1], Ib[0, 2], Ib[1, 2]]
+            lines.append(f'{inner}<inertial pos="{_fmt(com_body)}" mass="{float(mass)!r}" '
+                         f'fullinertia="{_fmt(full)}"/>')
         tip = L[:3, 3]
         if np.linalg.norm(tip) > 1e-6:
             lines.append(f'{inner}<geom type="capsule" fromto="0 0 0 {_fmt(tip)}" size="0.03" '
@@ -191,16 +198,16 @@ def pinch_mjcf(mu: float, box_mass: float = 0.2, half: float = 0.02, finger_mass
         "</mujoco>"])
 
 
-# The lab 28 gripper, in the UR5 flange frame (DH frame 6: z = approach direction).
+# The lab 28 gripper, in the UR5e flange frame (DH frame 6: z = approach direction).
 GRIPPER_TCP = 0.10        # tool centre point: z offset from the flange to the middle of the pads
 GRIPPER_OPEN_GAP = 0.046  # half the distance between the pad faces when fully open [m]
 GRIPPER_STROKE = 0.04     # finger travel [m]
 BOX_HALF = 0.02           # the lab 28 cube's half size [m]
 
 
-def ur5_gripper_mjcf(dh, links, box_pos, box_yaw: float = 0.0, box_mass: float = 0.1,
+def ur5e_gripper_mjcf(dh, links, box_pos, box_yaw: float = 0.0, box_mass: float = 0.1,
                      mu: float = 1.0, timestep: float = 0.001) -> str:
-    """The UR5 (dh, links) on a table (plane "table" at z = 0), a two-finger gripper on its flange
+    """The UR5e (dh, links) on a table (plane "table" at z = 0), a two-finger gripper on its flange
     and a free cube (body/geom "box", half size BOX_HALF) resting at box_pos (x, y), yaw box_yaw.
 
     Gripper: body "hand" on the flange (0.4 kg), fingers "finger_l"/"finger_r" on slide joints
@@ -215,7 +222,7 @@ def ur5_gripper_mjcf(dh, links, box_pos, box_yaw: float = 0.0, box_mass: float =
     impratio 10, as in pinch_mjcf.
     """
     mu, box_mass = float(mu), float(box_mass)
-    xml = dh_arm_mjcf(dh, links, name="ur5_gripper", timestep=timestep,
+    xml = dh_arm_mjcf(dh, links, name="ur5e_gripper", timestep=timestep,
                       integrator="implicitfast", contact=True)
     site = xml[xml.index('<site name="ee"'):]
     site = site[:site.index("/>") + 2]

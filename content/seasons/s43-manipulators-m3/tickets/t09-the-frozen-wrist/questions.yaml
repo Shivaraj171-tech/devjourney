@@ -1,13 +1,13 @@
 questions:
-  - prompt: "The monitor reported κ = 200.9 at q5 = 28°, where the true σ_max / σ_min is 14.2. What explains it?"
+  - prompt: "The monitor reported κ = 204.4 at q5 = 28°, where the true σ_max / σ_min is 14.3. What explains it?"
     choices:
       - "It computed λ_max / λ_min of Jᵀ J, which is κ²"
-      - "The UR5's Jacobian is wrong at that pose"
+      - "The UR5e's Jacobian is wrong at that pose"
       - "κ depends on the joint speeds, which were high"
       - "The threshold should have been 2000"
     answer: 0
-    explain: "14.2² = 201.6 ≈ 200.9. The eigenvalues of Jᵀ J are the squared singular values."
-  - prompt: "Near the UR5's wrist flip, the same 0.2 rad/s spin needs joint 4 to turn at roughly..."
+    explain: "14.3² = 204.5 ≈ 204.4. The eigenvalues of Jᵀ J are the squared singular values."
+  - prompt: "Near the UR5e's wrist flip, the same 0.2 rad/s spin needs joint 4 to turn at roughly..."
     choices:
       - "a speed that grows like 1 / sin(q5): 14 rad/s at q5 = 1°"
       - "0.2 rad/s, whatever q5 is"

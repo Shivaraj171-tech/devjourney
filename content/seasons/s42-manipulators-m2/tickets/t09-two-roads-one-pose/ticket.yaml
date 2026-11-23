@@ -3,8 +3,8 @@ title: "Two roads, one pose"
 type: feature
 level: senior
 track: robotics
-concepts: [dh-convention, ur5-fk, product-of-exponentials, dh-vs-poe]
+concepts: [dh-convention, ur5e-fk, product-of-exponentials, dh-vs-poe]
 new_concept: dh-vs-poe
 estimated_minutes: 30
 tests_visible: true
-files_editable: [kin/ur5_poe.py]
+files_editable: [kin/ur5e_poe.py]

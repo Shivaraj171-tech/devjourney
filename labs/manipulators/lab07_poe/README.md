@@ -64,7 +64,7 @@ Every Sᵢ is written in the base frame **at q = 0**: that's the whole trick.
 **7. DH == PoE.** Both describe the same arm, so they must agree at every q. To get
 the PoE data from a DH table: compute the DH frames at q = 0; joint i spins about
 z_{i−1} through o_{i−1}, so Sᵢ = (z_{i−1}, −z_{i−1} × o_{i−1}), and M = T_0n(0). The
-tests check this for the UR5 and your 3-DOF arm at random configurations.
+tests check this for the UR5e and your 3-DOF arm at random configurations.
 
 ## Task
 

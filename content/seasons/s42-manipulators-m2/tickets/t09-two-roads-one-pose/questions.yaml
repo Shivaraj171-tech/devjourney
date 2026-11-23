@@ -1,5 +1,5 @@
 questions:
-  - prompt: "From DH frames at home, which frame gives the UR5's joint 4 screw axis?"
+  - prompt: "From DH frames at home, which frame gives the UR5e's joint 4 screw axis?"
     choices:
       - "Frame 3: its z axis and its origin"
       - "Frame 4: its z axis and its origin"

@@ -59,8 +59,8 @@ Implement `link_constant`, `dh_to_mjcf`, `load_model`, `sim_site_pose`,
 
     python -m labs.manipulators check lab08
     python -c "from labs.manipulators.lab08_sim_fk.starter import dh_to_mjcf; \
-    from labs.manipulators.toolbox import UR5_DH; print(dh_to_mjcf(UR5_DH))" > /tmp/ur5.xml
-    python -m mujoco.viewer --mjcf=/tmp/ur5.xml      # optional, needs a display
+    from labs.manipulators.toolbox import UR5E_DH; print(dh_to_mjcf(UR5E_DH))" > /tmp/ur5e.xml
+    python -m mujoco.viewer --mjcf=/tmp/ur5e.xml      # optional, needs a display
 
 (The blocking viewer above works with plain `python`; on macOS, scripts that use
 `mujoco.viewer.launch_passive` must be run with `mjpython`. The viewer is

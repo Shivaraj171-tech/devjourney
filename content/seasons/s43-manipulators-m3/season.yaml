@@ -3,7 +3,7 @@ title: "Manipulators · Module 3: Velocity kinematics"
 icon: "🦾"
 # A deep side floor: module 3 of 8 of the manipulator track (see README). Its codebase
 # starts from Module 2's final kin/ + rigid/ packages and adds vel/ (numeric and analytic
-# Jacobians, the UR5's 6x6 Jacobian, space and body Jacobians, singularities,
+# Jacobians, the UR5e's 6x6 Jacobian, space and body Jacobians, singularities,
 # manipulability ellipsoids, statics). It opens once Module 2 is done.
 chain: false
 requires: s42-t11
@@ -13,7 +13,7 @@ intro: >
   **Module 3 of 8: Velocity kinematics.** Forward kinematics says where the gripper is.
   This module asks how FAST it moves when the joints turn, and in which directions it
   can't move at all. Rosa takes you from differentiating a two-link arm numerically to
-  the Jacobian derived by hand, the geometric Jacobian of any arm, the UR5's full 6x6
+  the Jacobian derived by hand, the geometric Jacobian of any arm, the UR5e's full 6x6
   Jacobian checked by finite differences, space and body Jacobians, singularities, the
   manipulability ellipsoid (watch it go flat in 3D) and the forces the same matrix sends
   back to the motors. Optional: it never blocks the main story.
@@ -21,7 +21,7 @@ tickets:
   - t01-how-fast-is-the-gripper
   - t02-the-two-link-jacobian
   - t03-the-geometric-jacobian
-  - t04-the-ur5-jacobian
+  - t04-the-ur5e-jacobian
   - t05-space-and-body
   - t06-singularities
   - t07-manipulability

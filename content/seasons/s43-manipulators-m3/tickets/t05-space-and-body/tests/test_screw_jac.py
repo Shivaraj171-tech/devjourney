@@ -3,13 +3,13 @@ import math
 from lab import viz
 
 from kin.poe import fk_poe
-from kin.ur5 import UR5_DH, ur5_frames
-from kin.ur5_poe import screws_from_dh
+from kin.ur5e import UR5E_DH, ur5e_frames
+from kin.ur5e_poe import screws_from_dh
 from rigid.transform import T_inv, T_mul
 from vel.screw_jac import adjoint, apply6, body_jacobian, geometric_from_space, space_jacobian
-from vel.ur5j import ur5_jacobian
+from vel.ur5ej import ur5e_jacobian
 
-M, SCREWS = screws_from_dh(UR5_DH)
+M, SCREWS = screws_from_dh(UR5E_DH)
 POSES = [[0.3, -1.2, 1.5, -0.8, 1.1, 0.4], [-1.7, -0.6, -1.9, 2.2, -0.5, 3.0]]
 Q0 = [0.3, -1.2, 1.5, -0.8, 1.1, 0.4]
 QDOT = [0.2, -0.3, 0.4, 0.5, -0.6, 0.7]
@@ -53,7 +53,7 @@ def test_draw_the_two_velocities():
         p = [T[i][3] for i in range(3)]
         G = geometric_from_space(Js, p)
         v = [sum(G[r][c] * QDOT[c] for c in range(6)) for r in range(3)]
-        frames.append(ur5_frames(q)[1:])
+        frames.append(ur5e_frames(q)[1:])
         arrows.append([{"start": p, "vec": v, "label": "flange v"},
                        {"start": [0.0, 0.0, 0.0], "vec": Vs[3:], "label": "v_s (base origin)"},
                        {"start": p, "vec": [0.2 * x for x in Vs[:3]], "label": "w x 0.2"}])
@@ -96,6 +96,6 @@ def test_space_jacobian_gives_the_geometric_one():
     for q in POSES:
         T = fk(q)
         G = geometric_from_space(space_jacobian(SCREWS, q), [T[0][3], T[1][3], T[2][3]])
-        J = ur5_jacobian(q)
+        J = ur5e_jacobian(q)
         err = max(abs(G[r][c] - J[r][c]) for r in range(6) for c in range(6))
         assert err < 1e-9, f"at q = {q}, v_s + w x p should give ticket 4's geometric Jacobian (off by {err:.2e})"

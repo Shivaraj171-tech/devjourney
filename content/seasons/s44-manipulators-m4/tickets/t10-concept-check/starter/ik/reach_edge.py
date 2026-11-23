@@ -1,4 +1,4 @@
-"""Grabby-6's production IK (a UR5): full pose, body twist error, damped and clamped.
+"""Grabby-6's production IK (a UR5e): full pose, body twist error, damped and clamped.
 
 Each iteration:
     V_b = log(T_sb^-1 T_sd)                     the error, as a body twist
@@ -11,7 +11,7 @@ an almost stretched elbow); the clamp keeps any single iteration from swinging t
 round, so a bad linearisation can't throw the next one somewhere worse.
 """
 from ik.dls import dls_step
-from ik.pose_newton import SCREWS, M, body_twist_error, error_norms, ur5_pose
+from ik.pose_newton import SCREWS, M, body_twist_error, error_norms, ur5e_pose
 from vel.screw_jac import body_jacobian
 
 LAMBDA = 0.02
@@ -31,7 +31,7 @@ def reach(T_sd, q0, iters=60, tol=1e-6):
     q = list(q0)
     errors, path = [], []
     for _ in range(iters + 1):
-        V = body_twist_error(ur5_pose(q), T_sd)
+        V = body_twist_error(ur5e_pose(q), T_sd)
         errors.append(error_norms(V))
         path.append(list(q))
         if max(errors[-1]) < tol:

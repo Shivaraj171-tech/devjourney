@@ -57,10 +57,10 @@ Geometry check: in the vertical plane rotated by q₁, the arm is a planar 2R:
 horizontal reach r = a₂cos q₂ + a₃cos(q₂+q₃), height z = d₁ + a₂ sin q₂ + a₃ sin(q₂+q₃),
 and the plane turns about z: p = (r cos q₁, r sin q₁, z). Your DH FK must agree.
 
-**5. A real 6-DOF arm: the UR5.** The table in `toolbox/robots.py` is Universal
-Robots' own (source URL in the file). Read it at q = 0: all θ = 0 so every link
-lies along ±x, giving x = a₂ + a₃ = −0.817, y = −(d₄ + d₆), z = d₁ − d₅. A test
-checks that you get this.
+**5. A real 6-DOF arm: the UR5e.** The table in `toolbox/robots.py` is Universal
+Robots' own (sources in the file). Read it at q = 0: all θ = 0 so every link
+lies along ±x, giving x = a₂ + a₃ = −0.8172, y = −(d₄ + d₆) = −0.2329, z = d₁ − d₅ = 0.0628
+(metres). A test checks that you get this.
 
 DH pitfalls: *modified* DH (Craig) puts the frame at the *proximal* end and
 multiplies Rx(α_{i−1}) Tx(a_{i−1}) Rz(θᵢ) Tz(dᵢ). Tables are not interchangeable.
@@ -72,4 +72,4 @@ Fill in `ARM3_DH`, then implement `dh_transform`, `fk_dh_frames`, `fk_dh`,
 `arm3_position`.
 
     python -m labs.manipulators check lab06
-    python -m labs.manipulators visual lab06    # 3D stick figure of the UR5 and the 3-DOF arm
+    python -m labs.manipulators visual lab06    # 3D stick figure of the UR5e and the 3-DOF arm

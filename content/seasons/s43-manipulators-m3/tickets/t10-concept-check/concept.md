@@ -18,7 +18,7 @@ radii = σ_k = sqrt(eig(J Jᵀ)),  w = σ1 σ2 ..., κ = σ_max / σ_min
 τ = Jᵀ F                                       forces back (power balance)
 ```
 
-Singularities: rank J drops. For the two-link arm det J = l1 l2 sin(q2) (stretched or folded). For the UR5 det J = a2 a3 sin(q3) sin(q5) (shoulder factor): the elbow, the wrist flip and the shoulder families. Near them κ explodes and resolved-rate control needs huge joint speeds.
+Singularities: rank J drops. For the two-link arm det J = l1 l2 sin(q2) (stretched or folded). For the UR5e det J = a2 a3 sin(q3) sin(q5) (shoulder factor): the elbow, the wrist flip and the shoulder families. Near them κ explodes and resolved-rate control needs huge joint speeds.
 
 **Worked example**
 

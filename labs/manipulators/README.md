@@ -1,9 +1,9 @@
 # Robot manipulator labs: laptop edition (Modules 1–8)
 
-Twenty-eight hands-on labs that take you from rotation matrices, through a UR5 that
+Twenty-eight hands-on labs that take you from rotation matrices, through a UR5e that
 draws a straight line in a physics simulator, inverse kinematics, trajectories and a
 rigid-body simulator of your own that matches MuJoCo to round-off, to torque controllers
-you tune and measure, and finally a UR5 that picks up a box and puts it down somewhere
+you tune and measure, and finally a UR5e that picks up a box and puts it down somewhere
 else, held by friction alone. Each lab follows
 the same rhythm: **intuition → key maths derived step by step → you implement it → tests check it**
 (and from Module 2 on, a real simulator checks it too).
@@ -50,7 +50,7 @@ the tests themselves run in 0.2–5 s per lab.
 | 03 | Axis-angle, Rodrigues, exp/log on SO(3) | 1 | 120 | 1.5 h | |
 | 04 | Quaternions and slerp | 1 | 120 | 1.5 h | cross-check with `mju_mulQuat` |
 | 05 | Homogeneous transforms and frame chains | 1 | 120 | 1 h | |
-| 06 | DH forward kinematics: 3-DOF arm + UR5 | 2 Forward kinematics | 150 | 1.5 h | |
+| 06 | DH forward kinematics: 3-DOF arm + UR5e | 2 Forward kinematics | 150 | 1.5 h | |
 | 07 | Product of exponentials; DH == PoE | 2 | 180 | 2 h | |
 | 08 | Write an MJCF model, validate FK in MuJoCo | 2 | 180 | 2 h | **required** |
 | 09 | Space, body and geometric Jacobians | 3 Velocity kinematics | 180 | 2 h | cross-check with `mj_jacSite` |
@@ -59,20 +59,20 @@ the tests themselves run in 0.2–5 s per lab.
 | 12 | Analytic IK of the 3-DOF arm: 4 solutions, elbow up/down | 4 Inverse kinematics | 150 | 1.5 h | |
 | 13 | Numerical IK: Newton–Raphson on the body twist | 4 | 180 | 1.5 h | |
 | 14 | Damped least squares / Levenberg–Marquardt, limits, choosing | 4 | 200 | 2 h | |
-| 15 | UR5 IK campaign: poses → joints, verified 3 ways | 4 | 220 | 2 h | MJCF kinematics + servoed arm |
+| 15 | UR5e IK campaign: poses → joints, verified 3 ways | 4 | 220 | 2 h | MJCF kinematics + servoed arm |
 | 16 | Cubic, quintic and trapezoidal time scaling | 5 Trajectories | 150 | 1.5 h | |
-| 17 | Joint-space vs Cartesian trajectories on the UR5 | 5 | 220 | 2.5 h | tracked by the servoed arm |
+| 17 | Joint-space vs Cartesian trajectories on the UR5e | 5 | 220 | 2.5 h | tracked by the servoed arm |
 | 18 | Lagrangian dynamics of the 2-link arm: M, C, g | 6 Dynamics | 200 | 2.5 h | `mj_fullM`, `qfrc_bias`, energy |
-| 19 | Recursive Newton–Euler inverse dynamics (3-DOF, UR5) | 6 | 220 | 2.5 h | `mj_inverse` |
+| 19 | Recursive Newton–Euler inverse dynamics (3-DOF, UR5e) | 6 | 220 | 2.5 h | `mj_inverse` |
 | 20 | Forward dynamics: Euler, semi-implicit, RK4, energy | 6 | 250 | 2.5 h | MuJoCo `RK4`/`Euler` trajectories |
 | 21 | Independent joint PD: step responses, gains vs overshoot, gravity droop | 7 Control | 150 | 2 h | torque `<motor>`s; your control loop |
 | 22 | PD + gravity compensation; why it's stable (Lyapunov) | 7 | 180 | 2 h | 2R and 3-DOF arm, RNEA gravity |
 | 23 | Computed-torque control along a quintic; 20% wrong masses | 7 | 220 | 2.5 h | 2R and 3-DOF arm, RNEA model |
-| 24 | Task space: Jacobian transpose, operational space, orientation error | 7 | 220 | 2.5 h | 3-DOF arm, UR5 pose control |
+| 24 | Task space: Jacobian transpose, operational space, orientation error | 7 | 220 | 2.5 h | 3-DOF arm, UR5e pose control |
 | 25 | Impedance control: push it, measure K, press on a table | 7 | 220 | 2.5 h | `xfrc_applied`, contacts, `mj_contactForce` |
 | 26 | Grasp basics: friction cones, grasp matrix, two-finger threshold | 8 Grasping | 180 | 2 h | a pinched box held or dropped |
 | 27 | Grasp quality: force closure, σ_min, the ε-metric | 8 | 200 | 2.5 h | |
-| 28 | Capstone: pick and place with the UR5 | 8 | 300 | 3–4 h | UR5 + two-finger gripper + box |
+| 28 | Capstone: pick and place with the UR5e | 8 | 300 | 3–4 h | UR5e + two-finger gripper + box |
 
 Module map: **1** rigid-body motion (01–05) → **2** forward kinematics (06–08) →
 **3** velocity kinematics (09–11) → **4** inverse kinematics (12–15) →
@@ -85,12 +85,13 @@ Modules 4 and 6 can be done in either order once Module 3 is done. Module 7 need
 labs 26–27 need only Module 1 and lab 09, and lab 28 needs everything.
 Module 7 takes about 11.5 h and Module 8 about 8 h; all eight modules come to roughly 55 h.
 
-The UR5 DH parameters come from Universal Robots' published table. The source URL
-is in `toolbox/robots.py`. The 3-DOF arm uses our own stated dimensions. For the
-dynamics labs, the 3-DOF arm's and the 2-link arm's masses and inertias are our own.
-The UR5's masses and centres of mass are as we recall them from the same UR article,
-**not re-verified** (the site wasn't reachable), and its inertia tensors are our own
-cylinder approximations. MuJoCo gets the same numbers (`toolbox/models.py`), so
+The arm is Universal Robots' **UR5e** (e-Series). Its DH table, joint limits, masses,
+centres of mass and full inertia tensors come from Universal Robots' own ROS 2 description
+package (`UniversalRobots/Universal_Robots_ROS2_Description`, tag 4.4.1, BSD-3-Clause),
+cross-checked against `ur_kinematics`' `UR5e_PARAMS` in ros-industrial/universal_robot; the
+sources, commits and the checks we ran are in `toolbox/robots.py`. The 3-DOF arm uses our
+own stated dimensions. For the dynamics labs, the 3-DOF arm's and the 2-link arm's masses
+and inertias are our own. MuJoCo gets the same numbers (`toolbox/models.py`), so
 every dynamics check compares like with like. In Modules 7–8 the contact settings
 (elliptic friction cones, `impratio="10"`, torsional friction on the gripper pads) were
 chosen once and are explained in labs 26 and 28. The gains and every number quoted in
@@ -192,10 +193,35 @@ The dynamics labs (18–20) use `toolbox/models.py` instead: MJCF with explicit
 actuators, so MuJoCo's equations of motion are exactly M q̈ + C q̇ + g = τ.
 Module 7 adds torque `<motor>` actuators to those same models (`with_motors`), so the
 controllers command exactly τ; `pendulum_mjcf` (one link), `arm3_table_mjcf` (fingertip
-and table), `pinch_mjcf` (two force-driven fingers and a box) and `ur5_gripper_mjcf` (the
+and table), `pinch_mjcf` (two force-driven fingers and a box) and `ur5e_gripper_mjcf` (the
 lab 28 scene) are the contact rigs. `toolbox/sim.py`'s `MujocoDynamics` evaluates M(q)
-and g(q) with MuJoCo for the UR5 controllers (equal to the lab 19 RNEA to 10⁻¹⁵, and
-about 300× faster than the numpy RNEA for the UR5 mass matrix).
+and g(q) with MuJoCo for the UR5e controllers (equal to the lab 19 RNEA to 10⁻¹⁴, and
+several hundred times faster than the numpy RNEA for the UR5e mass matrix: we measured
+4 µs against 2 ms).
+
+### Optional: the real-looking UR5e (MuJoCo Menagerie)
+
+Our MuJoCo arms are capsules built from the DH table. If you'd like to see the motion on
+the UR5e's real meshes, Google DeepMind's MuJoCo Menagerie has a UR5e model
+(`universal_robots_ur5e`, BSD-3-Clause, © 2018 ROS Industrial Consortium). It isn't in this
+repo; download it once (~30 MB, pinned commit, every file checksummed) into
+`~/.cache/devjourney/mujoco_menagerie` (or `$DEVJOURNEY_MENAGERIE_DIR`):
+
+```bash
+python labs/manipulators/tools/fetch_menagerie_ur5e.py
+python labs/manipulators/tools/menagerie_ur5e_replay.py          # capstone plan, headless report
+python labs/manipulators/tools/menagerie_ur5e_replay.py --view   # watch it (macOS: use mjpython)
+python labs/manipulators/tools/menagerie_ur5e_replay.py --mine   # with your lab 28 plan
+python -m pytest labs/manipulators/tools/tests                   # skipped if not downloaded
+```
+
+What we checked (MuJoCo 4.0.1): it loads headless with the same zero pose, joint directions
+and base frame as our `UR5E_DH`, and its flange stays within 1.5 mm of our DH FK (Menagerie
+rounds UR's offsets, e.g. 0.163 m for d₁ = 0.1625). Its masses come from the older URDF it was converted from
+(close to the CB-series UR5's), not Universal Robots' UR5e ones, so it's a model to look at and replay joint plans on; the
+labs' dynamics use `toolbox/robots.py`. Replaying the capstone plan into Menagerie's own
+position servos (no gravity compensation) lags up to 0.19 rad mid-move and ends 0.007 rad
+low: compare that with lab 28's computed torque.
 
 Without MuJoCo, run `verify_all.py` in a venv with only numpy and pytest. It must
 report every lab except 08 as verified (27/28), with only the `needs mujoco` tests skipped.

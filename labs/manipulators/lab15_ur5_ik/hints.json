@@ -1,5 +1,0 @@
-[
-  "make_pose: make_transform(euler_zyx_to_matrix(*rpy), p). ik_seeds: rng = np.random.default_rng(rng_seed); np.vstack([q_seed[None], rng.uniform(UR5_Q_MIN, UR5_Q_MAX, size=(n_random, 6))]). solve_ur5_pose: cands = multi_start_ik(M_UR5, B_UR5, T_d, seeds, UR5_Q_MIN, UR5_Q_MAX); return select_solution(cands, q_seed, UR5_Q_MIN, UR5_Q_MAX), cands.",
-  "ik_campaign: q_prev = q_start; for name, T_d in poses.items(): q, cands = solve_ur5_pose(T_d, q_prev); row with success = q is not None, n_solutions = len(cands); if success: row['pos_err'], row['rot_err'] = pose_error(fk_dh(UR5_DH, q), T_d) and q_prev = q.",
-  "mujoco_kinematic_errors: model, data = load_model(dh_to_mjcf(UR5_DH)); for each row: pose_error(sim_site_pose(model, data, row['q']), poses[row['name']]) or (nan, nan). drive_mujoco: qdot = (q_goal - sim.q) / duration; step it round(duration/dt) times, then zeros round(settle/dt) times; return sim.ee_pose(). format_report: f-strings with fixed widths, pos_err * 1e3 and np.degrees(rot_err)."
-]

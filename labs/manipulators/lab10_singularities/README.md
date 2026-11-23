@@ -50,7 +50,7 @@ stretched-out singularity the arm can hold an enormous radial load.
 Singular iff θ₂ = 0 or π (stretched or folded). w = l₁l₂|sin θ₂| is maximal at
 θ₂ = ±90° — the classic argument for elbow-at-right-angle "ready" poses.
 
-**7. The UR5's three singularities.** For the 6x6 geometric Jacobian (checked
+**7. The UR5e's three singularities.** For the 6x6 geometric Jacobian (checked
 numerically against numpy in this lab's tests):
 
     det J = a₂ a₃ sin q₃ sin q₅ (a₂ cos q₂ + a₃ cos(q₂+q₃) + d₅ sin(q₂+q₃+q₄))
@@ -64,7 +64,7 @@ numerically against numpy in this lab's tests):
 
 Implement `singular_values`, `numerical_rank`, `is_singular`,
 `condition_number`, `manipulability`, `velocity_ellipsoid`, `force_ellipsoid`,
-`lost_directions`, `ur5_jacobian_det`, `classify_ur5_singularity`.
+`lost_directions`, `ur5e_jacobian_det`, `classify_ur5e_singularity`.
 
     python -m labs.manipulators check lab10
     python -m labs.manipulators visual lab10    # 2R arm with its velocity ellipses

@@ -190,7 +190,7 @@ async function checkTicketSpecifics(page: Page, id: string) {
   if (id === "s43-t04") {
     await expect(summary).toContainText("Frame 31 of 31");
     await expect(summary).toContainText("w x 0.2 (");
-    await shotView(page, view, "m3-t04-ur5-velocity-desktop");
+    await shotView(page, view, "m3-t04-ur5e-velocity-desktop");
   }
   if (id === "s43-t06") {
     // The wrist flip: the two joint axes (arrows) line up at q5 = 0, the middle of the motion.

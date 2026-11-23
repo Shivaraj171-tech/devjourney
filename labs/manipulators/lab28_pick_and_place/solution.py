@@ -1,4 +1,4 @@
-"""Lab 28 reference solution: pick and place with the UR5 in MuJoCo, using your IK (lab 14),
+"""Lab 28 reference solution: pick and place with the UR5e in MuJoCo, using your IK (lab 14),
 quintic trajectories (lab 16), computed-torque control (lab 23) and a force-controlled two-finger
 gripper (labs 26-27). The box is held by contact friction only: no welds, no teleporting."""
 
@@ -14,7 +14,7 @@ from labs.manipulators.lab14_dls_ik.solution import ik_lm
 from labs.manipulators.lab16_time_scaling.solution import quintic_scaling
 from labs.manipulators.lab23_computed_torque.solution import computed_torque
 from labs.manipulators.toolbox.models import BOX_HALF, GRIPPER_TCP
-from labs.manipulators.toolbox.robots import UR5_DH, UR5_Q_MAX, UR5_Q_MIN
+from labs.manipulators.toolbox.robots import UR5E_DH, UR5E_Q_MAX, UR5E_Q_MIN
 
 Q_HOME = np.array([0.0, -np.pi / 2, np.pi / 2, -np.pi / 2, -np.pi / 2, 0.0])
 HOME_YAW = np.pi / 2       # at Q_HOME the gripper's y axis (finger direction) is world -x
@@ -25,9 +25,9 @@ OPEN, CLOSE = -5.0, 15.0    # finger motor forces [N]: hold open against the sto
 
 
 def tool_model():
-    """(M_tool, S, B_tool): the UR5's PoE model with the end-effector frame moved GRIPPER_TCP
+    """(M_tool, S, B_tool): the UR5e's PoE model with the end-effector frame moved GRIPPER_TCP
     along the flange z axis, to the point between the finger pads."""
-    M, S = screws_from_dh(UR5_DH)
+    M, S = screws_from_dh(UR5E_DH)
     M_tool = M @ make_transform(np.eye(3), [0.0, 0.0, GRIPPER_TCP])
     return M_tool, S, body_screws(M_tool, S)
 
@@ -47,7 +47,7 @@ def grasp_yaw(box_yaw: float, ref: float = HOME_YAW) -> float:
 
 def plan_waypoints(box_xy, box_yaw: float, target_xy, target_yaw: float, q_start=Q_HOME) -> dict:
     """Joint configurations for "pre", "grasp", "lift", "carry", "place", "retreat", each solved by
-    ik_lm (joint limits UR5_Q_MIN/MAX) warm-started from the previous one, so the arm stays on
+    ik_lm (joint limits UR5E_Q_MIN/MAX) warm-started from the previous one, so the arm stays on
     one IK branch. The place yaw turns the box from box_yaw to target_yaw. Raises RuntimeError if
     any IK fails."""
     M_tool, _, B_tool = tool_model()
@@ -58,7 +58,7 @@ def plan_waypoints(box_xy, box_yaw: float, target_xy, target_yaw: float, q_start
              ("retreat", target_xy, CARRY_Z, yb)]
     q, out = np.asarray(q_start, dtype=float), {}
     for name, xy, z, yaw in poses:
-        q, ok, _ = ik_lm(M_tool, B_tool, tool_pose(xy, z, yaw), q, UR5_Q_MIN, UR5_Q_MAX)
+        q, ok, _ = ik_lm(M_tool, B_tool, tool_pose(xy, z, yaw), q, UR5E_Q_MIN, UR5E_Q_MAX)
         if not ok:
             raise RuntimeError(f"IK failed for waypoint {name!r}")
         out[name] = q.copy()
@@ -112,18 +112,18 @@ def make_controller(ref, dyn, wn: float = 20.0, squeeze: float = CLOSE):
 
 def run_pick_and_place(box_xy, box_yaw: float, target_xy, target_yaw: float = 0.0, mu: float = 1.0,
                        squeeze: float = CLOSE, settle: float = 0.3) -> dict:
-    """Build toolbox.models.ur5_gripper_mjcf, plan, and run the whole task with run_mujoco_control
+    """Build toolbox.models.ur5e_gripper_mjcf, plan, and run the whole task with run_mujoco_control
     (lab 21) for T_total + settle seconds, logging the box and TCP positions every step via
     before_step. Returns {"t", "box" (N, 3), "box_quat" (N, 4), "tcp" (N, 3), "segments_end"
     (cumulative segment end times), "final_box" (3,), "final_yaw"}."""
     import mujoco
 
     from labs.manipulators.lab21_pd_control.solution import run_mujoco_control
-    from labs.manipulators.toolbox.models import ur5_gripper_mjcf
-    from labs.manipulators.toolbox.robots import UR5_LINKS
+    from labs.manipulators.toolbox.models import ur5e_gripper_mjcf
+    from labs.manipulators.toolbox.robots import UR5E_LINKS
     from labs.manipulators.toolbox.sim import MujocoDynamics
 
-    model = mujoco.MjModel.from_xml_string(ur5_gripper_mjcf(UR5_DH, UR5_LINKS, box_xy, box_yaw, mu=mu))
+    model = mujoco.MjModel.from_xml_string(ur5e_gripper_mjcf(UR5E_DH, UR5E_LINKS, box_xy, box_yaw, mu=mu))
     segments = plan_segments(plan_waypoints(box_xy, box_yaw, target_xy, target_yaw))
     ref, T = segment_reference(segments)
     ctrl = make_controller(ref, MujocoDynamics(model, n=6), squeeze=squeeze)

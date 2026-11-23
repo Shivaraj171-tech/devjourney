@@ -37,14 +37,14 @@ questions:
       - "The base frame"
     answer: 0
     explain: "z(i-1) is joint i's axis. It's the classic off-by-one: in ticket 9, taking frame i made PoE disagree everywhere except at home."
-  - prompt: "The UR5's flange at home is at (-0.817, -0.191, -0.005). What is -0.817 in terms of the table?"
+  - prompt: "The UR5e's flange at home is at (-0.817, -0.233, 0.063). What is -0.817 in terms of the table?"
     choices:
       - "a2 + a3"
       - "d1 + d4 + d6"
       - "a2 - a3"
       - "d4 + d5 + d6"
     answer: 0
-    explain: "At home the upper arm and forearm lie along the base's x axis: x = a2 + a3 = -0.425 - 0.39225. The signs come from where UR put x2 and x3."
+    explain: "At home the upper arm and forearm lie along the base's x axis: x = a2 + a3 = -0.425 - 0.3922. The signs come from where UR put x2 and x3."
   - prompt: "Gripper pose T_0_6: position (0.5, 0, 0.6), z6 = third column = (0, 0, -1), d6 = 0.1. Where is the wrist centre?"
     choices:
       - "(0.5, 0, 0.7)"

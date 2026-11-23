@@ -3,7 +3,7 @@ title: "Where the arm gets stuck"
 type: bug
 level: senior
 track: robotics
-concepts: [ur5-jacobian, analytic-jacobian, singularities]
+concepts: [ur5e-jacobian, analytic-jacobian, singularities]
 new_concept: singularities
 estimated_minutes: 35
 tests_visible: true

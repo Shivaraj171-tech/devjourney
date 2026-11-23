@@ -16,7 +16,7 @@ intro: >
   backwards, and it is harder: a target can have no solution, one, two, four, eight.
   Rosa takes you from counting solutions to the law of cosines, the 3-DOF arm and the
   wrist-centre trick for six joints, then to numerical IK: Newton-Raphson watched step
-  by step in 3D, the full UR5 pose with a body-twist error, damped least squares when
+  by step in 3D, the full UR5e pose with a body-twist error, damped least squares when
   Newton explodes, choosing the solution closest to where the arm is, and a boss
   incident at the edge of the workspace. Optional: it never blocks the main story.
 tickets:

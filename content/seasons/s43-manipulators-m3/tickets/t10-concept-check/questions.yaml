@@ -15,7 +15,7 @@ questions:
       - "0"
     answer: 0
     explain: "det J = l1 l2 sin(q2) = 0.2 × 0.5 = 0.1, whatever q1 is."
-  - prompt: "Standard DH, joint 4 of the UR5. Its geometric Jacobian column uses which frame's z axis and origin?"
+  - prompt: "Standard DH, joint 4 of the UR5e. Its geometric Jacobian column uses which frame's z axis and origin?"
     choices:
       - "Frame 3's"
       - "Frame 4's"
@@ -37,7 +37,7 @@ questions:
       - "κ = 4900, w = 0.0000078"
     answer: 0
     explain: "σ = 0.7, 0.4, 0.01. κ = 0.7 / 0.01 = 70, w = 0.7 × 0.4 × 0.01 = 0.0028. The other numbers forgot a square root."
-  - prompt: "The UR5 at q5 = 0. Which statement is true?"
+  - prompt: "The UR5e at q5 = 0. Which statement is true?"
     choices:
       - "Joints 4 and 6 turn about parallel axes: one direction of rotation is lost"
       - "The arm is stretched out along its upper arm and forearm, and can't reach any further"

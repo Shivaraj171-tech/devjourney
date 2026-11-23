@@ -1,0 +1,10 @@
+id: s43-t04
+title: "Who checks the checker?"
+type: bug
+level: senior
+track: robotics
+concepts: [ur5e-fk, geometric-jacobian, ur5e-jacobian]
+new_concept: ur5e-jacobian
+estimated_minutes: 30
+tests_visible: true
+files_editable: [vel/ur5ej.py]

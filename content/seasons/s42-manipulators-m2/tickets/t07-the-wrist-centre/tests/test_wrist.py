@@ -4,7 +4,7 @@ import random
 from lab import viz
 
 from kin.dh import fk_dh, fk_dh_frames
-from kin.ur5 import ur5_frames
+from kin.ur5e import ur5e_frames
 from kin.wrist import D6, SPHERICAL6_DH, wrist_center, wrist_center_from_arm
 from rigid.transform import translation_of
 
@@ -75,7 +75,7 @@ def test_home_wrist_centre():
     assert dist(got, (0.7, 0.0, 0.3)) < 1e-9, f"at home the wrist centre is at (0.700, 0.000, 0.300), got {fmt(got)}"
 
 
-def test_the_ur5_wrist_is_not_spherical():
-    frames = ur5_frames([0.3, -1.0, 1.2, 0.4, 0.8, -0.5])
+def test_the_ur5e_wrist_is_not_spherical():
+    frames = ur5e_frames([0.3, -1.0, 1.2, 0.4, 0.8, -0.5])
     gap = dist(translation_of(frames[4]), translation_of(frames[5]))
-    assert gap > 0.05, "the UR5's wrist axes don't meet in one point (d5 = 0.09465 m sits between them)"
+    assert gap > 0.05, "the UR5e's wrist axes don't meet in one point (d5 = 0.0997 m sits between them)"

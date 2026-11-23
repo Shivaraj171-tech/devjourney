@@ -2,9 +2,9 @@ import math
 
 from lab import viz
 
-from kin.ur5 import ur5_frames
+from kin.ur5e import ur5e_frames
 from vel.monitor import KAPPA_SLOW, KAPPA_STOP, condition_number, guard, joint_speeds, singular_values
-from vel.ur5j import ur5_jacobian
+from vel.ur5ej import ur5e_jacobian
 
 BASE = [0.4, -1.2, 1.6, -1.9, 0.6, 0.3]   # the incident's pose, q5 = 0.6 rad
 SPIN = [0.0, 0.0, 0.0, 0.0, 0.0, 0.2]     # the planner's command: turn the box about the vertical, 0.2 rad/s
@@ -22,8 +22,8 @@ def test_draw_the_wrist_tilting():
     frames, arrows, kappas, q4dot, q6dot = [], [], [], [], []
     for d in degs:
         q = at_q5(d)
-        F = ur5_frames(q)
-        J = ur5_jacobian(q)
+        F = ur5e_frames(q)
+        J = ur5e_jacobian(q)
         qdot = joint_speeds(J, SPIN)
         frames.append(F[1:])
         p = [F[-1][i][3] for i in range(3)]
@@ -50,21 +50,21 @@ def test_singular_values_of_a_known_matrix():
 
 def test_far_from_the_flip_it_keeps_going():
     for d in (28, 20, 10):
-        action, kappa = guard(ur5_jacobian(at_q5(d)))
+        action, kappa = guard(ur5e_jacobian(at_q5(d)))
         assert action == "go", (
             f"at q5 = {d} deg the wrist is nowhere near its flip (the joints need under 1.4 rad/s), but the monitor says "
             f"{action!r} with kappa = {kappa:.0f}. The real sigma_max / sigma_min there is under {KAPPA_SLOW:.0f}")
 
 
 def test_near_the_flip_it_slows_then_stops():
-    assert guard(ur5_jacobian(at_q5(5)))[0] == "slow", "at q5 = 5 deg kappa is about 74: slow down"
-    action, kappa = guard(ur5_jacobian(at_q5(1)))
-    assert action == "stop", f"at q5 = 1 deg kappa is about 366 and joint 4 would need 14 rad/s: stop. Got {action!r} ({kappa:.0f})"
-    assert abs(kappa - 366.19) < 0.5, f"kappa at q5 = 1 deg should be 366.2, got {kappa:.1f}"
+    assert guard(ur5e_jacobian(at_q5(5)))[0] == "slow", "at q5 = 5 deg kappa is about 74: slow down"
+    action, kappa = guard(ur5e_jacobian(at_q5(1)))
+    assert action == "stop", f"at q5 = 1 deg kappa is about 367 and joint 4 would need 14 rad/s: stop. Got {action!r} ({kappa:.0f})"
+    assert abs(kappa - 366.91) < 0.5, f"kappa at q5 = 1 deg should be 366.9, got {kappa:.1f}"
 
 
 def test_speeds_explode_near_the_flip():
-    slow = joint_speeds(ur5_jacobian(at_q5(30)), SPIN)
-    fast = joint_speeds(ur5_jacobian(at_q5(1)), SPIN)
+    slow = joint_speeds(ur5e_jacobian(at_q5(30)), SPIN)
+    fast = joint_speeds(ur5e_jacobian(at_q5(1)), SPIN)
     assert abs(slow[3]) < 0.5 and abs(fast[3]) > 10, (
         f"the same spin needs joint 4 at {slow[3]:.2f} rad/s at q5 = 30 deg but {fast[3]:.2f} rad/s at q5 = 1 deg")

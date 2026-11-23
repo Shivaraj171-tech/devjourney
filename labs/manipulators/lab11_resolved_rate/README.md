@@ -68,9 +68,9 @@ roughly like an industrial controller in velocity mode. Measured in our runs
 
 | gain K | max deviation during the move | error after the hold |
 |---|---|---|
-| 0 (feed-forward only) | 2.3 mm | 2.4 mm (servo lag is never corrected) |
+| 0 (feed-forward only) | 2.3 mm | 2.5 mm (servo lag is never corrected) |
 | 20 (default) | 0.14 mm | ~0 |
-| 60 | 0.33 mm | 0.2 mm and **ringing**: outer loop too fast for the servos |
+| 60 | 0.31 mm | 0.06 mm and **ringing** (up to 0.13 mm in the last second): outer loop too fast for the servos |
 
 An earlier, softer servo tuning (kp = 2000, damping 30) looked fine for 2.5 s
 but slowly rang up after the move. That's why the MuJoCo test holds for 2 s

@@ -1,6 +1,6 @@
 """Lab 19: recursive Newton-Euler inverse dynamics (twist form), verified against mj_inverse.
 
-Twists (omega, v); wrenches (m, f). links = tuple of (mass, com in DH frame i, (Ixx, Iyy, Izz)),
+Twists (omega, v); wrenches (m, f). links = tuple of (mass, com in DH frame i, (Ixx, Iyy, Izz) or a 3x3 tensor),
 see toolbox/robots.py. Toolbox: skew, adjoint, exp_se3, transform_inverse, fk_dh_frames,
 screws_from_dh.
 """
@@ -20,8 +20,8 @@ def ad_twist(V) -> np.ndarray:
     raise NotImplementedError("ad of a twist")
 
 
-def spatial_inertia(mass: float, inertia_diag) -> np.ndarray:
-    """6x6 diag(Ixx, Iyy, Izz, m, m, m)."""
+def spatial_inertia(mass: float, inertia) -> np.ndarray:
+    """6x6 [[I, 0], [0, m 1]]: inertia is (Ixx, Iyy, Izz) -> I = diag, or a full 3x3 tensor."""
     # TODO
     raise NotImplementedError("spatial inertia")
 

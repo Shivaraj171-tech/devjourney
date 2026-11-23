@@ -1,0 +1,30 @@
+questions:
+  - prompt: "From the UR5e's table, what is the flange's height (z) at the home pose?"
+    choices:
+      - "d1 - d5 = 0.0628 m"
+      - "d1 + d4 + d5 + d6 = 0.495 m"
+      - "d1 = 0.1625 m"
+      - "0: the flange is always level with the base"
+    answer: 0
+    explain: "At home the shoulder is d1 up, the wrist offsets d4 and d6 run sideways (-y), and d5 runs down: 0.1625 - 0.0997 = 0.0628 m, about 6 cm above the base's mounting plane."
+  - prompt: "Why are a2 and a3 negative in the UR5e's table?"
+    choices:
+      - "a is measured along x_i, and UR's x2, x3 point back along the arm"
+      - "They are typos in the datasheet that everyone copies, kept for backward compatibility"
+      - "Negative a means the joint is prismatic and slides backwards"
+    answer: 0
+    explain: "a is a signed distance along x_i. With x2 and x3 chosen to point the other way, the link lengths come out negative: at home the arm lies along the base's -x axis."
+  - prompt: "How many 4x4 DH matrices are multiplied to get the UR5e's flange pose, and what is the product of the first three?"
+    choices:
+      - "6; the first three give frame 3: the end of the forearm"
+      - "7; the first three give the flange's orientation"
+      - "6; the first three multiply to the identity at the home pose"
+    answer: 0
+    explain: "One matrix per joint: T_0_6 = A1 ... A6. Every prefix A1 ... Ak is frame k's pose in the base: that's how the 3D view draws all six frames."
+  - prompt: "You need millimetre accuracy on a real UR5e. Are the datasheet's DH numbers enough?"
+    choices:
+      - "No: they're nominal; use the robot's own calibration file"
+      - "Yes: DH parameters are exact by definition, since they come from the CAD drawing"
+      - "Yes, as long as you copy every decimal of the published table"
+    answer: 0
+    explain: "Each arm is calibrated at the factory and its real parameters differ slightly from the nominal ones. More decimals don't help: the published table describes the design, not your arm."
