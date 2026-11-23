@@ -1,0 +1,17 @@
+2026-11-23 16:20:11 INFO  deploy   ik: reach_edge.py "plain Newton steps: fewest iterations, removed the damping and the clamp" (author: Byte)
+2026-11-23 16:41:52 INFO  planner  tote 9, box #413 at (-0.580, -0.475, 0.671): reach from q = (11, -69, 52, -74, 52, 6) deg
+2026-11-23 16:41:52 INFO  ik       box #413 solved in 6 iterations, error 3e-07 m. Picked.
+2026-11-23 16:42:30 INFO  planner  tote 9, box #414 at (-0.570, -0.470, 0.702), far edge of the tote
+2026-11-23 16:42:30 DEBUG ik       iter  1  |v| 194.7 mm  q3 =  21.2 deg  max step 0.53 rad
+2026-11-23 16:42:30 DEBUG ik       iter  2  |v|  52.2 mm  q3 =   4.0 deg  max step 0.31 rad
+2026-11-23 16:42:30 DEBUG ik       iter  3  |v|  10.7 mm  q3 = -39.5 deg  max step 0.76 rad
+2026-11-23 16:42:30 DEBUG ik       iter  4  |v|  58.4 mm  q3 = -15.5 deg  max step 0.42 rad
+2026-11-23 16:42:30 DEBUG ik       iter  5  |v|  17.5 mm  q3 =   2.9 deg  max step 0.32 rad
+2026-11-23 16:42:30 DEBUG ik       iter  6  |v|  10.2 mm  q3 = -58.4 deg  max step 1.07 rad
+2026-11-23 16:42:30 DEBUG ik       iter  7  |v| 114.8 mm  q3 = -25.8 deg  max step 0.57 rad
+2026-11-23 16:42:30 WARN  ik       error not decreasing: elbow flipping between +21 and -58 deg
+2026-11-23 16:42:31 DEBUG ik       iter 18  |v|  10.0 mm  q3 =  -0.1 deg  (elbow nearly straight, cond(J) = 6.0e+03)
+2026-11-23 16:42:31 ERROR ik       iter 19  joint 2 commanded -12.24 rad, joint 3 +24.05 rad in ONE step (max step 24.05 rad)
+2026-11-23 16:42:31 ERROR ik       60 iterations, no convergence: final |v| 10.0 mm, joints (29, -3248, 2813, 343, 69, 23) deg
+2026-11-23 16:42:31 ERROR safety   IK result rejected: joints outside +-360 deg. Pick of box #414 aborted
+2026-11-23 16:42:33 WARN  alerts   Grabby-6 stopped at tote 9, paging on-call developer
