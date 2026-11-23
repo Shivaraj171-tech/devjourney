@@ -1,0 +1,10 @@
+id: s44-t10
+title: "Module 4 concept check"
+type: read
+level: mid
+track: robotics
+concepts: [ik-solutions, analytic-ik, rrr-ik, wrist-decoupling, newton-raphson-ik, body-twist-ik, damped-least-squares, choosing-ik-solutions, robust-ik, inverse-kinematics-module]
+new_concept: inverse-kinematics-module
+estimated_minutes: 20
+tests_visible: true
+files_editable: []

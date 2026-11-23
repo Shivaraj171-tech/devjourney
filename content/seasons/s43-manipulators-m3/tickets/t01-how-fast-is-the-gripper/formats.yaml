@@ -1,0 +1,58 @@
+predict:
+  - code: |
+      def step(q, d, h):
+          for i in range(len(q)):
+              q[i] += h * d[i]
+          return q
+
+      q = [1.0, 2.0]
+      ahead = step(q, [1, 1], 0.5)
+      behind = step(q, [1, 1], -0.5)
+      print(ahead, behind, ahead is behind)
+    question: "Byte's in-place step(), probing both ways from q. What are the two probe points?"
+    answer: "[1.0, 2.0] [1.0, 2.0] True"
+    choices:
+      - "[1.0, 2.0] [1.0, 2.0] True"
+      - "[1.5, 2.5] [0.5, 1.5] False"
+      - "[1.5, 2.5] [1.0, 2.0] False"
+      - "[1.5, 2.5] [0.5, 1.5] True"
+    explain: >-
+      Both names point at the SAME list, q itself, which was moved forward and then back. In tip_velocity the
+      first probe is evaluated before the second step, so it sees q + h q̇, but the "behind" probe sees q:
+      a forward difference divided by 2h, half the velocity.
+  - code: |
+      import math
+      def p(q):
+          return math.sin(q)
+      h = 0.1
+      forward = (p(1.0 + h) - p(1.0)) / h
+      central = (p(1.0 + h) - p(1.0 - h)) / (2 * h)
+      exact = math.cos(1.0)
+      print(round(abs(forward - exact), 4), round(abs(central - exact), 4))
+    question: "The slope of sin at 1.0 with a big step h = 0.1. How far off is each difference?"
+    answer: "0.0429 0.0009"
+    choices:
+      - "0.0429 0.0009"
+      - "0.0009 0.0429"
+      - "0.0429 0.0429"
+      - "0.0043 0.0001"
+    explain: >-
+      The forward error is about (h / 2) |p''| = 0.05 x 0.84; the central one about (h² / 6) |p'''| = 0.0017 x 0.54.
+      Fifty times better for the same two function calls.
+parsons:
+  - goal: >-
+      Write `velocity(p, q, qd, h)`: the central-difference velocity of a 1-joint "arm" p(q) moving at qd,
+      without changing anything the caller owns. One line is Byte's slip: leave it out.
+    lines:
+      - "def velocity(p, q, qd, h):"
+      - "    ahead = p(q + h * qd)"
+      - "    behind = p(q - h * qd)"
+      - "    return (ahead - behind) / (2 * h)"
+    distractors:
+      - line: "    return (ahead - behind) / h"
+        replaces: 3
+        explain: "The probes are 2h apart (q - h q̇ to q + h q̇): divide by 2h, or the velocity doubles."
+    check: |
+      import math
+      assert abs(velocity(math.sin, 0.5, 2.0, 1e-6) - 2.0 * math.cos(0.5)) < 1e-8
+    explain: "Probe both sides, divide by the distance between the probes: 2h."

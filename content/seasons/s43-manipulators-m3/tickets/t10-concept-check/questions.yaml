@@ -1,0 +1,68 @@
+questions:
+  - prompt: "A 5-joint arm. Its geometric Jacobian has how many rows and columns?"
+    choices:
+      - "6 × 5"
+      - "5 × 6"
+      - "5 × 5"
+      - "6 × 6"
+    answer: 0
+    explain: "Rows: what the gripper does (3 linear + 3 angular speeds). Columns: one per joint."
+  - prompt: "The two-link arm (l1 = 0.5, l2 = 0.4) has q2 = 30°. What is det J?"
+    choices:
+      - "0.1"
+      - "0.2"
+      - "0.17"
+      - "0"
+    answer: 0
+    explain: "det J = l1 l2 sin(q2) = 0.2 × 0.5 = 0.1, whatever q1 is."
+  - prompt: "Standard DH, joint 4 of the UR5. Its geometric Jacobian column uses which frame's z axis and origin?"
+    choices:
+      - "Frame 3's"
+      - "Frame 4's"
+      - "The flange's (frame 6)"
+    answer: 0
+    explain: "Joint i turns about z(i-1) through p(i-1): joint 4 uses frame 3."
+  - prompt: "Which of these is the gripper's angular velocity written in the gripper's OWN frame?"
+    choices:
+      - "vee(Rᵀ Ṙ)"
+      - "vee(Ṙ Rᵀ)"
+      - "vee(R Ṙ)"
+    answer: 0
+    explain: "Ṙ Rᵀ is the base-frame spin; Rᵀ Ṙ = Rᵀ [w] R is the same spin in the gripper's axes."
+  - prompt: "J J^T has eigenvalues 0.49, 0.16 and 0.0001. Condition number κ and manipulability w?"
+    choices:
+      - "κ = 70, w = 0.0028"
+      - "κ = 4900, w = 0.0028"
+      - "κ = 70, w = 0.0000078"
+      - "κ = 4900, w = 0.0000078"
+    answer: 0
+    explain: "σ = 0.7, 0.4, 0.01. κ = 0.7 / 0.01 = 70, w = 0.7 × 0.4 × 0.01 = 0.0028. The other numbers forgot a square root."
+  - prompt: "The UR5 at q5 = 0. Which statement is true?"
+    choices:
+      - "Joints 4 and 6 turn about parallel axes: one direction of rotation is lost"
+      - "The arm is stretched out along its upper arm and forearm, and can't reach any further"
+      - "Joint 5 has hit its limit"
+    answer: 0
+    explain: "The wrist flip: sin(q5) is a factor of det J. Stretched out is the ELBOW singularity (sin q3 = 0)."
+  - prompt: "A 3-joint arm holds a force F at its gripper. Which formula gives the joint torques?"
+    choices:
+      - "τ = Jvᵀ F"
+      - "τ = Jv F"
+      - "τ = Jv⁻¹ F"
+      - "τ = F / det Jv"
+    answer: 0
+    explain: "Power balance: τ · q̇ = F · (J q̇) for every q̇ gives τ = Jᵀ F. It needs no inverse, so it works at singularities too."
+  - prompt: "A twist V_s = (w, v) in the base frame. The gripper sits at p. How fast does the gripper POINT move?"
+    choices:
+      - "v + w × p"
+      - "v"
+      - "w × p"
+    answer: 0
+    explain: "v is the velocity of the body point at the base origin; carrying it over to p adds the lever w × p."
+  - prompt: "Why is a central difference preferred for the numeric Jacobian?"
+    choices:
+      - "Its error shrinks like h², so h = 1e-6 gives about 12 good digits"
+      - "It needs fewer forward-kinematics calls than a forward difference"
+      - "It never has rounding errors"
+    answer: 0
+    explain: "It costs two calls per column (a forward difference can share one base call), but the first error terms cancel: the error falls like h², not h."

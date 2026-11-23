@@ -1,0 +1,33 @@
+predict:
+  - code: |
+      def clamp_scale(dq, m):
+          big = max(abs(x) for x in dq)
+          return [round(x * m / big, 3) for x in dq] if big > m else dq
+      def clamp_each(dq, m):
+          return [max(-m, min(m, x)) for x in dq]
+      dq = [0.1, -0.6, 0.3]
+      print(clamp_scale(dq, 0.2), clamp_each(dq, 0.2))
+    question: "Two ways to limit a step to 0.2 rad per joint. What does each give?"
+    answer: "[0.033, -0.2, 0.1] [0.1, -0.2, 0.2]"
+    choices:
+      - "[0.033, -0.2, 0.1] [0.1, -0.2, 0.2]"
+      - "[0.1, -0.2, 0.2] [0.033, -0.2, 0.1]"
+      - "[0.033, -0.2, 0.1] [0.033, -0.2, 0.1]"
+      - "[0.2, -0.2, 0.2] [0.1, -0.2, 0.2]"
+    explain: >-
+      Scaling keeps the direction (ratios 1 : -6 : 3); clipping each joint gives 1 : -2 : 2, a different step that the
+      linearisation never asked for.
+trace:
+  - code: |
+      def settle(errors, window):
+          recent = errors[-window:]
+          spread = max(recent) - min(recent)
+          return spread < 0.001
+
+      calm = settle([0.19, 0.05, 0.0108, 0.0107, 0.0107], 3)
+      thrash = settle([0.19, 0.05, 0.0107, 0.0584, 0.0175], 3)
+    watch: [recent, spread]
+    rows: 4
+    explain: >-
+      The robust solver's last errors barely move (spread 0.0001): settled. Plain Newton's jump around by almost
+      5 cm: thrashing. "The error settles" is the success test for an unreachable target.

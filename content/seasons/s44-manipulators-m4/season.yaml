@@ -1,0 +1,32 @@
+id: s44
+title: "Manipulators · Module 4: Inverse kinematics"
+icon: "🦾"
+# A deep side floor: module 4 of 8 of the manipulator track (see README). Its codebase
+# starts from Module 3's final vel/ + kin/ + rigid/ packages and adds ik/ (reachability,
+# analytic IK by the law of cosines and the wrist centre, Newton-Raphson on position and
+# on the full pose, damped least squares, choosing among solutions). It opens once
+# Module 3 is done.
+chain: false
+requires: s43-t10
+lesson: long
+short_title: "Manipulators · M4"
+intro: >
+  **Module 4 of 8: Inverse kinematics.** The planner knows where the box is; Grabby
+  needs the joint angles that put the gripper there. That's forward kinematics run
+  backwards, and it is harder: a target can have no solution, one, two, four, eight.
+  Rosa takes you from counting solutions to the law of cosines, the 3-DOF arm and the
+  wrist-centre trick for six joints, then to numerical IK: Newton-Raphson watched step
+  by step in 3D, the full UR5 pose with a body-twist error, damped least squares when
+  Newton explodes, choosing the solution closest to where the arm is, and a boss
+  incident at the edge of the workspace. Optional: it never blocks the main story.
+tickets:
+  - t01-fk-backwards
+  - t02-law-of-cosines
+  - t03-three-joints-backwards
+  - t04-the-wrist-centre
+  - t05-newton-raphson
+  - t06-the-full-pose
+  - t07-damped-least-squares
+  - t08-choosing-a-solution
+  - t09-edge-of-reach
+  - t10-concept-check

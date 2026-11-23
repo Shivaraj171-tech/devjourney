@@ -1,0 +1,42 @@
+predict:
+  - code: |
+      J = [[0.1, -0.2, 0.0, 0.0, 0.0, 0.0],
+           [0.5, 0.0, 0.3, 0.0, 0.0, 0.0],
+           [0.0, 0.4, 0.1, 0.0, 0.0, 0.0],
+           [0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+           [0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+           [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
+      qdot = [1.0, 0.5, 0.0, 0.0, 0.0, -1.0]
+      twist = [sum(J[r][c] * qdot[c] for c in range(6)) for r in range(6)]
+      print(twist[:3], twist[3:])
+    question: "A made-up 6x6 Jacobian and joint speeds. What are the flange's v and w?"
+    answer: "[0.0, 0.5, 0.2] [0.0, 0.0, 0.0]"
+    choices:
+      - "[0.0, 0.5, 0.2] [0.0, 0.0, 0.0]"
+      - "[0.0, 0.5, 0.2] [0.0, 0.0, 2.0]"
+      - "[0.1, 0.5, 0.0] [1.0, 0.0, -1.0]"
+      - "[0.0, 0.5, 0.2] [0.0, 0.0, 1.0]"
+    explain: >-
+      Row by row: vx = 0.1 - 0.1, vy = 0.5, vz = 0.2; wz = 1.0 x 1 + 1.0 x (-1) = 0. Joints 1 and 6 spin the
+      flange in opposite directions about the same axis, and cancel: a hint of what ticket 6 calls a singularity.
+parsons:
+  - goal: >-
+      Write `vee_spin(Rd, R)`: the base-frame angular velocity from Ṙ and R (`mul` and `transpose` exist). One
+      line is Byte's slip: leave it out.
+    lines:
+      - "def vee_spin(Rd, R):"
+      - "    W = mul(Rd, transpose(R))"
+      - "    return [W[2][1], W[0][2], W[1][0]]"
+    distractors:
+      - line: "    W = mul(transpose(R), Rd)"
+        replaces: 1
+        explain: "That's the spin in the flange's own axes. dR/dt = [w] R puts R on the RIGHT, so [w] = Ṙ Rᵀ."
+    check: |
+      def mul(A, B):
+          return [[sum(A[i][k] * B[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+      def transpose(A):
+          return [list(r) for r in zip(*A)]
+      R = [[1, 0, 0], [0, 0, -1], [0, 1, 0]]
+      Rd = [[0, 0, 1], [1, 0, 0], [0, 0, 0]]
+      assert vee_spin(Rd, R) == [0, 0, 1], vee_spin(Rd, R)
+    explain: "The spin about the base's z axis comes out as (0, 0, 1), whatever way the flange is tipped."

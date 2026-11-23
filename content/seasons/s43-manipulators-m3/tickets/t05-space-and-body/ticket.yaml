@@ -1,0 +1,10 @@
+id: s43-t05
+title: "Two frames, one motion"
+type: bug
+level: senior
+track: robotics
+concepts: [product-of-exponentials, ur5-jacobian, space-body-jacobian]
+new_concept: space-body-jacobian
+estimated_minutes: 35
+tests_visible: true
+files_editable: [vel/screw_jac.py]

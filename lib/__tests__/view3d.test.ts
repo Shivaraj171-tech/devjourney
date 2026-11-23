@@ -5,6 +5,14 @@ import { test } from "node:test";
 import { parseViz, VIZ_LIMITS, type Frames3DItem } from "../lab/viz.ts";
 import {
   angleBetween,
+  arrowSummary,
+  ellipsoidCondition,
+  ELLIPSOID_LATITUDES,
+  ELLIPSOID_LONGITUDES,
+  ellipsoidPoint,
+  ellipsoidRings,
+  ellipsoidsAt,
+  ellipsoidSummary,
   axisOf,
   cameraBasis,
   defaultCamera,
@@ -190,4 +198,75 @@ test("text summary: where the focus frame is, its axes, the target, stretched ax
   const stretched = item({ frames: [[I34, [1.1, 0, 0, 0, 0, 1.1, 0, 0, 0, 0, 1.1, 0]]], target: null, trail: null });
   assert.match(frames3dSummary(stretched, 0), /axis lengths 1\.10, 1\.10, 1\.10 \(not a pure rotation\)/);
   assert.ok(Math.abs(angleBetween(I34, rz(0.5)) - 0.5) < 1e-9);
+});
+
+// ---------- ellipsoids and arrows (manipulability, velocities) ----------
+
+const ELL = { center: [1, 0, 0.5], axes: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], radii: [0.4, 0.2, 0.1], label: "v" };
+type V3 = [number, number, number];
+
+test("parseViz: ellipsoids and arrows are kept per frame, broken ones dropped, caps applied", () => {
+  const it = item({
+    ellipsoids: [[ELL], [ELL, { ...ELL, radii: [0.3, -1, 0.1] }, { ...ELL, axes: [[1, 0, 0]] }, { center: [0, 0] }]],
+    arrows: [[{ start: [0, 0, 0], vec: [0.1, 0, 0], label: "v" }], [{ start: [0, 0, 0], vec: [0, Number.NaN, 0] }, "x"]],
+  });
+  assert.equal(it.ellipsoids.length, 2);
+  assert.deepEqual(it.ellipsoids[0][0], { center: [1, 0, 0.5], axes: ELL.axes, radii: [0.4, 0.2, 0.1], label: "v" });
+  assert.equal(it.ellipsoids[1].length, 1, "a negative radius, one axis or no axes: dropped");
+  assert.deepEqual(it.arrows[0][0].vec, [0.1, 0, 0]);
+  assert.equal(it.arrows[1].length, 0);
+  const many = item({ ellipsoids: [Array(10).fill(ELL)], arrows: [Array(20).fill({ start: [0, 0, 0], vec: [1, 0, 0] })] });
+  assert.equal(many.ellipsoids[0].length, VIZ_LIMITS.ellipsoids);
+  assert.equal(many.arrows[0].length, VIZ_LIMITS.arrows);
+  // A flat ellipse: 2 axes, 2 radii.
+  const flat = item({ ellipsoids: [[{ center: [0, 0, 0], axes: [[1, 0, 0], [0, 0, 1]], radii: [0.5, 0.2] }]] });
+  assert.equal(flat.ellipsoids[0][0].axes.length, 2);
+  // Old items (no ellipsoids / arrows) are unchanged.
+  const old = item();
+  assert.deepEqual(old.ellipsoids, []);
+  assert.deepEqual(old.arrows, []);
+  assert.equal(ellipsoidsAt(old, 0).length, 0);
+  assert.equal(frames3dSummary(old, 0), frames3dSummary(item({ ellipsoids: "junk", arrows: 3 }), 0));
+});
+
+test("ellipsoid geometry: rings lie on the ellipsoid, a zero radius flattens them", () => {
+  const e = { center: [1, 0, 0.5] as V3, axes: ELL.axes as V3[], radii: [0.4, 0.2, 0.1], label: "" };
+  const rings = ellipsoidRings(e, 24);
+  assert.equal(rings.length, ELLIPSOID_LATITUDES.length + ELLIPSOID_LONGITUDES.length);
+  for (const ring of rings)
+    for (const p of ring) {
+      const q = [(p[0] - 1) / 0.4, p[1] / 0.2, (p[2] - 0.5) / 0.1];
+      assert.ok(Math.abs(Math.hypot(q[0], q[1], q[2]) - 1) < 1e-9, "every ring point is on the surface");
+    }
+  // Turned axes: the point along u = (1, 0, 0) is center + r1 * axis 1.
+  const turned = { ...e, axes: [[0, 1, 0], [-1, 0, 0], [0, 0, 1]] as V3[] };
+  assert.deepEqual(ellipsoidPoint(turned, [1, 0, 0]).map((v) => Number(v.toFixed(9))), [1, 0.4, 0.5]);
+  const flat = { ...e, radii: [0.4, 0.2, 0] };
+  for (const ring of ellipsoidRings(flat)) for (const p of ring) assert.ok(Math.abs(p[2] - 0.5) < 1e-12, "flat: every ring in the plane");
+  assert.equal(ellipsoidRings({ ...e, axes: e.axes.slice(0, 2), radii: [0.4, 0.2] }).length, 1);
+});
+
+test("ellipsoid condition number and summaries", () => {
+  const e = { center: [0, 0, 0] as V3, axes: ELL.axes as V3[], radii: [0.4, 0.2, 0.1], label: "velocity" };
+  assert.equal(ellipsoidCondition(e), 4);
+  assert.equal(ellipsoidCondition({ ...e, radii: [0.4, 0.2, 0] }), Infinity);
+  assert.equal(ellipsoidSummary(e), "velocity: radii 0.4, 0.2, 0.1 · condition number 4");
+  assert.match(ellipsoidSummary({ ...e, radii: [0.4, 0.2, 0] }), /∞ \(flat: singular\)/);
+  assert.equal(arrowSummary({ start: [0, 0, 0], vec: [0.3, 0, 0.4], label: "v" }), "v (0.30, 0.00, 0.40), length 0.5");
+  const it = item({ ellipsoids: [[ELL], []], arrows: [[], [{ start: [0, 0, 0], vec: [0, 0, 2], label: "F" }]] });
+  assert.match(frames3dSummary(it, 0), /v: radii 0.4, 0.2, 0.1 · condition number 4$/);
+  assert.match(frames3dSummary(it, 1), /F \(0.00, 0.00, 2.00\), length 2$/);
+});
+
+test("frame shapes and bounds include ellipsoids and arrows", () => {
+  const it = item({ ellipsoids: [[ELL], [ELL]], arrows: [[{ start: [0, 0, 0], vec: [0, 0, 3], label: "F" }], []] });
+  const shapes = frameShapes(it, 0, 0.2);
+  assert.ok(shapes.filter((s) => s.kind === "segment" && s.role === "ellipsoid").length >= 36 * 9);
+  assert.equal(shapes.filter((s) => s.kind === "segment" && s.role === "ellipsoid-axis").length, 3);
+  assert.equal(shapes.filter((s) => s.kind === "arrow").length, 1);
+  assert.equal(frameShapes(it, 1, 0.2).filter((s) => s.kind === "arrow").length, 0);
+  const { center, radius } = sceneBounds(it);
+  assert.ok(norm3([center[0], center[1], center[2] - 3]) <= radius, "the arrow's tip is inside the bounds");
+  const arrow = shapes.find((s) => s.kind === "arrow")!;
+  assert.ok(shapeDepth(arrow, defaultCamera(it), 300, 300) !== null);
 });

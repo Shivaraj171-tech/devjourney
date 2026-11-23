@@ -11,6 +11,7 @@ Robotics Lab tickets draw their results in the Lab viewer next to the CI checks
     viz.points("Grasps", [(x, y), ...], labels=[0, 1, ...])   # a scatter plot of labelled points
     viz.frames3d("Box", [[T_world, T_box], ...])               # 3D coordinate frames (4x4 transforms), animated
     viz.arm3d([[T_01, T_12, T_23], ...])                       # a 3D arm from link-to-link transforms
+    viz.arm3d(..., ellipsoids=[...], arrows=[...])             # + velocity ellipsoids and arrows (3D)
 
 Each call records one item, keyed by its name (calling again with the same name
 replaces it, except chart(), which adds a line). test_runner.run_tests() clears
@@ -37,6 +38,8 @@ MAX_GRID = 40           # rows and columns per grid
 MAX_TEXT = 120          # characters per title / label / caption
 MAX_TRANSFORMS = 12     # 4x4 transforms per 3D frame
 MAX_LINES = 24          # static line segments per 3D item
+MAX_ELLIPSOIDS = 4      # ellipsoids per 3D frame
+MAX_ARROWS = 8          # arrows per 3D frame
 MAX_JSON = 200_000      # characters of JSON for the whole run
 DIGITS = 4              # decimals kept
 
@@ -69,6 +72,22 @@ def _num(value):
     return round(value, DIGITS)
 
 
+def _sig(value):
+    """Like _num, but keeping DIGITS significant digits (for log-scale charts)."""
+    value = _num_raw(value)
+    if value is None or value == 0:
+        return value
+    return float(f"{value:.{DIGITS}g}")
+
+
+def _num_raw(value):
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return None
+    return value if math.isfinite(value) else None
+
+
 def _text(value, default=""):
     if value is None:
         return default
@@ -99,7 +118,7 @@ def _thin_all(items):
     """Halve every long list once. Returns False when nothing could be thinned."""
     changed = False
     for item in items:
-        for key in ("frames", "targets", "ghost", "points", "labels", "path"):
+        for key in ("frames", "targets", "ghost", "points", "labels", "path", "ellipsoids", "arrows"):
             if item.get("kind") == "frames3d" and key in ("labels", "points"):
                 continue  # one per transform / static marks: never thinned
             if isinstance(item.get(key), list) and len(item[key]) > 8:
@@ -183,7 +202,10 @@ class _Viz:
         if len(xs) != len(ys):
             raise ValueError(f"viz.chart: xs and ys must be the same length ({len(xs)} vs {len(ys)})")
         thin_xs, truncated = _thin([_num(x) for x in xs], MAX_POINTS)
-        thin_ys = _thin([_num(y) for y in ys], MAX_POINTS)[0]
+        # On a log scale small values matter (an IK error of 1e-9): keep significant digits there.
+        existing = _items.get(_text(name) or "chart")
+        on_log = log or bool(existing and existing.get("kind") == "chart" and existing.get("log"))
+        thin_ys = _thin([_sig(y) if on_log else _num(y) for y in ys], MAX_POINTS)[0]
         series = {"label": _text(label, _text(name)), "xs": thin_xs, "ys": thin_ys}
         key = _text(name) or "chart"
         item = _items.get(key)
@@ -230,7 +252,7 @@ class _Viz:
 
 
     def frames3d(self, name, frames, *, axes=True, links=True, labels=None, points=None, lines=None,
-                 target=None, trail=None, scale=None, title=None, caption=None):
+                 target=None, trail=None, scale=None, title=None, caption=None, ellipsoids=None, arrows=None):
         """Animate 3D coordinate frames: each frame of the animation is a list of 4x4
         homogeneous transforms (nested lists, rows first), each one a pose in the WORLD frame.
 
@@ -247,6 +269,16 @@ class _Viz:
         target: optional 4x4 pose (drawn as a dashed triad) or (x, y, z) point to reach.
         trail:  optional transform index whose origin leaves a trail (e.g. -1: the last one).
         scale:  triad length in metres (default: picked from the scene's size).
+        ellipsoids: optional ellipsoids (e.g. a manipulability / velocity ellipsoid), each a dict
+                {"center": (x, y, z), "axes": 3x3 matrix whose COLUMNS are the principal directions,
+                 "radii": (r1, r2, r3), "label": "v"} (3 rows of 2 columns + 2 radii: a flat ellipse).
+                Drawn as a wireframe (latitude and longitude rings) with its principal axes; the
+                text summary gives the radii and the condition number (largest / smallest radius).
+                A list of dicts: the same ellipsoids in every frame. A list of LISTS (or None), one
+                per frame: they change as the arm moves (at most MAX_ELLIPSOIDS per frame).
+        arrows: optional arrows (a velocity, a force), each a dict {"start": (x, y, z),
+                "vec": (dx, dy, dz), "label": "v"}: from start to start + vec. Static or one list
+                per frame, like ellipsoids (at most MAX_ARROWS per frame).
 
         The matrices are drawn as they are, even when they are not proper rotations
         (a quaternion that drifted shows as stretched axes). A bottom row that is not
@@ -284,10 +316,15 @@ class _Viz:
             item["trail"] = int(trail) % count
         if scale is not None:
             item["scale"] = _num(scale)
+        if ellipsoids is not None:
+            item["ellipsoids"] = _thin(_per_frame(ellipsoids, len(scenes), "ellipsoids", MAX_ELLIPSOIDS, _ellipsoid),
+                                       MAX_FRAMES)[0]
+        if arrows is not None:
+            item["arrows"] = _thin(_per_frame(arrows, len(scenes), "arrows", MAX_ARROWS, _arrow), MAX_FRAMES)[0]
         _record(name, item)
 
     def arm3d(self, frames, *, name="arm3d", local=True, labels=None, points=None, lines=None, target=None,
-              title=None, caption=None, scale=None, trail=True, axes="ends"):
+              title=None, caption=None, scale=None, trail=True, axes="ends", ellipsoids=None, arrows=None):
         """A 3D arm: each frame is one pose, given as a list of 4x4 transforms.
 
         local=True (default): the transforms are link to link (T_0_1, T_1_2, ...): the viewer
@@ -297,6 +334,8 @@ class _Viz:
         drawn as a thick arm, with triads at the base and the gripper (the last transform).
         axes:    "ends" (default: base and gripper), True (a triad on EVERY joint frame, e.g. to
                  see each DH frame), False, or one True/False per frame (base first).
+        ellipsoids, arrows: as in frames3d, in world coordinates (e.g. the velocity ellipsoid at
+                 the gripper, the gripper's velocity).
         """
         poses = []
         for f, pose in enumerate(_scenes(frames)):
@@ -313,7 +352,7 @@ class _Viz:
             names = ["base"] + names
         self.frames3d(name, poses, axes=axes, links=True, labels=names, points=points, lines=lines, target=target,
                       trail=(n - 1) if trail else None, scale=scale, title=_text(title, "Grabby's arm (3D)"),
-                      caption=caption)
+                      caption=caption, ellipsoids=ellipsoids, arrows=arrows)
         if name in _items and _items[name]["kind"] == "frames3d":
             _items[name]["style"] = "arm"
 
@@ -394,6 +433,48 @@ def _per_transform(flag, count, key):
         return [bool(flag)] * count
     flags = [bool(v) for v in list(flag)[:MAX_TRANSFORMS]]
     return flags + [False] * (count - len(flags))
+
+
+def _per_frame(values, count, key, cap, clean):
+    """Static (a list of dicts: every frame) or per frame (a list of lists or None, one per frame)."""
+    values = list(values) if isinstance(values, (list, tuple)) else values
+    if not isinstance(values, list):
+        raise TypeError(f"viz.frames3d: {key} must be a list of dicts, or one list (or None) per frame")
+    if all(isinstance(v, dict) for v in values):
+        static = [clean(v) for v in values[:cap]]
+        return [static] * count
+    if len(values) != count or not all(v is None or isinstance(v, (list, tuple)) for v in values):
+        raise ValueError(f"viz.frames3d: {key} per frame needs one list (or None) per frame ({count}), "
+                         f"got {len(values)} entries (a static list holds only dicts)")
+    return [[clean(v) for v in list(f or [])[:cap]] for f in values]
+
+
+def _ellipsoid(e):
+    """{center, axes (3 rows x 2 or 3 columns), radii, label} as JSON, axes as a list of columns."""
+    if not isinstance(e, dict):
+        raise TypeError(f"viz: an ellipsoid is a dict with center, axes and radii, got {e!r}")
+    missing = [k for k in ("center", "axes", "radii") if k not in e]
+    if missing:
+        raise ValueError(f"viz: an ellipsoid needs center, axes and radii (missing {', '.join(missing)})")
+    try:
+        rows = [list(r) for r in e["axes"]]
+        radii = [_num(r) for r in e["radii"]]
+    except TypeError:
+        raise ValueError(f"viz: an ellipsoid's axes must be a 3x3 matrix (columns: the directions), got {e['axes']!r}") from None
+    k = len(rows[0]) if rows else 0
+    if len(rows) != 3 or k not in (2, 3) or any(len(r) != k for r in rows):
+        raise ValueError("viz: an ellipsoid's axes must be 3 rows of 3 numbers (or 3 rows of 2: an ellipse), "
+                         f"the columns being the principal directions, got {rows!r}")
+    if len(radii) != k or any(r is None or r < 0 for r in radii):
+        raise ValueError(f"viz: an ellipsoid needs {k} finite, non-negative radii (one per axis), got {e['radii']!r}")
+    cols = [[_num(rows[i][j]) or 0.0 for i in range(3)] for j in range(k)]
+    return {"center": _vec3(e["center"]), "axes": cols, "radii": radii, "label": _text(e.get("label"))}
+
+
+def _arrow(a):
+    if not isinstance(a, dict) or "start" not in a or "vec" not in a:
+        raise ValueError(f"viz: an arrow is a dict with start (x, y, z) and vec (dx, dy, dz), got {a!r}")
+    return {"start": _vec3(a["start"]), "vec": _vec3(a["vec"]), "label": _text(a.get("label"))}
 
 
 def _mark(m):

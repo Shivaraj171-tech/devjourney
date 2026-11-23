@@ -1,0 +1,10 @@
+id: s44-t07
+title: "Damping the explosion"
+type: bug
+level: senior
+track: robotics
+concepts: [singularities, newton-raphson-ik, damped-least-squares]
+new_concept: damped-least-squares
+estimated_minutes: 30
+tests_visible: true
+files_editable: [ik/dls.py]

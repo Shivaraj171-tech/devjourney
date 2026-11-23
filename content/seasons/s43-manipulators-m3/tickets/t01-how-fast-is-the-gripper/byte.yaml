@@ -1,0 +1,18 @@
+# Wrong: Byte fixes the symptom (half the speed) by dividing by h. The numbers look right,
+# but the probes are still wrong (a forward difference) and the caller's q still moves.
+suggestion:
+  file: vel/numeric.py
+  find: "    return [(a - b) / (2 * h) for a, b in zip(ahead, behind)]"
+  replace: "    return [(a - b) / h for a, b in zip(ahead, behind)]"
+  correct: false
+  why:
+    choices:
+      - "Reject: it hides the real bug. The probes are p(q + h q̇) and p(q), and step() still changes the caller's list."
+      - "Accept: the velocity is exactly half, so the divisor is the bug; a central difference divides by h."
+      - "Accept: the numbers now match the exact derivative to 6 digits, which is good enough for a conveyor."
+    answer: 0
+  says: "Velocity is exactly half? Then the divisor is off by two. One character, done."
+  explain: >-
+    A symptom fix. The probes are still p(q + h q̇) and p(q) (step() moves the caller's list forward, then back),
+    so this turns the code into a forward difference: about 6 correct digits instead of 12, and the caller's q is
+    still modified, which the step() test catches. Fix the cause: make step() return a new list.

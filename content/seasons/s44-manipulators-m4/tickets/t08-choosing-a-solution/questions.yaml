@@ -1,0 +1,29 @@
+questions:
+  - prompt: "Current q = (0, 0). Candidates A = (0.5, -0.5) and B = (0.3, 0.3). Which is closer in joint space?"
+    choices:
+      - "B: sqrt(0.18) ≈ 0.42 versus sqrt(0.5) ≈ 0.71"
+      - "A: its differences add up to 0"
+      - "They are equally close"
+    answer: 0
+    explain: "A's differences cancel in a plain sum, but the joints still move 0.5 rad each. A norm counts both."
+  - prompt: "Why filter by joint limits BEFORE choosing the closest solution?"
+    choices:
+      - "A solution outside the limits can't be executed at all, however close it is"
+      - "Filtering first is faster to compute, because then there are fewer distances to work out"
+      - "It doesn't matter in which order you do them"
+    answer: 0
+    explain: "Limits are hard constraints; closeness is a preference among what's possible. Choosing first could pick an impossible pose."
+  - prompt: "Joint 1 has hard stops at ±170°. The arm is at 160° and a solution has q1 = -160°. How far must joint 1 travel?"
+    choices:
+      - "320°: it can't go through the stops, so no wrapping"
+      - "40°: through 180°, the short way round"
+      - "0°: -160° and 160° are mirror images"
+    answer: 0
+    explain: "Wrapping to the short way only makes sense for a joint that can turn freely. With stops, the travel is the plain difference."
+  - prompt: "No candidate is within the limits. What should pick_solution do?"
+    choices:
+      - "Return None, so the planner knows the box can't be picked safely"
+      - "Return the closest candidate anyway"
+      - "Clamp the closest candidate into the limits, joint by joint, and return that"
+    answer: 0
+    explain: "Clamping changes the pose: the gripper would end up somewhere else. Saying 'no' lets the planner skip the box or re-plan."

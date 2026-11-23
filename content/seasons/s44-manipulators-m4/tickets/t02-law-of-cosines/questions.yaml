@@ -1,0 +1,30 @@
+questions:
+  - prompt: "l1 = 0.5, l2 = 0.4 and the target is 0.6 m from the shoulder. What is cos(q2)?"
+    choices:
+      - "-0.125"
+      - "+0.125"
+      - "0.6"
+      - "-0.6"
+    answer: 0
+    explain: "c2 = (0.36 - 0.25 - 0.16) / 0.4 = -0.05 / 0.4 = -0.125: the elbow bends a little past 90°."
+  - prompt: "Why does the IK use atan2(s2, c2) rather than acos(c2) for the elbow?"
+    choices:
+      - "atan2 keeps the sign of s2, which is the elbow choice"
+      - "acos is slower to compute, and atan2 is the faster built-in function"
+      - "acos only works in degrees"
+    answer: 0
+    explain: "acos(c2) is always in [0, π]: it can only ever give one elbow. atan2(±sqrt(1 - c2²), c2) gives both."
+  - prompt: "The far box is exactly at full reach and c2 comes out as 1.0000000000000002. What should the solver do?"
+    choices:
+      - "Accept it (a tiny tolerance), clamp c2 to 1 and return the stretched-out pose"
+      - "Return None: |c2| > 1 means no triangle"
+      - "Return both elbow solutions, since a reachable target always has exactly two of them"
+    answer: 0
+    explain: "It's rounding, not geometry. Clamp, and the single solution is q2 = 0: both elbows coincide."
+  - prompt: "Elbow up gives q2 = -1.596. What is q2 for elbow down, same target?"
+    choices:
+      - "+1.596"
+      - "-1.596 + π"
+      - "The same, -1.596: only q1 changes between the two"
+    answer: 0
+    explain: "Same triangle, folded the other way: the bend flips sign, and the shoulder angle changes to match."

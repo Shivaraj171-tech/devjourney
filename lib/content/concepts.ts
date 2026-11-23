@@ -66,6 +66,28 @@ const LABELS: Record<string, string> = {
   "dh-vs-poe": "DH and PoE agree",
   "joint-offsets": "Joint offsets and tool frames",
   "forward-kinematics-module": "Forward kinematics (module check)",
+  // Manipulators · Module 3: velocity kinematics (side floor, opens after Module 2)
+  "velocity-kinematics": "Velocity kinematics (numeric differentiation)",
+  "analytic-jacobian": "The Jacobian, derived by hand",
+  "geometric-jacobian": "The geometric Jacobian (one column per joint)",
+  "ur5-jacobian": "The UR5's 6x6 Jacobian, checked by finite differences",
+  "space-body-jacobian": "Space and body Jacobians (the adjoint)",
+  singularities: "Singularities (rank and determinant)",
+  manipulability: "Manipulability and the velocity ellipsoid",
+  statics: "Statics: τ = Jᵀ F",
+  "condition-number": "Condition number (singularity monitoring)",
+  "velocity-kinematics-module": "Velocity kinematics (module check)",
+  // Manipulators · Module 4: inverse kinematics (side floor, opens after Module 3)
+  "ik-solutions": "How many IK solutions (reachability)",
+  "analytic-ik": "Analytic IK (law of cosines, atan2)",
+  "rrr-ik": "IK of a 3-DOF arm (base plane + two links)",
+  "wrist-decoupling": "Wrist-centre decoupling (6-DOF IK)",
+  "newton-raphson-ik": "Newton-Raphson IK",
+  "body-twist-ik": "Full-pose IK with the body twist error",
+  "damped-least-squares": "Damped least squares",
+  "choosing-ik-solutions": "Joint limits and choosing a solution",
+  "robust-ik": "Robust IK at the workspace edge",
+  "inverse-kinematics-module": "Inverse kinematics (module check)",
 };
 
 /** "mutable-shared-data" → "Mutable shared data". Unknown slugs are tidied, labels pass through. */

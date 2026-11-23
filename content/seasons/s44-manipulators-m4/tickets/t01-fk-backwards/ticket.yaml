@@ -1,0 +1,10 @@
+id: s44-t01
+title: "Forward kinematics, backwards"
+type: bug
+level: mid
+track: robotics
+concepts: [forward-kinematics, joint-limits, ik-solutions]
+new_concept: ik-solutions
+estimated_minutes: 20
+tests_visible: true
+files_editable: [ik/reach.py]

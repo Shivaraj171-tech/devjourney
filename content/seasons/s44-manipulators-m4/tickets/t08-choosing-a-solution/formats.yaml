@@ -1,0 +1,35 @@
+predict:
+  - code: |
+      now = [0.0, 0.0]
+      cands = [[1.0, -1.0], [0.2, 0.3]]
+      signed = min(cands, key=lambda q: sum(a - b for a, b in zip(q, now)))
+      norm = min(cands, key=lambda q: sum((a - b) ** 2 for a, b in zip(q, now)))
+      print(signed, norm)
+    question: "Two candidates. Which one does each 'closest' pick?"
+    answer: "[1.0, -1.0] [0.2, 0.3]"
+    choices:
+      - "[1.0, -1.0] [0.2, 0.3]"
+      - "[0.2, 0.3] [0.2, 0.3]"
+      - "[1.0, -1.0] [1.0, -1.0]"
+      - "[0.2, 0.3] [1.0, -1.0]"
+    explain: >-
+      The signed sum of [1, -1] is 0, smaller than 0.5, so it "wins" despite moving both joints a full radian. The
+      squared distance compares 2.0 with 0.13.
+break_it:
+  - says: "Limit check done and tested: q = (-1, 0, 0) with limits (-0.5, 2.0) on every joint is rejected. Works!"
+    code: |
+      def within_limits(q, limits):
+          return all(low <= qi for qi, (low, high) in zip(q, limits))
+    spec: "True exactly when every joint q_i is within its (low, high) range, both ends included. Give q (3 joints); the limits are (-0.5, 2.0) for every joint."
+    call: "within_limits({input}, [(-0.5, 2.0)] * 3)"
+    input_hint: "q, e.g. [0.0, 1.0, 0.0]"
+    helpers: |
+      def spec_ok(q, result):
+          return result == all(-0.5 <= x <= 2.0 for x in q)
+    check: "spec_ok({input}, result)"
+    normal_input: "[-1.0, 0.0, 0.0]"
+    example_input: "[0.0, 2.5, 0.0]"
+    miss: "That one is handled right. Byte only tested the LOW end."
+    explain: >-
+      A joint past its upper stop sails through: Byte tested the end it thought of. Every range has two ends, and
+      every limit check needs a test for each.

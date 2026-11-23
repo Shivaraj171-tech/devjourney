@@ -1,0 +1,37 @@
+predict:
+  - code: |
+      import math
+      sigmas = [0.6, 0.3, 0.1]
+      w = sigmas[0] * sigmas[1] * sigmas[2]
+      kappa = max(sigmas) / min(sigmas)
+      bigger = [2 * s for s in sigmas]
+      print(round(w, 3), round(kappa, 1), round(bigger[0] * bigger[1] * bigger[2], 3), round(max(bigger) / min(bigger), 1))
+    question: "An arm, then the same arm built twice as big. Manipulability and condition number of each?"
+    answer: "0.018 6.0 0.144 6.0"
+    choices:
+      - "0.018 6.0 0.144 6.0"
+      - "0.018 6.0 0.036 12.0"
+      - "0.018 6.0 0.144 12.0"
+      - "0.036 3.0 0.072 3.0"
+    explain: >-
+      Doubling every length doubles every σ: w grows 2³ = 8 times, κ doesn't change. That's why w compares poses
+      of ONE arm, and κ is the measure for "how close to singular".
+parsons:
+  - goal: >-
+      Write `radii(eigenvalues)`: the ellipsoid's radii from the eigenvalues of J J^T, guarding against tiny
+      negative rounding errors (math is imported). One line is Byte's slip: leave it out.
+    lines:
+      - "def radii(eigenvalues):"
+      - "    out = []"
+      - "    for lam in eigenvalues:"
+      - "        out.append(math.sqrt(max(0.0, lam)))"
+      - "    return out"
+    distractors:
+      - line: "        out.append(max(0.0, lam))"
+        replaces: 3
+        explain: "The eigenvalues of J J^T are σ²: the radius is their square root."
+    check: |
+      import math
+      r = radii([4.0, 0.25, -1e-18])
+      assert r == [2.0, 0.5, 0.0], r
+    explain: "One square root per eigenvalue: from σ² back to σ."

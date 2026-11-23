@@ -1,0 +1,30 @@
+questions:
+  - prompt: "Standard DH. About which axis does joint 3 of an arm turn?"
+    choices:
+      - "z2: the z axis of frame 2"
+      - "z3: the z axis of frame 3"
+      - "x2: the common normal of frame 2"
+      - "The base's z axis, for every joint"
+    answer: 0
+    explain: "Row i is Rz(θi) Tz(di) Tx(ai) Rx(αi): it turns about the OLD z, z(i-1). So joint 3 turns about z2."
+  - prompt: "Why is Jv_i = z(i-1) × (p_e - p(i-1)) always perpendicular to the joint's axis?"
+    choices:
+      - "A cross product is perpendicular to both of its factors"
+      - "Because DH frames are chosen that way"
+      - "It isn't: it is parallel to the axis for prismatic joints"
+    answer: 0
+    explain: "a × b is perpendicular to a and to b. For a prismatic joint the formula is different (Jv_i = z(i-1)), but that's not a cross product."
+  - prompt: "The radius p_e - p(i-1) uses p(i-1). What if you used ANOTHER point on the same axis?"
+    choices:
+      - "Same column: the difference is parallel to the axis, and crosses to zero"
+      - "A different column: the radius changes, so the column is scaled by the distance between the two points"
+      - "The column flips sign"
+    answer: 0
+    explain: "Any two points on the axis differ by a multiple of z(i-1), and z × (k z) = 0."
+  - prompt: "The geometric Jacobian of a 4-joint arm has how many rows and columns?"
+    choices:
+      - "6 rows (vx, vy, vz, wx, wy, wz) and 4 columns, one per joint"
+      - "4 rows and 6 columns"
+      - "4 rows and 4 columns: it's always square"
+    answer: 0
+    explain: "Rows are what the gripper does (3 linear + 3 angular speeds), columns are the joints. Only a 6-joint arm has a square one."

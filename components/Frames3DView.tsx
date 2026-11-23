@@ -10,7 +10,9 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
 import type { Frames3DItem } from "@/lib/lab/viz";
 import {
+  arrowsAt,
   defaultCamera,
+  ellipsoidsAt,
   floorGrid,
   frames3dSummary,
   frameShapes,
@@ -42,11 +44,13 @@ const C = {
   line: "#fbbf24", // amber-400
   target: "#fbbf24",
   point: "#f472b6", // pink-400
+  ellipsoid: "#22d3ee", // cyan-400
+  arrow: "#e879f9", // fuchsia-400
   text: "#e2e8f0",
 };
 
 const roleColor = (role: string): string =>
-  role.endsWith("x") ? C.x : role.endsWith("y") ? C.y : role.endsWith("z") ? C.z : role === "arm" ? C.arm : role === "trail" ? C.trail : role === "line" ? C.line : C.link;
+  role.startsWith("ellipsoid") ? C.ellipsoid : role === "arrow" ? C.arrow : role.endsWith("x") ? C.x : role.endsWith("y") ? C.y : role.endsWith("z") ? C.z : role === "arm" ? C.arm : role === "trail" ? C.trail : role === "line" ? C.line : C.link;
 
 function draw(ctx: CanvasRenderingContext2D, item: Frames3DItem, frame: number, cam: Camera, w: number, h: number) {
   const { center, radius } = sceneBounds(item);
@@ -76,14 +80,38 @@ function draw(ctx: CanvasRenderingContext2D, item: Frames3DItem, frame: number, 
     .filter((x): x is { s: Exclude<Shape, { kind: "label" }>; d: number } => x.d !== null)
     .sort((a, b) => b.d - a.d);
   for (const { s } of solid) {
-    if (s.kind === "segment") {
+    if (s.kind === "arrow") {
+      const a = project(s.a, cam, w, h)!;
+      const b = project(s.b, cam, w, h)!;
+      ctx.strokeStyle = C.arrow;
+      ctx.fillStyle = C.arrow;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+      // The head, in screen space so it always faces the viewer.
+      const len = Math.hypot(b.x - a.x, b.y - a.y);
+      if (len > 1) {
+        const ux = (b.x - a.x) / len;
+        const uy = (b.y - a.y) / len;
+        const head = Math.min(11, len * 0.45);
+        ctx.beginPath();
+        ctx.moveTo(b.x, b.y);
+        ctx.lineTo(b.x - ux * head - uy * head * 0.5, b.y - uy * head + ux * head * 0.5);
+        ctx.lineTo(b.x - ux * head + uy * head * 0.5, b.y - uy * head - ux * head * 0.5);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else if (s.kind === "segment") {
       const a = project(s.a, cam, w, h)!;
       const b = project(s.b, cam, w, h)!;
       const target = s.role.startsWith("target");
       ctx.strokeStyle = roleColor(s.role);
-      ctx.globalAlpha = target ? 0.75 : s.role === "trail" ? 0.7 : 1;
-      ctx.lineWidth = s.role === "arm" ? 7 : s.role === "link" ? 2 : s.role === "trail" || s.role === "line" ? 1.5 : 2.5;
-      ctx.setLineDash(target || s.role === "line" ? [5, 4] : []);
+      const ell = s.role === "ellipsoid" || s.role === "ellipsoid-axis";
+      ctx.globalAlpha = target ? 0.75 : s.role === "trail" ? 0.7 : s.role === "ellipsoid" ? 0.8 : 1;
+      ctx.lineWidth = s.role === "arm" ? 7 : s.role === "link" ? 2 : s.role === "trail" || s.role === "line" || ell ? 1.5 : 2.5;
+      ctx.setLineDash(target || s.role === "line" || s.role === "ellipsoid-axis" ? [5, 4] : []);
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
@@ -121,15 +149,16 @@ function draw(ctx: CanvasRenderingContext2D, item: Frames3DItem, frame: number, 
     ctx.font = axis ? "bold 12px ui-sans-serif, system-ui, sans-serif" : "11px ui-sans-serif, system-ui, sans-serif";
     // Axis letters at the tips; a frame's name just under its origin; the target's name under that;
     // a point's name to its right. So labels that share a spot (a box sitting on its target) don't collide.
-    ctx.textAlign = axis || s.role === "name" || s.role === "target" ? "center" : "left";
+    const side = s.role === "point" || s.role === "arrow" || s.role === "ellipsoid";
+    ctx.textAlign = side ? "left" : "center";
     const text = s.text;
-    const x = s.role === "point" ? p.x + 8 : p.x;
-    const y = axis || s.role === "point" ? p.y : s.role === "name" ? p.y + 13 : p.y + 26;
+    const x = side ? p.x + 8 : p.x;
+    const y = axis || side ? p.y : s.role === "name" ? p.y + 13 : p.y + 26;
     // A dark halo keeps the text readable over lines.
     ctx.lineWidth = 3;
     ctx.strokeStyle = C.bg;
     ctx.strokeText(text, x, y);
-    ctx.fillStyle = axis ? roleColor(s.role) : s.role === "point" ? C.point : s.role === "target" ? C.target : C.text;
+    ctx.fillStyle = axis || s.role === "arrow" || s.role === "ellipsoid" ? roleColor(s.role) : s.role === "point" ? C.point : s.role === "target" ? C.target : C.text;
     ctx.fillText(text, x, y);
   }
 }
@@ -217,6 +246,8 @@ export default function Frames3DView({ item }: { item: Frames3DItem }) {
           data-pitch={deg(cam.pitch)}
           data-dist={cam.dist.toFixed(2)}
           data-triads={item.axes.slice(0, item.frames[0]?.length ?? 0).filter(Boolean).length}
+          data-ellipsoids={ellipsoidsAt(item, frame).length}
+          data-arrows={arrowsAt(item, frame).length}
           tabIndex={0}
           role="img"
           aria-label={`${item.title}. ${summary}. ${view}. Drag or use the arrow keys to turn the view, plus and minus to zoom, 0 to reset.`}
@@ -269,6 +300,16 @@ export default function Frames3DView({ item }: { item: Frames3DItem }) {
         {item.trail !== null && (
           <li className="flex items-center gap-1">
             <span aria-hidden className="inline-block h-0.5 w-3 bg-violet-400" /> path so far
+          </li>
+        )}
+        {item.ellipsoids.some((e) => e.length > 0) && (
+          <li className="flex items-center gap-1">
+            <span aria-hidden className="inline-block h-2.5 w-3.5 rounded-full border border-cyan-400" /> ellipsoid
+          </li>
+        )}
+        {item.arrows.some((a) => a.length > 0) && (
+          <li className="flex items-center gap-1">
+            <span aria-hidden className="font-bold text-fuchsia-400">→</span> arrow
           </li>
         )}
         {item.points.length > 0 && (

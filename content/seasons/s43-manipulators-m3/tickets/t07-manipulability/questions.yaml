@@ -1,0 +1,31 @@
+questions:
+  - prompt: "J J^T has eigenvalues 0.36, 0.09 and 0.01. What are the velocity ellipsoid's radii?"
+    choices:
+      - "0.6, 0.3 and 0.1"
+      - "0.36, 0.09 and 0.01"
+      - "0.1296, 0.0081 and 0.0001"
+      - "1/0.36, 1/0.09 and 1/0.01"
+    answer: 0
+    explain: "Radii are the singular values σ = sqrt(λ). (The reciprocals would be the FORCE ellipsoid's radii, a story for ticket 8.)"
+  - prompt: "What is Yoshikawa's manipulability for that same arm?"
+    choices:
+      - "0.018 (0.6 × 0.3 × 0.1)"
+      - "0.000324 (det of J J^T)"
+      - "1.0 (it's always normalised)"
+    answer: 0
+    explain: "w = sqrt(det(J J^T)) = σ1 σ2 σ3. det(J J^T) itself is w² = 0.000324."
+  - prompt: "As the 3-DOF arm stretches its elbow out, what happens to its velocity ellipsoid at the wrist?"
+    choices:
+      - "It flattens: the radius along the arm shrinks to 0"
+      - "It shrinks evenly in every direction until it's a point"
+      - "It grows: a longer arm sweeps the wrist faster"
+      - "Nothing: the ellipsoid only depends on the link lengths"
+    answer: 0
+    explain: "Stretched out, no joint can move the wrist along the arm: one radius goes to 0, the others stay finite (the chart of w falls to 0)."
+  - prompt: "Arm A has manipulability 0.02, arm B 0.08. Can you conclude B is further from a singularity?"
+    choices:
+      - "No: w also scales with the arm's size; compare condition numbers instead"
+      - "Yes: bigger w always means further from singularity"
+      - "Yes, as long as both arms have the same number of joints and the same DH convention"
+    answer: 0
+    explain: "Double every link length and every σ doubles, so w grows 8x without any change in shape. κ = σ_max / σ_min is scale-free."

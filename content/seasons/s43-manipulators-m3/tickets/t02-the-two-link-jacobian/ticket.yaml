@@ -1,0 +1,10 @@
+id: s43-t02
+title: "The two-link Jacobian"
+type: bug
+level: mid
+track: robotics
+concepts: [velocity-kinematics, analytic-jacobian]
+new_concept: analytic-jacobian
+estimated_minutes: 25
+tests_visible: true
+files_editable: [vel/jacobian2.py]

@@ -1,0 +1,10 @@
+# Right: Byte measures the in-plane height from the shoulder.
+suggestion:
+  file: ik/rrr_ik.py
+  find: "    s = z  # Byte: how far up\n"
+  replace: "    s = z - D1  # how far up, from the SHOULDER\n"
+  correct: true
+  says: "The wrists were all 0.3 m high, and D1 = 0.3. The two-link part starts at the shoulder, not the floor."
+  explain: >-
+    Right, and diagnosed from the evidence: a constant offset equal to a constant in the code. With the height
+    measured from the shoulder all four solutions land on the box, and the "out of reach" boxes come back.

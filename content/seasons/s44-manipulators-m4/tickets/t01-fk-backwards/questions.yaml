@@ -1,0 +1,31 @@
+questions:
+  - prompt: "A two-link arm has l1 = 0.6 and l2 = 0.2. Which shoulder-to-target distances can it reach?"
+    choices:
+      - "0.4 to 0.8"
+      - "0 to 0.8"
+      - "0.2 to 0.6"
+      - "Only exactly 0.8"
+    answer: 0
+    explain: "The ring |l1 - l2| <= r <= l1 + l2: the forearm (0.2) can't fold back far enough to bring the gripper within 0.4 of the shoulder."
+  - prompt: "A target strictly inside the ring. How many solutions, and why?"
+    choices:
+      - "2: the triangle folds with the elbow on either side of the line"
+      - "1: inverse kinematics undoes forward kinematics, which is a function"
+      - "Infinitely many: the shoulder can turn freely"
+    answer: 0
+    explain: "Shoulder, elbow and target make a triangle with fixed sides. It can be drawn mirrored about the shoulder-target line: elbow up and elbow down."
+  - prompt: "Why does the brute-force grid search find CLUSTERS of poses instead of exact solutions?"
+    choices:
+      - "It keeps every grid pose within 3 cm, and several neighbours near each solution qualify"
+      - "Each solution of a two-link arm is a whole small region of joint space, not a single point"
+      - "Floating-point rounding spreads the solutions out"
+    answer: 0
+    explain: "The exact solutions are points; the grid only approximates them, so the poses close enough around each one form a cluster. Two clusters: two solutions."
+  - prompt: "How many solutions can a 6-DOF arm like the UR5 have for one full gripper pose?"
+    choices:
+      - "Up to 8 (shoulder × elbow × wrist choices)"
+      - "Exactly 1"
+      - "Up to 2, like the two-link arm"
+      - "Always infinitely many, because six joints are more than enough"
+    answer: 0
+    explain: "Each of the three 'which side' choices doubles the count: 2 × 2 × 2 = 8. A 7-joint arm has infinitely many (a free elbow circle)."

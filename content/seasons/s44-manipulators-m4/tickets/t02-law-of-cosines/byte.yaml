@@ -1,0 +1,17 @@
+# Wrong: Byte adds a tolerance but no clamp; sqrt(1 - c2²) then fails on the far box.
+suggestion:
+  file: ik/two_link_ik.py
+  find: "    if abs(c2) > 1:\n"
+  replace: "    if abs(c2) > 1 + 1e-9:  # allow for rounding\n"
+  correct: false
+  why:
+    choices:
+      - "Reject: with c2 just above 1 the next line takes sqrt of a tiny negative number; it needs a clamp too, and elbow up is still wrong."
+      - "Accept: the far box is now accepted, and a 1e-9 tolerance is the right size for rounding errors."
+      - "Accept: tolerances in geometry code are always good, the more the better."
+    answer: 0
+  says: "The far box fails on rounding: c2 is 1.0000000000000002. A tolerance fixes it."
+  explain: >-
+    Half a diagnosis. The tolerance lets c2 = 1.0000000000000002 through, and then math.sqrt(1 - c2 * c2) is the
+    square root of -4e-16: ValueError, math domain error. Accepting a rounded value means clamping it too. And the
+    elbow-up shoulder angle (abs(s2)) is still wrong.

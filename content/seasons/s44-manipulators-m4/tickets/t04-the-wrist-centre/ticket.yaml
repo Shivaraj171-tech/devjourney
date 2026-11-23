@@ -1,0 +1,10 @@
+id: s44-t04
+title: "Find the wrist first"
+type: bug
+level: senior
+track: robotics
+concepts: [spherical-wrist, rrr-ik, wrist-decoupling]
+new_concept: wrist-decoupling
+estimated_minutes: 30
+tests_visible: true
+files_editable: [ik/wrist_ik.py]

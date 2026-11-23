@@ -1,0 +1,10 @@
+id: s43-t10
+title: "Module 3 concept check"
+type: read
+level: mid
+track: robotics
+concepts: [velocity-kinematics, analytic-jacobian, geometric-jacobian, ur5-jacobian, space-body-jacobian, singularities, manipulability, statics, condition-number, velocity-kinematics-module]
+new_concept: velocity-kinematics-module
+estimated_minutes: 20
+tests_visible: true
+files_editable: []

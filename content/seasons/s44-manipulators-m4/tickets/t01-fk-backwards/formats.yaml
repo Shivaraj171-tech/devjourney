@@ -1,0 +1,41 @@
+predict:
+  - code: |
+      import math
+      l1, l2 = 0.5, 0.4
+      hits = 0
+      for i in range(0, 360, 2):
+          for j in range(0, 360, 2):
+              q1, q2 = math.radians(i), math.radians(j)
+              x = l1 * math.cos(q1) + l2 * math.cos(q1 + q2)
+              z = l1 * math.sin(q1) + l2 * math.sin(q1 + q2)
+              if math.hypot(x - 0.6, z - 0.2) < 0.02:
+                  hits += 1
+      print(hits > 0, hits > 1)
+    question: "A two-degree grid of every pose, keeping those within 2 cm of the box. Does it find any? More than one?"
+    answer: "True True"
+    choices:
+      - "True True"
+      - "True False"
+      - "False False"
+    explain: >-
+      Several grid points near EACH of the two solutions qualify: brute force sees clusters. It costs 32 400 FK
+      calls for two joints; with six joints the same grid would take about 3 × 10^13. That's why the rest of this module
+      exists.
+trace:
+  - code: |
+      def count(r, inner, outer):
+          answer = 2
+          if r > outer or r < inner:
+              answer = 0
+          elif r == outer or r == inner:
+              answer = 1
+          return answer
+
+      a = count(0.95, 0.1, 0.9)
+      b = count(0.9, 0.1, 0.9)
+      c = count(0.5, 0.1, 0.9)
+    watch: [answer]
+    rows: 5
+    explain: >-
+      Outside: 2 then 0. On the edge: 2 then 1. Inside: stays 2. (Real code compares with a tolerance, not ==,
+      because a computed distance is rarely exactly 0.9.)

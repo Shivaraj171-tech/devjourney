@@ -1,0 +1,38 @@
+predict:
+  - code: |
+      import math
+      a2, a3, d5 = -0.425, -0.39225, 0.09465
+      def kinds(q2, q3, q4, q5):
+          out = []
+          if abs(math.sin(q3)) < 1e-3: out.append("elbow")
+          if abs(math.sin(q5)) < 1e-3: out.append("wrist")
+          if abs(a2 * math.cos(q2) + a3 * math.cos(q2 + q3) + d5 * math.sin(q2 + q3 + q4)) < 1e-3: out.append("shoulder")
+          return out
+      print(kinds(0, 0, 0, 0), kinds(-1.2, 1.6, 0, 0.6), kinds(-1.2, 1.6, -1.9, math.pi))
+    question: "Three UR5 poses (q2, q3, q4, q5 in radians). Which singularities does each hit?"
+    answer: "['elbow', 'wrist'] [] ['wrist']"
+    choices:
+      - "['elbow', 'wrist'] [] ['wrist']"
+      - "[] [] []"
+      - "['elbow', 'wrist'] ['wrist'] ['wrist']"
+      - "['elbow'] [] ['wrist']"
+    explain: >-
+      Home is stretched and wrist-flipped at once. A bent elbow with q5 = 0.6 is regular. q5 = π flips the wrist
+      the other way: sin(π) = 0 too.
+trace:
+  - code: |
+      def count_swaps(col):
+          swaps = 0
+          for k in range(len(col)):
+              p = max(range(k, len(col)), key=lambda r: abs(col[r]))
+              if p != k:
+                  col[k], col[p] = col[p], col[k]
+                  swaps = swaps + 1
+          return swaps
+
+      result = count_swaps([1, 3, 2])
+    watch: [p, swaps]
+    rows: 5
+    explain: >-
+      Partial pivoting on the first column [1, 3, 2]: the biggest entry (3) moves up (one swap), then 2 moves
+      above 1 (a second swap). Two swaps: the determinant's sign flips twice, so it's unchanged.

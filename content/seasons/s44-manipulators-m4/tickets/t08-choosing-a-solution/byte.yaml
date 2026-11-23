@@ -1,0 +1,12 @@
+# Right as far as it goes (partial): Byte makes the distance a norm; within_limits still ignores the upper bound.
+suggestion:
+  file: ik/choose.py
+  find: "    return sum(x - y for x, y in zip(a, b))  # Byte: total joint travel\n"
+  replace: "    return math.sqrt(sum((x - y) ** 2 for x, y in zip(a, b)))  # a norm: opposite moves don't cancel\n"
+  correct: true
+  partial: true
+  says: "My 'total travel' let +1 and -1 cancel out, and the most negative sum won. Squared differences now."
+  explain: >-
+    Right for the distance: the arm now takes the short way to the box. But within_limits still checks only the
+    lower bound of each joint, so a solution with the shoulder past its upper stop is still "allowed". It didn't
+    matter for this box, which is exactly why it will matter for some other box.

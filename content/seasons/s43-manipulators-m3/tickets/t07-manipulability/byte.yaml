@@ -1,0 +1,12 @@
+# Right as far as it goes (partial): Byte takes the square root of each eigenvalue, but manipulability is still w².
+suggestion:
+  file: vel/ellipsoid.py
+  find: "    radii = [max(0.0, lam) for lam in values]  # Byte: the eigenvalues are the radii\n"
+  replace: "    radii = [math.sqrt(max(0.0, lam)) for lam in values]  # radii are sigma = sqrt(lambda)\n"
+  correct: true
+  partial: true
+  says: "The radii are singular values, so square roots of the eigenvalues. The ellipsoid is the right size now."
+  explain: >-
+    Right for the ellipsoid: the radii are now σ, and the trace test passes. But manipulability() makes the same
+    mistake one function down: det(J J^T) is w², not w. Byte fixed the picture and not the number the
+    planner reads. Same root cause, two places: when you find a bug, search for its twin.

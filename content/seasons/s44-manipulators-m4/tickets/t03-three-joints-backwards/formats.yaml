@@ -1,0 +1,39 @@
+predict:
+  - code: |
+      import math
+      def wrap(a):
+          a = math.fmod(a + math.pi, 2 * math.pi)
+          if a <= 0:
+              a += 2 * math.pi
+          return a - math.pi
+      q1 = math.atan2(0.4, 0.3)
+      print(round(q1, 3), round(q1 + math.pi, 3), round(wrap(q1 + math.pi), 3))
+    question: "The front base angle for the box, the back one, and the back one wrapped. What does it print?"
+    answer: "0.927 4.069 -2.214"
+    choices:
+      - "0.927 4.069 -2.214"
+      - "0.927 -2.214 -2.214"
+      - "0.927 4.069 4.069"
+      - "0.927 2.214 -2.214"
+    explain: >-
+      q1 + π is the same physical angle as q1 - π = -2.214. Wrapping into (-π, π] makes equal solutions look
+      equal, and keeps the base within its limits.
+parsons:
+  - goal: >-
+      Write `plane_target(x, y, z, D1)`: the base angle and the in-plane target (r, s) of the shoulder-elbow arm
+      (math is imported). One line is Byte's slip: leave it out.
+    lines:
+      - "def plane_target(x, y, z, D1):"
+      - "    q1 = math.atan2(y, x)"
+      - "    r = math.hypot(x, y)"
+      - "    s = z - D1"
+      - "    return q1, r, s"
+    distractors:
+      - line: "    s = z"
+        replaces: 3
+        explain: "The planar arm starts at the shoulder, D1 above the base."
+    check: |
+      import math
+      q1, r, s = plane_target(0.0, 0.5, 0.3, 0.3)
+      assert abs(q1 - math.pi / 2) < 1e-12 and abs(r - 0.5) < 1e-12 and abs(s) < 1e-12
+    explain: "Face the box, then measure out and up from the shoulder."

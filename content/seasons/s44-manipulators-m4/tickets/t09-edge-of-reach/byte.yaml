@@ -1,0 +1,17 @@
+# Right: Byte puts the damped, clamped step back.
+suggestion:
+  file: ik/reach_edge.py
+  find: "        dq = solve(body_jacobian(SCREWS, M, q), V)  # Byte: plain Newton, fastest convergence\n"
+  replace: "        dq = clamp_step(dls_step(body_jacobian(SCREWS, M, q), V, LAMBDA))\n"
+  correct: true
+  why:
+    choices:
+      - "Accept: out of reach and at the elbow singularity, only a damped, clamped step stays bounded and settles."
+      - "Reject: keep plain Newton and add more iterations; it converged on box #413, so it will converge on #414 eventually."
+      - "Accept: damping makes Newton converge faster on every target."
+    answer: 0
+  says: "I optimised for the easy boxes. Damped and clamped again: slower on #413, safe on #414."
+  explain: >-
+    Right, and for the right reason: #414 has no exact solution, so "more iterations" never helps plain Newton,
+    and at the singularity its steps blow up. Damping bounds the step, the clamp bounds the swing; #413 now takes
+    more iterations, which costs milliseconds. (Damping never makes Newton faster: it trades speed for safety.)

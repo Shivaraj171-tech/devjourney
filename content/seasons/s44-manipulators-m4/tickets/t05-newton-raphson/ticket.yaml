@@ -1,0 +1,10 @@
+id: s44-t05
+title: "Newton, step by step"
+type: bug
+level: senior
+track: robotics
+concepts: [geometric-jacobian, analytic-ik, newton-raphson-ik]
+new_concept: newton-raphson-ik
+estimated_minutes: 30
+tests_visible: true
+files_editable: [ik/newton.py]
