@@ -1,0 +1,5 @@
+[
+  "com_positions: c1 = lc1 * [cos q1, sin q1]; c2 = l1 * [cos q1, sin q1] + lc2 * [cos(q1+q2), sin(q1+q2)]. com_jacobians: differentiate those two lines by q1 and q2 (README step 1 shows the matrices). mass_matrix_from_jacobians: m1 J1.T @ J1 + I1 Jw1.T @ Jw1 + (same for link 2) with Jw1 = [[1, 0]], Jw2 = [[1, 1]].",
+  "planar2r_mass_matrix: write M11, M12, M22 from README step 3 with c2 = cos q2. planar2r_gravity: README step 4. planar2r_energy: K = 0.5 * qd @ M @ qd; P = g * (m1 * c1[1] + m2 * c2[1]) using com_positions.",
+  "planar2r_coriolis_matrix: h = -m2 l1 lc2 sin(q2); [[h qd2, h (qd1 + qd2)], [-h qd1, 0]]. inverse dynamics: M @ qdd + C @ qd + g. mujoco_dynamics: data.qpos[:] = q; data.qvel[:] = qd; mujoco.mj_forward(model, data); M = np.zeros((model.nv, model.nv)); mujoco.mj_fullM(model, data, M); return M, data.qfrc_bias.copy()."
+]
