@@ -61,7 +61,7 @@ def __getattr__(name):
         "trapezoid_profile": "lab16_time_scaling", "trapezoid_sample": "lab16_time_scaling",
         "min_time_polynomial": "lab16_time_scaling",
         "joint_trajectory": "lab17_trajectories", "cartesian_poses": "lab17_trajectories",
-        "cartesian_trajectory_ik": "lab17_trajectories",
+        "cartesian_trajectory": "lab17_trajectories", "sync_trapezoid": "lab17_trajectories",
         # Module 6: dynamics
         "planar2r_mass_matrix": "lab18_lagrange_2r", "planar2r_coriolis_matrix": "lab18_lagrange_2r",
         "planar2r_gravity": "lab18_lagrange_2r", "planar2r_inverse_dynamics": "lab18_lagrange_2r",

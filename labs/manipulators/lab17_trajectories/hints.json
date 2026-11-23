@@ -1,0 +1,5 @@
+[
+  "joint_trajectory: S = np.array([quintic_scaling(t, T) for t in ts]); D = q1 - q0; return q0 + S[:, :1] * D, S[:, 1:2] * D, S[:, 2:3] * D. ee_positions: np.array([fk_dh(UR5_DH, q)[:3, 3] for q in Q]). finite_differences: Qd = np.gradient(Q, dt, axis=0), then the same on Qd and Qdd. limit_check: max(|Qd| / vmax), max(|Qdd| / amax).",
+  "sync_trapezoid: D = |q1 - q0|; m = D > 1e-12; vs = min(vmax[m] / D[m]); as = min(amax[m] / D[m]); T, ta, _ = trapezoid_profile(1.0, vs, as). trapezoid_joint_trajectory: like joint_trajectory with S rows trapezoid_sample(t, 1.0, vs, as). cartesian_poses: q0, q1 = matrix_to_quat(R0), matrix_to_quat(R1); R = quat_to_matrix(quat_slerp(q0, q1, s)); p = p0 + s (p1 - p0).",
+  "cartesian_trajectory: s = [quintic_scaling(t, T)[0] for t in ts]; q = q_start; for T_d in cartesian_poses(T0, T1, s): q, success, _ = ik_lm(M_UR5, B_UR5, T_d, q); collect; return np.unwrap(np.array(Q), axis=0), all successes. track_in_mujoco: P = [sim.ee_pose()[:3, 3]]; Qm = [sim.q]; for k in range(len(Q) - 1): sim.step((Q[k+1] - Q[k]) / dt, dt); append both."
+]
