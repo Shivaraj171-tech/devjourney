@@ -1,0 +1,17 @@
+# Right: Byte drops the reversed() and multiplies from the base outwards.
+suggestion:
+  file: kin/rrr.py
+  find: "    return chain(*reversed(rrr_links(q1, q2, q3)))"
+  replace: "    return chain(*rrr_links(q1, q2, q3))"
+  correct: true
+  why:
+    choices:
+      - "Accept: T_0_1 T_1_2 T_2_3 is the order where the touching frame names cancel."
+      - "Reject: the home-pose test passes, so the order was already right and the bug is elsewhere."
+      - "Accept: both orders give the same pose, but this one is faster to compute."
+    answer: 0
+  says: "My bad, I mixed up the order of coordinates with the order of the chain. Base first, wrist last."
+  explain: >-
+    Right. T_0_1 T_1_2 T_2_3: base_(1) (1)_2 (2)_3 cancels to base_3. The home pose passed before only because
+    every joint turn is the identity there. With the order fixed, yaw swings the whole arm and the shoulder
+    lifts the forearm with it. (The docstring still repeats Byte's wrong story: worth fixing too.)

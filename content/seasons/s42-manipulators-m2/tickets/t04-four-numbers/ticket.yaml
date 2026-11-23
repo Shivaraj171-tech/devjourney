@@ -1,0 +1,10 @@
+id: s42-t04
+title: "Four numbers per joint"
+type: bug
+level: mid
+track: robotics
+concepts: [homogeneous-transforms, fk-composition, dh-convention]
+new_concept: dh-convention
+estimated_minutes: 30
+tests_visible: true
+files_editable: [kin/dh.py]

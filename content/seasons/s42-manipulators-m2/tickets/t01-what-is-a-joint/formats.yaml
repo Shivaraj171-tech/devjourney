@@ -1,0 +1,34 @@
+predict:
+  - code: |
+      def mobility(links, freedoms, m=6):
+          return m * (links - 1 - len(freedoms)) + sum(freedoms)
+
+      # A SCARA arm: R, R, P, R in a row (5 links counting the ground)
+      print(mobility(5, [1, 1, 1, 1]))
+    question: "A SCARA (the classic pick-and-place arm: two hinges, a vertical slide, a wrist turn). How many DOF?"
+    answer: "4"
+    choices:
+      - "4"
+      - "6"
+      - "10"
+      - "-2"
+    explain: >-
+      An open chain: J = N - 1, so the first term is 0 and dof = 1 + 1 + 1 + 1 = 4. Four DOF is exactly what
+      pick-and-place needs: x, y, z and a turn about the vertical. It can't tilt a box: no roll or pitch.
+  - code: |
+      def mobility(links, freedoms, m=6):
+          return m * (links - 1 - len(freedoms)) + sum(freedoms)
+
+      # A Stewart platform (flight simulator): ground + top + 6 legs of 2 parts each = 14 links,
+      # 6 spherical joints (3), 6 universal joints (2), 6 prismatic legs (1)
+      print(mobility(14, [3] * 6 + [2] * 6 + [1] * 6))
+    question: "A closed-chain robot: the Stewart platform. What does Grübler give?"
+    answer: "6"
+    choices:
+      - "6"
+      - "36"
+      - "18"
+      - "0"
+    explain: >-
+      6 (14 - 1 - 18) + (18 + 12 + 6) = -30 + 36 = 6. Six motors (the legs) set all six DOF of the top plate:
+      that's why flight simulators look like this. Loops take freedoms away, and the count still works.

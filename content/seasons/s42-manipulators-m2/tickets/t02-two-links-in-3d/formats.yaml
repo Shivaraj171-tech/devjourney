@@ -1,0 +1,49 @@
+trace:
+  - code: |
+      import math
+
+      def tip(angles, lengths):
+          heading, x, y = 0, 0, 0
+          for q, l in zip(angles, lengths):
+              heading = heading + q
+              x = x + l * round(math.cos(math.radians(heading)))
+              y = y + l * round(math.sin(math.radians(heading)))
+          return x, y
+
+      result = tip([90, 90], [5, 4])
+    watch: [heading, x, y]
+    rows: 5
+    explain: >-
+      This is what the matrix product does for a planar arm: each joint turns the HEADING (relative angles add
+      up: 90, then 180), then the link walks along the new heading. Link 1 walks 5 along y; link 2, now facing
+      -x, walks 4 back along x: the tip is at (-4, 5). Composing transforms keeps this bookkeeping for you in 3D,
+      where headings can't simply be added.
+parsons:
+  - goal: >-
+      Write `frames_in_base(links)`: the running product of 4x4 link transforms, one base-frame pose per link.
+      `mul(A, B)` multiplies two 4x4s and `I` is the identity. One line is Byte's slip: leave it out.
+    lines:
+      - "def frames_in_base(links):"
+      - "    T, out = I, []"
+      - "    for link in links:"
+      - "        T = mul(T, link)"
+      - "        out.append(T)"
+      - "    return out"
+    distractors:
+      - line: "        T = mul(link, T)"
+        replaces: 3
+        explain: >-
+          The new link goes on the RIGHT: it is written in the previous joint's (moving) frame. mul(link, T)
+          is the fixed-frame order and swaps the links' roles.
+    check: |
+      import math
+      def mul(A, B):
+          return [[sum(A[i][k] * B[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+      I = [[float(i == j) for j in range(4)] for i in range(4)]
+      def link(q, l):
+          c, s = math.cos(q), math.sin(q)
+          return [[c, -s, 0, l * c], [s, c, 0, l * s], [0, 0, 1, 0], [0, 0, 0, 1]]
+      f = frames_in_base([link(math.pi / 2, 0.5), link(math.pi / 2, 0.4)])
+      assert len(f) == 2
+      assert abs(f[1][0][3] + 0.4) < 1e-9 and abs(f[1][1][3] - 0.5) < 1e-9, f[1]
+    explain: "Start from the identity, multiply each link onto the right, keep each running pose: T_0_1, T_0_2, ..."

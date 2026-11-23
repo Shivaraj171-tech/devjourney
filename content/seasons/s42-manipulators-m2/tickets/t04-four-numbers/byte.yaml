@@ -1,0 +1,18 @@
+# Wrong: Byte switches dh_transform to the modified (Craig) move order; the table's columns are still swapped.
+suggestion:
+  file: kin/dh.py
+  find: "    return chain(turn(rot_z(theta)), trans(0.0, 0.0, d), trans(a, 0.0, 0.0), turn(rot_x(alpha)))"
+  replace: "    return chain(turn(rot_x(alpha)), trans(a, 0.0, 0.0), turn(rot_z(theta)), trans(0.0, 0.0, d))"
+  correct: false
+  why:
+    choices:
+      - "Reject: our tables are standard DH, and the bug is in how fk_dh_frames reads a row, not in dh_transform."
+      - "Accept: Craig's order is the modern one, so it will fix the pedestal arm."
+      - "Accept: the four moves commute, so the order doesn't matter and this is harmless tidying."
+    answer: 0
+  says: "Found it: the textbook (Craig) does the x-moves first. Reordering dh_transform to match."
+  explain: >-
+    Two mistakes in one. The tables here are STANDARD DH, so Rz(θ) Tz(d) Tx(a) Rx(α) is the right order, and
+    the all-four-parameters test now fails. And the real bug isn't touched: fk_dh_frames still unpacks the
+    row as (a, alpha, offset, d), so the pedestal is still read as an angle. Mixing conventions to make a
+    symptom move is how DH bugs multiply.

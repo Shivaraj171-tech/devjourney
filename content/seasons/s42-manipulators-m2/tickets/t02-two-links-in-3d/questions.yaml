@@ -1,0 +1,23 @@
+questions:
+  - prompt: "l1 = 0.5, l2 = 0.4, q1 = 0°, q2 = 90°. Where is the tip?"
+    choices:
+      - "(0.5, 0.4, 0)"
+      - "(0.9, 0, 0)"
+      - "(0.4, 0.5, 0)"
+      - "(0, 0.9, 0)"
+    answer: 0
+    explain: "The upper arm points along x to (0.5, 0, 0); the elbow turns the forearm 90° from there, so it points along y: the tip is at (0.5, 0.4, 0)."
+  - prompt: "Why does the second link's transform go on the RIGHT of the first, T_0_2 = T_0_1 T_1_2?"
+    choices:
+      - "T_1_2 is written in the elbow's frame, which moves with link 1"
+      - "Matrix products are written in the order the motors are wired, from the base controller"
+      - "It doesn't matter: for links in a plane, T_0_1 T_1_2 and T_1_2 T_0_1 always give the same tip"
+    answer: 0
+    explain: "Moving (body) frames post-multiply. The other order gives a different tip: try q1 = 90°, q2 = 0° with l1 ≠ l2."
+  - prompt: "Byte's frames_in_base returned the link transforms unchanged. Which test passed anyway, and why?"
+    choices:
+      - "The elbow's: T_0_1 is already a base-frame pose, the others aren't"
+      - "The tip's at q = (0, 0): every link transform is the identity at zero angles"
+      - "None of them: returning the wrong frames makes every single FK test fail"
+    answer: 0
+    explain: "The first link transform is both 'link 1 in the base' and T_0_1. From the second joint on, each one is relative. The tip at (0, 0) fails too: Tx(l2) alone gives (0.4, 0, 0), not (0.9, 0, 0)."

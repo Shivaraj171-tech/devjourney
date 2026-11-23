@@ -1,0 +1,31 @@
+predict:
+  - code: |
+      import math
+      a, alpha, d, theta = 0.5, math.radians(90), 0.2, math.radians(90)
+      origin = [a * math.cos(theta), a * math.sin(theta), d]
+      z_new = [math.sin(theta) * math.sin(alpha), -math.cos(theta) * math.sin(alpha), math.cos(alpha)]
+      print([round(c, 2) + 0 for c in origin], [round(c, 2) + 0 for c in z_new])
+    question: "One DH row with all four parameters set. Where is the new frame's origin, and where does its z axis point?"
+    answer: "[0.0, 0.5, 0.2] [1.0, 0.0, 0.0]"
+    choices:
+      - "[0.0, 0.5, 0.2] [1.0, 0.0, 0.0]"
+      - "[0.5, 0.0, 0.2] [0.0, -1.0, 0.0]"
+      - "[0.0, 0.5, 0.2] [0.0, 0.0, 1.0]"
+      - "[0.5, 0.2, 0.0] [1.0, 0.0, 0.0]"
+    explain: >-
+      θ = 90° turns x onto y, so walking a = 0.5 along the new x lands at y = 0.5, and d lifts 0.2. Then α = 90°
+      twists about that new x (the old y), tipping z over onto the old x. Columns of the DH matrix: the third
+      is the new z axis, the fourth the new origin.
+  - code: |
+      row = (0.5, 0.0, 0.2, 0.0)          # (a, alpha, d, theta_offset), as the table says
+      a, alpha, offset, d = row           # Byte's unpacking
+      print("d =", d, "| offset =", offset)
+    question: "Byte's unpacking of a DH row. What does it print?"
+    answer: "d = 0.0 | offset = 0.2"
+    choices:
+      - "d = 0.0 | offset = 0.2"
+      - "d = 0.2 | offset = 0.0"
+      - "d = 0.5 | offset = 0.0"
+    explain: >-
+      Unpacking goes by position, not by name: the third column (the 0.2 m pedestal height) lands in the variable
+      called offset, and becomes 0.2 rad added to the joint angle. Nothing complains; the arm just sits on the floor.

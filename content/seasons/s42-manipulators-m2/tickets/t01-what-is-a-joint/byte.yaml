@@ -1,0 +1,18 @@
+# Partial: Byte fixes the lift (a prismatic joint slides), but the DOF count still forgets the ground.
+suggestion:
+  file: kin/joints.py
+  find: "    if kind in (\"revolute\", \"prismatic\"):  # Byte: either way, the joint moves by q about its axis\n        return turn(rodrigues(axis, q))\n"
+  replace: "    if kind == \"revolute\":\n        return turn(rodrigues(axis, q))\n    if kind == \"prismatic\":\n        u = unit(axis)\n        return trans(u[0] * q, u[1] * q, u[2] * q)\n"
+  correct: true
+  partial: true
+  why:
+    choices:
+      - "Accept: a prismatic joint is a pure slide along its unit axis, but the DOF count is a separate bug."
+      - "Reject: a prismatic joint should turn AND slide, so the turn must stay in that branch."
+      - "Accept: this fixes every failing check, because the DOF count also came from the turning lift."
+    answer: 0
+  says: "Lifts slide, hinges turn. Separate branch for prismatic: q times the unit axis, no rotation."
+  explain: >-
+    Right as far as it goes: the lift's frame now rises 0.20 m without turning, and the rig's gripper reaches
+    (0.45, 0, 0.45). But `mobility` is untouched: it still treats the ground as a link that can move, so a
+    six-joint arm comes out with 12 DOF. That one is yours: m (N - 1 - J) + sum(f).

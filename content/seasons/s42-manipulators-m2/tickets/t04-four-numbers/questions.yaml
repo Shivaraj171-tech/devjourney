@@ -1,0 +1,30 @@
+questions:
+  - prompt: "A DH row has a = 0, α = 0, d = 0.3, θ = 0. What does its transform do?"
+    choices:
+      - "Slides 0.3 m along z, no turn"
+      - "Walks 0.3 m along x, no turn"
+      - "Turns 0.3 rad about z, no move"
+      - "Twists 0.3 rad about x, no move"
+    answer: 0
+    explain: "d is the slide along the OLD z axis (the joint's axis). a is the walk along the new x, θ the turn about z, α the twist about x."
+  - prompt: "Which two DH parameters can be the joint variable, and when?"
+    choices:
+      - "θ for a revolute joint, d for a prismatic joint"
+      - "a for a revolute joint and α for a prismatic one, since both describe the link"
+      - "Any of the four: the robot's controller simply chooses one at start-up"
+    answer: 0
+    explain: "A joint moves along or about ITS axis, which is the old z axis: a turn about z (θ) or a slide along z (d). a and α describe the fixed link geometry along x."
+  - prompt: "In the standard DH matrix, what is the last column [a cos θ, a sin θ, d]?"
+    choices:
+      - "Frame i's origin, written in frame i-1"
+      - "Frame i-1's origin, written in frame i"
+      - "The joint axis of joint i, written as a unit vector in frame i-1"
+    answer: 0
+    explain: "As always for T_(i-1)_i: the last column is where frame i's origin is, seen from frame i-1. Walk a along the turned x (a cos θ, a sin θ), plus d up z."
+  - prompt: "A datasheet's table is in MODIFIED DH (Craig). You feed it to standard-DH code. What happens?"
+    choices:
+      - "Wrong poses: the moves are in another order and the rows are shifted"
+      - "The code raises an error, since modified-DH tables have five columns"
+      - "Nothing bad: both conventions describe the same robot, so the code gives the same pose"
+    answer: 0
+    explain: "Modified DH applies Rx(α_(i-1)) Tx(a_(i-1)) before Rz(θ_i) Tz(d_i): the link parameters belong to the PREVIOUS row. Same robot, different table: mixing them gives believable, wrong numbers."

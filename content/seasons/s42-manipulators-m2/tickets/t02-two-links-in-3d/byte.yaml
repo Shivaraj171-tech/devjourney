@@ -1,0 +1,11 @@
+# Wrong: Byte multiplies each new link on the LEFT (fixed-frame order), so the tip is still wrong.
+suggestion:
+  file: kin/planar2.py
+  find: "        out.append(link)  # TODO (Byte's draft): is each link already in the base frame?"
+  replace: "        out.append(T_mul(link, out[-1]) if out else link)  # new link first: it's applied first"
+  correct: false
+  says: "Easy: chain each link onto the previous frame. The newest link acts first, so it goes first."
+  explain: >-
+    The idea (a running product) is right, the order is not. T_1_2 is written in the ELBOW's frame, which
+    moves with link 1, so it belongs on the right: T_0_2 = T_0_1 T_1_2. Byte's T_1_2 T_0_1 swings the upper
+    arm by the forearm's angle: at q = (90°, 90°) the tip lands at (-0.5, 0.4, 0) instead of (-0.4, 0.5, 0): the two links have swapped places.

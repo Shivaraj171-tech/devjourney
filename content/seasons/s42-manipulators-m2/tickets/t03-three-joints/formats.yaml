@@ -1,0 +1,40 @@
+predict:
+  - code: |
+      def compose(*names):
+          start, at = names[0].split("_")
+          for name in names[1:]:
+              a, b = name.split("_")
+              if a != at:
+                  return "mismatch: " + at + " vs " + a
+              at = b
+          return start + "_" + at
+
+      print(compose("0_1", "1_2", "2_3"), "|", compose("2_3", "1_2", "0_1"))
+    question: "The naming rule as code: what does it say about the two orders?"
+    answer: "0_3 | mismatch: 3 vs 1"
+    choices:
+      - "0_3 | mismatch: 3 vs 1"
+      - "0_3 | 2_1"
+      - "0_3 | 0_3"
+      - "mismatch: 1 vs 2 | 0_3"
+    explain: >-
+      Base outwards, every touching pair matches and you end with T_0_3. Reversed, the first pair already
+      fails: T_2_3 ends in frame 3, but T_1_2 starts in frame 1. Python would still multiply the matrices:
+      only the names tell you the product is meaningless.
+  - code: |
+      import math
+      d1, a2, a3 = 0.3, 0.4, 0.3
+      q1, q2, q3 = math.radians(90), math.radians(-90), math.radians(90)
+      r = a2 * math.cos(q2) + a3 * math.cos(q2 + q3)
+      h = a2 * math.sin(q2) + a3 * math.sin(q2 + q3)
+      print(round(r * math.cos(q1), 2) + 0, round(r * math.sin(q1), 2) + 0, round(d1 + h, 2) + 0)
+    question: "Yaw 90°, shoulder pointing straight down, elbow folded back up to horizontal. Where is the wrist?"
+    answer: "0.0 0.3 -0.1"
+    choices:
+      - "0.0 0.3 -0.1"
+      - "0.3 0.0 -0.1"
+      - "0.0 0.7 0.3"
+      - "0.0 0.3 0.7"
+    explain: >-
+      The upper arm points down 0.4 (h = -0.4), the forearm at q2 + q3 = 0° points out 0.3 (r = 0.3). The yaw
+      of 90° turns that reach onto +y, and the height is 0.3 - 0.4 = -0.1: below the base, if there's room.
