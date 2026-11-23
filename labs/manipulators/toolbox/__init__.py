@@ -11,6 +11,9 @@ them explicitly where needed.
 Modules 4-6 (labs 12-20): IK (analytic, Newton, Levenberg-Marquardt), time scaling and
 trajectories, Lagrangian/Newton-Euler dynamics. Loaded lazily by name, like Modules 2-3.
 `toolbox.models` writes MuJoCo models with real inertias for the dynamics labs.
+Modules 7-8 (labs 21-28): PD, gravity compensation, computed torque, task-space and impedance
+control, contacts and grasp quality. `toolbox.models` adds torque motors and contact scenes
+(table, pinch rig, UR5 + gripper); `toolbox.sim.MujocoDynamics` evaluates M(q) and g(q) fast.
 """
 
 from labs.manipulators.lab01_rotations.solution import (  # noqa: F401

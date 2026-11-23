@@ -14,6 +14,12 @@ The person working here is learning. In this folder:
 - Conventions: twists (omega, v); quaternions [w, x, y, z]; standard (distal) DH;
   the geometric Jacobian is [Jv; Jw]. Modules 4-6 add: wrenches (m, f); spatial
   inertia diag(I, m, m, m); IK errors as the body twist log(T_sb^-1 T_sd); angles
-  wrapped to (-pi, pi].
+  wrapped to (-pi, pi]. Modules 7-8 add: a controller is `controller(t, q, qd) -> tau`
+  (the same function drives lab 20's numpy `simulate` and MuJoCo torque `<motor>`s via
+  `run_mujoco_control`); task-space errors are [p_d - p; log(R_d R^T)] in world axes,
+  ordered like [Jv; Jw]; MuJoCo's `xfrc_applied` is [force; torque] at the body COM (the
+  opposite order to our (m, f) wrenches); `mj_contactForce` gives the force on geom2 in the
+  contact frame (rows of `contact.frame`, normal first, pointing geom1 -> geom2); grasp
+  wrenches divide moments by a length scale.
 - If you do write code on request, keep functions small and leave one meaningful
   `TODO(human)` for them where it makes sense (this pairs with the coach).

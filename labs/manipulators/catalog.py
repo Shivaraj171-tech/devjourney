@@ -59,9 +59,9 @@ LABS = [
         needs_mujoco=True),
     Lab("lab25", "lab25_impedance", 7, "Impedance control: push it, press a table", 220,
         needs_mujoco=True),
-    Lab("lab26", "lab26_grasp_basics", 8, "Grasp basics: friction cones, two-finger pinch", 180,
+    Lab("lab26", "lab26_grasp_basics", 8, "Friction cones and the two-finger pinch", 180,
         needs_mujoco=True),
-    Lab("lab27", "lab27_grasp_quality", 8, "Grasp quality: force closure, epsilon metric", 200),
+    Lab("lab27", "lab27_grasp_quality", 8, "Grasp quality: closure and epsilon metric", 200),
     Lab("lab28", "lab28_pick_and_place", 8, "Capstone: pick and place in MuJoCo", 300,
         needs_mujoco=True),
 ]
@@ -87,12 +87,17 @@ BADGES = {
     "equations-of-motion": "Equations of Motion: completed Module 6 (dynamics)",
     "torque-matched": "Torque Matched: lab19 passed with MuJoCo's mj_inverse agreeing",
     "digital-twin": "Digital Twin: lab20 passed, your simulator matches MuJoCo",
+    "steady-hand": "Steady Hand: completed Module 7 (control)",
+    "soft-touch": "Soft Touch: lab25 passed in MuJoCo, a steady push on the table",
+    "firm-grip": "Firm Grip: completed Module 8 (grasping)",
+    "pick-and-place": "Pick and Place: lab28 passed with MuJoCo moving a real (simulated) box",
     "graduate": "Manipulator Graduate: all labs complete",
 }
 
-# Labs 01-11 total 1600 XP, labs 12-20 another 1790 (3390 in all).
+# Labs 01-11 total 1600 XP, labs 12-20 another 1790, labs 21-28 another 1670 (5060 in all).
 RANKS = [(0, "Novice"), (300, "Apprentice"), (700, "Technician"), (1100, "Engineer"),
-         (1500, "Researcher"), (2200, "Senior Researcher"), (3000, "Principal Investigator")]
+         (1500, "Researcher"), (2200, "Senior Researcher"), (3000, "Principal Investigator"),
+         (3900, "Lab Director"), (4800, "Distinguished Roboticist")]
 
 
 def find_lab(name: str) -> Lab:

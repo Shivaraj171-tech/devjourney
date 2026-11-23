@@ -196,6 +196,10 @@ def cmd_visual(args) -> int:
     except NotImplementedError as exc:
         print(f"Finish the TODOs first ({exc}).")
         return 1
+    except ImportError as exc:  # e.g. the lab 25/26/28 plots run MuJoCo
+        print(f"This plot needs an optional package that isn't installed ({exc.name}): "
+              "pip install -r labs/manipulators/requirements.txt")
+        return 1
     print(f"Saved {path}")
     return 0
 
