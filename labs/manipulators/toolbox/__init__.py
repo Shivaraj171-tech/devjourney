@@ -90,6 +90,11 @@ def __getattr__(name):
         "impedance_torque": "lab25_impedance", "predicted_deflection": "lab25_impedance",
         "xfrc_for_point_force": "lab25_impedance", "estimate_stiffness": "lab25_impedance",
         "contact_normal_force": "lab25_impedance",
+        "contact_frame": "lab26_grasp_basics", "in_friction_cone": "lab26_grasp_basics",
+        "friction_cone_edges": "lab26_grasp_basics", "contact_wrench": "lab26_grasp_basics",
+        "grasp_matrix": "lab26_grasp_basics", "gravity_wrench": "lab26_grasp_basics",
+        "min_friction_two_finger": "lab26_grasp_basics",
+        "box_contact_forces": "lab26_grasp_basics",
     }
     if name in lazy:
         import importlib

@@ -167,6 +167,7 @@ def pinch_mjcf(mu: float, box_mass: float = 0.2, half: float = 0.02, finger_mass
     friction stiffer: 10 cut the creep to 0.26 mm/s without moving the slip threshold.
     """
     pad = 0.005
+    mu, box_mass, half, finger_mass = float(mu), float(box_mass), float(half), float(finger_mass)
 
     def finger(name, sign, joint):
         x = sign * (half + pad)
@@ -210,6 +211,7 @@ def ur5_gripper_mjcf(dh, links, box_pos, box_yaw: float = 0.0, box_mass: float =
     (x, y, z, quaternion w x y z).
     Contacts: only pads, box and table collide (condim 4: torsional friction too, see lab 27).
     """
+    mu, box_mass = float(mu), float(box_mass)
     xml = dh_arm_mjcf(dh, links, name="ur5_gripper", timestep=timestep,
                       integrator="implicitfast", contact=True)
     site = xml[xml.index('<site name="ee"'):]

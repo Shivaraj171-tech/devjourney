@@ -59,6 +59,8 @@ LABS = [
         needs_mujoco=True),
     Lab("lab25", "lab25_impedance", 7, "Impedance control: push it, press a table", 220,
         needs_mujoco=True),
+    Lab("lab26", "lab26_grasp_basics", 8, "Grasp basics: friction cones, two-finger pinch", 180,
+        needs_mujoco=True),
 ]
 
 MODULE_NAMES = {1: "Rigid-body motion", 2: "Forward kinematics", 3: "Velocity kinematics",
