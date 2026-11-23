@@ -12,9 +12,10 @@ import numpy as np
 #      Universal_Robots_ROS2_Description, tag 4.4.1 (commit 0eb1a861), BSD-3-Clause:
 #      config/ur5e/default_kinematics.yaml, physical_parameters.yaml, joint_limits.yaml.
 #      https://github.com/UniversalRobots/Universal_Robots_ROS2_Description/tree/4.4.1/config/ur5e
-#  [UR-KIN] ros-industrial/universal_robot (noetic-devel, commit 39ad110d), BSD:
-#      ur_kinematics/src/ur_kin.cpp, UR5e_PARAMS (d1, a2, a3, d4, d5, d6). Its ur_description/
-#      config/ur5e/*.yaml carry the same kinematics, masses, centres of mass and tensors.
+#  [UR-KIN] ros-industrial/universal_robot (noetic-devel, commit 39ad110d):
+#      ur_kinematics/src/ur_kin.cpp, UR5e_PARAMS (d1, a2, a3, d4, d5, d6) (ur_kinematics: BSD,
+#      (c) 2013 Georgia Tech, package also Apache-2.0). Its ur_description/config/ur5e/*.yaml
+#      (BSD) carry the same kinematics, masses, centres of mass and tensors.
 #  [UR-DH] Universal Robots, "DH parameters for calculations of kinematics and dynamics",
 #      https://www.universal-robots.com/articles/ur/application-installation/dh-parameters-for-calculations-of-kinematics-and-dynamics/
 #      (not reachable from where this was written; [UR-ROS2]'s physical_parameters.yaml says its
