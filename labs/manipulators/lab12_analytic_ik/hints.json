@@ -1,0 +1,5 @@
+[
+  "wrap_to_pi: w = np.mod(q + np.pi, 2*np.pi) - np.pi, then np.where(w <= -np.pi, w + 2*np.pi, w). is_reachable: dist = |p - (0, 0, d1)|, check |a2 - a3| <= dist <= a2 + a3. fk_position_error: norm(fk_dh(ARM3_DH, q)[:3, 3] - p).",
+  "planar2r_ik: c3 = (r^2 + s^2 - a2^2 - a3^2) / (2 a2 a3); None if |c3| > 1 + 1e-12; clip; q3 = elbow_sign * atan2(sqrt(1 - c3^2), c3); q2 = atan2(s, r) - atan2(a3 sin q3, a2 + a3 cos q3). elbow_is_up: elbow = a2 (c2, s2), tip = elbow + a3 (c23, s23); if tip[0] < 0 multiply both by [-1, 1]; return tip[0]*elbow[1] - tip[1]*elbow[0] > 0.",
+  "arm3_ik_all: rho = hypot(x, y); phi = atan2(y, x) if rho > 1e-12 else 0; s = z - d1; for (name, q1, r) in [('front', phi, rho), ('back', phi + pi, -rho)]: for sign in (+1, -1): sol = planar2r_ik(r, s, a2, a3, sign); if sol: q = wrap_to_pi([q1, *sol]); out[(name, 'up' if elbow_is_up(q) else 'down')] = q. arm3_ik: arm3_ik_all(p).get((shoulder, elbow))."
+]
