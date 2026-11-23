@@ -1,0 +1,5 @@
+[
+  "ad_twist: out = zeros((6,6)); out[:3,:3] = skew(w); out[3:,:3] = skew(v); out[3:,3:] = skew(w). spatial_inertia: np.diag(np.concatenate([I, [m, m, m]])). com_frames: frames = fk_dh_frames(dh, zeros(n)); for link i: T = frames[i+1].copy(); T[:3,3] = frames[i+1][:3,:3] @ com + frames[i+1][:3,3]; finally append frames[-1].",
+  "rnea_model: homes = com_frames(dh, links); _, S = screws_from_dh(dh); Mlist = [homes[0]] + [transform_inverse(homes[i-1]) @ homes[i] for i in 1..n]; Glist from spatial_inertia; Alist[i] = adjoint(transform_inverse(homes[i])) @ S[:, i]. mass_matrix_rnea: column_stack of rnea(model, q, 0, e_j, gravity=zeros(3)). bias = rnea(q, qd, 0); gravity = rnea(q, 0, 0).",
+  "rnea forward: V = 0; Vd = concat(0, 0, 0, -gravity); for i: T = exp_se3(-A[i], q[i]) @ transform_inverse(Mlist[i]); V = adjoint(T) @ V + A[i] qd[i]; Vd = adjoint(T) @ Vd + ad_twist(V) @ A[i] qd[i] + A[i] qdd[i]; store T, V, Vd. Backward: F = F_tip or 0; T_next = transform_inverse(Mlist[n]); for i = n-1..0: F = adjoint(T_next).T @ F + G[i] @ Vd[i] - ad_twist(V[i]).T @ (G[i] @ V[i]); tau[i] = F @ A[i]; T_next = T[i]."
+]
