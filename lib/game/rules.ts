@@ -188,12 +188,17 @@ export function pickWarmup<W extends { id: string; after: string }>(
 }
 
 // ---------- Office leaderboard ----------
-// There are no accounts yet, so you compete with your (fictional) teammates.
-// Sam, the other new hire, keeps learning every day you've been at the company.
+// There are no accounts yet, so you compete with your (fictional) teammates, and the
+// UI says so wherever they appear. Sam, the other new hire, learns on the days YOU
+// practise (days in the streak log), not with the calendar: a week away doesn't put
+// you further behind (audit flaw 12).
 export type Teammate = { name: string; role: string; avatar: string; xp: number; isYou?: boolean };
 
-export function teammates(daysSinceStart: number): Teammate[] {
-  const samXp = Math.min(150 + daysSinceStart * 90, 3200);
+/** One line that says the board is made up, for every place it is shown. */
+export const FICTIONAL_NOTE = "Your teammates are fictional for now. Sam earns XP only on the days you practise.";
+
+export function teammates(daysPractised: number): Teammate[] {
+  const samXp = Math.min(150 + Math.max(0, daysPractised) * 90, 3200);
   return [
     { name: "Maya", role: "Tech Lead", avatar: "👩🏾‍💻", xp: 16400 },
     { name: "Byte", role: "AI Assistant", avatar: "🤖", xp: 2200 },
@@ -203,8 +208,8 @@ export function teammates(daysSinceStart: number): Teammate[] {
   ];
 }
 
-export function leaderboard(you: { name: string; xp: number }, daysSinceStart: number): Teammate[] {
-  return [...teammates(daysSinceStart), { name: you.name, role: "You", avatar: "⭐", xp: you.xp, isYou: true }]
+export function leaderboard(you: { name: string; xp: number }, daysPractised: number): Teammate[] {
+  return [...teammates(daysPractised), { name: you.name, role: "You", avatar: "⭐", xp: you.xp, isYou: true }]
     .sort((a, b) => b.xp - a.xp);
 }
 

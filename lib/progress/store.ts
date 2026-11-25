@@ -211,14 +211,17 @@ export const actions = {
   },
   /** Record a test run. `xpIfSolved` is awarded only the first time it passes. */
   recordRun(id: string, passed: boolean, xpIfSolved: (runs: number, hintsUsed: number) => number) {
-    updateTicket(id, (t) => {
+    // Only a merge counts toward the day streak: pressing Run on a fresh ticket isn't a day of
+    // learning (audit flaw 14). Quiz answers, warm-ups and Byte calls still count.
+    const solving = passed && !getSnapshot().tickets[id]?.solved;
+    (solving ? updateTicket : patchTicket)(id, (t) => {
       const runs = t.runs + 1;
       if (t.solved || !passed) return { ...t, runs };
       return { ...t, runs, solved: true, solvedAt: new Date().toISOString(), solveXp: xpIfSolved(runs, t.hintsUsed) };
     });
   },
   revealHint(id: string) {
-    updateTicket(id, (t) => ({ ...t, hintsUsed: t.hintsUsed + 1 }));
+    patchTicket(id, (t) => ({ ...t, hintsUsed: t.hintsUsed + 1 }));
   },
   /** Record a quiz answer; only the first pick per question counts for XP. */
   answerQuestion(id: string, index: number, choice: number, count: number) {

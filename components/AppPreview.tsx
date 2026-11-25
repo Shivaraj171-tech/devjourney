@@ -6,7 +6,7 @@
 // see (reviews, tests, refactors) aren't listed.
 import type { ReactNode } from "react";
 
-type Props = { solved: Set<string>; playerName: string };
+type Props = { solved: Set<string>; playerName: string; /** Inside a fold that already has the title and border. */ bare?: boolean };
 
 function Feature({ on, label, children }: { on: boolean; label: string; children: ReactNode }) {
   return (
@@ -25,20 +25,27 @@ const FEATURE_TICKETS = [
   "s02-t02", "s02-t03", "s02-t04", "s03-t02", "s03-t05", "s03-t06",
 ];
 
-export default function AppPreview({ solved, playerName }: Props) {
+export default function AppPreview({ solved, playerName, bare = false }: Props) {
   const customer = playerName && playerName !== "You" ? playerName : "Sam";
   const has = (n: number, season = 1) => solved.has(`s0${season}-t${String(n).padStart(2, "0")}`);
   const shipped = FEATURE_TICKETS.filter((id) => solved.has(id)).length;
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-lg font-bold text-white">📱 The app you&apos;re building</h2>
-        <span className="text-xs text-slate-400">{shipped}/{FEATURE_TICKETS.length} features shipped</span>
+    <section className={bare ? "px-5 pb-5" : "rounded-xl border border-rule bg-panel p-5"}>
+      <div className="flex items-baseline justify-between gap-3">
+        {!bare && <h3 className="font-display text-lg font-bold text-ink">📱 The app you&apos;re building</h3>}
+        <span className="text-sm text-slate-300">{shipped}/{FEATURE_TICKETS.length} features shipped</span>
       </div>
-      <p className="mt-1 text-sm text-slate-400">Every ticket you merge fixes or adds a piece of the real Orbit Orders app.</p>
+      <p className="mt-1 text-sm text-slate-300">Every ticket you merge fixes or adds a piece of the real Orbit Orders app.</p>
 
-      <div className="mx-auto mt-4 w-full max-w-[280px] rounded-[2.2rem] border-4 border-slate-700 bg-slate-950 p-3 shadow-xl" data-testid="app-preview">
+      {/* A picture of the app: the dimmed parts are features not shipped yet (decorative, so one
+          text alternative instead of 29 low-contrast labels; audit flaw 9). */}
+      <div
+        className="mx-auto mt-4 w-full max-w-[280px] rounded-[2.2rem] border-4 border-slate-700 bg-slate-950 p-3 shadow-xl"
+        data-testid="app-preview"
+        role="img"
+        aria-label={`Preview of the Orbit Orders app: ${shipped} of ${FEATURE_TICKETS.length} features shipped so far.`}
+      >
         <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-slate-700" />
         <div className="space-y-2 rounded-2xl bg-white p-3 text-[13px] text-slate-800">
           <div className="flex items-center justify-between">
