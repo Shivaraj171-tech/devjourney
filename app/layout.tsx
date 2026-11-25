@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ServiceWorker from "@/components/ServiceWorker";
 import TopBar from "@/components/TopBar";
 import { SITE_URL } from "@/lib/basePath";
+import { THEME_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const TITLE = "DevJourney · Learn to code with an AI teammate";
@@ -33,11 +34,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col bg-slate-950 text-slate-200">
+    // data-theme is set by THEME_SCRIPT before React hydrates, hence suppressHydrationWarning.
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body className="flex min-h-full flex-col bg-page text-slate-200">
+        <a href="#main" className="skip-link" data-testid="skip-link">
+          Skip to content
+        </a>
         <ServiceWorker />
         <TopBar />
-        <main className="flex-1">{children}</main>
+        <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
+          {children}
+        </main>
       </body>
     </html>
   );
