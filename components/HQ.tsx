@@ -258,7 +258,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
                   gateFloor={previousChainSeasonIndex(seasons, floor) + 1}
                   extra={
                     season.final && certificate.eligible ? (
-                      <Link href="/certificate" data-testid="certificate-link" className="text-sm font-semibold text-amber-300 hover:underline">
+                      <Link href="/certificate" data-testid="certificate-link" className="inline-block py-1 text-sm font-semibold text-amber-300 hover:underline">
                         🎓 Your certificate
                       </Link>
                     ) : undefined

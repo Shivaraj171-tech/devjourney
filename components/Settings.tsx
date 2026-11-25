@@ -91,6 +91,7 @@ function ThemeSection() {
               choice === o.id ? "border-signal bg-signal/15 text-ink" : "border-slate-600 text-slate-200 hover:bg-slate-800"
             }`}
           >
+            {choice === o.id && <span aria-hidden="true">✓ </span>}
             {o.label}
           </button>
         ))}
