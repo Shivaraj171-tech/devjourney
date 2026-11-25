@@ -41,7 +41,7 @@ export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
   return (
     <section className="flex min-h-[600px] min-w-0 flex-1 flex-col gap-3 lg:min-h-0" data-testid="review-panel">
       {/* ---------- PR header ---------- */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+      <div className="rounded-xl border border-rule bg-panel p-4">
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-300">⇄ Open pull request</span>
           <span className="text-slate-400">
@@ -120,9 +120,9 @@ export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
       </div>
 
       {/* ---------- submit + verdict ---------- */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+      <div className="rounded-xl border border-rule bg-panel p-4">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="text-xs font-semibold tracking-wide text-slate-400 uppercase">Your review</div>
+          <h2 className="text-sm font-semibold text-ink">Your review</h2>
           <span className="text-sm text-slate-300" data-testid="flag-count">
             🚩 {flags.length} line{flags.length === 1 ? "" : "s"} flagged
           </span>
@@ -131,7 +131,7 @@ export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
               data-testid="submit-review"
               onClick={submit}
               disabled={flags.length === 0}
-              className="ml-auto rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+              className="btn-signal ml-auto rounded-lg px-4 py-2 text-sm"
             >
               Submit review
             </button>
@@ -235,7 +235,7 @@ function PrFileView({ path, text, before, review, flags, last, solved, onToggle 
               aria-pressed={flagged}
               disabled={solved || (blank && !flagged)}
               onClick={() => onToggle(key)}
-              className={`group flex w-full text-left ${tone} ${solved || blank ? "cursor-default" : "hover:bg-violet-500/15"} focus-visible:outline focus-visible:outline-violet-400`}
+              className={`group relative flex w-full text-left ${tone} ${solved || blank ? "cursor-default" : "hover:bg-violet-500/15"} focus-visible:outline focus-visible:outline-violet-400`}
             >
               {/* The accessible name is the visible text ("Line 12, <code>") plus the state, so voice
                   control users can say what they see (axe label-content-name-mismatch). */}

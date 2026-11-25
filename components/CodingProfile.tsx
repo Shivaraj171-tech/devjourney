@@ -126,7 +126,7 @@ function EmptyState() {
         Your profile fills in as you work: run the tests on a ticket, answer a warm-up, make a call on Byte&apos;s code. After a ticket or two you&apos;ll see
         what you&apos;re good at, what to practise next, and practice picked for you.
       </p>
-      <Link href="/" className="mt-4 inline-block rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400">
+      <Link href="/" className="mt-4 inline-block rounded-lg btn-signal px-4 py-2 text-sm ">
         Go to the office →
       </Link>
     </section>

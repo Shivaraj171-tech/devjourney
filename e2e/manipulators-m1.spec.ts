@@ -89,7 +89,7 @@ test("HQ: '🦾 Manipulators · M1' is locked until Season 1 is done, then opens
   // The Robotics Lab is still there, unchanged.
   await expect(page.getByTestId("side-floor-s40")).toContainText("8 tickets");
   await page.goto(ticketUrl("s41-t01"));
-  await expect(page.getByText("The Manipulators · M1 opens once you've finished the floor it builds on.")).toBeVisible();
+  await expect(page.getByTestId("locked-reason")).toContainText("The Manipulators · M1 opens once you've merged ticket #");
 
   await seedSolved(page, season1);
   await page.goto("/");

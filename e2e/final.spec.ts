@@ -76,8 +76,10 @@ test("final exam: baseline, three no-hint tickets, final check, certificate", as
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   const errors = trackPageErrors(page);
 
-  // ---------- day 1: the baseline is offered after onboarding ----------
+  // ---------- day 1: the baseline is offered once ticket 1 is merged (not in minute one) ----------
   await seedSolved(page, []);
+  await expect(page.getByTestId("skills-card")).toHaveCount(0);
+  await seedSolved(page, [onChain[0]]);
   const card = page.getByTestId("skills-card");
   await expect(card).toHaveAttribute("data-state", "offer-baseline");
   await expect(page.getByTestId("final-exam")).toHaveAttribute("data-state", "locked");
@@ -198,7 +200,7 @@ test("final exam: baseline, three no-hint tickets, final check, certificate", as
 });
 
 test("the baseline can be skipped, and the exam is locked until the main story is done", async ({ page }) => {
-  await seedSolved(page, []);
+  await seedSolved(page, [onChain[0]]); // the baseline is offered after ticket 1
   await page.getByTestId("skills-card-skip").click();
   await expect(page.getByTestId("skills-card")).toHaveCount(0);
   expect((await readProgress(page)).skillsCheck.baselineSkipped).toBe(true);

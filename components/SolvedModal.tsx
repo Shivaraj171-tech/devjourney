@@ -125,7 +125,7 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
                 primaryRef.current = el;
               }}
               href={next.href}
-              className="rounded-lg bg-emerald-600 py-2.5 font-semibold text-white hover:bg-emerald-500"
+              className="rounded-lg btn-signal py-2.5"
             >
               {next.label}
             </Link>

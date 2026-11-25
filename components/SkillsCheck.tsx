@@ -88,7 +88,7 @@ export default function SkillsCheck({ check, finalGate, finalTickets }: Props) {
                 setPosition(0);
                 setAnswers({});
               }}
-              className="rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-400"
+              className="rounded-xl btn-signal px-5 py-3 "
             >
               Start: {items.length} questions →
             </button>
@@ -253,7 +253,7 @@ function Results({ check, sc, finalUnlocked, certificateReady }: { check: Skills
         </p>
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
-          <Link href="/" className="rounded-xl bg-emerald-500 px-5 py-3 text-center font-semibold text-slate-950 hover:bg-emerald-400">
+          <Link href="/" className="rounded-xl btn-signal px-5 py-3 text-center ">
             Back to the office
           </Link>
           {certificateReady && (

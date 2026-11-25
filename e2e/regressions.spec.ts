@@ -96,6 +96,13 @@ test.describe("phone viewport", () => {
 test("the 2-minute lesson on s01-t01 unfolds in the brief and shows the Strings lesson with a code block", async ({ page }) => {
   await page.goto(ticketUrl(t01.id));
   const toggle = page.getByTestId("lesson-toggle");
+  // Ticket 1 (a tutorial ticket), first visit: the lesson is already open, before any run
+  // (read, learn, fix: the order onboarding promises). It still folds and unfolds.
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  expect(await page.getByTestId("lesson").evaluate((el) => el.getBoundingClientRect().top)).toBeLessThan(
+    await page.getByTestId("byte-teaser").evaluate((el) => el.getBoundingClientRect().top),
+  );
+  await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
