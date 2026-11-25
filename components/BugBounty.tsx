@@ -91,15 +91,15 @@ function BountyCardView({ card, state, xp, recommended = false }: { card: Bounty
     return (
       <li data-testid={`bounty-${card.id}`} data-state="done" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
         {header}
-        <Link href={`/ticket/${card.id}`} className="block hover:underline">
+        <Link href={`/ticket/${card.id}`} className="block py-1 hover:underline">
           {title}
         </Link>
         <p className="mt-2 text-xs text-emerald-100" data-testid="bounty-reveal">
           ✅ {revealText(card.bugKind)}
         </p>
         {card.requires && (
-          <a href={withBase(lessonHref(card.requires.id))} data-testid="bounty-lesson-link" className="mt-1 inline-block text-xs font-semibold text-cyan-300 hover:underline">
-            📘 Revisit the lesson →
+          <a href={withBase(lessonHref(card.requires.id))} data-testid="bounty-lesson-link" className="mt-1 inline-block min-h-6 py-1 text-xs font-semibold text-cyan-300 hover:underline">
+            📘 Revisit the lesson
           </a>
         )}
       </li>

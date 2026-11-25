@@ -359,7 +359,7 @@ function DiffPreview({ find, replace }: { find: string; replace: string }) {
     ...replace.split("\n").map((text) => ({ sign: "+", text })),
   ];
   return (
-    <div className="mt-2 w-0 min-w-full rounded-lg border border-slate-800 bg-[#1e1e1e] py-1 font-mono text-xs" data-testid="byte-diff">
+    <div className="mt-2 w-0 min-w-full rounded-lg border border-slate-800 bg-editor py-1 font-mono text-xs" data-testid="byte-diff">
       {rows.map((r, i) => (
         <div
           key={i}

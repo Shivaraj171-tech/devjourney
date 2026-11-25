@@ -58,7 +58,7 @@ export default function TodayCard({ playerName, next, nextFloor, nextIsExam = fa
           </Fact>
           <Fact label="Warm-up" testId="today-warmup">
             {warmup === "ready" ? (
-              <a href="#warm-up" className="underline decoration-signal decoration-2 underline-offset-4">
+              <a href="#warm-up" className="inline-block py-1 underline decoration-signal decoration-2 underline-offset-4">
                 ☕ Ready, +{WARMUP_XP} XP
               </a>
             ) : warmup === "done" ? (

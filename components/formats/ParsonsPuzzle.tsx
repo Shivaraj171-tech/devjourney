@@ -108,7 +108,7 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
               key={id}
               data-testid={`${testId}-line`}
               data-block={id}
-              className="flex min-w-0 flex-wrap items-center gap-1 rounded-lg border border-slate-700 bg-[#1e1e1e] py-1 pr-1 pl-2"
+              className="flex min-w-0 flex-wrap items-center gap-1 rounded-lg border border-slate-700 bg-editor py-1 pr-1 pl-2"
             >
               {/* Long lines push the buttons onto their own row on narrow screens, so the code stays readable. */}
               <span className="flex min-w-0 flex-[1_1_auto] items-baseline gap-1">

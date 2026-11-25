@@ -54,7 +54,7 @@ export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
       </div>
 
       {/* ---------- files ---------- */}
-      <div className="flex min-h-[380px] flex-1 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e1e1e]">
+      <div className="flex min-h-[380px] flex-1 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-editor">
         <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-800 bg-slate-950 px-2">
           {prPaths.map((path) => (
             <FileTab key={path} path={path} active={activeFile === path} onClick={() => setActiveFile(path)}>
@@ -233,20 +233,26 @@ function PrFileView({ path, text, before, review, flags, last, solved, onToggle 
               type="button"
               data-line={n}
               aria-pressed={flagged}
-              aria-label={`Line ${n}${flagged ? ", flagged" : ""}${falseAlarm ? ", false alarm" : ""}${revealed ? ", real problem" : ""}`}
               disabled={solved || (blank && !flagged)}
               onClick={() => onToggle(key)}
               className={`group flex w-full text-left ${tone} ${solved || blank ? "cursor-default" : "hover:bg-violet-500/15"} focus-visible:outline focus-visible:outline-violet-400`}
             >
-              <span className="w-8 shrink-0 text-center select-none">
+              {/* The accessible name is the visible text ("Line 12, <code>") plus the state, so voice
+                  control users can say what they see (axe label-content-name-mismatch). */}
+              <span aria-hidden className="w-8 shrink-0 text-center select-none">
                 {revealed ? "✅" : falseAlarm ? "⚠️" : flagged ? "🚩" : blank || solved ? null : (
                   // A flag on every line says "these are tappable" before anyone hovers.
                   <span aria-hidden className="text-slate-500 group-hover:text-violet-300">⚑</span>
                 )}
               </span>
-              <span className="w-10 shrink-0 pr-2 text-right text-slate-400 select-none">{n}</span>
-              <span className={`w-4 shrink-0 select-none ${added.has(n) ? "text-emerald-400" : "text-transparent"}`}>+</span>
+              <span className="w-10 shrink-0 pr-2 text-right text-slate-300 select-none">
+                <span className="sr-only">Line </span>
+                {n}
+                <span className="sr-only">: </span>
+              </span>
+              <span aria-hidden className={`w-4 shrink-0 select-none ${added.has(n) ? "text-emerald-400" : "text-transparent"}`}>+</span>
               <span className={`${WRAP} text-slate-200`}>{line}</span>
+              <span className="sr-only">{`${flagged ? ", flagged" : ""}${falseAlarm ? ", false alarm" : ""}${revealed ? ", real problem" : ""}`}</span>
             </button>
             {falseAlarm && (
               <div className="ml-[5.5rem] mb-1 font-sans text-xs text-amber-300">

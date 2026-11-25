@@ -10,11 +10,11 @@ type Props = { solved: Set<string>; playerName: string; /** Inside a fold that a
 
 function Feature({ on, label, children }: { on: boolean; label: string; children: ReactNode }) {
   return (
-    <div
-      title={on ? `Shipped: ${label}` : `Not shipped yet: ${label}`}
-      className={`rounded-xl transition ${on ? "" : "pointer-events-none opacity-30 grayscale"}`}
-    >
-      {children}
+    <div title={on ? `Shipped: ${label}` : `Not shipped yet: ${label}`} className={`relative rounded-xl ${on ? "" : "pointer-events-none"}`}>
+      {/* Not shipped yet: a dashed outline the size of the feature, with its text hidden
+          (it was dimmed to 1.6:1, unreadable text that failed contrast; audit flaw 9). */}
+      <div className={on ? "" : "invisible"}>{children}</div>
+      {!on && <div aria-hidden className="absolute inset-0 rounded-lg border border-dashed border-slate-400 bg-slate-100/60" />}
     </div>
   );
 }

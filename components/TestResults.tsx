@@ -109,7 +109,7 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
                 </div>
                 {r.status !== "pass" && <Explained result={r} />}
                 {r.output && (
-                  <pre className="mt-1.5 overflow-x-auto rounded bg-black/40 p-2 text-xs text-slate-300">
+                  <pre className="mt-1.5 overflow-x-auto rounded bg-slate-950/70 p-2 text-xs text-slate-300">
                     <span className="text-slate-300"># printed output{"\n"}</span>
                     {r.output}
                   </pre>
@@ -118,7 +118,7 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
                   // Syntax errors are easiest to fix with the line number from the traceback.
                   <details className="mt-1.5">
                     <summary className="cursor-pointer py-1 text-xs text-slate-300">Show traceback</summary>
-                    <pre className="mt-1 overflow-x-auto rounded bg-black/40 p-2 text-xs text-red-200">{r.traceback}</pre>
+                    <pre className="mt-1 overflow-x-auto rounded bg-slate-950/70 p-2 text-xs text-red-200">{r.traceback}</pre>
                   </details>
                 )}
               </div>

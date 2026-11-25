@@ -45,6 +45,7 @@ const defineThemes: BeforeMount = (monaco) => {
       "editor.background": "#161b38",
       "editorLineNumber.foreground": "#9aa3c7", // 6.9:1
       "editorLineNumber.activeForeground": "#f7f8fc",
+      "editorLineNumber.dimmedForeground": "#9aa3c7",
       "editor.lineHighlightBackground": "#1f2650",
       "editorIndentGuide.background1": "#2c3561",
       "editorGutter.background": "#161b38",
@@ -53,11 +54,15 @@ const defineThemes: BeforeMount = (monaco) => {
   monaco.editor.defineTheme("dj-light", {
     base: "vs",
     inherit: true,
-    rules: [{ token: "comment", foreground: "2F6B2C", fontStyle: "italic" }], // 6.4:1
+    rules: [
+      { token: "comment", foreground: "2F6B2C", fontStyle: "italic" }, // 6.4:1
+      { token: "number", foreground: "07704B" }, // the vs default #098658 is 4.48:1
+    ],
     colors: {
       "editor.background": "#fbfcff",
       "editorLineNumber.foreground": "#4f5a7c", // 6.9:1
       "editorLineNumber.activeForeground": "#121833",
+      "editorLineNumber.dimmedForeground": "#4f5a7c",
       "editor.lineHighlightBackground": "#eef1f8",
       "editorGutter.background": "#fbfcff",
     },

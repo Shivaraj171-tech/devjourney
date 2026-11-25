@@ -3,8 +3,8 @@
 // The app's components use Tailwind's colour utilities written for a dark page
 // (text-cyan-300 on bg-slate-950, …). The light theme re-maps those scales so
 // the same classes read well on a light page: each accent scale is mirrored
-// (50 <-> 950, 100 <-> 900, 200 <-> 800, 300 <-> 700, 600 -> 400 …), and 400 and
-// 500 take 800's value. So dark-page text such as text-amber-400 stays AA on a
+// (50 <-> 950, 100 <-> 900, 200 <-> 800, 600 -> 400 …), and 300, 400 and
+// 500 take 800's value (300 -> 700 measured 4.1-4.5:1 on tinted panels). So dark-page text such as text-amber-400 stays AA on a
 // light page, and so does the (now light) text-slate-950 on a bg-*-400/500 button.
 // The neutral (slate) scale and the brand tokens are hand-tuned in globals.css.
 //
@@ -16,7 +16,7 @@ const root = join(import.meta.dirname, "..");
 const theme = readFileSync(join(root, "node_modules/tailwindcss/theme.css"), "utf-8");
 const FAMILIES = ["red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose"];
 const SHADES = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
-const MIRROR = { 50: "950", 100: "900", 200: "800", 300: "700", 400: "800", 500: "800", 600: "400", 700: "300", 800: "200", 900: "100", 950: "50" };
+const MIRROR = { 50: "950", 100: "900", 200: "800", 300: "800", 400: "800", 500: "800", 600: "400", 700: "300", 800: "200", 900: "100", 950: "50" };
 
 const value = (family, shade) => {
   const m = theme.match(new RegExp(`--color-${family}-${shade}:\\s*([^;]+);`));

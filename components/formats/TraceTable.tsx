@@ -223,7 +223,7 @@ function TracedCode({ code, highlight, testId }: { code: string; highlight?: num
       data-testid={testId}
       tabIndex={0}
       aria-label="Python code"
-      className="w-0 min-w-full overflow-x-auto rounded-lg border border-slate-800 bg-[#1e1e1e] py-2 font-mono text-xs leading-relaxed text-slate-100"
+      className="w-0 min-w-full overflow-x-auto rounded-lg border border-slate-800 bg-editor py-2 font-mono text-xs leading-relaxed text-slate-100"
     >
       <code>
         {code.split("\n").map((line, i) => (
