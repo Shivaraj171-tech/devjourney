@@ -68,7 +68,7 @@ function BountyCardView({ card, state, xp, recommended = false }: { card: Bounty
   const header = (
     <div className="flex items-center justify-between gap-2 text-xs font-semibold text-lime-100">
       <span>🐞 Mystery bug · ~{card.estimatedMinutes} min</span>
-      <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-amber-200" data-testid="bounty-xp">
+      <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-amber-100" data-testid="bounty-xp">
         {state === "done" ? `+${xp} XP` : `🪙 ${card.xp} XP`}
       </span>
     </div>

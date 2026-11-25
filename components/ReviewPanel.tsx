@@ -91,7 +91,7 @@ export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
             )}
           </div>
         )}
-        <div className="min-h-0 flex-1 overflow-auto">
+        <div className="min-h-0 flex-1 overflow-auto" tabIndex={0} role="region" aria-label="Changed code, scrollable">
           {prFile ? (
             <PrFileView
               path={prFile.path}

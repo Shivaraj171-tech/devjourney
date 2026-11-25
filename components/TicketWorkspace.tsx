@@ -317,7 +317,10 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
         <p className="mt-1 text-slate-200">Read the code, then answer the questions. No code changes needed.</p>
         {hasQuiz && (
           <div className="mt-3 flex items-center gap-2">
-            <button onClick={openQuiz} className="btn-signal flex-1 rounded-lg py-2">
+            <button
+              onClick={openQuiz}
+              className={`flex-1 rounded-lg py-2 ${tp.quizDone && nextTicket ? "border border-slate-600 text-slate-200 hover:border-slate-400 hover:text-white" : "btn-signal"}`}
+            >
               {tp.quizDone ? "See your answers" : "Start the questions"}
             </button>
             {hints("down")}

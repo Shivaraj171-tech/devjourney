@@ -93,7 +93,7 @@ export default function SkillsCheck({ check, finalGate, finalTickets }: Props) {
               Start: {items.length} questions →
             </button>
             {attempt === "baseline" && (
-              <Link href="/" onClick={() => skillsCheckActions.skipBaseline()} className="text-sm text-slate-300 underline-offset-2 hover:underline" data-testid="skills-skip">
+              <Link href="/" onClick={() => skillsCheckActions.skipBaseline()} className="inline-flex min-h-6 items-center py-1 text-sm text-slate-300 underline-offset-2 hover:underline" data-testid="skills-skip">
                 Skip for now
               </Link>
             )}
@@ -162,7 +162,7 @@ function Shell({ children }: { children: ReactNode }) {
 /** Code with line numbers (spot the bug) or plain. */
 function CodeBlock({ code, numbered = false }: { code: string; numbered?: boolean }) {
   return (
-    <pre className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-3 text-sm leading-relaxed text-slate-100">
+    <pre tabIndex={0} role="region" aria-label="Code, scrollable" className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-3 text-sm leading-relaxed text-slate-100">
       <code>
         {code.split("\n").map((line, i) => (
           <span key={i} className="block">
