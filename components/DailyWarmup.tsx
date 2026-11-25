@@ -130,7 +130,7 @@ function WarmupQuestion({
       <div className="min-w-0">
         <p className="text-xs text-amber-200/90" data-testid="warmup-reason">{reason}</p>
         <div className="mt-1 text-sm font-semibold text-white">{warmup.title}</div>
-        <pre className="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 font-mono text-[13px] leading-snug text-slate-200">
+        <pre tabIndex={0} className="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 font-mono text-[13px] leading-snug text-slate-200">
           {warmup.code.trimEnd()}
         </pre>
       </div>

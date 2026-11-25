@@ -113,7 +113,7 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
                 onClick={onQuiz}
                 className="rounded-lg bg-violet-600 py-2.5 font-semibold text-white hover:bg-violet-500"
               >
-                🧠 Lock it in: 1-minute quiz <span className="font-normal text-violet-100">(+{QUIZ_XP_PER_CORRECT} XP each)</span>
+                🧠 Lock it in: 1-minute quiz <span className="font-normal text-violet-50">(+{QUIZ_XP_PER_CORRECT} XP each)</span>
               </button>
               <Link href={next.href} className="py-1 text-sm font-semibold text-emerald-300 hover:text-emerald-200">
                 {next.skip}

@@ -112,7 +112,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
         <button
           onClick={() => onPosition(position - 1)}
           disabled={position <= 0}
-          aria-label="Previous step"
+          aria-label="Prev, the previous step"
           className="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           ◀ Prev
@@ -200,7 +200,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
                         <td className="py-1 align-top break-all text-slate-100">
                           {value}
                           {change && (
-                            <span className="ml-2 rounded bg-amber-400/20 px-1 font-sans text-[10px] text-amber-200">
+                            <span className="ml-2 rounded bg-amber-400/20 px-1 font-sans text-[10px] text-amber-50">
                               {change === "new" ? "new" : "changed"}
                             </span>
                           )}

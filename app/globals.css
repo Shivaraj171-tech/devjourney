@@ -239,7 +239,7 @@ h1, h2, h3 {
 
 /* Step-through debugger: the line that runs next (Monaco decorations, see CodeEditor). */
 .debug-current-line {
-  background: rgba(250, 204, 21, 0.16);
+  background: rgba(250, 204, 21, 0.10);
 }
 .debug-current-glyph {
   background: #facc15;
