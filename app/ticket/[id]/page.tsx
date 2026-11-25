@@ -32,10 +32,14 @@ export default async function TicketPage({ params }: PageProps<"/ticket/[id]">) 
   }));
   const nextId = nextStoryTicketId(order, ticket.id);
   const next = nextId ? getTicket(nextId) : undefined;
+  const prevId = previousTicketId(order, ticket.id);
+  const prev = prevId ? getTicket(prevId) : undefined;
+  const prevSeason = prev ? loadSeasons().find((s) => s.id === prev.seasonId) : undefined;
   return (
     <TicketWorkspace
       ticket={ticket}
-      prevTicketId={previousTicketId(order, ticket.id)}
+      prevTicketId={prevId}
+      prevTicket={prev ? { title: prev.title, number: prev.number, floor: prevSeason ? (prevSeason.shortTitle ?? prevSeason.title) : "" } : null}
       nextTicket={next ? { id: next.id, title: next.title } : null}
     />
   );

@@ -84,7 +84,7 @@ test("HQ: the lab is locked until Season 1 is done, then opens; it never blocks 
   // A locked lab ticket says why.
   await page.goto(ticketUrl("s40-t01"));
   await expect(page.getByText(/still in the backlog/)).toBeVisible();
-  await expect(page.getByText("The Robotics Lab opens once you've finished the floor it builds on.")).toBeVisible();
+  await expect(page.getByTestId("locked-reason")).toContainText("The Robotics Lab opens once you've merged ticket #");
 
   await seedSolved(page, season1);
   await page.goto("/");

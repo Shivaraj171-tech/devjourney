@@ -12,6 +12,9 @@ type Props = {
   tp: TicketProgress;
   /** Phone: start with the logs folded so the banner and the goal both fit the first screen. */
   logsOpenAtStart?: boolean;
+  /** Desktop: the logs are a tab of the results pane under the editor, so the banner carries
+   *  only the clock (the editor keeps its height; audit flaw 3). */
+  withLogs?: boolean;
 };
 
 function clock(totalSeconds: number): string {
@@ -27,7 +30,7 @@ function logTone(line: string): string {
   return "text-slate-400";
 }
 
-export default function IncidentPanel({ ticketId, incident, tp, logsOpenAtStart = true }: Props) {
+export default function IncidentPanel({ ticketId, incident, tp, logsOpenAtStart = true, withLogs = true }: Props) {
   // Start the clock the first time the ticket is opened; the start time is saved in progress.
   useEffect(() => incidentActions.start(ticketId), [ticketId]);
 
@@ -75,10 +78,10 @@ export default function IncidentPanel({ ticketId, incident, tp, logsOpenAtStart 
       className={`overflow-hidden rounded-2xl border ${live ? "border-red-500/60 bg-red-950/40" : "border-emerald-500/40 bg-emerald-950/30"}`}
     >
       <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 ${live ? "bg-red-600/25" : "bg-emerald-600/15"}`}>
-        <span className={`font-bold tracking-wide uppercase ${live ? "text-red-200" : "text-emerald-200"}`}>
+        <span className={`font-display font-bold ${live ? "text-red-200" : "text-emerald-200"}`}>
           {live ? (
             <>
-              <span className="mr-1.5 inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-red-400 align-middle" />
+              <span className="mr-1.5 inline-block h-2.5 w-2.5 animate-pulse rounded-full motion-reduce:animate-none bg-red-400 align-middle" />
               Production incident
             </>
           ) : (
@@ -86,18 +89,18 @@ export default function IncidentPanel({ ticketId, incident, tp, logsOpenAtStart 
           )}
         </span>
         <span className="text-sm text-slate-200">{status}</span>
-        <button
+        {withLogs && <button
           onClick={() => setShowLogs((v) => !v)}
           aria-expanded={showLogs}
-          className="ml-auto rounded-md px-2 py-1 text-xs text-slate-300 hover:bg-white/10 hover:text-white"
+          className="ml-auto min-h-8 rounded-md px-2 py-1 text-xs text-slate-200 hover:bg-white/10 hover:text-white"
         >
           {showLogs ? "Hide logs ▲" : "Show logs ▼"}
-        </button>
+        </button>}
       </div>
-      {showLogs && (
+      {withLogs && showLogs && (
         <div>
-          <div className="border-t border-red-500/20 px-4 pt-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">
-            Logs · production <span className="font-normal normal-case">· newest at the bottom</span>
+          <div className="border-t border-red-500/20 px-4 pt-2 text-xs font-semibold text-slate-300">
+            Production logs <span className="font-normal">(newest at the bottom)</span>
           </div>
           <IncidentLogs logs={incident.logs} />
         </div>

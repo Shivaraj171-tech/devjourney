@@ -271,7 +271,8 @@ async function openTicketWithWhy(page: Page, id: string) {
   await page.goto(ticketUrl(t.id));
   await revealByteCard(page);
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "undecided");
-  await expect(page.getByTestId("byte-why")).toBeVisible();
+  // One question at a time: the reason is asked once a call is picked (UI audit flaw 5).
+  await expect(page.getByTestId("byte-why")).toHaveCount(0);
 }
 
 test("why: reject + the right reason, locked in together, is caught (+20 XP)", async ({ page }) => {
@@ -280,11 +281,12 @@ test("why: reject + the right reason, locked in together, is caught (+20 XP)", a
   await openTicketWithWhy(page, "s01-t02");
   const xp = await xpTotal(page);
   const lock = page.getByTestId("byte-lock");
-  await expect(lock).toBeDisabled();
+  await expect(lock).toHaveCount(0);
 
-  // A call alone doesn't decide anything.
+  // A call alone doesn't decide anything: it opens the "why?" step.
   await page.getByTestId("byte-reject").click();
   await expect(page.getByTestId("byte-reject")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByTestId("byte-why")).toBeVisible();
   await expect(lock).toBeDisabled();
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "undecided");
   expect((await readProgress(page)).tickets["s01-t02"]?.byteSuggestion).toBeUndefined();
@@ -313,8 +315,8 @@ test("why: the right call with the wrong reason earns nothing and shows the real
   await openTicketWithWhy(page, wrongWhyId);
   const xp = await xpTotal(page);
   const wrong = why.answer === 0 ? 1 : 0;
-  await page.getByTestId(`byte-why-${wrong}`).click();
   await page.getByTestId("byte-reject").click();
+  await page.getByTestId(`byte-why-${wrong}`).click();
   await page.getByTestId("byte-lock").click();
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "caught");
   await expect(page.getByTestId("byte-outcome")).toContainText("Right call, shaky reason");

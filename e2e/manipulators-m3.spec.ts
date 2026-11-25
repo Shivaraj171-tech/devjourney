@@ -112,7 +112,7 @@ test("HQ: 'Manipulators · M3' stays locked until Module 2 is done ('opens after
   await expect(page.getByTestId("side-floor-s44")).toHaveAttribute("data-state", "locked");
   await expect(page.getByTestId("side-floor-s44")).toContainText("🔒 opens after Manipulators · M3");
   await page.goto(ticketUrl("s43-t01"));
-  await expect(page.getByText("The Manipulators · M3 opens once you've finished the floor it builds on.")).toBeVisible();
+  await expect(page.getByTestId("locked-reason")).toContainText("The Manipulators · M3 opens once you've merged ticket #");
 
   await seedSolved(page, before);
   await page.goto("/");

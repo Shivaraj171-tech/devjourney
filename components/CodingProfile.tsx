@@ -95,7 +95,7 @@ export default function CodingProfile({ content }: { content: ProfileContent }) 
 
           {others.length > 0 && (
             <details className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5" data-testid="profile-all">
-              <summary className="cursor-pointer text-sm font-semibold text-white">Everything else so far ({others.length} concepts)</summary>
+              <summary className="cursor-pointer py-1 text-sm font-semibold text-white">Everything else so far ({others.length} concepts)</summary>
               <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {others.map((c) => (
                   <li key={c.concept} className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
@@ -126,7 +126,7 @@ function EmptyState() {
         Your profile fills in as you work: run the tests on a ticket, answer a warm-up, make a call on Byte&apos;s code. After a ticket or two you&apos;ll see
         what you&apos;re good at, what to practise next, and practice picked for you.
       </p>
-      <Link href="/" className="mt-4 inline-block rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400">
+      <Link href="/" className="mt-4 inline-block rounded-lg btn-signal px-4 py-2 text-sm ">
         Go to the office →
       </Link>
     </section>

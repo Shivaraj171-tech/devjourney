@@ -27,10 +27,11 @@ export default function BugBounty({ bounties, isSolved, xpFor, recommended = [] 
     })
     .sort((a, b) => rank(a) - rank(b) || a.i - b.i);
   const { solved, open, total } = bountyProgress(cards.map((c) => c.state));
+  const foldSolved = solved >= 4;
   return (
-    <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-2xl border border-lime-500/30 bg-lime-950/20 p-4 sm:p-5">
+    <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-xl border border-rule bg-panel p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h2 id="bug-bounty-title" className="text-lg font-bold text-white">
+        <h2 id="bug-bounty-title" className="font-display text-lg font-bold text-ink">
           🐞 Bug Bounty
         </h2>
         <span className="text-sm text-slate-300" data-testid="bounty-progress">
@@ -42,10 +43,23 @@ export default function BugBounty({ bounties, isSolved, xpFor, recommended = [] 
         Optional, and they never block your next ticket.
       </p>
       <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map(({ card, state, recommended: rec }) => (
+        {(foldSolved ? cards.filter((c) => c.state !== "done") : cards).map(({ card, state, recommended: rec }) => (
           <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} recommended={rec} />
         ))}
       </ul>
+      {/* Many solved: they fold into one line, so the home screen stays short (audit flaw 8). */}
+      {foldSolved && (
+        <details className="mt-3">
+          <summary className="min-h-8 cursor-pointer py-1 text-sm font-semibold text-slate-200">{solved} solved bounties</summary>
+          <ul className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {cards
+              .filter((c) => c.state === "done")
+              .map(({ card, state }) => (
+                <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} />
+              ))}
+          </ul>
+        </details>
+      )}
     </section>
   );
 }
@@ -54,7 +68,7 @@ function BountyCardView({ card, state, xp, recommended = false }: { card: Bounty
   const header = (
     <div className="flex items-center justify-between gap-2 text-xs font-semibold text-lime-100">
       <span>🐞 Mystery bug · ~{card.estimatedMinutes} min</span>
-      <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-amber-200" data-testid="bounty-xp">
+      <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-amber-50" data-testid="bounty-xp">
         {state === "done" ? `+${xp} XP` : `🪙 ${card.xp} XP`}
       </span>
     </div>
@@ -77,15 +91,15 @@ function BountyCardView({ card, state, xp, recommended = false }: { card: Bounty
     return (
       <li data-testid={`bounty-${card.id}`} data-state="done" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
         {header}
-        <Link href={`/ticket/${card.id}`} className="block hover:underline">
+        <Link href={`/ticket/${card.id}`} className="block py-1 hover:underline">
           {title}
         </Link>
         <p className="mt-2 text-xs text-emerald-100" data-testid="bounty-reveal">
           ✅ {revealText(card.bugKind)}
         </p>
         {card.requires && (
-          <a href={withBase(lessonHref(card.requires.id))} data-testid="bounty-lesson-link" className="mt-1 inline-block text-xs font-semibold text-cyan-300 hover:underline">
-            📘 Revisit the lesson →
+          <a href={withBase(lessonHref(card.requires.id))} data-testid="bounty-lesson-link" className="mt-1 inline-block min-h-6 py-1 text-xs font-semibold text-cyan-300 hover:underline">
+            📘 Revisit the lesson
           </a>
         )}
       </li>

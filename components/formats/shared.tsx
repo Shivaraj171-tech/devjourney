@@ -54,7 +54,7 @@ export function CodeBlock({ code, label, testId }: { code: string; label?: strin
         data-testid={testId}
         tabIndex={0}
         aria-label={label ?? "Python code"}
-        className="w-0 min-w-full overflow-x-auto rounded-lg border border-slate-800 bg-[#1e1e1e] p-2.5 font-mono text-xs leading-relaxed text-slate-100"
+        className="w-0 min-w-full overflow-x-auto rounded-lg border border-slate-800 bg-editor p-2.5 font-mono text-xs leading-relaxed text-slate-100"
       >
         <code>{code}</code>
       </pre>

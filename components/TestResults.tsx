@@ -24,9 +24,12 @@ type Props = {
   onStepThrough?: (check: TestResult) => void;
   /** `${file}:${name}` of the check being traced right now, if any. */
   tracing?: string | null;
+  /** The ticket's real number of checks. When the code fails to load, the runner returns one
+   *  synthetic "(import)" failure, and "0 of 1" would contradict the "0/2" pill (audit flaw 2). */
+  total?: number;
 };
 
-export default function TestResults({ result, running, onStepThrough, tracing = null }: Props) {
+export default function TestResults({ result, running, onStepThrough, tracing = null, total }: Props) {
   // Remember how many checks passed on the previous run, to say "2 more than last time".
   // (React's pattern for adjusting state when a prop changes.)
   const [seen, setSeen] = useState<{ result: RunResult | null; previousPassed?: number }>({ result: null });
@@ -36,16 +39,16 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
   }
 
   if (running) {
-    return <p className="animate-pulse text-sm text-slate-400">Running tests…</p>;
+    return <p className="animate-pulse text-sm text-slate-300 motion-reduce:animate-none">Running the checks…</p>;
   }
   if (!result) {
     return (
       <div className="space-y-1.5 text-sm text-slate-300">
         <p>
-          Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 text-slate-200">▶ Run tests</kbd> to check your fix
+          Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 font-sans text-slate-100">▶ Run tests</kbd> to check your fix
           <span className="pointer-coarse:hidden"> (or Ctrl/⌘ + Enter)</span>.
         </p>
-        <p className="text-slate-400">
+        <p className="text-slate-300">
           Tip: add <code className="text-slate-200">print(...)</code> anywhere in your code to see what&apos;s going on. Whatever it prints shows up
           under each check as &quot;# printed output&quot;.
         </p>
@@ -60,19 +63,29 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
     );
   }
   const passed = result.results.filter((r) => r.status === "pass").length;
+  const loadFailed = result.results.some((r) => r.name === "(import)");
+  const checkCount = Math.max(total ?? 0, result.results.length);
   return (
     <div className="space-y-2">
-      <p data-testid="run-summary" className={`text-sm font-semibold ${result.passed ? "text-emerald-300" : "text-amber-300"}`}>
-        {result.passed ? "All checks passed — ready to merge!" : `${passed} of ${result.results.length} checks passing`}
+      <p data-testid="run-summary" className={`text-base font-bold ${result.passed ? "text-pass" : "text-ink"}`}>
+        {result.passed
+          ? "All checks passed. Ready to merge!"
+          : loadFailed
+            ? `Your code didn't load: 0 of ${checkCount} checks could run`
+            : `${passed} of ${checkCount} checks passing`}
       </p>
       {!result.passed && (
-        <p data-testid="run-encouragement" className="text-xs text-slate-400">
-          {runEncouragement(passed, result.results.length, seen.result === result ? seen.previousPassed : undefined)}
+        <p data-testid="run-encouragement" className="text-sm text-slate-300">
+          {runEncouragement(passed, checkCount, seen.result === result ? seen.previousPassed : undefined, loadFailed)}
         </p>
       )}
       <ul className="space-y-1.5">
         {result.results.map((r) => (
-          <li key={`${r.file}-${r.name}`} className="rounded-lg bg-slate-900 p-2.5 text-sm">
+          <li
+            key={`${r.file}-${r.name}`}
+            data-status={r.status}
+            className={`rounded-lg border-l-4 bg-slate-950/60 p-2.5 text-sm ${r.status === "pass" ? "border-pass" : "border-fail"}`}
+          >
             <div className="flex items-start gap-2">
               <span>{ICON[r.status]}</span>
               <div className="min-w-0 flex-1">
@@ -96,16 +109,16 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
                 </div>
                 {r.status !== "pass" && <Explained result={r} />}
                 {r.output && (
-                  <pre className="mt-1.5 overflow-x-auto rounded bg-black/40 p-2 text-xs text-slate-300">
-                    <span className="text-slate-400"># printed output{"\n"}</span>
+                  <pre className="mt-1.5 overflow-x-auto rounded bg-slate-950/70 p-2 text-xs text-slate-300">
+                    <span className="text-slate-300"># printed output{"\n"}</span>
                     {r.output}
                   </pre>
                 )}
                 {r.status === "error" && r.traceback && (
                   // Syntax errors are easiest to fix with the line number from the traceback.
                   <details className="mt-1.5">
-                    <summary className="cursor-pointer text-xs text-slate-400">Show traceback</summary>
-                    <pre className="mt-1 overflow-x-auto rounded bg-black/40 p-2 text-xs text-red-200">{r.traceback}</pre>
+                    <summary className="cursor-pointer py-1 text-xs text-slate-300">Show traceback</summary>
+                    <pre className="mt-1 overflow-x-auto rounded bg-slate-950/70 p-2 text-xs text-red-200">{r.traceback}</pre>
                   </details>
                 )}
               </div>
@@ -146,7 +159,8 @@ export function CheckPill({ total, result, previousPassed }: { total: number; re
   const passed = ran ? (result.passed ? total : result.results.filter((r) => r.status === "pass").length) : 0;
   const delta = ran && previousPassed !== undefined ? passed - previousPassed : 0;
   const done = ran && result.passed;
-  const tone = done ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-200" : ran ? "border-amber-400/40 bg-amber-500/10 text-amber-100" : "border-slate-700 bg-slate-900 text-slate-300";
+  // Green is earned: passing checks are green dots, the rest stay hollow (no amber: amber means "press me").
+  const tone = done ? "border-pass/60 bg-pass/15 text-ink" : "border-rule bg-slate-950/60 text-ink";
   const label = ran
     ? `${passed} of ${total} checks passing${delta > 0 ? `, ${delta} more than last run` : delta < 0 ? `, ${-delta} fewer than last run` : ""}`
     : `${total} checks, not run yet`;
@@ -155,7 +169,7 @@ export function CheckPill({ total, result, previousPassed }: { total: number; re
       {total <= 8 && (
         <span aria-hidden className="flex gap-0.5">
           {Array.from({ length: total }, (_, i) => (
-            <span key={i} className={`h-2 w-2 rounded-full ${i < passed ? (done ? "bg-emerald-400" : "bg-amber-300") : "bg-slate-600"}`} />
+            <span key={i} className={`h-2.5 w-2.5 rounded-full border ${i < passed ? "border-pass bg-pass" : ran ? "border-fail" : "border-slate-500"}`} />
           ))}
         </span>
       )}

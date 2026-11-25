@@ -31,7 +31,7 @@ function CurrentLine({ text, line }: { text: string; line: number }) {
   const from = Math.max(1, line - 1);
   const to = Math.min(lines.length, line + 1);
   return (
-    <div data-testid="debugger-code" className="mb-2 overflow-hidden rounded-md border border-slate-800 bg-[#1e1e1e] py-1 font-mono text-xs">
+    <div data-testid="debugger-code" className="mb-2 overflow-hidden rounded-md border border-slate-800 bg-editor py-1 font-mono text-xs">
       {Array.from({ length: to - from + 1 }, (_, i) => from + i).map((n) => (
         <div
           key={n}
@@ -87,7 +87,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
     <div data-testid="debugger" className="space-y-3 text-sm">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold tracking-wide text-slate-400 uppercase">🐞 Step through</div>
+          <div className="text-xs font-semibold text-slate-300">🐞 Step through</div>
           <div className="truncate font-semibold text-white" title={trace.name}>
             {checkLabel(trace.name)}
           </div>
@@ -112,7 +112,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
         <button
           onClick={() => onPosition(position - 1)}
           disabled={position <= 0}
-          aria-label="Previous step"
+          aria-label="Prev, the previous step"
           className="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           ◀ Prev
@@ -200,7 +200,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
                         <td className="py-1 align-top break-all text-slate-100">
                           {value}
                           {change && (
-                            <span className="ml-2 rounded bg-amber-400/20 px-1 font-sans text-[10px] text-amber-200">
+                            <span className="ml-2 rounded bg-amber-400/20 px-1 font-sans text-[10px] text-amber-50">
                               {change === "new" ? "new" : "changed"}
                             </span>
                           )}
@@ -240,7 +240,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
 
       {/* ----- printed output so far ----- */}
       {step?.stdout && (
-        <pre data-testid="debugger-output" className="max-h-32 overflow-auto rounded bg-black/40 p-2 text-xs whitespace-pre-wrap text-slate-300">
+        <pre data-testid="debugger-output" className="max-h-32 overflow-auto rounded bg-slate-950/70 p-2 text-xs whitespace-pre-wrap text-slate-300">
           <span className="text-slate-400"># printed so far{"\n"}</span>
           {atEnd ? trace.output || step.stdout : step.stdout}
         </pre>

@@ -9,7 +9,7 @@ const STEPS = [
   { icon: "📨", title: "Read the ticket", text: "A teammate explains what's broken and why it matters to customers." },
   { icon: "📘", title: "Learn the idea", text: "Each ticket brings one new idea, explained in a 2-minute lesson: one new idea at a time, built on what you already know." },
   { icon: "▶️", title: "Fix the code & run the checks", text: "Edit the real app's code right in your browser. Run the checks as often as you like: no lives, no penalties." },
-  { icon: "🎉", title: "Merge, earn XP, level up", text: "When every check is green, your change is accepted into the app (developers call this \"merging a pull request\", or PR). Stuck? Hints cost a little XP. A quick quiz earns bonus XP." },
+  { icon: "🎉", title: "Merge, earn XP, level up", text: "When every check is green, your change is accepted into the app (developers call this \"merging a pull request\", or PR). Stuck? Each hint costs 20 XP of the ticket's reward (at most 60%). A quick quiz earns bonus XP." },
 ];
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -58,8 +58,8 @@ export default function Onboarding() {
       aria-labelledby="onboarding-title"
       data-testid="onboarding"
     >
-      <div className="w-full max-w-lg rounded-2xl border border-violet-500/40 bg-slate-900 p-6 shadow-2xl">
-        <p className="text-sm font-semibold tracking-widest text-cyan-300 uppercase">Day 1 · Orbit Orders</p>
+      <div className="w-full max-w-lg rounded-2xl border border-rule bg-panel p-6 shadow-2xl">
+        <p className="text-sm font-semibold text-slate-300">Day 1 at Orbit Orders</p>
         <h2 id="onboarding-title" className="mt-1 text-2xl font-bold text-white">You&apos;re hired! 🎉</h2>
         <p className="mt-2 text-slate-300">
           You just joined a small food-delivery startup as a junior developer. Your teammate Byte is an AI that writes code
@@ -74,7 +74,7 @@ export default function Onboarding() {
                 <div className="font-semibold text-white">
                   {i + 1}. {s.title}
                 </div>
-                <div className="text-sm text-slate-400">{s.text}</div>
+                <div className="text-sm text-slate-300">{s.text}</div>
               </div>
             </li>
           ))}
@@ -83,11 +83,11 @@ export default function Onboarding() {
           ref={cta}
           type="button"
           onClick={() => actions.finishOnboarding()}
-          className="mt-6 w-full rounded-xl bg-emerald-500 py-3 font-semibold text-slate-950 hover:bg-emerald-400"
+          className="btn-signal mt-6 w-full rounded-xl py-3"
         >
-          Let&apos;s go →
+          Let&apos;s go
         </button>
-        <p className="mt-2 text-center text-xs text-slate-400">No sign-up. Your progress is saved in this browser.</p>
+        <p className="mt-2 text-center text-xs text-slate-300">No sign-up. Your progress is saved in this browser.</p>
       </div>
     </div>
   );

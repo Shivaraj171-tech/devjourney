@@ -1,16 +1,214 @@
 @import "tailwindcss";
+@import "./theme-light.css";
 
+/* ---------- Design tokens (docs/design/ui-redesign-plan.md) ----------
+   No web fonts: there is no network at build or run time, so these are system stacks.
+   Display: rounded where the OS has one (SF Pro Rounded on Apple), else the system sans. */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-display: ui-rounded, "SF Pro Rounded", "Arial Rounded MT", "Arial Rounded MT Bold", Nunito, "Varela Round", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Neutrals: "Night shift", a clear midnight blue (not a tinted near-black). The whole app's
+     slate-* utilities resolve to these, so every page shares the palette. */
+  --color-slate-50: #f7f8fc;
+  --color-slate-100: #edeff7;
+  --color-slate-200: #dde1ef;
+  --color-slate-300: #c4cae0;
+  --color-slate-400: #a3abcb;
+  --color-slate-500: #7d87ad;
+  --color-slate-600: #56608c;
+  --color-slate-700: #3a4370;
+  --color-slate-800: #283057;
+  --color-slate-900: #1b2142;
+  --color-slate-950: #131833;
 }
 
-html {
+/* Brand tokens, as utilities: bg-paper, text-signal, border-byte, … (values per theme below). */
+@theme inline {
+  --color-page: var(--dj-page);
+  --color-panel: var(--dj-panel);
+  --color-rule: var(--dj-rule);
+  --color-ink: var(--dj-ink);
+  --color-muted: var(--dj-muted);
+  --color-paper: var(--dj-paper);
+  --color-paper-ink: var(--dj-paper-ink);
+  --color-paper-muted: var(--dj-paper-muted);
+  --color-signal: var(--dj-signal);
+  --color-signal-hover: var(--dj-signal-hover);
+  --color-signal-ink: var(--dj-signal-ink);
+  --color-byte: var(--dj-byte);
+  --color-pass: var(--dj-pass);
+  --color-fail: var(--dj-fail);
+  --color-editor: var(--dj-editor);
+}
+
+:root {
   color-scheme: dark;
+  --dj-page: #131833; /* Night shift */
+  --dj-panel: #1b2142; /* Console */
+  --dj-rule: #2c3561;
+  --dj-ink: #f7f8fc;
+  --dj-muted: #b3bad6;
+  --dj-paper: #e9edf6; /* Thermal paper: the ticket slip, same in both themes */
+  --dj-paper-ink: #1a2140;
+  --dj-paper-muted: #4a5475;
+  --dj-signal: #ffb224; /* Order-up amber: the one primary action */
+  --dj-signal-hover: #ffc457;
+  --dj-signal-ink: #1a2140;
+  --dj-byte: #a99cff; /* Byte violet: what the AI says */
+  --dj-pass: #3ddc84;
+  --dj-fail: #ff7a80;
+  --dj-editor: #161b38;
+}
+
+/* Light theme ("Daylight"): the system setting, or Settings > Theme (data-theme on <html>). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --dj-page: #f4f6fb;
+  --dj-panel: #ffffff;
+  --dj-rule: #d5dbe9;
+  --dj-ink: #121833;
+  --dj-muted: #4a5475;
+  --dj-paper-ink: #1a2140;
+  --dj-signal-hover: #ffc04d;
+  --dj-byte: #5b4bd6;
+  --dj-pass: #137a43;
+  --dj-fail: #c42a33;
+  --dj-editor: #fbfcff;
+  --color-white: #121833; /* text-white = the ink colour on a light page */
+  --color-slate-50: #121833;
+  --color-slate-100: #1a2140;
+  --color-slate-200: #242c4b;
+  --color-slate-300: #353f60;
+  --color-slate-400: #475170;
+  --color-slate-500: #5a6587;
+  --color-slate-600: #8c95b2;
+  --color-slate-700: #c3cadb;
+  --color-slate-800: #e3e7f1;
+  --color-slate-900: #ffffff;
+  --color-slate-950: #f4f6fb;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --dj-page: #f4f6fb;
+    --dj-panel: #ffffff;
+    --dj-rule: #d5dbe9;
+    --dj-ink: #121833;
+    --dj-muted: #4a5475;
+    --dj-paper-ink: #1a2140;
+    --dj-signal-hover: #ffc04d;
+    --dj-byte: #5b4bd6;
+    --dj-pass: #137a43;
+    --dj-fail: #c42a33;
+    --dj-editor: #fbfcff;
+    --color-white: #121833;
+    --color-slate-50: #121833;
+    --color-slate-100: #1a2140;
+    --color-slate-200: #242c4b;
+    --color-slate-300: #353f60;
+    --color-slate-400: #475170;
+    --color-slate-500: #5a6587;
+    --color-slate-600: #8c95b2;
+    --color-slate-700: #c3cadb;
+    --color-slate-800: #e3e7f1;
+    --color-slate-900: #ffffff;
+    --color-slate-950: #f4f6fb;
+  }
+}
+/* Printing (the certificate) is always ink on white. */
+@media print {
+  :root {
+    --color-white: #fff;
+  }
 }
 
 body {
   font-family: var(--font-sans);
+  background: var(--dj-page);
+  color: var(--color-slate-200);
+}
+h1, h2, h3 {
+  font-family: var(--font-display);
+}
+
+/* Skip link: hidden until focused, then the first thing on the page. */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 100;
+  border-radius: 0.5rem;
+  background: var(--dj-signal);
+  color: var(--dj-signal-ink);
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+}
+.skip-link:focus {
+  top: 0.6rem;
+}
+
+/* ---------- The ticket slip: a kitchen order ticket on thermal paper ----------
+   The one bold element. Perforated top and bottom edges (radial-gradient "teeth"). */
+.slip {
+  --tooth: 7px;
+  position: relative;
+  background: var(--dj-paper);
+  color: var(--dj-paper-ink);
+  padding-block: calc(var(--tooth) + 0.9rem);
+  -webkit-mask:
+    radial-gradient(circle at 50% 0, transparent calc(var(--tooth) * 0.62), #000 calc(var(--tooth) * 0.62 + 0.5px)) top / calc(var(--tooth) * 2) var(--tooth) repeat-x,
+    radial-gradient(circle at 50% 100%, transparent calc(var(--tooth) * 0.62), #000 calc(var(--tooth) * 0.62 + 0.5px)) bottom / calc(var(--tooth) * 2) var(--tooth) repeat-x,
+    linear-gradient(#000, #000) center / 100% calc(100% - var(--tooth) * 2) no-repeat;
+  mask:
+    radial-gradient(circle at 50% 0, transparent calc(var(--tooth) * 0.62), #000 calc(var(--tooth) * 0.62 + 0.5px)) top / calc(var(--tooth) * 2) var(--tooth) repeat-x,
+    radial-gradient(circle at 50% 100%, transparent calc(var(--tooth) * 0.62), #000 calc(var(--tooth) * 0.62 + 0.5px)) bottom / calc(var(--tooth) * 2) var(--tooth) repeat-x,
+    linear-gradient(#000, #000) center / 100% calc(100% - var(--tooth) * 2) no-repeat;
+}
+/* Focus rings inside the slip sit on paper, so they use the ink colour. */
+.slip :focus-visible {
+  outline-color: var(--dj-paper-ink) !important;
+}
+.slip-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+/* A dashed tear line inside the slip. */
+.slip-rule {
+  border-top: 2px dashed color-mix(in oklab, var(--dj-paper-ink) 28%, transparent);
+}
+
+/* The primary action: Order-up amber with ink text (10.9:1). */
+.btn-signal {
+  background: var(--dj-signal);
+  color: var(--dj-signal-ink);
+  font-weight: 700;
+}
+.btn-signal:hover {
+  background: var(--dj-signal-hover);
+}
+.btn-signal:disabled {
+  cursor: not-allowed;
+  background: var(--color-slate-800);
+  color: var(--color-slate-300);
+}
+
+/* Loading bar for Python (determinate by stage; a slow shimmer within a stage). */
+@keyframes load-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.load-shimmer {
+  background-image: linear-gradient(90deg, transparent, color-mix(in oklab, var(--dj-signal) 55%, transparent), transparent);
+  background-size: 200% 100%;
+  animation: load-shimmer 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .load-shimmer { animation: none; }
 }
 
 /* One visible keyboard focus style for the whole site (2px violet-400 ring).
@@ -41,7 +239,7 @@ body {
 
 /* Step-through debugger: the line that runs next (Monaco decorations, see CodeEditor). */
 .debug-current-line {
-  background: rgba(250, 204, 21, 0.16);
+  background: rgba(250, 204, 21, 0.10);
 }
 .debug-current-glyph {
   background: #facc15;
@@ -123,7 +321,7 @@ body {
 /* ---------- Ticket page (TicketWorkspace) ---------- */
 /* A clear 2px keyboard focus ring on every control (the browser default is a faint 1px). */
 .ticket-page :focus-visible {
-  outline: 2px solid #a78bfa; /* violet-400 */
+  outline: 2px solid var(--color-violet-400);
   outline-offset: 2px;
 }
 /* Monaco draws its own focus state; a ring around its hidden input would look broken. */

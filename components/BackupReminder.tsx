@@ -19,7 +19,7 @@ export default function BackupReminder({ ticketsMerged, startedAt, now }: Props)
     <section
       data-testid="backup-reminder"
       aria-labelledby="backup-reminder-title"
-      className="flex flex-col gap-3 rounded-2xl border border-amber-400/30 bg-amber-950/20 p-4 sm:flex-row sm:items-center"
+      className="flex flex-col gap-3 rounded-xl border border-amber-400/40 bg-panel p-4 sm:flex-row sm:items-center"
     >
       <div className="min-w-0 flex-1">
         <h2 id="backup-reminder-title" className="font-bold text-white">💾 Keep your progress safe</h2>
@@ -29,7 +29,7 @@ export default function BackupReminder({ ticketsMerged, startedAt, now }: Props)
         </p>
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
-        <Link href="/settings" data-testid="backup-reminder-go" className="rounded-xl bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-300">
+        <Link href="/settings" data-testid="backup-reminder-go" className="min-h-10 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold text-ink hover:bg-slate-800">
           Back up now →
         </Link>
         <button

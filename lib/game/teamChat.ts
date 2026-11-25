@@ -92,12 +92,14 @@ const BYTE_LINES: Partial<Record<SuggestionOutcome, string>> = {
 
 /** The chat, oldest message first (3-6 messages). */
 export function teamChat(input: ChatInput): ChatMessage[] {
-  const name = input.playerName === "You" ? "new dev" : input.playerName;
+  // No name set yet ("You"): leave the name out rather than say "say hi to new dev" (audit flaw 13).
+  const named = input.playerName !== "You";
+  const name = input.playerName;
   const msgs: ChatMessage[] = [];
   const last = input.solved[input.solved.length - 1];
 
   if (!last) {
-    msgs.push({ id: "welcome", from: "maya", text: `Everyone, say hi to ${name}, our newest developer! 👋` });
+    msgs.push({ id: "welcome", from: "maya", text: named ? `Everyone, say hi to ${name}, our newest developer! 👋` : "Everyone, say hi to our newest developer! 👋" });
     msgs.push({ id: "byte-hello", from: "byte", text: "Hi! I'm Byte. I write code very fast. Most of it is probably fine. 🤖" });
     msgs.push({ id: "sam-hello", from: "sam", text: "Other new hire here. I already closed a ticket this morning. No pressure. 😏" });
   } else {
@@ -135,7 +137,7 @@ export function teamChat(input: ChatInput): ChatMessage[] {
     msgs.push({
       id: `next-${input.next.id}`,
       from: "maya",
-      text: input.solved.length === 0 ? `Your first ticket is ready, ${name}: #${input.next.number} ${sentence(input.next.title)}` : input.next.exam
+      text: input.solved.length === 0 ? `Your first ticket is ready${named ? `, ${name}` : ""}: #${input.next.number} ${sentence(input.next.title)}` : input.next.exam
           ? `Final exam: #${input.next.number} ${sentence(input.next.title)} I'm away this week, so it's you and the checks. You're ready.`
           : `Next up: #${input.next.number} ${sentence(input.next.title)} Ping me if you get stuck.`,
       link: { href: `/ticket/${input.next.id}`, label: "Open ticket" },

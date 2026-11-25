@@ -6,12 +6,12 @@ import { cleanSolve, flowStreak } from "@/lib/game/juice";
 import { suggestionOutcome } from "@/lib/game/byte";
 import { teammates } from "@/lib/game/rules";
 import { CHAT_PEOPLE, teamChat, type ChatTicket } from "@/lib/game/teamChat";
-import { daysSinceStart, ticketProgress, totalXp, type Progress } from "@/lib/progress/store";
+import { ticketProgress, totalXp, type Progress } from "@/lib/progress/store";
 import type { SeasonSummary } from "./HQ";
 
 type Props = { seasons: SeasonSummary[]; progress: Progress; streak: number; now: Date };
 
-export default function TeamChat({ seasons, progress, streak, now }: Props) {
+export default function TeamChat({ seasons, progress, streak }: Props) {
   const tickets: ChatTicket[] = seasons.flatMap((s) =>
     s.tickets.map((t) => ({ id: t.id, number: t.number, title: t.title, type: t.type, seasonId: s.id, seasonTitle: s.title, exam: s.final })),
   );
@@ -26,7 +26,7 @@ export default function TeamChat({ seasons, progress, streak, now }: Props) {
   const last = solved[solved.length - 1];
   const lastTp = last ? ticketProgress(progress, last.id) : null;
   const season = last ? seasons.find((s) => s.id === last.seasonId) : undefined;
-  const sam = teammates(daysSinceStart(progress, now)).find((t) => t.name === "Sam");
+  const sam = teammates(progress.activeDays.length).find((t) => t.name === "Sam");
 
   const messages = teamChat({
     playerName: progress.playerName,
@@ -47,12 +47,12 @@ export default function TeamChat({ seasons, progress, streak, now }: Props) {
   });
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/60" aria-labelledby="team-chat-title" data-testid="team-chat">
-      <div className="flex items-center justify-between border-b border-slate-800 px-4 py-2.5">
+    <section className="rounded-xl border border-rule bg-panel" aria-labelledby="team-chat-title" data-testid="team-chat">
+      <div className="flex items-center justify-between border-b border-rule px-4 py-2.5">
         <h2 id="team-chat-title" className="font-mono text-sm font-bold text-white">
-          <span className="text-slate-400">#</span>orbit-team
+          <span className="text-slate-300">#</span>orbit-team
         </h2>
-        <span className="flex items-center gap-1.5 text-xs text-slate-400">
+        <span className="flex items-center gap-1.5 text-xs text-slate-300">
           <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden />5 online
         </span>
       </div>
@@ -62,7 +62,7 @@ export default function TeamChat({ seasons, progress, streak, now }: Props) {
           return (
             <li
               key={m.id}
-              className="chat-in flex gap-3"
+              className="chat-in flex gap-3 motion-reduce:animate-none"
               style={{ animationDelay: `${i * 140}ms` }}
               data-testid="chat-message"
               data-from={m.from}
@@ -73,12 +73,12 @@ export default function TeamChat({ seasons, progress, streak, now }: Props) {
               </span>
               <div className="min-w-0">
                 <div className="text-xs">
-                  <b className="text-white">{who.name}</b> <span className="text-slate-400">{who.role}</span>
+                  <b className="text-white">{who.name}</b> <span className="text-slate-300">{who.role}</span>
                 </div>
                 <p className="text-sm break-words text-slate-300">{m.text}</p>
                 {m.link && (
-                  <Link href={m.link.href} className="mt-1 inline-block text-sm font-semibold text-cyan-300 hover:underline">
-                    {m.link.label} →
+                  <Link href={m.link.href} className="mt-1 inline-block py-1 text-sm font-semibold text-ink underline decoration-signal decoration-2 underline-offset-4">
+                    {m.link.label}
                   </Link>
                 )}
               </div>

@@ -75,12 +75,12 @@ export default function SkillTree({ skills }: { skills: Skill[] }) {
                         </div>
                         <div className="mt-1 text-xs text-slate-300">
                           Ticket:{" "}
-                          <Link href={`/ticket/${s.ticketId}`} className="text-cyan-300 hover:underline">
+                          <Link href={`/ticket/${s.ticketId}`} className="inline-block min-h-6 py-0.5 text-cyan-300 hover:underline">
                             {s.ticketTitle}
                           </Link>
                         </div>
                         {done && s.lesson && (
-                          <button onClick={() => setOpen(isOpen ? null : s.ticketId)} className="mt-2 text-xs text-violet-300 hover:underline">
+                          <button onClick={() => setOpen(isOpen ? null : s.ticketId)} className="mt-1 inline-block min-h-6 py-1 text-xs text-violet-300 hover:underline">
                             {isOpen ? "Hide lesson" : "📘 Re-read the lesson"}
                           </button>
                         )}

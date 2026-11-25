@@ -43,7 +43,7 @@ export default function Certificate({ examTitle, tickets }: Props) {
             </li>
           ))}
         </ul>
-        <Link href="/" className="mt-6 inline-block rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-400">
+        <Link href="/" className="mt-6 inline-block rounded-xl btn-signal px-5 py-3 ">
           Back to the office
         </Link>
       </div>

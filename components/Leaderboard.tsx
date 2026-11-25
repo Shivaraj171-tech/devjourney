@@ -1,17 +1,17 @@
 "use client";
 import { hitlScore } from "@/lib/game/byte";
-import { leaderboard, rankFor } from "@/lib/game/rules";
+import { FICTIONAL_NOTE, leaderboard, rankFor } from "@/lib/game/rules";
 import { ticketsAwayText } from "@/lib/game/share";
 import HumanInTheLoop from "./HumanInTheLoop";
 import { useIsClient } from "@/lib/useIsClient";
-import { daysSinceStart, totalXp, useProgress } from "@/lib/progress/store";
+import { totalXp, useProgress } from "@/lib/progress/store";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
 export default function Leaderboard() {
   const progress = useProgress();
   const xp = totalXp(progress);
-  const board = useIsClient() ? leaderboard({ name: progress.playerName, xp }, daysSinceStart(progress, new Date())) : [];
+  const board = useIsClient() ? leaderboard({ name: progress.playerName, xp }, progress.activeDays.length) : [];
 
   const myIndex = board.findIndex((b) => b.isYou);
   const above = myIndex > 0 ? board[myIndex - 1] : null;
@@ -19,8 +19,10 @@ export default function Leaderboard() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="text-3xl font-bold text-white">🏆 Office leaderboard</h1>
-      <p className="mt-2 text-slate-400">
-        Everyone at Orbit Orders earns XP by shipping. Sam, the other new hire, learns a bit every day, so keep your streak going!
+      <p className="mt-2 text-slate-300">Everyone at Orbit Orders earns XP by shipping tickets.</p>
+      {/* Honest up front, not in the last line (audit flaw 12). */}
+      <p data-testid="fictional-note" className="mt-3 rounded-xl border border-rule bg-panel px-3 py-2 text-sm text-slate-200">
+        <b className="text-ink">Practice board.</b> {FICTIONAL_NOTE} Real leaderboards come once accounts exist.
       </p>
       {above && (
         <p className="mt-4 rounded-xl border border-violet-500/30 bg-violet-500/10 p-3 text-sm text-violet-100">
@@ -59,9 +61,6 @@ export default function Leaderboard() {
           well you catch an AI&apos;s mistakes.
         </p>
       </div>
-      <p className="mt-6 text-xs text-slate-400">
-        Your teammates are fictional for now. Real multiplayer leaderboards are planned once accounts exist.
-      </p>
     </div>
   );
 }

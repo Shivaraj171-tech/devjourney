@@ -140,7 +140,7 @@ test("a locked bounty says what opens it", async ({ page }) => {
   await seedSolved(page, upTo("s01-t04"));
   await page.goto(ticketUrl(b.id));
   await expect(page.getByRole("heading", { name: /still in the backlog/ })).toBeVisible();
-  await expect(page.getByText(/This bounty opens once you've solved the ticket/)).toBeVisible();
+  await expect(page.getByTestId("locked-reason")).toContainText(/This bounty opens once you've solved ticket #\d+/);
   await expect(page.getByRole("link", { name: "Go to previous ticket" })).toHaveAttribute("href", new RegExp(`/ticket/${b.requires}/?$`));
   await expect(page.getByTestId("run-tests")).toHaveCount(0);
 });

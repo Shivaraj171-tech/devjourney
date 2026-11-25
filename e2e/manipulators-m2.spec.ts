@@ -100,7 +100,7 @@ test("HQ: 'Manipulators · M2' stays locked until Module 1 is done ('opens after
   await expect(page.getByTestId("side-floor-s40")).toHaveAttribute("data-state", "open");
   await expect(page.getByTestId("side-floor-s40")).toContainText("0/8 merged");
   await page.goto(ticketUrl("s42-t01"));
-  await expect(page.getByText("The Manipulators · M2 opens once you've finished the floor it builds on.")).toBeVisible();
+  await expect(page.getByTestId("locked-reason")).toContainText("The Manipulators · M2 opens once you've merged ticket #");
 
   // Module 1's last ticket merged: M2 opens, its first room first.
   await seedSolved(page, [...season1, ...m1.tickets]);

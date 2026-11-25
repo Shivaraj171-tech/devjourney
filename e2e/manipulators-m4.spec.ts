@@ -107,7 +107,7 @@ test("HQ: 'Manipulators · M4' stays locked until Module 3 is done, then opens r
   await expect(floor.getByRole("heading").first()).toContainText("🦾 Manipulators · M4");
   await expect(floor).toContainText("10 tickets · 🔒 opens after Manipulators · M3");
   await page.goto(ticketUrl("s44-t01"));
-  await expect(page.getByText("The Manipulators · M4 opens once you've finished the floor it builds on.")).toBeVisible();
+  await expect(page.getByTestId("locked-reason")).toContainText("The Manipulators · M4 opens once you've merged ticket #");
 
   await seedSolved(page, before);
   await page.goto("/");

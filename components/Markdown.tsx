@@ -52,7 +52,7 @@ export default function Markdown({ text, className = "" }: { text: string; class
     <div className={`space-y-3 leading-relaxed ${className}`}>
       {blocks(text).map((block, b) =>
         block.code ? (
-          <pre key={b} className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 font-mono text-[13px] leading-snug text-slate-200">
+          <pre key={b} tabIndex={0} className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 font-mono text-[13px] leading-snug text-slate-200">
             {block.body}
           </pre>
         ) : (

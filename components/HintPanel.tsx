@@ -17,7 +17,7 @@ export default function HintPanel({ hints, revealed, solved, onReveal }: Props) 
     <div className="space-y-3">
       <p className="text-sm text-slate-300">
         Stuck? Ask a teammate. Each hint costs <span className="font-semibold text-amber-300">{HINT_COST} XP</span>
-        {solved ? " (free now, you already solved it)" : ""}. Try on your own first!
+        {solved ? " (free now, you already solved it)" : ", up to 60% of this ticket's XP in total"}. Try on your own first!
       </p>
       {hints.slice(0, revealed).map((hint, i) => (
         <div key={i} className="rounded-lg border border-violet-500/30 bg-violet-500/10 p-3 text-sm text-slate-200">

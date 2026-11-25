@@ -20,6 +20,7 @@ import { downloadText, markBackedUp, readBackupMeta } from "@/lib/progress/backu
 import { actions, totalXp, useProgress, type Progress } from "@/lib/progress/store";
 import { buildReport, encodeReport, NAME_MAX } from "@/lib/teacher/report";
 import { useIsClient } from "@/lib/useIsClient";
+import { applyTheme, readTheme, type ThemeChoice } from "@/lib/theme";
 import { copyText } from "./ShareButton";
 
 export type ReportSeason = { id: string; ticketIds: string[] };
@@ -55,11 +56,47 @@ function SettingsView({ seasons }: { seasons: ReportSeason[] }) {
           {summary.playerName === "You" ? "You" : summary.playerName} · {summary.ticketsMerged} ticket{summary.ticketsMerged === 1 ? "" : "s"} merged · {xp} XP
         </p>
       </header>
+      <ThemeSection />
       <BackupSection progress={progress} />
       <RestoreSection current={`${summary.ticketsMerged} tickets merged, ${xp} XP`} />
       <ClassReportSection progress={progress} seasons={seasons} xp={xp} />
       <ResetSection />
     </div>
+  );
+}
+
+/** Light or dark: follow the system (default), or pick one for this browser. */
+function ThemeSection() {
+  const [choice, setChoice] = useState<ThemeChoice>(() => readTheme());
+  const options: { id: ThemeChoice; label: string }[] = [
+    { id: "system", label: "Same as my device" },
+    { id: "dark", label: "Dark" },
+    { id: "light", label: "Light" },
+  ];
+  return (
+    <Section id="theme-title" title="Theme" testId="theme-section">
+      <div role="radiogroup" aria-labelledby="theme-title" className="mt-3 flex flex-wrap gap-2">
+        {options.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={choice === o.id}
+            data-testid={`theme-${o.id}`}
+            onClick={() => {
+              applyTheme(o.id);
+              setChoice(o.id);
+            }}
+            className={`min-h-10 rounded-xl border px-4 py-2 text-sm font-semibold ${
+              choice === o.id ? "border-signal bg-signal/15 text-ink" : "border-slate-600 text-slate-200 hover:bg-slate-800"
+            }`}
+          >
+            {choice === o.id && <span aria-hidden="true">✓ </span>}
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </Section>
   );
 }
 
