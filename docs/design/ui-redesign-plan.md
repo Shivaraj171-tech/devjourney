@@ -206,4 +206,24 @@ Then the brief itself, checked line by line:
 
 Recorded after the build, so the plan stays honest:
 
-- See the final report for anything not finished. (Updated at the end of the work.)
+- **Type:** the screenshots were taken in a Linux container without SF Pro Rounded, so the
+  display stack falls back to the system sans there. On macOS and iOS it renders rounded.
+- **Light theme mechanics:** the neutrals are hand-tuned; the 17 accent scales are mirrored by
+  `scripts/gen-theme.mjs` into `app/theme-light.css` (300, 400 and 500 all map to 800, because
+  300 → 700 measured 4.1–4.5:1 on tinted panels). axe reports no contrast issues on the pages
+  swept in either theme.
+- **Ticket page:** the Run bar moved from "under the editor" to "the top of the results pane", so
+  the separator sits between the editor and the Run bar. Results default to 40 % of the column,
+  52 % after a run, 58 % in the debugger and 68 % when a run drew in the Lab viewer; the editor
+  always keeps at least ~150 px.
+- **Home length:** progressed (almost everything merged) went from 6,895 to 3,857 px on desktop
+  and from 11,136 to 5,627 px on a phone. That misses the phone target of 5,000 px; the rest is
+  the Bug Bounty board's open cards, the team chat and the record band.
+- **Lesson on first visit:** opened automatically only on the two tutorial tickets
+  (`tutorial: true`), not on every ticket, so later briefs stay short.
+- **Side floors for returning players:** still the per-floor boards (their tests and links depend
+  on them), with a one-line preview on locked rows and only one side floor unfolded at a time.
+  Newcomers get the three-row locked preview instead.
+- **3D viewer labels:** a placement pass (`placeLabels` in `lib/lab/view3d.ts`) keeps every label
+  inside the canvas and drops axis letters that would overlap a name; the full text summary under
+  the canvas still lists everything.

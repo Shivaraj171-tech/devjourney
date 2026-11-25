@@ -13,7 +13,7 @@ import FloorBoard, { type Room } from "./FloorBoard";
 import TodayCard from "./TodayCard";
 import NextTicketSlip from "./NextTicketSlip";
 import { useIsClient } from "@/lib/useIsClient";
-import AppPreview from "./AppPreview";
+import AppPreview, { featuresShippedText } from "./AppPreview";
 import DailyWarmup, { warmupSession } from "./DailyWarmup";
 import HumanInTheLoop from "./HumanInTheLoop";
 import Onboarding from "./Onboarding";
@@ -333,7 +333,10 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
             <MiniLeaderboard board={board} myPlace={myPlace} playerName={progress.playerName} />
             {returning ? (
               <details className="rounded-xl border border-rule bg-panel" data-testid="app-preview-fold">
-                <summary className="min-h-11 cursor-pointer px-5 py-3 font-display font-bold text-ink">📱 The app you&apos;re building</summary>
+                <summary className="min-h-11 cursor-pointer px-5 py-3">
+                  <span className="font-display font-bold text-ink">📱 The app you&apos;re building</span>
+                  <span className="mt-0.5 block text-sm text-slate-300">{featuresShippedText(solvedIds)}</span>
+                </summary>
                 <AppPreview solved={solvedIds} playerName={progress.playerName} bare />
               </details>
             ) : (
@@ -351,14 +354,14 @@ function Pitch({ current }: { current: TicketSummary | undefined }) {
   return (
     <section aria-labelledby="pitch-title" className="grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(320px,400px)] md:gap-12">
       <div className="min-w-0">
-        <h1 id="pitch-title" className="font-display text-[2rem] leading-[1.1] font-bold text-ink sm:text-[2.6rem]">
+        <h1 id="pitch-title" className="font-display text-[1.75rem] leading-[1.1] font-bold text-ink sm:text-[2.6rem]">
           Learn to code with an AI teammate, and learn to catch its mistakes.
         </h1>
-        <p className="mt-4 max-w-prose text-lg text-slate-200">
+        <p className="mt-3 max-w-prose text-base text-slate-200 sm:mt-4 sm:text-lg">
           Byte, the office AI at Orbit Orders, writes code fast but not always right. You&apos;ll learn Python by reading, running and fixing the
           real code of one growing food-delivery app, so you can decide what ships.
         </p>
-        <ol className="mt-6 grid max-w-xl grid-cols-2 gap-x-6 gap-y-2 text-[15px] text-slate-200 sm:grid-cols-4" aria-label="How a ticket works">
+        <ol className="mt-4 grid max-w-xl sm:mt-6 grid-cols-2 gap-x-6 gap-y-2 text-[15px] text-slate-200 sm:grid-cols-4" aria-label="How a ticket works">
           {["Read the ticket", "Learn the idea", "Fix and run", "Merge it"].map((s, i) => (
             <li key={s} className="flex items-baseline gap-2">
               <span className="font-mono text-sm font-bold text-signal" aria-hidden>
@@ -368,7 +371,7 @@ function Pitch({ current }: { current: TicketSummary | undefined }) {
             </li>
           ))}
         </ol>
-        <p className="mt-6 text-sm text-slate-300">Short tickets, 10 to 20 minutes. Free, no sign-up, nothing to install.</p>
+        <p className="mt-4 text-sm text-slate-300 sm:mt-6">Short tickets, 10 to 20 minutes. Free, no sign-up, nothing to install.</p>
       </div>
       {current && (
         <NextTicketSlip ticket={current} where="Floor 1, your first week" cta={`Start ticket #${current.number}`} headingLevel={2} kicker="Your first ticket" />

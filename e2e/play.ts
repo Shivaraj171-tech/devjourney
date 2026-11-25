@@ -76,7 +76,7 @@ export async function playReview(page: Page, t: TicketInfo, opts: ReviewOptions 
     const verdict = page.getByTestId("review-verdict");
     await expect(verdict).toContainText(`You found 0 of ${review.issues.length}`);
     await expect(verdict).toContainText("false alarm");
-    await expect(lineButton(page, fa.line)).toHaveAttribute("aria-label", /false alarm/);
+    await expect(lineButton(page, fa.line)).toHaveAccessibleName(/false alarm/);
     await expect(page.getByText(new RegExp(`False alarm: this line looks fine \\(−${FALSE_ALARM_COST} XP\\)`))).toBeVisible();
     await expect(page.getByTestId("solved-modal")).toHaveCount(0);
     await lineButton(page, fa.line).click();
@@ -108,7 +108,7 @@ export async function playReview(page: Page, t: TicketInfo, opts: ReviewOptions 
   // Every issue is revealed as a real problem on its main line once the review is done.
   for (const issue of review.issues) {
     await openPrFile(page, issue.file);
-    await expect(lineButton(page, issue.line)).toHaveAttribute("aria-label", /real problem/);
+    await expect(lineButton(page, issue.line)).toHaveAccessibleName(/real problem/);
   }
 }
 

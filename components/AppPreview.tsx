@@ -25,6 +25,11 @@ const FEATURE_TICKETS = [
   "s02-t02", "s02-t03", "s02-t04", "s03-t02", "s03-t05", "s03-t06",
 ];
 
+/** "9/15 features shipped" (also on the folded preview's summary line). */
+export function featuresShippedText(solved: Set<string>): string {
+  return `${FEATURE_TICKETS.filter((id) => solved.has(id)).length}/${FEATURE_TICKETS.length} features shipped`;
+}
+
 export default function AppPreview({ solved, playerName, bare = false }: Props) {
   const customer = playerName && playerName !== "You" ? playerName : "Sam";
   const has = (n: number, season = 1) => solved.has(`s0${season}-t${String(n).padStart(2, "0")}`);
@@ -34,7 +39,7 @@ export default function AppPreview({ solved, playerName, bare = false }: Props) 
     <section className={bare ? "px-5 pb-5" : "rounded-xl border border-rule bg-panel p-5"}>
       <div className="flex items-baseline justify-between gap-3">
         {!bare && <h3 className="font-display text-lg font-bold text-ink">📱 The app you&apos;re building</h3>}
-        <span className="text-sm text-slate-300">{shipped}/{FEATURE_TICKETS.length} features shipped</span>
+        {!bare && <span className="text-sm text-slate-300">{shipped}/{FEATURE_TICKETS.length} features shipped</span>}
       </div>
       <p className="mt-1 text-sm text-slate-300">Every ticket you merge fixes or adds a piece of the real Orbit Orders app.</p>
 

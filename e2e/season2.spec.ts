@@ -74,7 +74,7 @@ async function playReview(page: Page, t: TicketInfo, tryFalseAlarm: boolean) {
     const verdict = page.getByTestId("review-verdict");
     await expect(verdict).toContainText(`You found 0 of ${review.issues.length}`);
     await expect(verdict).toContainText("false alarm");
-    await expect(lineButton(page, fa.line)).toHaveAttribute("aria-label", /false alarm/);
+    await expect(lineButton(page, fa.line)).toHaveAccessibleName(/false alarm/);
     await expect(page.getByText(/False alarm: this line looks fine \(−10 XP\)/)).toBeVisible();
     await expect(page.getByTestId("solved-modal")).toHaveCount(0);
     // Unflag it before flagging the real problems.
