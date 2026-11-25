@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Vendor files copied from node_modules by scripts/copy-assets.mjs (gitignored).
     "public/monaco/**",
     "public/pyodide/**",
+    // Agent worktrees and their build output (gitignored).
+    ".claude/**",
   ]),
 ]);
 
