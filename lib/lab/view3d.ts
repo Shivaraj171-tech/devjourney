@@ -349,9 +349,12 @@ export type PlacedLabel = { x: number; y: number; shown: boolean };
  * - Labels are placed in priority order (frame names before axis letters).
  * - A label is first clamped inside the canvas (with `pad` px to spare).
  * - If it still overlaps one already placed, it is nudged down, then up, by its height; if
- *   neither fits, it is skipped. Skipped labels are still in the text summary under the canvas.
+ *   neither fits, an axis letter is skipped (it is still in the text summary under the canvas).
  * Returns positions in the input order.
  */
+/** Labels at or above this priority are always drawn (moved inside the canvas if need be). */
+const KEEP = 3;
+
 export function placeLabels(labels: LabelBox[], width: number, height: number, pad = 2): PlacedLabel[] {
   const placed: { l: number; t: number; r: number; b: number }[] = [];
   const out: PlacedLabel[] = labels.map(() => ({ x: 0, y: 0, shown: false }));
@@ -377,6 +380,13 @@ export function placeLabels(labels: LabelBox[], width: number, height: number, p
         out[i] = { x, y, shown: true };
         break;
       }
+    }
+    // Names, targets, points and arrows (priority >= KEEP) are never dropped, only kept inside
+    // the canvas: only the repeated axis letters give way.
+    if (!out[i].shown && l.priority >= KEEP) {
+      const y = clampY(l, l.y);
+      placed.push(box(l, x, y));
+      out[i] = { x, y, shown: true };
     }
   }
   return out;

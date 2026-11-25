@@ -156,7 +156,7 @@ function draw(ctx: CanvasRenderingContext2D, item: Frames3DItem, frame: number, 
     const x = side ? p.x + 8 : p.x;
     const y = axis || side ? p.y : s.role === "name" ? p.y + 13 : p.y + 26;
     // Names, targets, points and arrows matter more than axis letters, which repeat on every frame.
-    const priority = axis ? 1 : 2;
+    const priority = axis ? 1 : 3;
     return [{ s, axis, side, box: { x, y, w: ctx.measureText(s.text).width + 4, h: axis ? 14 : 13, align: side ? ("left" as const) : ("center" as const), priority } }];
   });
   const spots = placeLabels(labels.map((l) => l.box), w, h);
