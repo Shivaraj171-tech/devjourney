@@ -18,6 +18,7 @@ import {
   defaultCamera,
   dot3,
   floorGrid,
+  placeLabels,
   frames3dSummary,
   frameShapes,
   norm3,
@@ -269,4 +270,28 @@ test("frame shapes and bounds include ellipsoids and arrows", () => {
   assert.ok(norm3([center[0], center[1], center[2] - 3]) <= radius, "the arrow's tip is inside the bounds");
   const arrow = shapes.find((s) => s.kind === "arrow")!;
   assert.ok(shapeDepth(arrow, defaultCamera(it), 300, 300) !== null);
+});
+
+test("placeLabels: names win, axis letters that would pile up are moved or dropped, nothing leaves the canvas", () => {
+  // Three frames at almost the same flange point, each with x/y/z letters (the UR5e at home).
+  const at = (x: number, y: number) => ({ x, y });
+  const letters = [0, 1, 2].flatMap((k) => ["x", "y", "z"].map(() => ({ ...at(150 + k, 100 + k), w: 10, h: 14, align: "center" as const, priority: 1 })));
+  const name = { ...at(151, 113), w: 80, h: 13, align: "center" as const, priority: 3 };
+  const out = placeLabels([...letters, name], 300, 220);
+  assert.equal(out.at(-1)!.shown, true, "the frame name is always shown");
+  const shown = out.filter((p) => p.shown);
+  assert.ok(shown.length < letters.length + 1, "some piled-up letters are dropped");
+  // No two shown boxes overlap.
+  const boxes = [...letters, name].map((l, i) => ({ l, p: out[i] })).filter((b) => b.p.shown).map(({ l, p }) => ({ l: p.x - l.w / 2, r: p.x + l.w / 2, t: p.y - l.h / 2, b: p.y + l.h / 2 }));
+  for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+    const a = boxes[i], b = boxes[j];
+    assert.ok(!(a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t), `labels ${i} and ${j} overlap`);
+  }
+});
+
+test("placeLabels: a label at the very top edge is moved inside the canvas", () => {
+  const [p] = placeLabels([{ x: 5, y: -4, w: 120, h: 13, align: "center", priority: 3 }], 300, 220);
+  assert.equal(p.shown, true);
+  assert.ok(p.y - 13 / 2 >= 0, "not clipped at the top");
+  assert.ok(p.x - 60 >= 0, "not clipped on the left");
 });

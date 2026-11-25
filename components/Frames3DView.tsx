@@ -27,6 +27,7 @@ import {
   zoom,
   type Camera,
   type Shape,
+  placeLabels,
 } from "@/lib/lab/view3d";
 import { ReplayBar, useReplay } from "./LabReplay";
 
@@ -141,26 +142,36 @@ function draw(ctx: CanvasRenderingContext2D, item: Frames3DItem, frame: number, 
     }
   }
   ctx.textBaseline = "middle";
-  for (const s of shapes) {
-    if (s.kind !== "label") continue;
+  // Measure every label first, then place them so none overlap or leave the canvas (placeLabels).
+  const fontFor = (axis: boolean) => (axis ? "bold 12px ui-sans-serif, system-ui, sans-serif" : "11px ui-sans-serif, system-ui, sans-serif");
+  const labels = shapes.flatMap((s) => {
+    if (s.kind !== "label") return [];
     const p = project(s.at, cam, w, h);
-    if (!p) continue;
+    if (!p) return [];
     const axis = s.role === "x" || s.role === "y" || s.role === "z";
-    ctx.font = axis ? "bold 12px ui-sans-serif, system-ui, sans-serif" : "11px ui-sans-serif, system-ui, sans-serif";
+    ctx.font = fontFor(axis);
     // Axis letters at the tips; a frame's name just under its origin; the target's name under that;
     // a point's name to its right. So labels that share a spot (a box sitting on its target) don't collide.
     const side = s.role === "point" || s.role === "arrow" || s.role === "ellipsoid";
-    ctx.textAlign = side ? "left" : "center";
-    const text = s.text;
     const x = side ? p.x + 8 : p.x;
     const y = axis || side ? p.y : s.role === "name" ? p.y + 13 : p.y + 26;
+    // Names and targets matter more than axis letters, which repeat on every frame.
+    const priority = axis ? 1 : s.role === "name" || s.role === "target" ? 3 : 2;
+    return [{ s, axis, side, box: { x, y, w: ctx.measureText(s.text).width + 4, h: axis ? 14 : 13, align: side ? ("left" as const) : ("center" as const), priority } }];
+  });
+  const spots = placeLabels(labels.map((l) => l.box), w, h);
+  labels.forEach(({ s, axis, side }, i) => {
+    const spot = spots[i];
+    if (!spot.shown || s.kind !== "label") return;
+    ctx.font = fontFor(axis);
+    ctx.textAlign = side ? "left" : "center";
     // A dark halo keeps the text readable over lines.
     ctx.lineWidth = 3;
     ctx.strokeStyle = C.bg;
-    ctx.strokeText(text, x, y);
+    ctx.strokeText(s.text, spot.x, spot.y);
     ctx.fillStyle = axis || s.role === "arrow" || s.role === "ellipsoid" ? roleColor(s.role) : s.role === "point" ? C.point : s.role === "target" ? C.target : C.text;
-    ctx.fillText(text, x, y);
-  }
+    ctx.fillText(s.text, spot.x, spot.y);
+  });
 }
 
 export default function Frames3DView({ item }: { item: Frames3DItem }) {

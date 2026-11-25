@@ -108,7 +108,15 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
       {!expanded && !floorOpen && preview && <p className="mt-0.5 ml-[1.15rem] max-w-3xl text-sm text-slate-300" data-testid="floor-preview">{preview}</p>}
 
       <div id={boardId} hidden={!expanded}>
-        <Markdown text={season.intro} className="mt-2 max-w-3xl text-sm text-slate-300" />
+        {done.length === 0 ? (
+          <Markdown text={season.intro} className="mt-2 max-w-3xl text-sm text-slate-300" />
+        ) : (
+          // Once you've started a floor, its intro folds away (you've read it).
+          <details className="mt-1">
+            <summary className="min-h-8 cursor-pointer py-1 text-sm text-slate-300">About this floor</summary>
+            <Markdown text={season.intro} className="max-w-3xl text-sm text-slate-300" />
+          </details>
+        )}
         {floorOpen && (
           <div
             className="mt-3 h-1.5 max-w-md overflow-hidden rounded-full bg-slate-800"

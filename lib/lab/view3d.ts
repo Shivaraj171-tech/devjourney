@@ -339,6 +339,49 @@ export function angleBetween(a: Mat34, b: Mat34): number {
   return Math.acos(Math.max(-1, Math.min(1, (trace - 1) / 2)));
 }
 
+/** A label to draw on the canvas: its anchor box in pixels and how much it matters. */
+export type LabelBox = { x: number; y: number; w: number; h: number; align: "left" | "center"; priority: number };
+export type PlacedLabel = { x: number; y: number; shown: boolean };
+
+/**
+ * Keep canvas labels readable (audit flaw 17): at the UR5e flange, the x/y/z letters of frames
+ * 4-6 piled up, and a name at the top edge was cut off.
+ * - Labels are placed in priority order (frame names before axis letters).
+ * - A label is first clamped inside the canvas (with `pad` px to spare).
+ * - If it still overlaps one already placed, it is nudged down, then up, by its height; if
+ *   neither fits, it is skipped. Skipped labels are still in the text summary under the canvas.
+ * Returns positions in the input order.
+ */
+export function placeLabels(labels: LabelBox[], width: number, height: number, pad = 2): PlacedLabel[] {
+  const placed: { l: number; t: number; r: number; b: number }[] = [];
+  const out: PlacedLabel[] = labels.map(() => ({ x: 0, y: 0, shown: false }));
+  const order = labels.map((_, i) => i).sort((a, b) => labels[b].priority - labels[a].priority || a - b);
+  const box = (l: LabelBox, x: number, y: number) => {
+    const left = l.align === "center" ? x - l.w / 2 : x;
+    return { l: left, t: y - l.h / 2, r: left + l.w, b: y + l.h / 2 };
+  };
+  const clampX = (l: LabelBox, x: number) => {
+    const half = l.align === "center" ? l.w / 2 : 0;
+    return Math.min(Math.max(x, pad + half), width - pad - (l.w - half));
+  };
+  const clampY = (l: LabelBox, y: number) => Math.min(Math.max(y, pad + l.h / 2), height - pad - l.h / 2);
+  const hits = (a: { l: number; t: number; r: number; b: number }) => placed.some((p) => a.l < p.r && a.r > p.l && a.t < p.b && a.b > p.t);
+  for (const i of order) {
+    const l = labels[i];
+    const x = clampX(l, l.x);
+    for (const dy of [0, l.h, -l.h]) {
+      const y = clampY(l, l.y + dy);
+      const b = box(l, x, y);
+      if (!hits(b)) {
+        placed.push(b);
+        out[i] = { x, y, shown: true };
+        break;
+      }
+    }
+  }
+  return out;
+}
+
 /** "View from 35° around, 25° up" (for the canvas's label and the e2e tests). */
 export function viewSummary(cam: Camera): string {
   return `View from ${deg(cam.yaw)} around, ${deg(cam.pitch)} up`;

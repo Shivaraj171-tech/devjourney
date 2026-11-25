@@ -27,10 +27,11 @@ export default function BugBounty({ bounties, isSolved, xpFor, recommended = [] 
     })
     .sort((a, b) => rank(a) - rank(b) || a.i - b.i);
   const { solved, open, total } = bountyProgress(cards.map((c) => c.state));
+  const foldSolved = solved >= 4;
   return (
-    <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-2xl border border-lime-500/30 bg-lime-950/20 p-4 sm:p-5">
+    <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-xl border border-rule bg-panel p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h2 id="bug-bounty-title" className="text-lg font-bold text-white">
+        <h2 id="bug-bounty-title" className="font-display text-lg font-bold text-ink">
           🐞 Bug Bounty
         </h2>
         <span className="text-sm text-slate-300" data-testid="bounty-progress">
@@ -42,10 +43,23 @@ export default function BugBounty({ bounties, isSolved, xpFor, recommended = [] 
         Optional, and they never block your next ticket.
       </p>
       <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map(({ card, state, recommended: rec }) => (
+        {(foldSolved ? cards.filter((c) => c.state !== "done") : cards).map(({ card, state, recommended: rec }) => (
           <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} recommended={rec} />
         ))}
       </ul>
+      {/* Many solved: they fold into one line, so the home screen stays short (audit flaw 8). */}
+      {foldSolved && (
+        <details className="mt-3">
+          <summary className="min-h-8 cursor-pointer py-1 text-sm font-semibold text-slate-200">{solved} solved bounties</summary>
+          <ul className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {cards
+              .filter((c) => c.state === "done")
+              .map(({ card, state }) => (
+                <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} />
+              ))}
+          </ul>
+        </details>
+      )}
     </section>
   );
 }
