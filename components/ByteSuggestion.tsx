@@ -116,7 +116,7 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
           )}
           <p className="mt-2 text-xs text-slate-400">
             {why
-              ? "Decide before you see any evidence: pick your call AND why. Byte's code is only applied once you lock both in."
+              ? "Make the call first. Then say why, and lock both in. Byte's code is only applied after that."
               : <>Read it like a reviewer: would it pass the &quot;Done when&quot; list? Byte sounds just as sure when it&apos;s wrong.</>}
           </p>
           {why && <div className="mt-2 text-xs font-semibold text-violet-100" id={`${ticketId}-byte-call`}>1. Your call</div>}
@@ -126,7 +126,7 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
               onClick={() => choose("accept")}
               disabled={applied === null}
               {...pressed("accept")}
-              className={`rounded-lg bg-emerald-600 px-2 py-2 font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400${ring("accept")}`}
+              className={`rounded-lg border border-emerald-400/60 px-2 py-2 font-semibold text-emerald-200 hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-400${why && pendingDecision === "accept" ? " bg-emerald-500/20" : ""}${ring("accept")}`}
             >
               ✓ Accept
             </button>
@@ -148,7 +148,8 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
               ✎ Edit it myself
             </button>
           </div>
-          {why && (
+          {/* The reason is asked once a call is picked, one question at a time (audit flaw 5). */}
+          {why && pendingDecision !== null && (
             <WhyPicker
               why={why}
               seed={`${ticketId}:why`}
@@ -227,9 +228,9 @@ function WhyPicker({
         data-testid="byte-lock"
         onClick={onLock}
         disabled={!ready}
-        className="mt-2 w-full rounded-lg bg-violet-600 px-3 py-2 font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+        className="mt-2 w-full rounded-lg bg-byte px-3 py-2 font-semibold text-page hover:opacity-90 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-300"
       >
-        {ready ? "🔒 Lock in my call" : "Pick a call and a reason to lock in"}
+        {ready ? "Lock in my call" : "Pick a reason to lock in your call"}
       </button>
     </div>
   );

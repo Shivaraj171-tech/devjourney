@@ -60,8 +60,36 @@ def trace_payload(payload_json):
                                         payload["testFile"], payload["testName"]))
 `;
 
+// Loading progress for the page (audit: a 5-10 s first load showed only "Starting Python…").
+// Pyodide's loader has no progress callback, so this reports what is really known:
+// the stage, and which of Pyodide's big files have finished downloading (Resource Timing).
+const PYODIDE_FILES = ["pyodide.asm.mjs", "pyodide.asm.wasm", "python_stdlib.zip", "pyodide-lock.json"];
+function progress(stage, filesDone = 0) {
+  self.postMessage({ type: "progress", stage, filesDone, filesTotal: PYODIDE_FILES.length });
+}
+function filesDownloaded() {
+  try {
+    const names = performance.getEntriesByType("resource").map((e) => e.name.split("?")[0]);
+    return PYODIDE_FILES.filter((f) => names.some((n) => n.endsWith("/" + f))).length;
+  } catch {
+    return 0;
+  }
+}
+
 async function init() {
-  const pyodide = await loadPyodide({ indexURL: new URL("./pyodide/", self.location.href).href });
+  progress("download", 0);
+  let lastDone = 0;
+  const poll = setInterval(() => {
+    const done = filesDownloaded();
+    if (done !== lastDone) progress("download", (lastDone = done));
+  }, 250);
+  let pyodide;
+  try {
+    pyodide = await loadPyodide({ indexURL: new URL("./pyodide/", self.location.href).href });
+  } finally {
+    clearInterval(poll);
+  }
+  progress("checker", PYODIDE_FILES.length);
   // Write the runner files from Python itself (avoids depending on FS APIs).
   pyodide.runPython(`from pathlib import Path\nPath("/runner").mkdir(exist_ok=True)`);
   for (const name of ["test_runner.py", "tracer.py", "formats.py", "lab.py"]) {

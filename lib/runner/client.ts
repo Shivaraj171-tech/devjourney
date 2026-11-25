@@ -13,8 +13,15 @@ type Pending = {
   timer: ReturnType<typeof setTimeout>;
 };
 
+/** How far Python has got with loading (reported by the worker, see public/runner-worker.js). */
+export type LoadProgress =
+  | { stage: "waiting" }
+  | { stage: "download"; filesDone: number; filesTotal: number }
+  | { stage: "checker" };
+
 type WorkerMessage =
   | { type: "ready" }
+  | { type: "progress"; stage: "download" | "checker"; filesDone: number; filesTotal: number }
   | { type: "result"; id: number; result: RunResult }
   | { type: "trace"; id: number; trace: TraceResult }
   | { type: "snippet"; id: number; result: unknown }
@@ -38,9 +45,12 @@ export class PythonRunner {
   private ready: Promise<void> | null = null;
   private pending = new Map<number, Pending>();
   private nextId = 1;
+  /** Called as Python loads (stages and finished files). */
+  onProgress: ((p: LoadProgress) => void) | null = null;
 
   warmUp(): Promise<void> {
     if (this.ready) return this.ready;
+    this.onProgress?.({ stage: "waiting" });
     const ready: Promise<void> = whenServiceWorkerControls(SW_WAIT_MS).then(() =>
       // Reset or disposed while waiting: this warm-up was abandoned (never settles).
       this.ready === ready ? this.start() : new Promise<void>(() => {}),
@@ -56,6 +66,9 @@ export class PythonRunner {
       worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
         const msg = event.data;
         if (msg.type === "ready") resolve();
+        else if (msg.type === "progress") {
+          this.onProgress?.(msg.stage === "download" ? { stage: "download", filesDone: msg.filesDone, filesTotal: msg.filesTotal } : { stage: "checker" });
+        }
         else if (msg.type === "result") this.finish(msg.id, { value: msg.result });
         else if (msg.type === "trace") this.finish(msg.id, { value: msg.trace });
         else if (msg.type === "snippet") this.finish(msg.id, { value: msg.result });

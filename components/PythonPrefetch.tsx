@@ -6,6 +6,7 @@
 import { useEffect } from "react";
 import { withBase } from "@/lib/basePath";
 import { whenServiceWorkerControls } from "@/lib/serviceWorker";
+import { useProgress } from "@/lib/progress/store";
 
 const FILES = ["/pyodide/pyodide.asm.wasm", "/pyodide/python_stdlib.zip", "/pyodide/pyodide.asm.mjs", "/pyodide/pyodide.mjs", "/pyodide/pyodide-lock.json"];
 
@@ -31,6 +32,9 @@ function hasStartedLearning(): boolean {
 }
 
 export default function PythonPrefetch() {
+  // Re-checked when onboarding closes, so a newcomer's download starts while they read the
+  // home screen, not only on their next visit (audit: slow first Python load).
+  const onboarded = useProgress().onboarded === true;
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return; // keep `next dev` quiet
     const connection = (navigator as Navigator & { connection?: Connection }).connection;
@@ -56,17 +60,17 @@ export default function PythonPrefetch() {
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
     const run = () => void prefetch();
     if (w.requestIdleCallback) {
-      const id = w.requestIdleCallback(run, { timeout: 5000 });
+      const id = w.requestIdleCallback(run, { timeout: 1500 });
       return () => {
         cancelled = true;
         w.cancelIdleCallback?.(id);
       };
     }
-    const id = window.setTimeout(run, 2000);
+    const id = window.setTimeout(run, 1000);
     return () => {
       cancelled = true;
       window.clearTimeout(id);
     };
-  }, []);
+  }, [onboarded]);
   return null;
 }
