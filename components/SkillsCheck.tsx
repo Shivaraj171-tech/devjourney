@@ -162,7 +162,7 @@ function Shell({ children }: { children: ReactNode }) {
 /** Code with line numbers (spot the bug) or plain. */
 function CodeBlock({ code, numbered = false }: { code: string; numbered?: boolean }) {
   return (
-    <pre tabIndex={0} role="region" aria-label="Code, scrollable" className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-3 text-sm leading-relaxed text-slate-100">
+    <pre tabIndex={0} className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-3 text-sm leading-relaxed text-slate-100">
       <code>
         {code.split("\n").map((line, i) => (
           <span key={i} className="block">
