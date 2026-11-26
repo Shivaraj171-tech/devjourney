@@ -7,6 +7,12 @@ Near a singularity J^-1 blows up, so the controller watches the CONDITION NUMBER
 
 where the sigma are J's singular values: the square roots of the eigenvalues of J^T J.
 It slows down above KAPPA_SLOW and stops above KAPPA_STOP.
+
+Units: J is ur5e_jacobian(q), lengths in METRES. Its top three rows are m/s per rad/s,
+its bottom three rad/s per rad/s. With rows in mixed units kappa is NOT scale-free: the
+same pose in millimetres gives a kappa about 200x bigger. So KAPPA_SLOW and KAPPA_STOP
+are only valid for J in metres and radians. (A unit-free monitor divides the linear rows
+by a characteristic length, or weights the rows, before taking kappa.)
 """
 import math
 

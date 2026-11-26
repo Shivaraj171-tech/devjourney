@@ -28,7 +28,7 @@ w = sqrt(det(J Jᵀ)) = σ1 σ2 σ3 = |det J|   (for a square J)
 
 For a redundant arm (more joints than directions) J isn't square, but sqrt(det(J Jᵀ)) still works. That's why it's the textbook definition.
 
-Step 4: two different questions. w falls to 0 at a singularity but also shrinks if you just scale the arm down; κ = σ_max / σ_min doesn't care about scale and only measures how lopsided the ellipsoid is (1 = a ball, ∞ = flat). Ticket 9 uses κ.
+Step 4: two different questions. w falls to 0 at a singularity but also shrinks if you just scale the arm down; κ = σ_max / σ_min only measures how lopsided the ellipsoid is (1 = a ball, ∞ = flat). Here every entry of Jv is in the same unit (m/s per rad/s), so scaling the arm, or switching from metres to millimetres, scales all of Jv together and κ doesn't change. That is only true when J's rows share one unit: ticket 9's 6x6 Jacobian mixes m/s rows with rad/s rows, and there κ depends on the length unit. Ticket 9 uses κ.
 
 Step 5: computing it without numpy. Jacobi's method repeatedly turns pairs of axes to zero the off-diagonal entries of a symmetric matrix; what's left on the diagonal are the eigenvalues, and the accumulated turns are the eigenvectors (`sym_eig`, given).
 

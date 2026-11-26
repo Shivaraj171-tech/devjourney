@@ -14,13 +14,13 @@ questions:
       - "0 rad/s: joints 4 and 6 lock and stop moving at a wrist singularity"
     answer: 0
     explain: "σ_min shrinks with sin(q5), and q̇ = J⁻¹ V scales with 1/σ_min. The chart under the 3D view shows joints 4 and 6 racing in opposite directions."
-  - prompt: "Why is κ a better singularity monitor than manipulability w?"
+  - prompt: "Someone switches the UR5e code to millimetres. Why does the monitor's stop threshold of 200 stop meaning anything?"
     choices:
-      - "κ doesn't depend on the arm's size, w does"
-      - "κ is cheaper to compute"
-      - "w can be negative"
+      - "J's linear rows grow 1000x and its angular rows don't, so κ changes"
+      - "It doesn't: κ = σ_max / σ_min is the same whatever the units are"
+      - "κ only changes if the joint angles are switched to degrees as well"
     answer: 0
-    explain: "Scale the arm and w changes by the cube (or more), κ not at all. A threshold on κ means the same thing for every arm."
+    explain: "κ is unchanged only by UNIFORM scaling. Millimetres multiply the three linear rows (m/s) by 1000 and leave the angular rows (rad/s) alone: at q5 = 7.4° κ goes from 50 to about 9,800. For a mixed-unit J the thresholds belong to its units (metres and radians here); dividing the linear rows by a characteristic length makes κ unit-free."
   - prompt: "Byte argued that dropping the square root keeps the ordering of the singular values. Why is that not enough?"
     choices:
       - "The monitor compares κ with fixed thresholds, and squaring moves where they trip"

@@ -28,4 +28,4 @@ questions:
       - "Yes: bigger w always means further from singularity"
       - "Yes, as long as both arms have the same number of joints and the same DH convention"
     answer: 0
-    explain: "Double every link length and every σ doubles, so w grows 8x without any change in shape. κ = σ_max / σ_min is scale-free."
+    explain: "Double every link length and every σ doubles, so w grows 8x without any change in shape. κ = σ_max / σ_min is scale-free here, because every entry of Jv is in the same unit (ticket 9's 6x6 J is different)."

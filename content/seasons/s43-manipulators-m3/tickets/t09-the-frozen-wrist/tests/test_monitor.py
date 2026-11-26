@@ -63,6 +63,21 @@ def test_near_the_flip_it_slows_then_stops():
     assert abs(kappa - 366.91) < 0.5, f"kappa at q5 = 1 deg should be 366.9, got {kappa:.1f}"
 
 
+
+def test_thresholds_are_in_metres_and_radians():
+    """KAPPA_SLOW and KAPPA_STOP assume ur5e_jacobian's units: linear rows in m/s, angular rows in rad/s.
+
+    Rows in mixed units make kappa depend on the length unit: it is NOT scale-free here.
+    """
+    J = ur5e_jacobian(at_q5(7.4))
+    in_metres = condition_number(J)
+    assert abs(in_metres - 50.0) < 0.5, f"at q5 = 7.4 deg kappa (lengths in metres) should be about 50, got {in_metres:.1f}"
+    J_mm = [[1000.0 * x for x in row] if i < 3 else list(row) for i, row in enumerate(J)]
+    in_mm = condition_number(J_mm)
+    assert in_mm > 100 * in_metres, (
+        f"the same pose with lengths in millimetres gives kappa = {in_mm:.0f}, not {in_metres:.0f}: "
+        "the thresholds only mean something in metres and radians")
+
 def test_speeds_explode_near_the_flip():
     slow = joint_speeds(ur5e_jacobian(at_q5(30)), SPIN)
     fast = joint_speeds(ur5e_jacobian(at_q5(1)), SPIN)
