@@ -14,9 +14,11 @@ type Props = {
   xpFor: (ticketId: string) => number;
   /** Open bounties matching the learner's focus areas (coding profile), best first: shown first, marked "Recommended for you". */
   recommended?: string[];
+  /** Phone: locked cards fold into one line ("6 more open as you learn"), open and solved ones stay. */
+  foldLocked?: boolean;
 };
 
-export default function BugBounty({ bounties, isSolved, xpFor, recommended = [] }: Props) {
+export default function BugBounty({ bounties, isSolved, xpFor, recommended = [], foldLocked = false }: Props) {
   if (bounties.length === 0) return null;
   // Recommended open ones first (in focus order); the rest keep the board's order.
   const rank = (c: { card: BountyCard; recommended: boolean }) => (c.recommended ? recommended.indexOf(c.card.id) : recommended.length);
@@ -28,6 +30,8 @@ export default function BugBounty({ bounties, isSolved, xpFor, recommended = [] 
     .sort((a, b) => rank(a) - rank(b) || a.i - b.i);
   const { solved, open, total } = bountyProgress(cards.map((c) => c.state));
   const foldSolved = solved >= 4;
+  const lockedCards = cards.filter((c) => c.state === "locked");
+  const foldingLocked = foldLocked && lockedCards.length > 0;
   return (
     <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-xl border border-rule bg-panel p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -40,13 +44,27 @@ export default function BugBounty({ bounties, isSolved, xpFor, recommended = [] 
       </div>
       <p className="mt-1 max-w-3xl text-sm text-slate-300">
         Mystery bugs from all over Orbit Orders. No lesson, no label: working out <i>what kind</i> of bug it is is part of the job.
-        Optional, and they never block your next ticket.
+        <span className={foldLocked ? "sr-only" : undefined}> Optional, and they never block your next ticket.</span>
       </p>
       <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {(foldSolved ? cards.filter((c) => c.state !== "done") : cards).map(({ card, state, recommended: rec }) => (
-          <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} recommended={rec} />
-        ))}
+        {cards
+          .filter((c) => !(foldSolved && c.state === "done") && !(foldingLocked && c.state === "locked"))
+          .map(({ card, state, recommended: rec }) => (
+            <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} recommended={rec} />
+          ))}
       </ul>
+      {foldingLocked && (
+        <details className="mt-3" data-testid="bounty-locked-fold">
+          <summary className="min-h-8 cursor-pointer py-1 text-sm font-semibold text-slate-200">
+            🔒 {lockedCards.length} more open as you learn, see what opens them
+          </summary>
+          <ul className="mt-2 grid grid-cols-1 gap-3">
+            {lockedCards.map(({ card, state }) => (
+              <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} />
+            ))}
+          </ul>
+        </details>
+      )}
       {/* Many solved: they fold into one line, so the home screen stays short (audit flaw 8). */}
       {foldSolved && (
         <details className="mt-3">
