@@ -2,7 +2,7 @@
 
 **Learn to code with an AI teammate, and learn to catch its mistakes.**
 
-More and more code is written by AI. The people who thrive will be the ones who can read it, run it, debug it and decide what ships: the human in the loop. DevJourney teaches exactly that, starting from zero.
+More and more code is written by AI. The people who thrive will be the ones who can read it, run it, debug it and decide what ships: the human in the loop. DevJourney practises exactly that, from your first line of Python: about 10 hours of reading, tracing, debugging and checking AI-written Python, mostly by fixing or finishing a few lines of existing code. It is not a full course (yet): you won't write programs from a blank page or touch files, git, the command line, APIs or SQL. A roadmap from first line of code to job-ready is the long-term goal ([`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md)), not what is here today.
 
 You join **Orbit Orders**, a small (fictional) food-delivery startup, as a junior developer. Your teammate **Byte** is an AI that writes code fast but not always right. You grow **one real codebase** by closing short tickets (10–20 minutes): bugs, features, code-reading tasks, reviews of AI-written pull requests, and production incidents.
 
