@@ -2,4 +2,4 @@ Look at the timings in the logs: 600 orders took 310ms, 1200 took 1240ms, 2400 t
 ---
 `order.order_id not in sent_ids` walks through `sent_ids` item by item, and it does that once for every order. A `set` answers the same question instantly. Turn `sent_ids` into a set once, before the loop, and check against the set instead.
 ---
-Add `sent = set(sent_ids)` just before `to_send = []`, and change the `if` line to `if order.order_id not in sent:`. Keep looping over `orders` so the result stays oldest first, and don't change either list.
+Just before `to_send = []`, make a set from `sent_ids` once and give it a name. Then change the `if` line to check the order's id against that set instead of the list. Keep looping over `orders` so the result stays oldest first, and don't change either list.

@@ -17,7 +17,7 @@ G = 9.81  # m/s^2
 
 def joint_torques(J, F):
     """tau = J^T F (J: m x n rows, F: m numbers): one torque per joint."""
-    return mat_vec(J, F)  # Byte: J maps joints to the gripper, so the same J maps forces
+    return mat_vec(J, F)
 
 
 def hold_box_torques(q, mass):

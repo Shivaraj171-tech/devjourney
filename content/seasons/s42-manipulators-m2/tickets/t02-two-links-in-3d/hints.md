@@ -2,4 +2,4 @@ Each link transform is written in the frame of the joint BEFORE it: T_1_2 is "wh
 ---
 The frame of joint k in the base is the running product T_0_1 T_1_2 ... T_(k-1)_k. Keep a running transform that starts as the identity (`identity(4)` is imported), multiply each link onto its RIGHT, and append the running transform after each step.
 ---
-Inside the loop: `T = T_mul(T, link)`, then append `T`. Before the loop you still need to create T: which 4x4 changes nothing when you multiply by it?
+Inside the loop: multiply the running transform by the link (the link on the RIGHT), store the product back in the running transform, and append that. Before the loop you still need to create the running transform: which 4x4 changes nothing when you multiply by it?

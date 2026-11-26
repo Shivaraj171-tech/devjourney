@@ -342,3 +342,98 @@ class TutorialFlagTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[2] / "content" / "seasons" / "s01-first-week" / "tickets"
         flagged = sorted(d.name for d in root.iterdir() if (yaml.safe_load((d / "ticket.yaml").read_text()) or {}).get("tutorial"))
         self.assertEqual(flagged, ["t01-welcome", "t02-menu-prices"])
+
+
+# ---------- Byte's calibration (curriculum audit): verify, don't reject by habit ----------
+
+MAIN_SEASONS = ("s01", "s02", "s03", "s04", "s05")
+# Byte should be fully right (not partial) in roughly half to 60% of its main-story suggestions,
+# and never in under 40% of a season's, so "always reject" is no strategy.
+RIGHT_SHARE_OVERALL = (0.5, 0.6)
+RIGHT_SHARE_PER_SEASON = 0.4
+
+
+def real_suggestions(prefixes):
+    """(season prefix, ticket name, suggestion) for every real byte.yaml suggestion in those seasons."""
+    out = []
+    for path in sorted((vc.REPO_ROOT / "content" / "seasons").glob("*/tickets/*/byte.yaml")):
+        season = path.parents[2].name[:3]
+        sug = (vc.load_byte(path.parent) or {}).get("suggestion")
+        if season in prefixes and sug:
+            out.append((season, path.parent.name, sug))
+    return out
+
+
+def fully_right(sug):
+    return sug["correct"] is True and not sug.get("partial")
+
+
+def mean_length(texts):
+    return sum(len(t) for t in texts) / len(texts)
+
+
+def share_with_bang(texts):
+    return sum("!" in t for t in texts) / len(texts)
+
+
+class ByteCalibrationTests(unittest.TestCase):
+    def setUp(self):
+        self.main = real_suggestions(MAIN_SEASONS)
+
+    def test_byte_is_right_about_half_the_time_in_the_main_story(self):
+        share = sum(fully_right(s) for _, _, s in self.main) / len(self.main)
+        low, high = RIGHT_SHARE_OVERALL
+        self.assertTrue(low <= share <= high, f"Byte is fully right in {share:.0%} of S1-S5 suggestions")
+
+    def test_no_season_teaches_always_reject(self):
+        for season in MAIN_SEASONS:
+            sugs = [s for p, _, s in self.main if p == season]
+            share = sum(fully_right(s) for s in sugs) / len(sugs)
+            self.assertGreaterEqual(share, RIGHT_SHARE_PER_SEASON, f"{season}: Byte fully right in {share:.0%}")
+
+    def test_tone_and_length_do_not_give_the_answer_away(self):
+        """Byte sounds just as sure, and says about as much, whether it's right or wrong."""
+        right = [s["says"] for _, _, s in self.main if fully_right(s)]
+        wrong = [s["says"] for _, _, s in self.main if not s["correct"]]
+        ratio = mean_length(right) / mean_length(wrong)
+        self.assertTrue(0.8 <= ratio <= 1.25, f"right pitches are {ratio:.2f}x as long as wrong ones")
+        self.assertLessEqual(abs(share_with_bang(right) - share_with_bang(wrong)), 0.25,
+                             "'!' marks only one kind of pitch")
+
+    def test_real_whys_pass_the_longest_reason_check(self):
+        self.assertEqual(vc.check_byte_why_lengths(vc.REPO_ROOT / "content" / "seasons"), [])
+
+
+class ByteWhyLengthTests(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.root)
+
+    def season_with_whys(self, answers_longest):
+        seasons = self.root / "seasons"
+        for n, longest in enumerate(answers_longest):
+            right = "the right reason, said at some length" if longest else "the right one"
+            t = seasons / "s01" / "tickets" / f"t{n:02d}"
+            t.mkdir(parents=True)
+            byte_yaml(t, textwrap.dedent(f"""\
+                suggestion:
+                  file: app/calc.py
+                  find: "x"
+                  replace: "y"
+                  correct: true
+                  says: "s"
+                  explain: "e"
+                  why:
+                    choices: ["{right}", "a decoy reason here", "another decoy"]
+                    answer: 0
+            """))
+        return seasons
+
+    def test_right_reason_longest_too_often_fails(self):
+        errors = vc.check_byte_why_lengths(self.season_with_whys([True, True, False, False]))
+        self.assertTrue(any("strictly longest choice in 2 of 4" in e for e in errors), errors)
+
+    def test_right_reason_longest_sometimes_is_fine(self):
+        self.assertEqual(vc.check_byte_why_lengths(self.season_with_whys([True, False, False, False])), [])

@@ -321,7 +321,7 @@ export function collectEvidence(input: {
       // Byte's suggestion on this ticket (practice rounds don't count).
       if (t.byteSuggestion && !t.byteSuggestion.tutorial) {
         const outcome = suggestionOutcome(t.byteSuggestion, t);
-        const scores: Record<string, number> = { caught: 1, trusted: 0.9, "waved-through": 0.1, doubted: 0.6 };
+        const scores: Record<string, number> = { caught: 1, trusted: 1, "waved-through": 0.1, doubted: 0.4 };
         const texts: Record<string, string> = {
           caught: `caught Byte's wrong suggestion on ${name}`,
           trusted: `checked Byte's good suggestion on ${name}`,
@@ -447,6 +447,7 @@ export type HabitTone = "strength" | "tip" | "neutral";
 export type HabitId =
   | "trusts-byte"
   | "checks-byte"
+  | "doubts-byte"
   | "tests-edges"
   | "misses-edges"
   | "reruns-unchanged"
@@ -516,6 +517,25 @@ export function detectHabits(tickets: Record<string, ProfileTicketProgress>, con
       label: "Checks Byte's work",
       tone: "strength",
       because: `Caught Byte's wrong code on ${names(caught.map((x) => x.id))} (${caught.length} of the last ${wrongDecided.length}).`,
+    });
+  }
+
+  // --- Byte: turns down good suggestions by habit (the last 5 right suggestions decided).
+  // Byte is right more often than not; rejecting everything is not "checking".
+  const rightDecided = list
+    .filter((t) => t.byteSuggestion && t.byteSuggestion.correct && !t.byteSuggestion.tutorial)
+    .map((t) => ({ id: t.id, outcome: suggestionOutcome(t.byteSuggestion!, t), at: lastActivity(t) }))
+    .filter((x) => x.outcome === "trusted" || x.outcome === "doubted")
+    .sort((a, b) => a.at - b.at)
+    .slice(-5);
+  const doubted = rightDecided.filter((x) => x.outcome === "doubted");
+  if (doubted.length >= 2 && doubted.length / rightDecided.length >= 0.5) {
+    habits.push({
+      id: "doubts-byte",
+      label: "Turns down good suggestions",
+      tone: "tip",
+      because: `Byte's suggestion was right on ${names(doubted.map((x) => x.id))}, and it was turned down (${doubted.length} of the last ${rightDecided.length} good suggestions).`,
+      tip: "Byte is right more often than not. Check it (one example, then the tests) and accept it when it holds up.",
     });
   }
 

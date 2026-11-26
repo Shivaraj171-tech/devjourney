@@ -215,6 +215,20 @@ test("habits: checks Byte's work, works without hints", () => {
   assert.ok(ids.includes("checks-byte"));
   assert.ok(ids.includes("no-hints"));
   assert.ok(!ids.includes("trusts-byte"));
+  assert.ok(!ids.includes("doubts-byte"));
+});
+
+test("habits: turning down Byte's good suggestions by habit is a tip, not a strength", () => {
+  const doubted = { decision: "reject" as const, correct: true, runsAtDecision: 0 };
+  const trusted = { decision: "accept" as const, correct: true, runsAtDecision: 0 };
+  const habits = detectHabits({ t1: tp({ byteSuggestion: doubted }), t2: tp({ byteSuggestion: doubted }), t4: tp({ byteSuggestion: trusted, runs: 1 }) }, CONTENT);
+  const doubts = habits.find((h) => h.id === "doubts-byte");
+  assert.ok(doubts, habits.map((h) => h.id).join());
+  assert.equal(doubts.tone, "tip");
+  assert.match(doubts.because, /2 of the last 3 good suggestions/);
+  // Checked and trusted instead: no tip.
+  const fine = detectHabits({ t1: tp({ byteSuggestion: trusted, runs: 1 }), t2: tp({ byteSuggestion: trusted, runs: 1 }) }, CONTENT);
+  assert.ok(!fine.some((h) => h.id === "doubts-byte"));
 });
 
 test("practice made for you: warm-ups, open bounties and lessons for a focus area, only unlocked ones", () => {

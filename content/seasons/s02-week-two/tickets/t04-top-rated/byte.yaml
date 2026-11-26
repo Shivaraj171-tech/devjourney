@@ -1,15 +1,14 @@
-# Partial: Byte stops the crash for new restaurants, but the 5-ratings rule is still missing.
+# Right: both rules from the docstring, with the count checked first so [] never reaches the average.
 suggestion:
   file: app/badges.py
   find: "    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
-  replace: "    if len(ratings) == 0:\n        return False\n    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
+  replace: "    return len(ratings) >= TOP_RATED_MIN_RATINGS and average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
   correct: true
-  partial: true
-  says: "After Wednesday, safety first: a restaurant with no ratings can't be top rated, and can't crash."
+  says: "After Wednesday, safety first! Enough ratings AND a high average, and an empty list can't crash it."
   explain: >-
-    Right as far as it goes: [] returns False and never reaches the average. But one 5-star rating from
-    the owner's mum still earns the badge. The docstring's "at least 5 ratings" rule is still yours to
-    add.
+    Byte is right. Both rules from the docstring are there, using the existing constants, and the count
+    comes first: `and` stops at the first False, so `average_rating` never sees an empty list. One
+    5-star rating from the owner's mum no longer earns the badge.
 
 # Prompt card: spell out the rule AND the edge cases.
 prompt:

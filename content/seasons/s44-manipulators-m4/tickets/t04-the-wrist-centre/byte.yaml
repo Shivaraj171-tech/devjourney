@@ -1,7 +1,7 @@
 # Wrong: Byte flips the sign of its offset; still along the base's z, not the gripper's.
 suggestion:
   file: ik/wrist_ik.py
-  find: "    return [p[0], p[1], p[2] + d6]  # Byte: the wrist sits d6 above the gripper\n"
+  find: "    return [p[0], p[1], p[2] + d6]\n"
   replace: "    return [p[0], p[1], p[2] - d6]  # the wrist sits d6 below the gripper when it points up\n"
   correct: false
   says: "Got the direction backwards: the label job points the gripper UP at the shelf, so the wrist is below it."

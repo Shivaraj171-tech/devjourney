@@ -1,14 +1,14 @@
 # Byte's second fix: title() looks right for "sam"... and is another regression.
 suggestion:
   file: app/apology.py
-  find: "    return customer.capitalize()  # Byte's fix for Leo's \"sam\" complaint"
+  find: "    return customer.capitalize()"
   replace: "    return customer.title()"
   correct: false
   why:
     choices:
-      - "`.upper()` turns the whole name into capitals, like SAM."
-      - "It capitalises the first letter and keeps the rest exactly as typed."
-      - "`customer[:1]` crashes on an empty name, so an old test will now fail."
+      - "`title()` capitalises every word, which is exactly what two-part names need."
+      - "`title()` also lowercases the rest of each word, so McKenzie is squashed again."
+      - "`title()` crashes on an empty name, so the old empty-name test in the suite will now fail."
     answer: 1
   says: "`capitalize()` was the problem. `title()` capitalises every word, so two-part names work too!"
   explain: >-

@@ -39,5 +39,4 @@ def T_apply(T, point):
 
 def T_inv(T):
     """The inverse transform: [[R^T, -R^T p], [0, 0, 0, 1]] (undo the move, then undo the turn)."""
-    # Byte: "rotations are orthonormal, so the inverse is the transpose"
     return transpose(T)

@@ -1,12 +1,11 @@
-# Partial: Byte guards discount_amount, but discount_percent(None) still crashes.
+# Right: Byte guards the function that calls .upper(), so every caller is safe.
 suggestion:
   file: app/promo.py
-  find: "    if subtotal_cents < MIN_SUBTOTAL_FOR_PROMO:\n        return 0"
-  replace: "    if code is None:\n        return 0\n    if subtotal_cents < MIN_SUBTOTAL_FOR_PROMO:\n        return 0"
+  find: "    return PROMO_CODES.get(code.upper(), 0)"
+  replace: "    if code is None:\n        return 0\n    return PROMO_CODES.get(code.upper(), 0)"
   correct: true
-  partial: true
-  says: "No code, no discount: I return 0 straight away in discount_amount when the code is None."
+  says: "No code, no discount: discount_percent now returns 0 for None before it ever calls .upper()."
   explain: >-
-    Right as far as it goes: checkout stops crashing, because discount_amount never reaches .upper() for
-    None. But discount_percent(None) still crashes, and other code can call it directly. Fix the
-    function that actually calls .upper(), too.
+    Byte is right. The crash happens where `.upper()` is called, in discount_percent, so that's where
+    the guard belongs: discount_percent(None) is now 0, and discount_amount, which calls it, is safe
+    too. Real codes and unknown codes behave exactly as before.

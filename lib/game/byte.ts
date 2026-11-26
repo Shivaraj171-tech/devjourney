@@ -32,13 +32,25 @@ export type PromptRecord = { firstPick: number; best: boolean };
  * - caught: rejected a wrong suggestion, or took it and fixed it ("edit") until the tests passed
  * - trusted: accepted (or edited) a correct suggestion and then ran the tests to check it
  * - waved-through: accepted a wrong suggestion as-is and ran it
- * - doubted: rejected a suggestion that was actually right (no penalty)
+ * - doubted: rejected a suggestion that was actually right (no penalty, but no XP: a missed call)
  * - pending: applied, but not checked yet
+ *
+ * A "partial" suggestion (byte.yaml `partial: true`) counts as a correct one: its change is right
+ * and keeps every passing check passing, it just doesn't finish the ticket. Taking it (accept or
+ * edit) and checking it is "trusted"; rejecting it is "doubted".
  */
 export type SuggestionOutcome = "caught" | "trusted" | "waved-through" | "doubted" | "pending";
 
-export const CATCH_XP = 20;
-export const TRUST_XP = 10;
+/**
+ * XP for a right call on Byte's suggestion. Catching a wrong one and checking-then-trusting a
+ * right one pay the SAME: Byte is right more often than not, and the skill is telling which is
+ * which, not refusing by habit (audit: rejecting used to pay double, which trained "always reject").
+ */
+export const JUDGE_XP = 15;
+/** A wrong suggestion rejected, or taken and fixed until the tests pass. */
+export const CATCH_XP = JUDGE_XP;
+/** A right suggestion accepted (or edited) and then checked with a test run. */
+export const TRUST_XP = JUDGE_XP;
 export const BEST_PROMPT_XP = 10;
 
 /** The minimum a ticket's progress needs for Byte's rules. */

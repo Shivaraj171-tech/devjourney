@@ -26,7 +26,7 @@ def adjoint(T):
     """The 6 x 6 adjoint of a 4x4 transform, for twists (w, v)."""
     R, p = rotation_of(T), translation_of(T)
     pR = matmul(skew(p), R)
-    top = [R[i] + pR[i] for i in range(3)]  # Byte: [[R, [p]R], [0, R]]
+    top = [R[i] + pR[i] for i in range(3)]
     bottom = [[0.0, 0.0, 0.0] + R[i] for i in range(3)]
     return top + bottom
 

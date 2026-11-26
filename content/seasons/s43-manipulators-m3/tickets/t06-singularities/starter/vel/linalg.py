@@ -23,7 +23,7 @@ def det(A):
         if abs(U[p][k]) < 1e-300:
             return 0.0
         if p != k:
-            U[k], U[p] = U[p], U[k]  # Byte: swapping rows is harmless
+            U[k], U[p] = U[p], U[k]
         for r in range(k + 1, n):
             f = U[r][k] / U[k][k]
             for c in range(k, n):

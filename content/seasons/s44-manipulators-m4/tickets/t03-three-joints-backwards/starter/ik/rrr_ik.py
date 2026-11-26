@@ -21,7 +21,7 @@ def rrr_ik(p, elbow="up", front=True):
     """[q1, q2, q3] putting the wrist at p = (x, y, z), or None when out of reach."""
     x, y, z = p
     r = math.hypot(x, y)
-    s = z  # Byte: how far up
+    s = z
     q1 = math.atan2(y, x)
     if not front:
         q1, r = wrap(q1 + math.pi), -r

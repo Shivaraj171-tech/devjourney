@@ -8,7 +8,7 @@ suggestion:
     choices:
       # None of the reasons names the defect: the learner has to compare the two lines to know
       # which claim is true (the old option 1 said "dropped the comma", which gave it away).
-      - "The `f` is back and nothing else on the line changed, so it's right."
+      - "The `f` is back and nothing else on the line changed, so customers see the same greeting with their own name."
       - "The `f` is back, but something else on the line changed too, so customers would see a different greeting."
       - "An f-string can't hold `{name}`, so it would crash."
     answer: 1

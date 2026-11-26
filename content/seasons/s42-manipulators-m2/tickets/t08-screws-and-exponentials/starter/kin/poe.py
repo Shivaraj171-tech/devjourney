@@ -34,7 +34,6 @@ def exp_twist(S, theta):
     w, v = S[:3], S[3:]
     if max(abs(c) for c in w) < 1e-12:
         return make_T(identity(3), [c * theta for c in v])  # prismatic: a pure slide
-    # Byte: the turn comes from Rodrigues, and the move is v theta, like the slide above.
     return make_T(rodrigues(w, theta), [c * theta for c in v])
 
 

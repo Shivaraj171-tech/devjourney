@@ -29,7 +29,7 @@ def geometric_jacobian(frames):
     """6 x n [Jv; Jw] as a list of 6 rows, for an arm of n revolute joints."""
     p_e = origin(frames[-1])
     columns = []
-    for i in range(len(frames) - 1):  # joint i + 1 turns about its own frame's z (Byte)
+    for i in range(len(frames) - 1):
         z = z_axis(frames[i + 1])
         r = [e - o for e, o in zip(p_e, origin(frames[i]))]
         columns.append(cross(z, r) + z)

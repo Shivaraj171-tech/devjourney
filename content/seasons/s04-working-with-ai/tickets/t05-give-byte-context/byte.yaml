@@ -1,15 +1,14 @@
-# Partial: Byte builds the late lines and the empty-day message. The total line is yours.
+# Right: with Maya's examples as context, Byte's draft of refund_report matches the spec.
 suggestion:
   file: app/refund_report.py
-  find: "    # TODO: Byte left this for you. Build the lines, then join them.\n    return \"\""
-  replace: "    lines = []\n    for order, delivery_minutes in deliveries:\n        if late_refund(order, delivery_minutes) > 0:\n            lines.append(refund_line(order, delivery_minutes))\n    if not lines:\n        return \"No late orders today.\"\n    # TODO: add the 'Total refunded: $X.XX' line, then join the lines with \"\\n\"\n    return \"\""
+  find: "    # TODO: build the lines, then join them.\n    return \"\""
+  replace: "    lines = []\n    total = 0\n    for order, delivery_minutes in deliveries:\n        refund = late_refund(order, delivery_minutes)\n        if refund > 0:\n            lines.append(refund_line(order, delivery_minutes))\n            total = total + refund\n    if not lines:\n        return \"No late orders today.\"\n    lines.append(f\"Total refunded: {format_price(total)}\")\n    return \"\\n\".join(lines)"
   correct: true
-  partial: true
-  says: "I did the loop and the empty-day message from the spec. The total line is the fun bit, so I left it for you!"
+  says: "Done from the spec: one line per late order, then the total, and the empty-day message. 🧾"
   explain: >-
-    Right as far as it goes: only late deliveries get a line, in order, and an empty day says "No late
-    orders today.". Days with late orders still return "": add up the refunds, add the total line with
-    format_price, and join the lines.
+    Byte is right this time, because the prompt had real examples to work from. Only late deliveries
+    get a line, in order; the refunds are added up and shown with format_price; and a day with no late
+    orders says "No late orders today.". Good context in, good code out, and the tests confirm it.
 
 prompt:
   goal: "Get Byte to draft `refund_report` for Leo."

@@ -2,4 +2,4 @@ At q = 0 every exponential is the identity, so PoE gives M whatever the screws a
 ---
 In DH, frame i-1's z axis is joint i's axis (ticket 5): z0 is joint 1, z1 joint 2, ..., z5 joint 6. `fk_dh_frames` returns [frame 0, frame 1, ..., frame 6], so the six axes are in the first six frames, not the last six.
 ---
-Change which slice of `frames` the loop runs over so it starts at frame 0 and stops before the flange. Then think about why the flange frame (frame 6) never appears as an axis, and fix Byte's comment.
+Change which slice of `frames` the loop runs over so it starts at frame 0 and stops before the flange. Then think about why the flange frame (frame 6) never appears as an axis.

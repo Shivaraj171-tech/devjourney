@@ -64,7 +64,33 @@ test("Byte XP: small bonuses, never a penalty", () => {
     byteXp({ runs: 0, solved: false, byteSuggestion: rec("reject", false), bytePrompt: { firstPick: 1, best: true } }),
     CATCH_XP + BEST_PROMPT_XP,
   );
-  assert.ok(CATCH_XP > TRUST_XP && TRUST_XP > 0);
+  assert.ok(TRUST_XP > 0);
+});
+
+test("Byte XP: a right call pays the same whether Byte was right or wrong", () => {
+  // Rejecting by habit must not out-earn checking: catching a wrong suggestion and
+  // checking-then-trusting a right one are worth exactly the same.
+  assert.equal(CATCH_XP, TRUST_XP);
+  const caught = byteXp({ runs: 0, solved: false, byteSuggestion: rec("reject", false) });
+  const trusted = byteXp({ runs: 1, solved: true, byteSuggestion: rec("accept", true) });
+  const trustedByEdit = byteXp({ runs: 2, solved: true, byteSuggestion: rec("edit", true, 1) });
+  assert.equal(caught, trusted);
+  assert.equal(trusted, trustedByEdit);
+  // ...and with a "why": the right call AND the right reason, either way.
+  const withReason = (decision: ByteDecision, correct: boolean, reasonCorrect: boolean) => ({ ...rec(decision, correct), reason: 0, reasonCorrect });
+  assert.equal(
+    byteXp({ runs: 0, solved: false, byteSuggestion: withReason("reject", false, true) }),
+    byteXp({ runs: 1, solved: true, byteSuggestion: withReason("accept", true, true) }),
+  );
+  assert.equal(byteXp({ runs: 1, solved: true, byteSuggestion: withReason("accept", true, false) }), 0);
+  assert.equal(byteXp({ runs: 0, solved: false, byteSuggestion: withReason("reject", false, false) }), 0);
+});
+
+test("Byte XP: a partial suggestion is a correct one (taking and checking it is trusted)", () => {
+  // partial: true only goes with correct: true, so the record holds correct: true.
+  assert.equal(suggestionOutcome(rec("edit", true, 0), { runs: 1, solved: false }), "trusted");
+  assert.equal(suggestionOutcome(rec("accept", true, 0), { runs: 1, solved: false }), "trusted");
+  assert.equal(suggestionOutcome(rec("reject", true), { runs: 1, solved: false }), "doubted");
 });
 
 const sample: ByteTicketState[] = [

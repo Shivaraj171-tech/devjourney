@@ -24,6 +24,8 @@ Step 4: the forgotten square root. If you skip the root you report λ_max / λ_m
 
 Step 5: thresholds. For our UR5e path, the true κ crosses 50 around q5 = 7.4° (slow down) and 200 around q5 = 1.8° (stop), where joint 4 would need about 8 rad/s for a 0.2 rad/s spin.
 
+Step 6: units. The UR5e's J has three linear rows (m/s per rad/s) and three angular rows (rad/s per rad/s). Uniform scaling never changes κ, but changing the length unit scales only the linear rows, and then κ changes: at the q5 = 7.4° pose κ is 50 with lengths in metres and about 9,800 in millimetres. So for this mixed-unit 6x6 J, κ is NOT scale-free, and the 50 and 200 thresholds are only valid in metres and radians. Robust monitors make κ unit-free first: divide the linear rows by a characteristic length L of the arm (or weight the rows), or watch the linear and angular parts separately.
+
 **Worked example**
 
 A diagonal Jacobian makes the singular values visible directly:
@@ -44,7 +46,7 @@ J stretches by 3, 2 and 1: κ = 3. Without the square root you'd report 9.
 
 **Watch out**
 
-"Same ordering, faster" was Byte's argument for dropping the root, and the ordering IS preserved: σ² sorts like σ. But a monitor compares against thresholds, and thresholds don't survive squaring. Optimisations that change units are bugs. Also, κ is the right number for "near singular" because it's scale-free (ticket 7): manipulability w would freeze a small arm everywhere.
+"Same ordering, faster" was Byte's argument for dropping the root, and the ordering IS preserved: σ² sorts like σ. But a monitor compares against thresholds, and thresholds don't survive squaring. Optimisations that change units are bugs. Also, κ beats manipulability w for "near singular" because it ignores the arm's overall size (w would freeze a small arm everywhere), but it is not scale-free for this J: its thresholds belong to metres and radians (Step 6). Feed the monitor a Jacobian in millimetres and it says "stop" even at a healthy q5 = 40° (κ ≈ 1,900).
 
 **AI check**
 

@@ -7,7 +7,7 @@ suggestion:
   why:
     choices:
       - "Reject: with c2 just above 1 the next line takes sqrt of a tiny negative number; it needs a clamp too, and elbow up is still wrong."
-      - "Accept: the far box is now accepted, and a 1e-9 tolerance is the right size for rounding errors."
+      - "Accept: the far box is now accepted, and a 1e-9 tolerance is the right size for the floating-point rounding that pushed c2 just above 1."
       - "Accept: tolerances in geometry code are always good, the more the better."
     answer: 0
   says: "The far box fails on rounding: c2 is 1.0000000000000002. A tolerance fixes it."

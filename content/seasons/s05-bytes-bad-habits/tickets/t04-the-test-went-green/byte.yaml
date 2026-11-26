@@ -6,7 +6,7 @@ suggestion:
   correct: false
   why:
     choices:
-      - "It's right: only one dish in each category is vegan, so one entry per category is the same thing."
+      - "It's right: only one dish in each category is vegan, so one entry per category is exactly the same thing."
       - "It changes the test to agree with the code, so the bug stays and the test can't catch it any more."
       - "It's wrong because tests may never be edited, even when the spec changes."
     answer: 1

@@ -8,5 +8,5 @@ suggestion:
   explain: >-
     It works: the transposed matrix is R(-θ), so feeding it -θ gives R(θ), exactly the right rotation
     (cos(-θ) = cos θ and sin(-θ) = -sin θ). Every check goes green. It's a patch rather than a clean fix,
-    though: the comment still claims the ROWS are the turned axes. Writing the columns as the turned axes
+    though: the matrix still has the turned axes in its ROWS. Writing the columns as the turned axes
     says what the matrix means.

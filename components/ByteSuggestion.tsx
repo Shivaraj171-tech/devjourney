@@ -336,8 +336,9 @@ function OutcomeNote({
     );
   }
   return (
-    <Verdict tone="neutral" title="Byte was actually right this time">
-      <InlineCode text={explain} /> No XP lost: being careful is never wrong. Write the fix yourself.
+    <Verdict tone="neutral" title={partial ? "Byte's part was actually right" : "Byte was actually right this time"}>
+      <InlineCode text={explain} /> Nothing lost, but no XP either: checking means trying Byte&apos;s code (an example,
+      the tests), not turning it down by habit. Write the fix yourself.
     </Verdict>
   );
 }

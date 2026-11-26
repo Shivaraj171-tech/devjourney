@@ -17,7 +17,7 @@ from vel.linalg import solve
 
 def dls_step(J, e, lam):
     """dq = J^T (J J^T + λ² I)^-1 e."""
-    return solve(J, e)  # Byte: TODO damping, plain Newton works fine in the tests
+    return solve(J, e)
 
 
 def ik_dls(fk_point, jacobian, target, q0, lam=0.05, iters=40, tol=1e-8):

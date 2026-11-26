@@ -26,8 +26,5 @@ def rrr_links(q1, q2, q3):
 
 
 def rrr_fk(q1, q2, q3):
-    """T_0_3: the wrist's pose in the base frame.
-
-    Byte: "the elbow turns the forearm first, so the last transform is applied first".
-    """
+    """T_0_3: the wrist's pose in the base frame."""
     return chain(*reversed(rrr_links(q1, q2, q3)))

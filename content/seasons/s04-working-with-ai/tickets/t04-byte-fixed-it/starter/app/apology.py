@@ -14,7 +14,7 @@ def display_name(customer):
     Names are shown as the customer typed them, except that the first letter
     is always a capital, so "sam" becomes "Sam".
     """
-    return customer.capitalize()  # Byte's fix for Leo's "sam" complaint
+    return customer.capitalize()
 
 
 def apology_sms(order, delivery_minutes, promo_code=None):

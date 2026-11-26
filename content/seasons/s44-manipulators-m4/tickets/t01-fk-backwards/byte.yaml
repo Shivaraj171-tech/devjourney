@@ -1,7 +1,7 @@
 # Right as far as it goes (partial): Byte adds the inner edge of the ring; the edges still count 2.
 suggestion:
   file: ik/reach.py
-  find: "    if r > outer + tol:  # Byte: further than the arm is long\n        return 0\n"
+  find: "    if r > outer + tol:\n        return 0\n"
   replace: "    if r > outer + tol or r < inner - tol:  # outside the ring, either side\n        return 0\n"
   correct: true
   partial: true

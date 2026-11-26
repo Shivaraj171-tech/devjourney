@@ -1,7 +1,7 @@
 # Right: Byte swaps the factors so the checker reports w in the base frame.
 suggestion:
   file: vel/ur5ej.py
-  find: "        w = vee(matmul(transpose(R), Rdot))  # angular velocity (Byte)"
+  find: "        w = vee(matmul(transpose(R), Rdot))"
   replace: "        w = vee(matmul(Rdot, transpose(R)))  # base-frame angular velocity: dR/dt = [w] R"
   correct: true
   why:

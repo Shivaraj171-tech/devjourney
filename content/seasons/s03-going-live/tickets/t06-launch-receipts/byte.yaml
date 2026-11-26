@@ -37,14 +37,32 @@ prompt:
         it's correct.
   best: 1
 
-# Partial: order_total is written and the email uses it. The SMS and the points are yours.
+# Right: Byte does the whole refactor. The learner checks that nothing but the SMS bug changed.
 suggestion:
   file: app/receipts.py
-  find: "    return 0\n\n\ndef receipt_email(order, promo_code=None):\n    \"\"\"The email receipt, e.g. 'Thanks Sam! Order 1001 total: $22.40'.\"\"\"\n    subtotal = order.subtotal()\n    discount = discount_amount(subtotal, promo_code)\n    total = subtotal - discount + delivery_fee(subtotal)\n    return f\"Thanks {order.customer}! Order {order.order_id} total: {format_price(total)}\""
-  replace: "    subtotal = order.subtotal()\n    discount = discount_amount(subtotal, promo_code)\n    return subtotal - discount + delivery_fee(subtotal)\n\n\ndef receipt_email(order, promo_code=None):\n    \"\"\"The email receipt, e.g. 'Thanks Sam! Order 1001 total: $22.40'.\"\"\"\n    total = order_total(order, promo_code)\n    return f\"Thanks {order.customer}! Order {order.order_id} total: {format_price(total)}\""
+  find: "    TODO: make this the ONE place that works out the total,\n    and make the three functions below use\
+    \ it.\n    \"\"\"\n    return 0\n\n\ndef receipt_email(order, promo_code=None):\n    \"\"\"The email receipt,\
+    \ e.g. 'Thanks Sam! Order 1001 total: $22.40'.\"\"\"\n    subtotal = order.subtotal()\n    discount = discount_amount(subtotal,\
+    \ promo_code)\n    total = subtotal - discount + delivery_fee(subtotal)\n    return f\"Thanks {order.customer}!\
+    \ Order {order.order_id} total: {format_price(total)}\"\n\n\ndef confirmation_sms(order, promo_code=None):\n\
+    \    \"\"\"The text message, e.g. 'Orbit Orders: order 1001 confirmed, $22.40 paid.'\"\"\"\n    subtotal = order.subtotal()\n\
+    \    total = subtotal + delivery_fee(subtotal)\n    return f\"Orbit Orders: order {order.order_id} confirmed,\
+    \ {format_price(total)} paid.\"\n\n\ndef loyalty_points(order, promo_code=None):\n    \"\"\"One loyalty point\
+    \ per whole dollar paid, e.g. $22.40 earns 22 points.\"\"\"\n    subtotal = order.subtotal()\n    discount =\
+    \ discount_amount(subtotal, promo_code)\n    total = subtotal - discount + delivery_fee(subtotal)\n    return\
+    \ total // 100"
+  replace: "    This is the ONE place that works out the total; every message uses it.\n    \"\"\"\n    subtotal\
+    \ = order.subtotal()\n    discount = discount_amount(subtotal, promo_code)\n    return subtotal - discount +\
+    \ delivery_fee(subtotal)\n\n\ndef receipt_email(order, promo_code=None):\n    \"\"\"The email receipt, e.g.\
+    \ 'Thanks Sam! Order 1001 total: $22.40'.\"\"\"\n    total = order_total(order, promo_code)\n    return f\"\
+    Thanks {order.customer}! Order {order.order_id} total: {format_price(total)}\"\n\n\ndef confirmation_sms(order,\
+    \ promo_code=None):\n    \"\"\"The text message, e.g. 'Orbit Orders: order 1001 confirmed, $22.40 paid.'\"\"\
+    \"\n    total = order_total(order, promo_code)\n    return f\"Orbit Orders: order {order.order_id} confirmed,\
+    \ {format_price(total)} paid.\"\n\n\ndef loyalty_points(order, promo_code=None):\n    \"\"\"One loyalty point\
+    \ per whole dollar paid, e.g. $22.40 earns 22 points.\"\"\"\n    return order_total(order, promo_code) // 100"
   correct: true
-  partial: true
-  says: "I wrote order_total once and switched the email over to it. Want me to... no wait, your turn! 🤖"
-  explain: >-
-    Right as far as it goes: one order_total, and the email uses it. confirmation_sms still has its own
-    copy (the one that forgot the discount) and loyalty_points has another. Switch both to order_total.
+  says: I wrote order_total once and switched all three messages over to it. One place for the maths now! 🤖
+  explain: 'Byte is right. order_total does exactly what receipt_email and loyalty_points did before (subtotal,
+    minus the discount, plus delivery on the subtotal), and all three messages now use it. The SMS changes on purpose:
+    it used to forget the promo discount, and now it can''t. A refactor should change nothing else, and the tests
+    confirm it doesn''t.'

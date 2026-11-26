@@ -22,7 +22,7 @@ def turn(R):
 
 def joint_transform(kind, axis, q):
     """The joint's own motion: turn by q about `axis` (revolute) or slide q along it (prismatic)."""
-    if kind in ("revolute", "prismatic"):  # Byte: either way, the joint moves by q about its axis
+    if kind in ("revolute", "prismatic"):
         return turn(rodrigues(axis, q))
     raise ValueError(f"unknown joint kind {kind!r}: use 'revolute' or 'prismatic'")
 

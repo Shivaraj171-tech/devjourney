@@ -35,7 +35,7 @@ def numeric_geometric_jacobian(fk, q, h=1e-6):
         T_plus, T_minus = fk(step(q, e_i, h)), fk(step(q, e_i, -h))
         v = [(a - b) / (2 * h) for a, b in zip(translation_of(T_plus), translation_of(T_minus))]
         Rdot = [[(a - b) / (2 * h) for a, b in zip(ra, rb)] for ra, rb in zip(rotation_of(T_plus), rotation_of(T_minus))]
-        w = vee(matmul(transpose(R), Rdot))  # angular velocity (Byte)
+        w = vee(matmul(transpose(R), Rdot))
         columns.append(v + w)
     return [[col[row] for col in columns] for row in range(6)]
 

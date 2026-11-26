@@ -1,7 +1,7 @@
 # Wrong: Byte multiplies each new link on the LEFT (fixed-frame order), so the tip is still wrong.
 suggestion:
   file: kin/planar2.py
-  find: "        out.append(link)  # TODO (Byte's draft): is each link already in the base frame?"
+  find: "        out.append(link)"
   replace: "        out.append(T_mul(link, out[-1]) if out else link)  # new link first: it's applied first"
   correct: false
   says: "Easy: chain each link onto the previous frame. The newest link acts first, so it goes first."

@@ -28,7 +28,7 @@ SPHERICAL6_DH = [
 
 def wrist_center(T_0_6, d6):
     """Back off from the flange by d6 along its approach axis z6 (the THIRD COLUMN of R)."""
-    z6 = [T_0_6[2][0], T_0_6[2][1], T_0_6[2][2]]  # Byte: z is the third row
+    z6 = [T_0_6[2][0], T_0_6[2][1], T_0_6[2][2]]
     return [T_0_6[i][3] - d6 * z6[i] for i in range(3)]
 
 

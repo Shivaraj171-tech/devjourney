@@ -1,6 +1,10 @@
 # DevJourney — Project Brief
 
-Working name; rename freely. A learn-to-code platform where the learner "joins a fictional startup as a junior developer" and progresses through one evolving codebase by solving tickets: bugs, features, incidents and code reviews. It is a complete roadmap from first line of code to job-ready, built to be engaging rather than a list of disconnected puzzles.
+Working name; rename freely. A learn-to-code platform where the learner "joins a fictional startup as a junior developer" and progresses through one evolving codebase by solving tickets: bugs, features, incidents and code reviews. It is built to be engaging rather than a list of disconnected puzzles.
+
+**What it covers today:** about 10 hours (8–10) of reading, tracing, debugging and checking AI-written Python in one small codebase, mostly by fixing or finishing 1–3 lines of existing code, plus optional robotics floors. It does not yet teach writing programs from a blank page, files, modules, git, the command line, HTTP/APIs or SQL, so it does not make anyone job-ready.
+
+**The goal (long-term vision, not built yet):** a complete roadmap from first line of code to job-ready, with the tracks below.
 
 The builder is also the first user. Optimise for "fun and useful for me today", structured so it can become a real product later.
 
@@ -24,9 +28,9 @@ The builder is also the first user. Optimise for "fun and useful for me today", 
   - `review`: learner reviews a pull request (often AI-written) and must find the problems.
   - `read`: questions about unfamiliar code ("where is the discount calculated?").
 - Progression: Intern → Junior → Mid → Senior. Each level unlocks harder systems.
-- End result: the learner has built a real, working app they can show.
+- End result (goal): the learner has built a real, working app they can show. Today they have patched and extended one that was mostly written for them.
 
-### Roadmap tracks (woven into the story)
+### Roadmap tracks (the goal; today's content covers 1, 3 and 6, and 2, 4 and 5 only in small pieces)
 1. Foundations: syntax, logic, reading code
 2. Building: features, data, APIs
 3. Debugging: reproduce, isolate, fix, test

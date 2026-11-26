@@ -15,5 +15,4 @@ def is_top_rated(ratings):
       - its average rating is TOP_RATED_MIN_AVERAGE (4.5) or higher.
     New restaurants with no ratings are never top rated.
     """
-    # Byte's first draft. It only checks the average.
     return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE

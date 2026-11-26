@@ -116,15 +116,15 @@ test("accepting a wrong suggestion: the next run fails and the lesson is shown",
   expect(errors).toEqual([]);
 });
 
-test("rejecting a wrong suggestion counts as caught (+20 XP) on the HQ and leaderboard", async ({ page }) => {
+test("rejecting a wrong suggestion counts as caught (+15 XP) on the HQ and leaderboard", async ({ page }) => {
   const t = wrongTicket;
   const sug = byteOf(t).suggestion!;
   await openTicket(page, t);
   const xp = await xpTotal(page);
   await page.getByTestId("byte-reject").click();
   await expect(card(page)).toHaveAttribute("data-outcome", "caught");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +20 XP");
-  await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 20} XP`);
+  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +15 XP");
+  await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 15} XP`);
   await page.screenshot({ path: `${SHOTS}/byte-caught.png` });
   // Rejecting leaves the learner's code alone.
   const p = await readProgress(page);
@@ -161,7 +161,7 @@ test("'Edit it myself' on a wrong suggestion: fixing it until the tests pass cou
   await closeSolvedModal(page, "PR merged!");
   await expect(card(page)).toHaveAttribute("data-outcome", "caught");
   const p = await readProgress(page);
-  expect(await xpTotal(page)).toBe(xp + p.tickets[t.id].solveXp + 20);
+  expect(await xpTotal(page)).toBe(xp + p.tickets[t.id].solveXp + 15);
 });
 
 test("accepting a correct suggestion: the tests pass and it counts as trusted correctly", async ({ page }) => {
@@ -175,11 +175,11 @@ test("accepting a correct suggestion: the tests pass and it counts as trusted co
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
   await closeSolvedModal(page, "PR merged!");
   await expect(card(page)).toHaveAttribute("data-outcome", "trusted");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +10 XP");
+  await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +15 XP");
   await page.screenshot({ path: `${SHOTS}/byte-trusted.png` });
   const p = await readProgress(page);
   expect(p.tickets[t.id].solved).toBe(true);
-  expect(await xpTotal(page)).toBe(seededXp(t) + p.tickets[t.id].solveXp + 10);
+  expect(await xpTotal(page)).toBe(seededXp(t) + p.tickets[t.id].solveXp + 15);
 });
 
 test("Ask Byte: picking the best prompt first earns XP; other prompts can be compared", async ({ page }) => {

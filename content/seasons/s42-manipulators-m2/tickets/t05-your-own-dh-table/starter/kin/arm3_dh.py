@@ -9,9 +9,9 @@ from kin.rrr import A2, A3, D1
 
 ARM3_DH = [
     # a     alpha        d     offset
-    [0.0, 0.0, D1, 0.0],           # 1 base yaw: up D1 to the shoulder (Byte)
-    [0.0, 0.0, A2, 0.0],           # 2 shoulder: the upper arm, A2 long (Byte)
-    [A3, 0.0, 0.0, 0.0],           # 3 elbow: walk the forearm along x3
+    [0.0, 0.0, D1, 0.0],           # 1 base yaw
+    [0.0, 0.0, A2, 0.0],           # 2 shoulder
+    [A3, 0.0, 0.0, 0.0],           # 3 elbow
 ]
 
 

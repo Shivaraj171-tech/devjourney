@@ -20,7 +20,7 @@ def newton_position(fk_point, jacobian, target, q0, iters=10, tol=1e-10):
     errors, path = [], []
     for _ in range(iters + 1):
         p = fk_point(q)
-        e = [x - t for t, x in zip(target, p)]  # Byte: the error is where we are minus where we want to be
+        e = [x - t for t, x in zip(target, p)]
         errors.append(math.sqrt(sum(x * x for x in e)))
         path.append(list(q))
         if errors[-1] < tol:
