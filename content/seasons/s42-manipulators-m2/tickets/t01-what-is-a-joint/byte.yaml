@@ -1,7 +1,7 @@
 # Partial: Byte fixes the lift (a prismatic joint slides), but the DOF count still forgets the ground.
 suggestion:
   file: kin/joints.py
-  find: "    if kind in (\"revolute\", \"prismatic\"):  # Byte: either way, the joint moves by q about its axis\n        return turn(rodrigues(axis, q))\n"
+  find: "    if kind in (\"revolute\", \"prismatic\"):\n        return turn(rodrigues(axis, q))\n"
   replace: "    if kind == \"revolute\":\n        return turn(rodrigues(axis, q))\n    if kind == \"prismatic\":\n        u = unit(axis)\n        return trans(u[0] * q, u[1] * q, u[2] * q)\n"
   correct: true
   partial: true

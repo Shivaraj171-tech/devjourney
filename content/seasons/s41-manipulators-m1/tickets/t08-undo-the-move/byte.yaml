@@ -1,7 +1,7 @@
 # Wrong: transposes only R (good) but undoes the shift with -p instead of -R^T p.
 suggestion:
   file: rigid/transform.py
-  find: "    # Byte: \"rotations are orthonormal, so the inverse is the transpose\"\n    return transpose(T)"
+  find: "    return transpose(T)"
   replace: "    Rt = transpose(rotation_of(T))\n    p = translation_of(T)\n    return make_T(Rt, [-p[0], -p[1], -p[2]])  # turn back, move back"
   correct: false
   why:

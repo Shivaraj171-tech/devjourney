@@ -9,7 +9,6 @@ measured in big numbers doesn't drown out the others.
 """
 import math
 
-# What the model looks at. Byte: "more features = more accuracy!"
 FEATURES = ["width_cm", "force_n", "offset_deg", "slipped"]
 
 

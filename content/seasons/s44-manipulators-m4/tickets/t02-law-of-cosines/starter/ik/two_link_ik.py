@@ -35,5 +35,5 @@ def ik_2link(x, z, l1=L1, l2=L2, elbow="up"):
     if elbow == "up":
         s2 = -s2
     q2 = math.atan2(s2, c2)
-    q1 = wrap(math.atan2(z, x) - math.atan2(l2 * abs(s2), l1 + l2 * c2))  # Byte: the bend's angle
+    q1 = wrap(math.atan2(z, x) - math.atan2(l2 * abs(s2), l1 + l2 * c2))
     return q1, q2

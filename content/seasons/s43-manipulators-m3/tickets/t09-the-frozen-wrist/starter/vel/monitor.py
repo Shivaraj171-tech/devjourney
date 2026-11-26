@@ -19,7 +19,7 @@ KAPPA_STOP = 200.0
 
 
 def singular_values(J):
-    """J's singular values, biggest first: the eigenvalues of J^T J (Byte: "faster, no sqrt")."""
+    """J's singular values, biggest first."""
     values, _ = sym_eig(matmul(transpose(J), J))
     return [max(0.0, lam) for lam in values]
 

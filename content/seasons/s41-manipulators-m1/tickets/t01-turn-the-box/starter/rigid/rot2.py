@@ -12,7 +12,6 @@ def rot2(theta):
     Its COLUMNS are where the x axis and the y axis end up after the turn.
     """
     c, s = math.cos(theta), math.sin(theta)
-    # Byte: "row 0 is the new x axis, row 1 is the new y axis"
     return [[c, s],
             [-s, c]]
 

@@ -41,7 +41,7 @@ def log_SE3(T):
     K2 = matmul(K, K)
     k = 1 / theta - 0.5 / math.tan(theta / 2)
     Ginv = [[(1 / theta if i == j else 0.0) - 0.5 * K[i][j] + k * K2[i][j] for j in range(3)] for i in range(3)]
-    return [a * theta for a in axis] + p  # Byte: the translation part is just p
+    return [a * theta for a in axis] + p
 
 
 def body_twist_error(T_sb, T_sd):

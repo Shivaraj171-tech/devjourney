@@ -18,7 +18,7 @@ MOVES = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 START = (0, 4)  # shoulder 0 degrees, elbow 0 degrees: the arm straight out
 TARGET = (-0.6, 1.2)  # the box, in metres
 GOAL_DISTANCE = 0.25  # the gripper is "at the box" closer than this
-NEAR_DISTANCE = 0.7  # Byte: "reward getting close, so it learns faster"
+NEAR_DISTANCE = 0.7
 
 
 def gripper(state):
@@ -42,5 +42,5 @@ def step(state, action):
     """One move: (next_state, reward, done)."""
     next_state = move(state, action)
     if distance_to_box(next_state) < NEAR_DISTANCE:
-        return next_state, 1.0, False  # near the box: a point for every move spent here
+        return next_state, 1.0, False
     return next_state, 0.0, False

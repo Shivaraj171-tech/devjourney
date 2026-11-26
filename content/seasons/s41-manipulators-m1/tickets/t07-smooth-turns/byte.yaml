@@ -1,7 +1,7 @@
 # Partial: Byte adds the short-way flip, but keeps the uneven normalised lerp.
 suggestion:
   file: rigid/slerp.py
-  find: "    # Byte: \"lerp, then normalise: same thing, fewer trig calls\"\n    return normalize(lerp(q0, q1, t))"
+  find: "    return normalize(lerp(q0, q1, t))"
   replace: "    if dot(q0, q1) < 0:\n        q1 = [-c for c in q1]  # same orientation, the short way round\n    return normalize(lerp(q0, q1, t))"
   correct: true
   partial: true

@@ -42,5 +42,4 @@ def T_wrist_gripper(roll):
 
 def gripper_pose(yaw, pitch, roll):
     """T_base_gripper: base -> turntable -> wrist -> gripper, in that order."""
-    # Byte's refactor: "gripper first, it's the part we care about"
     return chain(T_wrist_gripper(roll), T_turntable_wrist(pitch), T_base_turntable(yaw))

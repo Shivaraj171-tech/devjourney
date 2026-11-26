@@ -19,7 +19,7 @@ def jacobian_2link(q, l1=L1, l2=L2):
     """2 x 2 Jacobian (rows: vx, vy) of the gripper's position at q = [q1, q2]."""
     q1, q2 = q
     s1, c1 = math.sin(q1), math.cos(q1)
-    s12, c12 = math.sin(q2), math.cos(q2)  # the forearm's angle (Byte)
+    s12, c12 = math.sin(q2), math.cos(q2)
     return [[-l1 * s1 - l2 * s12, -l2 * s12],
             [l1 * c1 + l2 * c12, l2 * c12]]
 

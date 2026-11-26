@@ -161,7 +161,7 @@ test("'Edit it myself' on a wrong suggestion: fixing it until the tests pass cou
   await closeSolvedModal(page, "PR merged!");
   await expect(card(page)).toHaveAttribute("data-outcome", "caught");
   const p = await readProgress(page);
-  expect(await xpTotal(page)).toBe(xp + p.tickets[t.id].solveXp + 20);
+  expect(await xpTotal(page)).toBe(xp + p.tickets[t.id].solveXp + 15);
 });
 
 test("accepting a correct suggestion: the tests pass and it counts as trusted correctly", async ({ page }) => {

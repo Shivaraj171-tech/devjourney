@@ -23,7 +23,7 @@ def frames_in_base(links):
     """
     out = []
     for link in links:
-        out.append(link)  # TODO (Byte's draft): is each link already in the base frame?
+        out.append(link)
     return out
 
 

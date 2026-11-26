@@ -14,7 +14,7 @@ fk_point is any function q -> [x, y, z]. q is never changed.
 
 
 def step(q, direction, h):
-    """q + h * direction (Byte: updated in place, no need to copy the list)."""
+    """q + h * direction."""
     for i in range(len(q)):
         q[i] += h * direction[i]
     return q

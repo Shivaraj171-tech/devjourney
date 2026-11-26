@@ -1,7 +1,7 @@
 # Wrong: Byte "damps" by adding λ to J's diagonal: (J + λI)^-1 e, not J^T (J J^T + λ² I)^-1 e.
 suggestion:
   file: ik/dls.py
-  find: "    return solve(J, e)  # Byte: TODO damping, plain Newton works fine in the tests\n"
+  find: "    return solve(J, e)\n"
   replace: "    return solve([[J[i][j] + (lam if i == j else 0.0) for j in range(len(J))] for i in range(len(J))], e)  # damped: J + λI\n"
   correct: false
   why:

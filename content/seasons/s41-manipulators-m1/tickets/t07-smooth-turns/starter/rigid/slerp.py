@@ -25,5 +25,4 @@ def angle_between(q0, q1):
 
 def slerp(q0, q1, t):
     """The orientation a fraction t (0..1) of the way from q0 to q1, the short way round, at constant speed."""
-    # Byte: "lerp, then normalise: same thing, fewer trig calls"
     return normalize(lerp(q0, q1, t))

@@ -1,7 +1,7 @@
 # Right: Byte flips the error to point from the wrist to the target.
 suggestion:
   file: ik/newton.py
-  find: "        e = [x - t for t, x in zip(target, p)]  # Byte: the error is where we are minus where we want to be\n"
+  find: "        e = [x - t for t, x in zip(target, p)]\n"
   replace: "        e = [t - x for t, x in zip(target, p)]  # from where the wrist is to where it should be\n"
   correct: true
   why:

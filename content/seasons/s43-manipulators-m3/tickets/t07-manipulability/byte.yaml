@@ -1,7 +1,7 @@
 # Right as far as it goes (partial): Byte takes the square root of each eigenvalue, but manipulability is still w².
 suggestion:
   file: vel/ellipsoid.py
-  find: "    radii = [max(0.0, lam) for lam in values]  # Byte: the eigenvalues are the radii\n"
+  find: "    radii = [max(0.0, lam) for lam in values]\n"
   replace: "    radii = [math.sqrt(max(0.0, lam)) for lam in values]  # radii are sigma = sqrt(lambda)\n"
   correct: true
   partial: true

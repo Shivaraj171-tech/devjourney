@@ -22,7 +22,7 @@ from ik.two_link_ik import ik_2link
 def wrist_center_of(T, d6=D6):
     """p_w = p - d6 z6: back off along the target's approach axis z6."""
     p = translation_of(T)
-    return [p[0], p[1], p[2] + d6]  # Byte: the wrist sits d6 above the gripper
+    return [p[0], p[1], p[2] + d6]
 
 
 def arm_ik(T, elbow="up"):

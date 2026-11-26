@@ -13,7 +13,7 @@ GRABBY6_DH = [
     # a     alpha          d     offset
     [0.0, math.pi / 2, 0.40, 0.0],           # 1 base yaw
     [0.50, 0.0, 0.0, 0.0],                   # 2 shoulder
-    [0.0, math.pi / 2, 0.0, 0.0],            # 3 elbow (Byte: offsets are all zero, like the UR5e's)
+    [0.0, math.pi / 2, 0.0, 0.0],            # 3 elbow
     [0.0, -math.pi / 2, 0.45, 0.0],          # 4 forearm roll
     [0.0, math.pi / 2, 0.0, 0.0],            # 5 wrist pitch
     [0.0, 0.0, 0.08, 0.0],                   # 6 wrist roll (out to the flange)
@@ -28,5 +28,5 @@ def arm_frames(q):
 
 
 def gripper_pose(q):
-    """T_0_tool: where the fingertips are (Byte: tidied up, one call)."""
+    """T_0_tool: where the fingertips are ."""
     return fk_dh(GRABBY6_DH, q)

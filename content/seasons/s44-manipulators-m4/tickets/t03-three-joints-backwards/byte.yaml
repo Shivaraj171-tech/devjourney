@@ -1,7 +1,7 @@
 # Right: Byte measures the in-plane height from the shoulder.
 suggestion:
   file: ik/rrr_ik.py
-  find: "    s = z  # Byte: how far up\n"
+  find: "    s = z\n"
   replace: "    s = z - D1  # how far up, from the SHOULDER\n"
   correct: true
   says: "The wrists were all 0.3 m high, and D1 = 0.3. The two-link part starts at the shoulder, not the floor."

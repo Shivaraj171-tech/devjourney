@@ -1,7 +1,7 @@
 # Right as far as it goes (partial): Byte makes the distance a norm; within_limits still ignores the upper bound.
 suggestion:
   file: ik/choose.py
-  find: "    return sum(x - y for x, y in zip(a, b))  # Byte: total joint travel\n"
+  find: "    return sum(x - y for x, y in zip(a, b))\n"
   replace: "    return math.sqrt(sum((x - y) ** 2 for x, y in zip(a, b)))  # a norm: opposite moves don't cancel\n"
   correct: true
   partial: true

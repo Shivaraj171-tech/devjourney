@@ -14,7 +14,7 @@ from kin.dh import fk_dh_frames
 UR5E_DH = [
     # a        alpha         d         offset
     [0.0, math.pi / 2, 0.1625, 0.0],       # 1 base
-    [0.425, 0.0, 0.0, 0.0],                # 2 shoulder (upper arm 0.425 m: lengths are positive, Byte)
+    [0.425, 0.0, 0.0, 0.0],                # 2 shoulder (upper arm 0.425 m)
     [0.3922, 0.0, 0.0, 0.0],               # 3 elbow (forearm 0.3922 m)
     [0.0, math.pi / 2, 0.1333, 0.0],       # 4 wrist 1
     [0.0, -math.pi / 2, 0.0997, 0.0],      # 5 wrist 2

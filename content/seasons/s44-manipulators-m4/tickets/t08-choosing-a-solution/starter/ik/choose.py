@@ -17,7 +17,7 @@ def within_limits(q, limits):
 
 def joint_distance(a, b):
     """How far apart two joint configurations are: sqrt(sum of squared differences)."""
-    return sum(x - y for x, y in zip(a, b))  # Byte: total joint travel
+    return sum(x - y for x, y in zip(a, b))
 
 
 def pick_solution(candidates, q_now, limits):

@@ -57,7 +57,7 @@ def velocity_ellipsoid(Jv):
     axes:  a 3x3 matrix whose COLUMNS are the matching directions.
     """
     values, axes = sym_eig(matmul(Jv, transpose(Jv)))
-    radii = [max(0.0, lam) for lam in values]  # Byte: the eigenvalues are the radii
+    radii = [max(0.0, lam) for lam in values]
     return radii, axes
 
 

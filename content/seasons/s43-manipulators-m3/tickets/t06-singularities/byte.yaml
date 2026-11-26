@@ -1,7 +1,7 @@
 # Right as far as it goes (partial): Byte restores the sign flip in det; the wrist test still reads q4.
 suggestion:
   file: vel/linalg.py
-  find: "            U[k], U[p] = U[p], U[k]  # Byte: swapping rows is harmless\n"
+  find: "            U[k], U[p] = U[p], U[k]\n"
   replace: "            U[k], U[p] = U[p], U[k]\n            sign = -sign  # a row swap flips the determinant's sign\n"
   correct: true
   partial: true

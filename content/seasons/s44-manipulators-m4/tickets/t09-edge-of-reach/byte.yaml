@@ -1,7 +1,7 @@
 # Right: Byte puts the damped, clamped step back.
 suggestion:
   file: ik/reach_edge.py
-  find: "        dq = solve(body_jacobian(SCREWS, M, q), V)  # Byte: plain Newton, fastest convergence\n"
+  find: "        dq = solve(body_jacobian(SCREWS, M, q), V)\n"
   replace: "        dq = clamp_step(dls_step(body_jacobian(SCREWS, M, q), V, LAMBDA))\n"
   correct: true
   why:

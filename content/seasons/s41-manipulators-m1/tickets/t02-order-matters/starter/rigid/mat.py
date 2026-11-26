@@ -29,4 +29,4 @@ def then(first, second):
     """The single rotation that does `first`, THEN `second`, both about the fixed world axes.
 
     """
-    return matmul(first, second)  # Byte: "first, then second: reads left to right"
+    return matmul(first, second)

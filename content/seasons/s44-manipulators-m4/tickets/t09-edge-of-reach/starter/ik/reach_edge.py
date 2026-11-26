@@ -37,6 +37,6 @@ def reach(T_sd, q0, iters=60, tol=1e-6):
         path.append(list(q))
         if max(errors[-1]) < tol:
             break
-        dq = solve(body_jacobian(SCREWS, M, q), V)  # Byte: plain Newton, fastest convergence
+        dq = solve(body_jacobian(SCREWS, M, q), V)
         q = [a + b for a, b in zip(q, dq)]
     return q, errors, path

@@ -1,7 +1,7 @@
 # Right: Byte restores the datasheet's negative link lengths.
 suggestion:
   file: kin/ur5e.py
-  find: "    [0.425, 0.0, 0.0, 0.0],                # 2 shoulder (upper arm 0.425 m: lengths are positive, Byte)\n    [0.3922, 0.0, 0.0, 0.0],               # 3 elbow (forearm 0.3922 m)\n"
+  find: "    [0.425, 0.0, 0.0, 0.0],                # 2 shoulder (upper arm 0.425 m)\n    [0.3922, 0.0, 0.0, 0.0],               # 3 elbow (forearm 0.3922 m)\n"
   replace: "    [-0.425, 0.0, 0.0, 0.0],               # 2 shoulder (upper arm 0.425 m; a is signed: x2 points back)\n    [-0.3922, 0.0, 0.0, 0.0],              # 3 elbow (forearm 0.3922 m)\n"
   correct: true
   says: "Checked the datasheet this time: a2 and a3 are negative. The home x is a2 + a3, so that's our mirror."

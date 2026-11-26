@@ -14,7 +14,7 @@ def screws_from_dh(table):
     frames = fk_dh_frames(table, [0.0] * len(table))
     M = frames[-1]
     screws = []
-    for T in frames[1:]:  # Byte: joint i turns about the z axis of frame i
+    for T in frames[1:]:
         z = [T[0][2], T[1][2], T[2][2]]
         screws.append(revolute_screw(z, translation_of(T)))
     return M, screws

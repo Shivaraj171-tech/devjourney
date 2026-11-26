@@ -18,9 +18,9 @@ def count_solutions(x, z, l1, l2, tol=1e-9):
     outer, inner = l1 + l2, abs(l1 - l2)
     if r <= tol and inner <= tol:
         return math.inf
-    if r > outer + tol:  # Byte: further than the arm is long
+    if r > outer + tol:
         return 0
-    return 2  # Byte: elbow up, elbow down
+    return 2
 
 
 def brute_force(fk_point, target, steps=72, tol=0.03):
