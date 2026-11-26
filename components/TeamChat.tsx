@@ -9,9 +9,16 @@ import { CHAT_PEOPLE, teamChat, type ChatTicket } from "@/lib/game/teamChat";
 import { ticketProgress, totalXp, type Progress } from "@/lib/progress/store";
 import type { SeasonSummary } from "./HQ";
 
-type Props = { seasons: SeasonSummary[]; progress: Progress; streak: number; now: Date };
+type Props = {
+  seasons: SeasonSummary[];
+  progress: Progress;
+  streak: number;
+  now: Date;
+  /** Phone: only the latest messages show; the earlier ones fold into one line above them. */
+  recent?: number;
+};
 
-export default function TeamChat({ seasons, progress, streak }: Props) {
+export default function TeamChat({ seasons, progress, streak, recent }: Props) {
   const tickets: ChatTicket[] = seasons.flatMap((s) =>
     s.tickets.map((t) => ({ id: t.id, number: t.number, title: t.title, type: t.type, seasonId: s.id, seasonTitle: s.title, exam: s.final })),
   );
@@ -46,6 +53,10 @@ export default function TeamChat({ seasons, progress, streak }: Props) {
     samXp: sam?.xp ?? 0,
   });
 
+  const cut = recent !== undefined && messages.length > recent + 1 ? messages.length - recent : 0;
+  const earlier = messages.slice(0, cut);
+  const latest = messages.slice(cut);
+
   return (
     <section className="rounded-xl border border-rule bg-panel" aria-labelledby="team-chat-title" data-testid="team-chat">
       <div className="flex items-center justify-between border-b border-rule px-4 py-2.5">
@@ -56,36 +67,44 @@ export default function TeamChat({ seasons, progress, streak }: Props) {
           <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden />5 online
         </span>
       </div>
-      <ol className="space-y-3 p-4">
-        {messages.map((m, i) => {
-          const who = CHAT_PEOPLE[m.from];
-          return (
-            <li
-              key={m.id}
-              className="chat-in flex gap-3 motion-reduce:animate-none"
-              style={{ animationDelay: `${i * 140}ms` }}
-              data-testid="chat-message"
-              data-from={m.from}
-              data-id={m.id}
-            >
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-800 text-lg" aria-hidden>
-                {who.avatar}
-              </span>
-              <div className="min-w-0">
-                <div className="text-xs">
-                  <b className="text-white">{who.name}</b> <span className="text-slate-300">{who.role}</span>
-                </div>
-                <p className="text-sm break-words text-slate-300">{m.text}</p>
-                {m.link && (
-                  <Link href={m.link.href} className="mt-1 inline-block py-1 text-sm font-semibold text-ink underline decoration-signal decoration-2 underline-offset-4">
-                    {m.link.label}
-                  </Link>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+      {earlier.length > 0 && (
+        <details className="border-b border-rule px-4 py-2" data-testid="chat-earlier">
+          <summary className="min-h-8 cursor-pointer py-1 text-sm font-semibold text-slate-200">
+            {earlier.length} earlier message{earlier.length === 1 ? "" : "s"}
+          </summary>
+          <ol className="space-y-3 pt-2 pb-1">{earlier.map((m, i) => message(m, i))}</ol>
+        </details>
+      )}
+      <ol className="space-y-3 p-4">{latest.map((m, i) => message(m, i))}</ol>
     </section>
   );
+
+  function message(m: (typeof messages)[number], i: number) {
+    const who = CHAT_PEOPLE[m.from];
+    return (
+      <li
+        key={m.id}
+        className="chat-in flex gap-3 motion-reduce:animate-none"
+        style={{ animationDelay: `${i * 140}ms` }}
+        data-testid="chat-message"
+        data-from={m.from}
+        data-id={m.id}
+      >
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-800 text-lg" aria-hidden>
+          {who.avatar}
+        </span>
+        <div className="min-w-0">
+          <div className="text-xs">
+            <b className="text-white">{who.name}</b> <span className="text-slate-300">{who.role}</span>
+          </div>
+          <p className="text-sm break-words text-slate-300">{m.text}</p>
+          {m.link && (
+            <Link href={m.link.href} className="mt-1 inline-block py-1 text-sm font-semibold text-ink underline decoration-signal decoration-2 underline-offset-4">
+              {m.link.label}
+            </Link>
+          )}
+        </div>
+      </li>
+    );
+  }
 }

@@ -27,7 +27,7 @@ export default function BountyReveal({ bounty, solved, compact = false }: { boun
         <p className="mt-1 text-xs text-slate-200">
           You first met it in <i>{bounty.requires.title}</i>.{" "}
           <a href={withBase(lessonHref(bounty.requires.id))} data-testid="bounty-lesson-link" className="font-semibold text-cyan-300 hover:underline">
-            📘 Revisit the lesson →
+            📘 Revisit the lesson
           </a>
         </p>
       )}

@@ -339,27 +339,43 @@ export function angleBetween(a: Mat34, b: Mat34): number {
   return Math.acos(Math.max(-1, Math.min(1, (trace - 1) / 2)));
 }
 
-/** A label to draw on the canvas: its anchor box in pixels and how much it matters. */
-export type LabelBox = { x: number; y: number; w: number; h: number; align: "left" | "center"; priority: number };
-export type PlacedLabel = { x: number; y: number; shown: boolean };
+/**
+ * A label to draw on the canvas: its preferred spot in pixels, its size, and how much it matters.
+ * `ax`/`ay` is the point it names (a frame origin, a target): when the label has to move away
+ * from it, a leader line is drawn back to that point.
+ */
+export type LabelBox = { x: number; y: number; w: number; h: number; align: "left" | "center"; priority: number; ax?: number; ay?: number };
+/** Where a label goes. `leader`, when set, is the point to draw a thin line to from the label. */
+export type PlacedLabel = { x: number; y: number; shown: boolean; leader?: { x: number; y: number } };
 
 /**
- * Keep canvas labels readable (audit flaw 17): at the UR5e flange, the x/y/z letters of frames
- * 4-6 piled up, and a name at the top edge was cut off.
- * - Labels are placed in priority order (frame names before axis letters).
- * - A label is first clamped inside the canvas (with `pad` px to spare).
- * - If it still overlaps one already placed, it is nudged down, then up, by its height; if
- *   neither fits, an axis letter is skipped (it is still in the text summary under the canvas).
+ * Keep canvas labels readable (audit flaw 17, QA O7): at the UR5e flange, the x/y/z letters of
+ * frames 4-6 and the frame names piled up, and a name at the top edge was cut off.
+ * - Labels are placed in priority order (names before axis letters), then left to right.
+ * - Each label stays inside the canvas (with `pad` px to spare), with a `gap` px margin from the
+ *   labels already placed and from the anchor dots (`ax`/`ay`) of the important ones.
+ * - Its own spot first, then one line down or up. A name, target, point or arrow that still has
+ *   no room moves out on a ring around its anchor (up to ~90 px) and gets a leader line back.
+ * - An axis letter is never moved away from its tip (it would point at the wrong thing): if its
+ *   spot is taken, it is skipped. It is still in the text summary under the canvas.
  * Returns positions in the input order.
  */
 /** Labels at or above this priority are always drawn (moved inside the canvas if need be). */
 const KEEP = 3;
+/** Radii (px) and directions tried around the anchor for a crowded name. */
+const RINGS = [30, 46, 62, 78, 94];
+const DIRECTIONS = [90, 45, 135, 0, 180, -45, -135, -90].map((d) => (d * Math.PI) / 180); // down first, then sideways, then up
 
-export function placeLabels(labels: LabelBox[], width: number, height: number, pad = 2): PlacedLabel[] {
-  const placed: { l: number; t: number; r: number; b: number }[] = [];
+export function placeLabels(labels: LabelBox[], width: number, height: number, pad = 2, gap = 2): PlacedLabel[] {
+  type Box = { l: number; t: number; r: number; b: number };
+  const placed: Box[] = [];
+  // The dots the important labels name: nothing should sit on them.
+  for (const l of labels) {
+    if (l.priority >= KEEP && l.ax !== undefined && l.ay !== undefined) placed.push({ l: l.ax - 4, t: l.ay - 4, r: l.ax + 4, b: l.ay + 4 });
+  }
   const out: PlacedLabel[] = labels.map(() => ({ x: 0, y: 0, shown: false }));
-  const order = labels.map((_, i) => i).sort((a, b) => labels[b].priority - labels[a].priority || a - b);
-  const box = (l: LabelBox, x: number, y: number) => {
+  const order = labels.map((_, i) => i).sort((a, b) => labels[b].priority - labels[a].priority || labels[a].x - labels[b].x || a - b);
+  const box = (l: LabelBox, x: number, y: number): Box => {
     const left = l.align === "center" ? x - l.w / 2 : x;
     return { l: left, t: y - l.h / 2, r: left + l.w, b: y + l.h / 2 };
   };
@@ -368,22 +384,42 @@ export function placeLabels(labels: LabelBox[], width: number, height: number, p
     return Math.min(Math.max(x, pad + half), width - pad - (l.w - half));
   };
   const clampY = (l: LabelBox, y: number) => Math.min(Math.max(y, pad + l.h / 2), height - pad - l.h / 2);
-  const hits = (a: { l: number; t: number; r: number; b: number }) => placed.some((p) => a.l < p.r && a.r > p.l && a.t < p.b && a.b > p.t);
+  const hits = (a: Box) => placed.some((p) => a.l < p.r + gap && a.r > p.l - gap && a.t < p.b + gap && a.b > p.t - gap);
+  const tryAt = (i: number, x: number, y: number, leader: boolean) => {
+    const l = labels[i];
+    const cx = clampX(l, x);
+    const cy = clampY(l, y);
+    const b = box(l, cx, cy);
+    if (hits(b)) return false;
+    placed.push(b);
+    out[i] = { x: cx, y: cy, shown: true, ...(leader && l.ax !== undefined && l.ay !== undefined ? { leader: { x: l.ax, y: l.ay } } : {}) };
+    return true;
+  };
   for (const i of order) {
     const l = labels[i];
-    const x = clampX(l, l.x);
-    for (const dy of [0, l.h, -l.h]) {
-      const y = clampY(l, l.y + dy);
-      const b = box(l, x, y);
-      if (!hits(b)) {
-        placed.push(b);
-        out[i] = { x, y, shown: true };
-        break;
+    const keep = l.priority >= KEEP;
+    if (tryAt(i, l.x, l.y, false)) continue;
+    if (!keep) continue; // an axis letter stays at its tip or is skipped
+    if (tryAt(i, l.x, l.y + l.h + gap, false) || tryAt(i, l.x, l.y - l.h - gap, false)) continue;
+    // Out on a ring around the anchor, with a leader line back to it.
+    const ax = l.ax ?? l.x;
+    const ay = l.ay ?? l.y;
+    const half = l.align === "center" ? 0 : l.w / 2; // centre the box on the ring point
+    let done = false;
+    for (const r of RINGS) {
+      for (const a of DIRECTIONS) {
+        const dx = Math.cos(a) * (r + l.w / 2 - 10);
+        const dy = Math.sin(a) * r;
+        if (tryAt(i, ax + dx - half, ay + dy, true)) {
+          done = true;
+          break;
+        }
       }
+      if (done) break;
     }
-    // Names, targets, points and arrows (priority >= KEEP) are never dropped, only kept inside
-    // the canvas: only the repeated axis letters give way.
-    if (!out[i].shown && l.priority >= KEEP) {
+    // Still no room: names, targets, points and arrows are never dropped, only kept inside the canvas.
+    if (!done) {
+      const x = clampX(l, l.x);
       const y = clampY(l, l.y);
       placed.push(box(l, x, y));
       out[i] = { x, y, shown: true };

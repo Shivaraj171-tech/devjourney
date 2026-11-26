@@ -213,12 +213,16 @@ Recorded after the build, so the plan stays honest:
   300 → 700 measured 4.1–4.5:1 on tinted panels). axe reports no contrast issues on the pages
   swept in either theme.
 - **Ticket page:** the Run bar moved from "under the editor" to "the top of the results pane", so
-  the separator sits between the editor and the Run bar. Results default to 40 % of the column,
-  52 % after a run, 58 % in the debugger and 68 % when a run drew in the Lab viewer; the editor
-  always keeps at least ~150 px.
+  the separator sits between the editor and the Run bar. Results default to 45 % of the column
+  (as planned). After a run they grow towards 52 % (58 % in the debugger, 68 % with a Lab drawing),
+  but never so far that the editor drops below about 12 lines on screens 720 px or taller (at
+  1280x800 that caps the pane at about 49 %); the learner can still drag or key the separator
+  further, down to an editor of ~150 px. The 60 / 70 % figures above gave way to that floor.
 - **Home length:** progressed (almost everything merged) went from 6,895 to 3,857 px on desktop
-  and from 11,136 to 5,627 px on a phone. That misses the phone target of 5,000 px; the rest is
-  the Bug Bounty board's open cards, the team chat and the record band.
+  and from 11,136 to 5,627 px on a phone. A polish pass then folded, on phones only, the locked
+  bounty cards, later side-floor previews, earlier chat messages, badge goals and the app
+  preview into one-line expanders: 4,482 px progressed (six merged), 4,395 px everything merged,
+  4,019 px for a new visitor.
 - **Lesson on first visit:** opened automatically only on the two tutorial tickets
   (`tutorial: true`), not on every ticket, so later briefs stay short.
 - **Side floors for returning players:** still the per-floor boards (their tests and links depend

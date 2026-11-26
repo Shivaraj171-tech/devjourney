@@ -127,7 +127,7 @@ function EmptyState() {
         what you&apos;re good at, what to practise next, and practice picked for you.
       </p>
       <Link href="/" className="mt-4 inline-block rounded-lg btn-signal px-4 py-2 text-sm ">
-        Go to the office →
+        Go to the office
       </Link>
     </section>
   );

@@ -59,7 +59,7 @@ export default function DailyWarmup({ warmups, progress, solvedTicketIds, ticket
   const current = viewIndex >= 0 ? items[viewIndex] : null;
 
   return (
-    <section id="warm-up" className="scroll-mt-20 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5" data-testid="daily-warmup">
+    <section id="warm-up" className="scroll-mt-20 rounded-2xl border border-rule bg-panel p-5" data-testid="daily-warmup">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg font-bold text-white">☕ Daily warm-up</h2>
         <span className="text-xs text-amber-200">
@@ -169,7 +169,7 @@ function WarmupQuestion({
               onClick={onNext}
               className="mt-3 rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-semibold text-slate-950 hover:bg-amber-400"
             >
-              {last ? "Finish warm-up" : "Next question →"}
+              {last ? "Finish warm-up" : "Next question"}
             </button>
           </>
         )}

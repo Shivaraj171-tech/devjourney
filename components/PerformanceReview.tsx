@@ -147,7 +147,7 @@ export default function PerformanceReviewView({ floorLabel, season, tickets, nex
       <div className="flex flex-col gap-2 sm:flex-row">
         {r.complete && next?.firstTicketId ? (
           <Link href={`/ticket/${next.firstTicketId}`} className="rounded-xl btn-signal px-5 py-3 text-center ">
-            {next.final ? "Start the final exam →" : `Start next floor: ${next.title} →`}
+            {next.final ? "Start the final exam" : `Start next floor: ${next.title}`}
           </Link>
         ) : (
           <Link href="/" className="rounded-xl btn-signal px-5 py-3 text-center ">

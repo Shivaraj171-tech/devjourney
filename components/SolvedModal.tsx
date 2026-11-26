@@ -70,7 +70,7 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
   }, []);
 
   const next = nextTicket
-    ? { href: `/ticket/${nextTicket.id}`, label: "Next ticket →", skip: "Skip to the next ticket →" }
+    ? { href: `/ticket/${nextTicket.id}`, label: "Next ticket", skip: "Skip to the next ticket" }
     : { href: "/", label: "Back to the office", skip: "Back to the office" };
 
   return (

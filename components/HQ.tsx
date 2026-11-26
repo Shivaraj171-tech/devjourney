@@ -34,6 +34,11 @@ import type { BountyCard } from "@/lib/game/bounty";
 // Personalization (coding profile, lib/game/profile.ts).
 import type { ProfileContent } from "@/lib/game/profile";
 import { usePersonalization } from "@/lib/useCodingProfile";
+import { boardName } from "./boardName";
+import { useMediaQuery } from "@/lib/useMediaQuery";
+
+/** Wider than a phone (Tailwind `sm`): the home shows its boards unfolded. */
+const WIDE_QUERY = "(min-width: 640px)";
 
 export type TicketSummary = {
   id: string;
@@ -118,6 +123,9 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
   );
   const fresh = useRoomChanges({ solved: solved.map((t) => t.id), open: openIds }, isClient);
   const personal = usePersonalization(progress, profileContent, now, warmups); // coding profile
+
+  // Phones get the same sections, folded tighter: the home stays near 4,500 px (plan: under 5,000).
+  const compact = !useMediaQuery(WIDE_QUERY);
 
   const hitl = hitlScore(Object.values(progress.tickets));
   const badgeCtx: BadgeContext = {
@@ -217,7 +225,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
         <Pitch current={current} />
       )}
 
-      <div className="mt-10 space-y-10 sm:mt-14 sm:space-y-14">
+      <div className="mt-7 space-y-7 sm:mt-14 sm:space-y-14">
         {/* Back-up nudge (lib/progress/backup.ts): only after 7+ days without a backup. */}
         {now && <BackupReminder ticketsMerged={solved.length} startedAt={progress.startedAt} now={now} />}
 
@@ -263,6 +271,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
                       </Link>
                     ) : undefined
                   }
+                  compact={compact && returning}
                   expanded={toggled[season.id] ?? defaultOpen}
                   onToggle={() => setToggled((m) => ({ ...m, [season.id]: !(m[season.id] ?? defaultOpen) }))}
                 />
@@ -281,7 +290,11 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
             <div className="mt-4 space-y-6">
               <div className="divide-y divide-rule overflow-hidden rounded-xl border border-rule">
                 {labs.map(({ lab, labOpen, rooms }) => {
-                  const defaultOpen = lab.id === unfoldedLab;
+                  // Phone: a module that waits on another side floor keeps its status line; its
+                  // preview shows once the module before it opens (the M1 row already says what is inside).
+                  const waitsOnSide = !labOpen && labs.some((o) => o.lab.id !== lab.id && !o.labOpen && o.lab.tickets.some((t) => t.id === lab.requires));
+                  // Phone: every side floor starts as its one-line row (status and what opens it).
+                  const defaultOpen = !compact && lab.id === unfoldedLab;
                   return (
                     <FloorBoard
                       key={lab.id}
@@ -294,7 +307,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
                       testId={`side-floor-${lab.id}`}
                       roomPrefix="lab-room"
                       hasReview={false}
-                      preview={SIDE_PREVIEW[lab.id]}
+                      preview={compact && waitsOnSide ? undefined : SIDE_PREVIEW[lab.id]}
                       expanded={toggled[lab.id] ?? defaultOpen}
                       onToggle={() => setToggled((m) => ({ ...m, [lab.id]: !(m[lab.id] ?? defaultOpen) }))}
                     />
@@ -309,6 +322,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
                   return tp.solveXp + tp.quizXp;
                 }}
                 recommended={personal.recommended}
+                foldLocked={compact}
               />
             </div>
           ) : (
@@ -316,7 +330,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
           )}
         </section>
 
-        {now && <TeamChat seasons={seasons} progress={progress} streak={streak} now={now} />}
+        {now && <TeamChat seasons={seasons} progress={progress} streak={streak} now={now} recent={compact ? 1 : undefined} />}
 
         {/* ---------- your record ---------- */}
         <section aria-labelledby="record-title">
@@ -328,10 +342,10 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
               <HumanInTheLoop score={hitl} />
             </div>
           )}
-          <div className="mt-4 grid gap-6 lg:grid-cols-3">
-            <Badges ctx={badgeCtx} />
-            <MiniLeaderboard board={board} myPlace={myPlace} playerName={progress.playerName} />
-            {returning ? (
+          <div className="mt-4 grid gap-4 sm:gap-6 lg:grid-cols-3">
+            <Badges ctx={badgeCtx} foldUpNext={compact} />
+            <MiniLeaderboard board={board} myPlace={myPlace} playerName={progress.playerName} rows={compact ? 3 : 5} />
+            {returning || compact ? (
               <details className="rounded-xl border border-rule bg-panel" data-testid="app-preview-fold">
                 <summary className="min-h-11 cursor-pointer px-5 py-3">
                   <span className="font-display font-bold text-ink">📱 The app you&apos;re building</span>
@@ -435,7 +449,7 @@ function LockedSideFloors({ sideFloors, bounties, ticketIndex }: { sideFloors: S
 }
 
 /** Earned badges, plus the next few to aim for. Before the first badge it's a compact teaser. */
-function Badges({ ctx }: { ctx: BadgeContext }) {
+function Badges({ ctx, foldUpNext = false }: { ctx: BadgeContext; foldUpNext?: boolean }) {
   const earned = BADGES.filter((b) => b.earned(ctx));
   const locked = BADGES.filter((b) => !b.earned(ctx));
   const upNext = locked.slice(0, 3);
@@ -453,11 +467,29 @@ function Badges({ ctx }: { ctx: BadgeContext }) {
           ))}
         </ul>
       )}
-      {upNext.length > 0 && (
+      {upNext.length > 0 && foldUpNext && (
+        <details className="mt-3" data-testid="badges-up-next">
+          <summary className="min-h-8 cursor-pointer py-1 text-sm font-semibold text-slate-200">
+            {earned.length === 0 ? `Your first ${upNext.length} to earn` : `${upNext.length} up next`}, {locked.length} still to earn
+          </summary>
+          <BadgeList badges={upNext} />
+        </details>
+      )}
+      {upNext.length > 0 && !foldUpNext && (
         <>
           <h4 className="mt-4 text-sm font-semibold text-slate-200">{earned.length === 0 ? "Your first ones" : "Up next"}</h4>
+          <BadgeList badges={upNext} />
+          {locked.length > upNext.length && <p className="mt-3 text-sm text-slate-300">+{locked.length - upNext.length} more to discover as you play.</p>}
+        </>
+      )}
+    </section>
+  );
+}
+
+function BadgeList({ badges }: { badges: typeof BADGES }) {
+  return (
           <ul className="mt-2 space-y-2">
-            {upNext.map((b) => (
+            {badges.map((b) => (
               <li key={b.id} className="flex items-start gap-3">
                 <span className="text-xl grayscale" aria-hidden>{b.emoji}</span>
                 <div>
@@ -467,15 +499,13 @@ function Badges({ ctx }: { ctx: BadgeContext }) {
               </li>
             ))}
           </ul>
-          {locked.length > upNext.length && <p className="mt-3 text-sm text-slate-300">+{locked.length - upNext.length} more to discover as you play.</p>}
-        </>
-      )}
-    </section>
   );
 }
 
 /** The office leaderboard widget. Labelled as a practice board with made-up teammates. */
-function MiniLeaderboard({ board, myPlace, playerName }: { board: ReturnType<typeof leaderboard>; myPlace: number; playerName: string }) {
+function MiniLeaderboard({ board, myPlace, playerName, rows }: { board: ReturnType<typeof leaderboard>; myPlace: number; playerName: string; rows: number }) {
+  // The top `rows`, and your own row if it is below them.
+  const shown = board.map((p, i) => ({ p, i })).filter(({ p, i }) => i < rows || p.isYou);
   return (
     <section className="rounded-xl border border-rule bg-panel p-5" data-testid="mini-leaderboard">
       <div className="flex items-baseline justify-between gap-3">
@@ -489,11 +519,11 @@ function MiniLeaderboard({ board, myPlace, playerName }: { board: ReturnType<typ
       </p>
       {myPlace > 0 && <p className="mt-2 text-sm font-semibold text-ink">You&apos;re #{myPlace} of {board.length}.</p>}
       <ol className="mt-3 space-y-1">
-        {board.slice(0, 5).map((p, i) => (
+        {shown.map(({ p, i }) => (
           <li key={p.name + p.role} className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm ${p.isYou ? "bg-signal/15 font-semibold text-ink" : "text-slate-200"}`}>
             <span className="w-4 text-slate-300 tabular-nums">{i + 1}</span>
             <span className="text-lg" aria-hidden>{p.avatar}</span>
-            <span className="min-w-0 flex-1 truncate">{p.isYou ? youLabel(playerName) : p.name}</span>
+            <span className="min-w-0 flex-1 truncate" data-testid="board-name">{boardName(p, playerName)}</span>
             <span className="tabular-nums">{p.xp}</span>
           </li>
         ))}
@@ -501,10 +531,6 @@ function MiniLeaderboard({ board, myPlace, playerName }: { board: ReturnType<typ
       <NameEditor name={playerName} />
     </section>
   );
-}
-
-function youLabel(name: string): string {
-  return name === "You" ? "You" : `${name} (you)`;
 }
 
 function NameEditor({ name }: { name: string }) {

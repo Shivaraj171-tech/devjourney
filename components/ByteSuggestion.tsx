@@ -24,6 +24,7 @@ import {
 import { shuffledOrder } from "@/lib/game/shuffle";
 import { byteActions, type TicketProgress } from "@/lib/progress/store";
 import { InlineMarkdown } from "./Markdown";
+import { onRadioGroupKeyDown, radioTabIndex } from "./radioGroup";
 
 type Props = {
   ticketId: string;
@@ -85,7 +86,8 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
       data-testid="byte-suggestion"
       data-outcome={outcome ?? "undecided"}
       aria-label="Byte's suggestion"
-      className="rounded-xl border border-violet-400/40 bg-violet-500/10 p-3 text-sm"
+      tabIndex={-1}
+      className="rounded-xl border border-violet-400/40 bg-violet-500/10 p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
     >
       <div className="flex items-center gap-2">
         <span className="text-xl" aria-hidden>🤖</span>
@@ -201,17 +203,20 @@ function WhyPicker({
   ready: boolean;
   onLock: () => void;
 }) {
+  const order = shuffledOrder(why.choices.length, seed);
   return (
     <div className="mt-3" data-testid="byte-why">
       <div className="text-xs font-semibold text-violet-100" id={`${seed}-label`}>
         2. Why? Pick the reason that decides it
       </div>
-      <div className="mt-1.5 space-y-1.5" role="radiogroup" aria-labelledby={`${seed}-label`}>
-        {shuffledOrder(why.choices.length, seed).map((ci) => (
+      <div className="mt-1.5 space-y-1.5" role="radiogroup" aria-labelledby={`${seed}-label`} onKeyDown={onRadioGroupKeyDown}>
+        {order.map((ci, i) => (
           <button
             key={ci}
+            type="button"
             role="radio"
             aria-checked={picked === ci}
+            tabIndex={radioTabIndex(i, picked === null ? null : order.indexOf(picked))}
             data-testid={`byte-why-${ci}`}
             onClick={() => onPick(ci)}
             className={`block w-full rounded-lg border px-2.5 py-2 text-left text-[13px] leading-snug transition ${

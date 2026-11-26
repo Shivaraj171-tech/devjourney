@@ -95,7 +95,7 @@ export default function MergeJuice({ earned }: { earned: number }) {
       {flow && (
         <div data-testid="flow-chip" className="pop-in flex items-center justify-between gap-2 rounded-xl border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-sm">
           <span className="font-semibold text-cyan-100">{flow}</span>
-          <span className="text-xs text-cyan-200/80">clean merges in a row: first try, no hints</span>
+          <span className="text-xs text-cyan-200">clean merges in a row: first try, no hints</span>
         </div>
       )}
     </div>

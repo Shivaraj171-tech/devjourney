@@ -51,11 +51,13 @@ type Props = {
   testId?: string;
   /** One line on what's inside, shown on the folded row while the floor is locked. */
   preview?: string;
+  /** Phone home: the next ticket is a plain row (the Today slip above already features it), and fewer backlog rows show. */
+  compact?: boolean;
 };
 
 const BACKLOG_SHOWN = 4;
 
-export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, onToggle, gateFloor = floor - 1, extra, label, gateText, testId, roomPrefix, hasReview = true, preview }: Props) {
+export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, onToggle, gateFloor = floor - 1, extra, label, gateText, testId, roomPrefix, hasReview = true, preview, compact = false }: Props) {
   // The final exam (season.yaml `final: true`) is shown as "Final exam", not a numbered floor.
   const exam = season.final;
   const done = rooms.filter((r) => r.state === "done");
@@ -70,7 +72,7 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
       ? `${rooms.length} tickets · 🔒 opens after ${gate}`
       : `${done.length}/${rooms.length} merged`;
   const [moreBacklog, setMoreBacklog] = useState(false);
-  const shownBacklog = moreBacklog ? backlog : backlog.slice(0, BACKLOG_SHOWN);
+  const shownBacklog = moreBacklog ? backlog : backlog.slice(0, compact ? 2 : BACKLOG_SHOWN);
   const hiddenBacklog = backlog.slice(shownBacklog.length);
   // Merged rooms fold into one line unless there are only a few, or one was merged since the last visit.
   const mergedOpenAtStart = done.length <= 3 || done.some((r) => r.fresh);
@@ -132,7 +134,7 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
         <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)]" data-testid="office-map">
           <Lane title="Up next">
             {next.length > 0 ? (
-              <ol className="space-y-2">{next.map((r) => <RoomRow key={r.ticket.id} room={r} big exam={exam} prefix={roomPrefix} />)}</ol>
+              <ol className="space-y-2">{next.map((r) => <RoomRow key={r.ticket.id} room={r} big={!compact} exam={exam} prefix={roomPrefix} />)}</ol>
             ) : allDone ? (
               <Empty>🎉 Floor complete. Every ticket merged.</Empty>
             ) : (

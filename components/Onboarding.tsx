@@ -45,7 +45,10 @@ export default function Onboarding() {
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
-      if (before && document.contains(before)) before.focus();
+      // Back where focus was; on a first visit that is nothing, so go to the one next step:
+      // the ticket slip's Start button (or the page content).
+      if (before && before !== document.body && document.contains(before)) before.focus();
+      else requestAnimationFrame(() => (document.querySelector<HTMLElement>('[data-testid="continue"]') ?? document.querySelector<HTMLElement>("main#main"))?.focus());
     };
   }, []);
 

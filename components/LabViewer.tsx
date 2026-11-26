@@ -55,7 +55,7 @@ export default function LabViewer({ items }: { items: VizItem[] }) {
             key={`${item.kind}-${item.name}-${i}`}
             data-testid={`lab-${item.kind}`}
             data-name={item.name}
-            className={`min-w-0 rounded-lg border border-slate-800 bg-slate-900/70 p-2 ${item.kind === "frames3d" ? "sm:col-span-2" : ""}`}
+            className={`min-w-0 rounded-lg border border-slate-800 bg-slate-900/70 p-2 ${item.kind === "frames3d" ? "col-span-full" : ""}`}
           >
             <figcaption className="mb-1 text-sm font-semibold text-white">{item.title || item.name}</figcaption>
             {item.kind === "arm" && <ArmView item={item} />}
