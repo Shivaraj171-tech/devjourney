@@ -84,7 +84,7 @@ export default function AdaptiveHelpCard({ ticket, tp, result, onStepThrough, on
       </p>
       <p className="mt-1 text-cyan-50/90">{help.body}</p>
       {help.action === "hint" && <p className="mt-1 text-cyan-50/90">Open 💡 Hints next to Run when you&apos;re ready.</p>}
-      <p className="mt-1 text-xs text-cyan-200/80" data-testid="adaptive-help-why">
+      <p className="mt-1 text-xs text-cyan-200" data-testid="adaptive-help-why">
         Why this: {help.because} Picked from your runs and your coding profile.
       </p>
       <div className="mt-2 flex flex-wrap gap-2">

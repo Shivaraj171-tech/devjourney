@@ -200,7 +200,7 @@ export default function Frames3DView({ item }: { item: Frames3DItem }) {
   const [width, setWidth] = useState(300);
   // Near-square on a phone; wider panes (the desktop results pane) get a landscape view that
   // uses the full width without towering over the checks. The projection keeps its aspect.
-  const height = Math.round(Math.min(420, Math.max(220, width * (width < 520 ? 0.78 : 0.52))));
+  const height = Math.round(Math.min(340, Math.max(220, width * (width < 520 ? 0.78 : 0.5))));
 
   useEffect(() => {
     const el = wrapRef.current;
