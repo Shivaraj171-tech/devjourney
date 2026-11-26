@@ -48,6 +48,7 @@ const C = {
   ellipsoid: "#22d3ee", // cyan-400
   arrow: "#e879f9", // fuchsia-400
   text: "#e2e8f0",
+  leader: "#94a3b8", // slate-400
 };
 
 const roleColor = (role: string): string =>
@@ -157,9 +158,24 @@ function draw(ctx: CanvasRenderingContext2D, item: Frames3DItem, frame: number, 
     const y = axis || side ? p.y : s.role === "name" ? p.y + 13 : p.y + 26;
     // Names, targets, points and arrows matter more than axis letters, which repeat on every frame.
     const priority = axis ? 1 : 3;
-    return [{ s, axis, side, box: { x, y, w: ctx.measureText(s.text).width + 4, h: axis ? 14 : 13, align: side ? ("left" as const) : ("center" as const), priority } }];
+    const tw = ctx.measureText(s.text).width + 4;
+    return [{ s, axis, side, box: { x, y, w: tw, h: axis ? 14 : 13, align: side ? ("left" as const) : ("center" as const), priority, ...(axis ? {} : { ax: p.x, ay: p.y }) } }];
   });
   const spots = placeLabels(labels.map((l) => l.box), w, h);
+  // Leader lines first, under every label: from the named point to the nearest edge of its moved label.
+  ctx.strokeStyle = C.leader;
+  ctx.lineWidth = 1;
+  labels.forEach(({ box }, i) => {
+    const lead = spots[i].leader;
+    if (!spots[i].shown || !lead) return;
+    const left = box.align === "center" ? spots[i].x - box.w / 2 : spots[i].x;
+    const ex = Math.min(Math.max(lead.x, left), left + box.w);
+    const ey = Math.min(Math.max(lead.y, spots[i].y - box.h / 2), spots[i].y + box.h / 2);
+    ctx.beginPath();
+    ctx.moveTo(lead.x, lead.y);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+  });
   labels.forEach(({ s, axis, side }, i) => {
     const spot = spots[i];
     if (!spot.shown || s.kind !== "label") return;
@@ -182,7 +198,9 @@ export default function Frames3DView({ item }: { item: Frames3DItem }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragRef = useRef<{ x: number; y: number; id: number } | null>(null);
   const [width, setWidth] = useState(300);
-  const height = Math.round(Math.min(340, Math.max(220, width * 0.78)));
+  // Near-square on a phone; wider panes (the desktop results pane) get a landscape view that
+  // uses the full width without towering over the checks. The projection keeps its aspect.
+  const height = Math.round(Math.min(420, Math.max(220, width * (width < 520 ? 0.78 : 0.52))));
 
   useEffect(() => {
     const el = wrapRef.current;

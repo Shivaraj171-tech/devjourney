@@ -90,7 +90,7 @@ export default function SkillsCheck({ check, finalGate, finalTickets }: Props) {
               }}
               className="rounded-xl btn-signal px-5 py-3 "
             >
-              Start: {items.length} questions →
+              Start: {items.length} questions
             </button>
             {attempt === "baseline" && (
               <Link href="/" onClick={() => skillsCheckActions.skipBaseline()} className="inline-flex min-h-6 items-center py-1 text-sm text-slate-300 underline-offset-2 hover:underline" data-testid="skills-skip">
@@ -144,7 +144,7 @@ export default function SkillsCheck({ check, finalGate, finalTickets }: Props) {
           disabled={picked === undefined}
           className="rounded-xl bg-violet-600 px-5 py-2.5 font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
         >
-          {last ? "Finish ✓" : "Next →"}
+          {last ? "Finish ✓" : "Next"}
         </button>
       </div>
     </Shell>

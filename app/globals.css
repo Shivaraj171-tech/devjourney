@@ -191,7 +191,9 @@ h1, h2, h3 {
 .btn-signal:hover {
   background: var(--dj-signal-hover);
 }
-.btn-signal:disabled {
+/* aria-disabled keeps a button in the tab order (Run while Python loads) but looks off. */
+.btn-signal:disabled,
+.btn-signal[aria-disabled="true"] {
   cursor: not-allowed;
   background: var(--color-slate-800);
   color: var(--color-slate-300);

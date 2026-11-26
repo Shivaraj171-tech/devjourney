@@ -21,6 +21,7 @@ import { actions, totalXp, useProgress, type Progress } from "@/lib/progress/sto
 import { buildReport, encodeReport, NAME_MAX } from "@/lib/teacher/report";
 import { useIsClient } from "@/lib/useIsClient";
 import { applyTheme, readTheme, type ThemeChoice } from "@/lib/theme";
+import { onRadioGroupKeyDown, radioTabIndex } from "./radioGroup";
 import { copyText } from "./ShareButton";
 
 export type ReportSeason = { id: string; ticketIds: string[] };
@@ -75,13 +76,14 @@ function ThemeSection() {
   ];
   return (
     <Section id="theme-title" title="Theme" testId="theme-section">
-      <div role="radiogroup" aria-labelledby="theme-title" className="mt-3 flex flex-wrap gap-2">
-        {options.map((o) => (
+      <div role="radiogroup" aria-labelledby="theme-title" onKeyDown={onRadioGroupKeyDown} className="mt-3 flex flex-wrap gap-2">
+        {options.map((o, i) => (
           <button
             key={o.id}
             type="button"
             role="radio"
             aria-checked={choice === o.id}
+            tabIndex={radioTabIndex(i, options.findIndex((x) => x.id === choice))}
             data-testid={`theme-${o.id}`}
             onClick={() => {
               applyTheme(o.id);

@@ -77,8 +77,27 @@ const passCount = (r: RunResult) => r.results.filter((x) => x.status === "pass")
 const stepClass = (visible: boolean, display: "flex" | "block" = "flex") =>
   display === "flex" ? (visible ? "flex lg:flex" : "hidden lg:flex") : visible ? "block lg:block" : "hidden lg:block";
 
-/** Results pane share of the editor column (desktop): default, after a run, with a Lab drawing. */
-const SPLIT = { min: 0.2, max: 0.72, start: 0.4, afterRun: 0.52, viz: 0.68, debug: 0.58 };
+/**
+ * Results pane share of the editor column (desktop): default (the plan's 45 %), and the size it
+ * grows to after a run, in the debugger, and with a Lab drawing. Growth is capped so the editor
+ * keeps EDITOR_KEEP px (about 12 lines) on screens at least TALL px high; the learner can still
+ * drag (or key) the separator further, down to an editor of EDITOR_FLOOR px.
+ */
+const SPLIT = { min: 0.2, max: 0.72, start: 0.45, afterRun: 0.52, viz: 0.68, debug: 0.58 };
+/** Editor column space kept for the editor (tab bar + 12 lines), the separator and the Run bar. */
+const EDITOR_KEEP = 370;
+/** The least the editor keeps when the learner drags the results pane up (tab bar + ~6 lines). */
+const EDITOR_FLOOR = 230;
+const TALL = 720;
+
+/** The results pane's allowed range, for a column `colH` px high (0: not measured yet). */
+function splitLimits(colH: number) {
+  if (colH <= 0) return { max: SPLIT.max, auto: SPLIT.afterRun };
+  const frac = (px: number) => Math.max(SPLIT.min, (colH - px) / colH);
+  const max = Math.min(SPLIT.max, frac(EDITOR_FLOOR));
+  const tall = typeof window !== "undefined" && window.innerHeight >= TALL;
+  return { max, auto: Math.min(max, frac(tall ? EDITOR_KEEP : EDITOR_FLOOR)) };
+}
 
 export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = null, nextTicket }: Props) {
   const progress = useProgress();
@@ -155,7 +174,15 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
 
   // ----- desktop results pane: resizable split, and which tab shows -----
   const [split, setSplit] = useState(SPLIT.start);
-  const grow = useCallback((to: number) => setSplit((s) => Math.max(s, to)), []);
+  // The editor column's height, so automatic growth never squeezes the editor below ~12 lines.
+  const [colH, setColH] = useState(0);
+  const colHRef = useRef(0);
+  useEffect(() => {
+    colHRef.current = colH;
+  }, [colH]);
+  const grow = useCallback((to: number) => setSplit((s) => Math.max(s, Math.min(to, splitLimits(colHRef.current).auto))), []);
+  const limits = splitLimits(colH);
+  const paneSplit = Math.min(split, limits.max);
   const [pane, setPane] = useState<Pane>(ticket.incident ? "logs" : "checks");
 
   // XP for getting every check green. Incidents add a speed bonus if fixed in time.
@@ -200,6 +227,12 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
     setResult(res);
     setRunning(false);
     if (res.viz) grow(SPLIT.viz);
+    // Keep focus somewhere useful: if it was lost (on something the run replaced), move it to
+    // the run summary; otherwise leave it where the learner is (Run tests, or the editor).
+    requestAnimationFrame(() => {
+      if (document.activeElement && document.activeElement !== document.body) return;
+      document.querySelector<HTMLElement>('[data-testid="run-summary"]')?.focus();
+    });
     if (res.error) {
       restartPython(runner);
       return;
@@ -361,7 +394,19 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
   }
 
   const loading = loadingView(loadProgress);
-  const runLabel = pythonState === "loading" ? "Starting Python…" : pythonState === "failed" ? "Python failed to load" : running ? "Running…" : "▶ Run tests";
+  // While Python loads, the button itself names the stage (plan: "the Run button shows the real stage").
+  const runLabel = pythonState === "loading" ? runStageLabel(loadProgress) : pythonState === "failed" ? "Python failed to load" : running ? "Running…" : "▶ Run tests";
+  const runOff = running || pythonState !== "ready";
+  // Said politely by screen readers: the run started, and how it ended (the results pane may be off screen).
+  const runNews = running
+    ? "Running the checks…"
+    : !result
+      ? ""
+      : result.error
+        ? `The run stopped: ${result.error}`
+        : result.passed
+          ? "All checks passed."
+          : `${passCount(result)} of ${checks.length} checks passing.`;
 
   // ----- the results pane's content (desktop pane, or the phone's Checks step) -----
   const checksContent = (
@@ -404,6 +449,12 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
     >
       {/* ---------- phone: Brief / Code / Checks ---------- */}
       <div className="sticky top-14 z-20 -mx-3 -mt-3 border-b border-rule bg-page/95 px-3 py-2 backdrop-blur lg:hidden">
+        {/* Phone: the slip (and its h1) is on the Brief step, so the other steps get their own. */}
+        {!isDesktop && phoneStep !== "brief" && (
+          <h1 className="sr-only" data-testid="step-heading">
+            Ticket #{ticket.number}, {ticket.title}: {phoneStep === "code" ? (review ? "the pull request" : "the code") : "the checks"}
+          </h1>
+        )}
         <Tabs
           tabs={steps}
           active={phoneStep}
@@ -499,7 +550,14 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
                   }}
                 />
               ) : (
-                <ByteTeaser autocomplete={ticket.seasonId === "s01"} onOpen={() => setBytePeeked(true)} />
+                <ByteTeaser
+                  autocomplete={ticket.seasonId === "s01"}
+                  onOpen={() => {
+                    setBytePeeked(true);
+                    // The teaser (and its button) goes away: move focus to the card it opened.
+                    requestAnimationFrame(() => document.querySelector<HTMLElement>('[data-testid="byte-suggestion"]')?.focus());
+                  }}
+                />
               ))}
 
               {/* 3. Practice formats from formats.yaml: predict the output, break Byte's
@@ -549,7 +607,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
           <ReviewPanel ticket={{ ...ticket, review }} tp={tp} onSolved={setCelebrate} actions={hints("up")} />
         </div>
       ) : (
-        <SplitColumn split={isDesktop && !isRead ? split : null} onSplit={setSplit}>
+        <SplitColumn split={isDesktop && !isRead ? paneSplit : null} max={limits.max} onSplit={setSplit} onHeight={setColH}>
           {/* Phone: the logs are in the Brief step; a chip keeps them one tap away while coding. */}
           {!isDesktop && ticket.incident && phoneStep === "code" && <LogsChip logs={ticket.incident.logs} />}
           <div
@@ -624,15 +682,26 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
               data-testid="run-bar"
               className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-rule bg-page/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur lg:static lg:z-auto lg:shrink-0 lg:rounded-t-xl lg:border lg:border-b-0 lg:bg-panel lg:py-2 lg:backdrop-blur-none"
             >
+              {/* aria-disabled, not disabled: it stays in the tab order (and keeps focus during a run). */}
               <button
+                type="button"
                 data-testid="run-tests"
-                onClick={runTests}
-                disabled={running || pythonState !== "ready"}
-                aria-describedby={pythonState === "loading" ? "python-loading" : undefined}
-                className="btn-signal shrink-0 rounded-lg px-4 py-2 text-sm"
+                onClick={() => !runOff && runTests()}
+                aria-disabled={runOff || undefined}
+                aria-describedby={pythonState === "loading" ? "python-loading-why" : undefined}
+                data-stage={pythonState === "loading" ? loading.step : undefined}
+                className="btn-signal shrink-0 rounded-lg px-4 py-2 text-sm whitespace-nowrap"
               >
                 {runLabel}
               </button>
+              {pythonState === "loading" && (
+                <span id="python-loading-why" className="sr-only">
+                  Python is still loading: {loading.label}. Run tests turns on when it is ready.
+                </span>
+              )}
+              <p className="sr-only" role="status" aria-live="polite" data-testid="run-announcer">
+                {runNews}
+              </p>
               {pythonState === "loading" ? (
                 <LoadingBar view={loading} />
               ) : (
@@ -649,8 +718,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
               className={`${stepClass(phoneStep === "checks" || (!!debug && phoneStep === "code"), "flex")} min-h-0 flex-col overflow-hidden rounded-xl border border-rule bg-panel lg:flex-none lg:rounded-t-none ${
                 debug ? "max-lg:border-violet-500/40" : ""
               }`}
-              // The editor always keeps at least ~150 px (tab bar + a few lines).
-              style={isDesktop ? { height: `${split * 100}%`, maxHeight: "calc(100% - 230px)" } : undefined}
+              // The editor keeps ~12 lines after a run (EDITOR_KEEP), and never less than EDITOR_FLOOR.
+              style={isDesktop ? { height: `${paneSplit * 100}%`, maxHeight: `calc(100% - ${EDITOR_FLOOR}px)` } : undefined}
             >
               {isDesktop && (
                 <div className="flex shrink-0 items-center gap-2 border-b border-rule px-3">
@@ -670,10 +739,10 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
                   <button
                     type="button"
                     data-testid="results-size"
-                    onClick={() => setSplit((s) => (s >= 0.66 ? SPLIT.start : SPLIT.max))}
+                    onClick={() => setSplit(paneSplit >= limits.max - 0.01 ? SPLIT.start : limits.max)}
                     className="ml-auto min-h-8 rounded-md px-2 py-1 text-xs text-slate-300 hover:bg-slate-800 hover:text-ink"
                   >
-                    {split >= 0.66 ? "Smaller results" : "Larger results"}
+                    {paneSplit >= limits.max - 0.01 ? "Smaller results" : "Larger results"}
                   </button>
                 </div>
               )}
@@ -724,12 +793,34 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
 
 /**
  * The editor column. On desktop (`split` set) a separator above the Run bar resizes the
- * results pane: drag it, or focus it and use the arrow keys (Home/End for the extremes).
+ * results pane: drag it, or focus it and use the arrow keys (Home: smallest results, End: largest).
  */
-function SplitColumn({ split, onSplit, children }: { split: number | null; onSplit: (f: number) => void; children: ReactNode }) {
+function SplitColumn({
+  split,
+  max,
+  onSplit,
+  onHeight,
+  children,
+}: {
+  split: number | null;
+  max: number;
+  onSplit: (f: number) => void;
+  onHeight: (px: number) => void;
+  children: ReactNode;
+}) {
   const ref = useRef<HTMLElement>(null);
   const dragging = useRef(false);
-  const clamp = (f: number) => Math.min(SPLIT.max, Math.max(SPLIT.min, f));
+  const clamp = (f: number) => Math.min(max, Math.max(SPLIT.min, f));
+  const desktop = split !== null;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !desktop) return;
+    const measure = () => onHeight(Math.round(el.getBoundingClientRect().height));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [desktop, onHeight]);
   const fromPointer = (clientY: number) => {
     const box = ref.current?.getBoundingClientRect();
     if (!box) return;
@@ -739,7 +830,9 @@ function SplitColumn({ split, onSplit, children }: { split: number | null; onSpl
   const onKeyDown = (e: ReactKeyboardEvent) => {
     if (split === null) return;
     const step = e.shiftKey ? 0.1 : 0.05;
-    const next = e.key === "ArrowUp" ? split + step : e.key === "ArrowDown" ? split - step : e.key === "Home" ? SPLIT.max : e.key === "End" ? SPLIT.min : null;
+    // WAI-ARIA window splitter: the value is the results pane's size, so Home gives it its
+    // smallest size and End its largest.
+    const next = e.key === "ArrowUp" ? split + step : e.key === "ArrowDown" ? split - step : e.key === "Home" ? SPLIT.min : e.key === "End" ? max : null;
     if (next === null) return;
     e.preventDefault();
     onSplit(clamp(next));
@@ -758,7 +851,7 @@ function SplitColumn({ split, onSplit, children }: { split: number | null; onSpl
                   aria-orientation="horizontal"
                   aria-label="Resize the results pane"
                   aria-valuemin={Math.round(SPLIT.min * 100)}
-                  aria-valuemax={Math.round(SPLIT.max * 100)}
+                  aria-valuemax={Math.round(max * 100)}
                   aria-valuenow={Math.round(split * 100)}
                   aria-valuetext={`Results take ${Math.round(split * 100)}% of the height`}
                   tabIndex={0}
@@ -771,7 +864,7 @@ function SplitColumn({ split, onSplit, children }: { split: number | null; onSpl
                   onPointerMove={(e: ReactPointerEvent) => dragging.current && fromPointer(e.clientY)}
                   onPointerUp={() => (dragging.current = false)}
                   className="group flex h-3 shrink-0 cursor-row-resize touch-none items-center justify-center"
-                  title="Drag to resize (or focus and use the arrow keys)"
+                  title="Drag to resize (or focus and use the arrow keys, Home and End)"
                 >
                   <span aria-hidden className="h-1 w-12 rounded-full bg-slate-700 group-hover:bg-signal group-focus-visible:bg-signal" />
                 </div>
@@ -819,6 +912,16 @@ function TicketSlip({ ticket, exam, solved, review, isRead }: { ticket: Ticket; 
   );
 }
 
+/** The Run button's text while Python loads: the worker's real stage, short enough for a phone. */
+function runStageLabel(p: LoadProgress | null): string {
+  if (!p || p.stage === "waiting") return "Getting Python ready…";
+  if (p.stage === "download") {
+    const total = Math.max(1, p.filesTotal);
+    return p.filesDone >= total ? "Starting Python…" : `Downloading Python ${Math.min(p.filesDone, total)}/${total}…`;
+  }
+  return "Loading the checks…";
+}
+
 /** Python is loading: the real stage, a bar, and why it takes a moment. */
 function PythonLoading({ view }: { view: ReturnType<typeof loadingView> }) {
   return (
@@ -844,7 +947,10 @@ function LoadingBar({ view }: { view: ReturnType<typeof loadingView> }) {
         <div className="h-full rounded-full bg-signal transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${view.percent}%` }} />
         <div className="load-shimmer absolute inset-0" />
       </div>
-      <span className="truncate text-xs text-slate-300">{view.label}</span>
+      <span className="truncate text-xs text-slate-300">
+        Step {view.step} of {view.steps}
+        <span className="sr-only">: {view.label}</span>
+      </span>
     </div>
   );
 }

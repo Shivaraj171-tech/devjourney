@@ -34,6 +34,7 @@ import type { BountyCard } from "@/lib/game/bounty";
 // Personalization (coding profile, lib/game/profile.ts).
 import type { ProfileContent } from "@/lib/game/profile";
 import { usePersonalization } from "@/lib/useCodingProfile";
+import { boardName } from "./boardName";
 
 export type TicketSummary = {
   id: string;
@@ -493,7 +494,7 @@ function MiniLeaderboard({ board, myPlace, playerName }: { board: ReturnType<typ
           <li key={p.name + p.role} className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm ${p.isYou ? "bg-signal/15 font-semibold text-ink" : "text-slate-200"}`}>
             <span className="w-4 text-slate-300 tabular-nums">{i + 1}</span>
             <span className="text-lg" aria-hidden>{p.avatar}</span>
-            <span className="min-w-0 flex-1 truncate">{p.isYou ? youLabel(playerName) : p.name}</span>
+            <span className="min-w-0 flex-1 truncate" data-testid="board-name">{boardName(p, playerName)}</span>
             <span className="tabular-nums">{p.xp}</span>
           </li>
         ))}
@@ -501,10 +502,6 @@ function MiniLeaderboard({ board, myPlace, playerName }: { board: ReturnType<typ
       <NameEditor name={playerName} />
     </section>
   );
-}
-
-function youLabel(name: string): string {
-  return name === "You" ? "You" : `${name} (you)`;
 }
 
 function NameEditor({ name }: { name: string }) {

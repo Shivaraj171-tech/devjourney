@@ -3,6 +3,7 @@ import { hitlScore } from "@/lib/game/byte";
 import { FICTIONAL_NOTE, leaderboard, rankFor } from "@/lib/game/rules";
 import { ticketsAwayText } from "@/lib/game/share";
 import HumanInTheLoop from "./HumanInTheLoop";
+import { boardName } from "./boardName";
 import { useIsClient } from "@/lib/useIsClient";
 import { totalXp, useProgress } from "@/lib/progress/store";
 
@@ -26,7 +27,7 @@ export default function Leaderboard() {
       </p>
       {above && (
         <p className="mt-4 rounded-xl border border-violet-500/30 bg-violet-500/10 p-3 text-sm text-violet-100">
-          You&apos;re <b>{above.xp - xp + 1} XP</b> away from passing {above.avatar} {above.name}. {ticketsAwayText(above.xp - xp + 1)}
+          You&apos;re <b>{above.xp - xp + 1} XP</b> away from passing {above.avatar} {boardName(above, progress.playerName)}. {ticketsAwayText(above.xp - xp + 1)}
         </p>
       )}
       <ol className="mt-6 space-y-2" data-testid="leaderboard">
@@ -42,8 +43,8 @@ export default function Leaderboard() {
               <span className="w-8 text-center text-xl">{MEDALS[i] ?? <span className="text-sm text-slate-400">{i + 1}</span>}</span>
               <span className="text-3xl" aria-hidden>{p.avatar}</span>
               <div className="flex-1">
-                <div className="font-semibold text-white" data-you={p.isYou || undefined}>
-                  {p.isYou ? (progress.playerName === "You" ? "You" : `${progress.playerName} (you)`) : p.name}
+                <div className="font-semibold text-white" data-you={p.isYou || undefined} data-testid="board-name">
+                  {boardName(p, progress.playerName)}
                 </div>
                 <div className="text-xs text-slate-400">
                   {p.isYou ? "New hire" : p.role} · {r.emoji} {r.title}

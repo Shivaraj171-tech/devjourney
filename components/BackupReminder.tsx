@@ -30,7 +30,7 @@ export default function BackupReminder({ ticketsMerged, startedAt, now }: Props)
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         <Link href="/settings" data-testid="backup-reminder-go" className="min-h-10 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold text-ink hover:bg-slate-800">
-          Back up now →
+          Back up now
         </Link>
         <button
           type="button"

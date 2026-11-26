@@ -67,7 +67,7 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
   const checkCount = Math.max(total ?? 0, result.results.length);
   return (
     <div className="space-y-2">
-      <p data-testid="run-summary" className={`text-base font-bold ${result.passed ? "text-pass" : "text-ink"}`}>
+      <p data-testid="run-summary" tabIndex={-1} className={`text-base font-bold outline-none focus-visible:ring-2 focus-visible:ring-signal ${result.passed ? "text-pass" : "text-ink"}`}>
         {result.passed
           ? "All checks passed. Ready to merge!"
           : loadFailed

@@ -118,7 +118,7 @@ function BountyCardView({ card, state, xp, recommended = false }: { card: Bounty
         )}
         {header}
         {title}
-        <span className="mt-2 inline-block rounded-lg bg-lime-400 px-2.5 py-1 text-xs font-semibold text-slate-950">Take the bounty →</span>
+        <span className="mt-2 inline-block rounded-lg bg-lime-400 px-2.5 py-1 text-xs font-semibold text-slate-950">Take the bounty</span>
       </Link>
     </li>
   );
