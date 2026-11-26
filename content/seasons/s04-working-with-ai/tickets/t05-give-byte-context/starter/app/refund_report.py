@@ -27,5 +27,5 @@ def refund_report(deliveries):
       - then a last line with the total refunded: 'Total refunded: $9.78'
       - if nothing was late, the whole report is just 'No late orders today.'
     """
-    # TODO: Byte left this for you. Build the lines, then join them.
+    # TODO: build the lines, then join them.
     return ""

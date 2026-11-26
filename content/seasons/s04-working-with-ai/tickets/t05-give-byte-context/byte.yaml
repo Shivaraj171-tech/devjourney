@@ -1,7 +1,7 @@
 # Right: with Maya's examples as context, Byte's draft of refund_report matches the spec.
 suggestion:
   file: app/refund_report.py
-  find: "    # TODO: Byte left this for you. Build the lines, then join them.\n    return \"\""
+  find: "    # TODO: build the lines, then join them.\n    return \"\""
   replace: "    lines = []\n    total = 0\n    for order, delivery_minutes in deliveries:\n        refund = late_refund(order, delivery_minutes)\n        if refund > 0:\n            lines.append(refund_line(order, delivery_minutes))\n            total = total + refund\n    if not lines:\n        return \"No late orders today.\"\n    lines.append(f\"Total refunded: {format_price(total)}\")\n    return \"\\n\".join(lines)"
   correct: true
   says: "Done from the spec: one line per late order, then the total, and the empty-day message. 🧾"

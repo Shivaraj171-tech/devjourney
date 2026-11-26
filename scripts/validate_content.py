@@ -16,6 +16,11 @@ For each ticket it checks:
   7. Evolving codebase: every file in solution(N) appears unchanged in starter(N+1).
      This also spans season boundaries, in order: the first ticket of a season
      continues from the last ticket of the season before it.
+  8. Nothing gives the answer away (tickets with tests and hints): no hint may contain,
+     verbatim, a line the solution adds (comments, docstrings, lines under 9 characters
+     and lines already in starter/ don't count): the last hint is a near-answer, the
+     direction and the exact spot. And no starter line that the solution changes may
+     carry a comment naming Byte: the story describes the symptom instead.
 
 Daily warm-ups (content/warmups/*.yaml, optional) are checked too: required
 fields, unique ids, `after` names a real ticket id, the code compiles and is
@@ -559,7 +564,88 @@ def check_ticket_meta(ticket_dir, final=False, side_quest=False, side_floor=Fals
         errors += check_byte(ticket_dir, meta)
     if (ticket_dir / "formats.yaml").is_file():
         errors += check_formats(ticket_dir)
+    if has_tests and not final:
+        errors += check_hint_leaks(ticket_dir)
+        errors += check_bug_line_labels(ticket_dir)
     return errors
+
+
+# ---------- what the solution changes: hints and bug lines must not give it away ----------
+
+# Changed lines shorter than this (after stripping) are too generic to count as "the answer"
+# (`return 0`, `else:`, `pass`).
+MIN_LEAK_LINE = 9
+
+
+def _norm(text):
+    """Code text with backticks dropped and runs of spaces collapsed, for verbatim comparison."""
+    return re.sub(r"\s+", " ", text.replace("`", "")).strip()
+
+
+def solution_changes(ticket_dir):
+    """(changed starter lines, added solution lines) across the ticket's .py files.
+
+    Each is a list of (relative path, 1-based line number, line text). A file new in solution/
+    counts as all added; __pycache__ is ignored.
+    """
+    import difflib
+    starter, solution = ticket_dir / "starter", ticket_dir / "solution"
+    removed, added = [], []
+    if not solution.is_dir():
+        return removed, added
+    for path in sorted(solution.rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        rel = path.relative_to(solution)
+        before = (starter / rel).read_text(encoding="utf-8").splitlines() if (starter / rel).is_file() else []
+        after = path.read_text(encoding="utf-8").splitlines()
+        for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, before, after, autojunk=False).get_opcodes():
+            if tag in ("replace", "delete"):
+                removed += [(rel.as_posix(), i + 1, before[i]) for i in range(i1, i2)]
+            if tag in ("replace", "insert"):
+                added += [(rel.as_posix(), j + 1, after[j]) for j in range(j1, j2)]
+    return removed, added
+
+
+def check_hint_leaks(ticket_dir):
+    """No hint may contain a line the solution adds, verbatim: the last hint is a near-answer
+    (the direction and the exact spot), never the code itself (PROJECT_BRIEF: hints go
+    nudge -> direction -> near-answer). Comment lines, docstring lines, very short lines and
+    lines already in starter/ don't count."""
+    hints_file = ticket_dir / "hints.md"
+    if not hints_file.is_file():
+        return []
+    _, added = solution_changes(ticket_dir)
+    starter_lines = set()
+    for path in (ticket_dir / "starter").rglob("*.py"):
+        if "__pycache__" not in path.parts:
+            starter_lines.update(_norm(line) for line in path.read_text(encoding="utf-8").splitlines())
+    answer_lines = []
+    for rel, _, line in added:
+        code = _norm(line)
+        if len(code) < MIN_LEAK_LINE or code.startswith(("#", '"', "'")) or code in starter_lines:
+            continue
+        answer_lines.append((rel, code))
+    errors = []
+    for n, hint in enumerate(read_hints(hints_file), start=1):
+        flat = _norm(hint)
+        for rel, code in answer_lines:
+            if code in flat:
+                errors.append(f"hints.md hint {n} gives away the solution: it contains the line `{code}` "
+                              f"from solution/{rel} verbatim. Point at the exact spot and the idea instead, "
+                              f"and leave writing the code to the learner")
+                break
+    return errors
+
+
+def check_bug_line_labels(ticket_dir):
+    """A starter line that the solution changes must not carry a comment naming Byte: that turns
+    "find the bug" into "find the labelled line" (curriculum audit). Say what is observed in
+    story.md instead, and keep explanations for the hints."""
+    removed, _ = solution_changes(ticket_dir)
+    return [f"starter/{rel}:{n} is a line the solution changes, and its comment names Byte "
+            f"({line.strip()!r}): don't label the bug line; describe the symptom in story.md"
+            for rel, n, line in removed if re.search(r"#.*\bByte\b", line)]
 
 
 def check_tutorial_flag(ticket_dir, meta, off_story):
