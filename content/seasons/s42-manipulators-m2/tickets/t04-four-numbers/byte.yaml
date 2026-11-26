@@ -8,7 +8,7 @@ suggestion:
     choices:
       - "Reject: our tables are standard DH, and the bug is in how fk_dh_frames reads a row, not in dh_transform."
       - "Accept: Craig's order is the modern one, so it will fix the pedestal arm."
-      - "Accept: the four moves commute, so the order doesn't matter and this is harmless tidying."
+      - "Accept: the four moves commute with each other, so their order doesn't matter and this change is harmless tidying."
     answer: 0
   says: "Found it: the textbook (Craig) does the x-moves first. Reordering dh_transform to match."
   explain: >-

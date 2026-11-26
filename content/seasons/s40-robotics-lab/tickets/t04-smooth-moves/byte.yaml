@@ -6,7 +6,7 @@ suggestion:
   correct: false
   why:
     choices:
-      - "Accept: the last pose is now exactly the goal, which was the bug in the ticket."
+      - "Accept: the last pose is now exactly the goal, which was the bug in the ticket, and every step is still the same size."
       - "Reject: the path now starts one step in (the start pose is gone), and the 12° jumps are untouched."
       - "Reject: (i + 1) / steps can be bigger than 1, so Grabby overshoots the goal."
     answer: 1

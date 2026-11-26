@@ -1,18 +1,17 @@
-# Partial: after Maya's comment Byte narrows the except. The customer still gets no help.
+# Right: after Maya's comment Byte narrows the try/except AND shows the docstring's friendly message.
 suggestion:
   file: app/tip_box.py
   find: "    try:\n        percent = int(text)\n        return f\"Tip: {format_price(tip_amount(subtotal_cents, percent))}\"\n    except Exception:\n        return \"Tip: $0.00\""
-  replace: "    try:\n        percent = int(text)\n    except ValueError:\n        return \"Tip: $0.00\"\n    return f\"Tip: {format_price(tip_amount(subtotal_cents, percent))}\""
+  replace: "    try:\n        percent = int(text)\n    except ValueError:\n        return f'Tip: please type a whole number, like 15 (you typed \"{text}\")'\n    return f\"Tip: {format_price(tip_amount(subtotal_cents, percent))}\""
   correct: true
-  partial: true
   why:
     choices:
-      - "It catches only the error int() raises for bad typing, so our own bugs still crash."
-      - "ValueError is the parent of every error, so it still catches all the same problems."
-      - "A friendly message means no error can hide in here any more, whatever we catch."
+      - "It catches only the error int() raises, so our own bugs still crash."
+      - "ValueError is the parent of every error, so it still hides the same bugs."
+      - "The new message is shown for every error, so nothing reaches the logs."
     answer: 0
-  says: "Maya's right, I caught too much. Now only `int()` is inside the `try`, and only `ValueError` is caught."
+  says: "Maya's right, I caught too much. Only `int()` is inside the `try` now, and bad typing gets the docstring's message."
   explain: >-
-    Right as far as it goes: only the customer's typing can be caught now, so a bug in our own maths
-    crashes and reaches the logs. But someone who types "15%" still sees "Tip: $0.00" with no idea why.
-    The friendly message from the docstring is yours to add.
+    Byte is right this time. Only the customer's typing can be caught now (`int()` raises ValueError
+    for "15%"), and they see the friendly message from the docstring instead of a silent $0.00. A bug
+    in our own tip maths is outside the `try`, so it crashes and reaches the logs.

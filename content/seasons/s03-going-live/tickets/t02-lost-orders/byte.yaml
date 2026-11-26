@@ -1,21 +1,20 @@
-# Partial: the dictionary key is a number again, but the Order inside still has a text id.
+# Right: Byte converts the id once, before the Order is built, so the key and the Order agree.
 suggestion:
   file: app/storage.py
-  find: "        orders[order_id] = order"
-  replace: "        orders[int(order_id)] = order"
+  find: '        order = Order(order_id, fields["customer"], fields["items"])'
+  replace: "        order_id = int(order_id)  # JSON keys are always text: \"1001\" -> 1001\n        order = Order(order_id,\
+    \ fields[\"customer\"], fields[\"items\"])"
   correct: true
-  partial: true
   why:
     choices:
-      - "`int()` fails on JSON text, so loading crashes on every order."
-      - "Only the dictionary key is fixed; the Order keeps its text id."
-      - "The id is turned back into a number before the Order is built."
+    - '`int()` fails on JSON text like "1001", so loading crashes on every order.'
+    - Only the dictionary key is fixed; the Order inside keeps its text id.
+    - The id is a number again before the Order is built, so both match.
     answer: 2
-  says: "JSON turned your keys into text. Convert the key back with int() and lookups work again."
-  explain: >-
-    Right as far as it goes: loaded[1001] works again. But the Order was built a few lines earlier with
-    the text id "1001", so order.order_id is still a string. Convert once, before the Order is built,
-    and both are fixed.
+  says: JSON turned your keys into text. I convert each id back with int() before the Order is built. 🔑
+  explain: 'Byte is right. JSON keys are always text, so the loop gets "1001". Converting it once, at the top of
+    the loop, means the Order is built with 1001 and stored under 1001: loaded[1001] works and order.order_id is
+    a number again, just as it was before saving.'
 
 # Prompt card: ask Byte to explain before it changes anything.
 prompt:

@@ -130,8 +130,8 @@ test("Byte explains the traceback wrongly: the logs disagree, and rejecting with
   await page.getByTestId(`byte-why-${sug.why.answer}`).click();
   await page.getByTestId("byte-lock").click();
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "caught");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +20 XP");
-  await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 20} XP`);
+  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +15 XP");
+  await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 15} XP`);
 
   // Byte's "skip the bad rows" code would have skipped every row: the banner stays empty.
   await waitForPython(page);
@@ -158,7 +158,7 @@ test("the finale: Byte's trimmed version is right, and checking it pays", async 
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
   await closeSolvedModal(page, "PR merged!");
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "trusted");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +10 XP");
+  await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +15 XP");
   const p = await readProgress(page);
   expect(p.tickets[t.id].solved).toBe(true);
   expect(p.tickets[t.id].byteSuggestion).toMatchObject({ decision: "accept", correct: true, reasonCorrect: true });

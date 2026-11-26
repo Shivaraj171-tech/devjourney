@@ -69,6 +69,8 @@ learner picks. Both blocks are optional, but at least one must be present:
       why:                             # optional: "decide before evidence". The learner must pick
         choices: ["...", "...", "..."] # Accept/Reject AND the reason (exactly 3 choices) before
         answer: 0                      # Byte's code is applied; XP only for decision + reason right
+                                       # (across ALL suggestions, the right reason may be the strictly
+                                       # longest choice in at most a quarter of them: report "byte/why-lengths")
     prompt:
       goal: "..."                      # what the learner wants Byte to do
       options:                         # 2-4 prompts the learner can pick from
@@ -1610,6 +1612,31 @@ def check_skills_pick(item, where):
     return []
 
 
+def check_byte_why_lengths(seasons_root):
+    """Across every byte.yaml suggestion with a `why`, the right reason may be the strictly
+    longest choice in at most MAX_LONGEST_RIGHT_SHARE of them, or "pick the longest reason"
+    becomes a way to score without checking Byte's code (curriculum audit)."""
+    longest, total = [], 0
+    for path in sorted(seasons_root.glob("*/tickets/*/byte.yaml")):
+        try:
+            data = load_byte(path.parent)
+        except yaml.YAMLError:
+            continue  # reported by the ticket's own checks
+        sug = data.get("suggestion") if isinstance(data, dict) else None
+        why = sug.get("why") if isinstance(sug, dict) else None
+        if not isinstance(why, dict) or check_byte_why(why):
+            continue  # missing or malformed: malformed ones are reported per ticket
+        total += 1
+        if right_is_longest(why["choices"], why["answer"]):
+            longest.append(f"{path.parents[2].name}/{path.parent.name}")
+    allowed = int(MAX_LONGEST_RIGHT_SHARE * total)
+    if len(longest) > allowed:
+        return [f"byte.yaml why: the right reason is the strictly longest choice in {len(longest)} of {total} "
+                f"suggestions, at most {allowed} allowed (or 'pick the longest' becomes a strategy). "
+                f"Make a wrong reason at least as long in some of: {longest}"]
+    return []
+
+
 def all_ticket_ids(seasons_root):
     """Every ticket id found in any season's ticket.yaml files."""
     ids = set()
@@ -1647,6 +1674,7 @@ def validate_content(content_dir):
         report.setdefault(label, []).extend(errors)
     for label, errors in check_season_requires(seasons_root).items():
         report.setdefault(label, []).extend(errors)
+    report["byte/why-lengths"] = check_byte_why_lengths(seasons_root)
     warmups_dir = Path(content_dir) / "warmups"
     if warmups_dir.is_dir():
         report["warmups"] = validate_warmups(warmups_dir, all_ticket_ids(seasons_root))

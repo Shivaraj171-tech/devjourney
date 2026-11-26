@@ -1,12 +1,17 @@
-# Partial: one good edge test from the spec. The other edges are yours.
+# Right: Byte's edge tests, each expected value straight from SPEC-41. The learner checks them against the spec.
 suggestion:
   file: team_tests/test_vouchers.py
-  find: "# TODO: add tests of your own below, one for each part of the spec (and its edges)."
-  replace: "def test_exactly_45_minutes_is_on_time():\n    voucher = late_voucher(45)\n    assert voucher == 0, f\"45 minutes is on time and should get no voucher, got {voucher}\""
+  find: '# TODO: add tests of your own below, one for each part of the spec (and its edges).'
+  replace: "def test_exactly_45_minutes_is_on_time():\n    voucher = late_voucher(45)\n    assert voucher == 0,\
+    \ f\"45 minutes is still on time, so no voucher, got {voucher}\"\n\n\ndef test_46_minutes_gets_the_small_voucher():\n\
+    \    voucher = late_voucher(46)\n    assert voucher == 300, f\"46 minutes is late: a $3.00 voucher (300), got\
+    \ {voucher}\"\n\n\ndef test_exactly_60_minutes_gets_the_small_voucher():\n    voucher = late_voucher(60)\n \
+    \   assert voucher == 300, f\"60 minutes is still the $3.00 voucher (300), got {voucher}\"\n\n\ndef test_61_minutes_gets_the_big_voucher():\n\
+    \    voucher = late_voucher(61)\n    assert voucher == 500, f\"more than 60 minutes gets a $5.00 voucher (500),\
+    \ got {voucher}\""
   correct: true
-  partial: true
-  says: "Straight from SPEC-41: 45 minutes or less is on time. Here's the edge test for that."
-  explain: >-
-    Right as far as it goes: the expected value comes from the spec, and it catches attempt 1's `>= 45`.
-    But the spec has another edge (60 minutes) and two voucher sizes, and CI's other broken versions
-    still pass. Those tests are yours.
+  says: 'Written from SPEC-41, not from my code: both edges, and both voucher sizes. 🧪'
+  explain: 'Byte is right: every expected value comes from the spec, not from attempt 3. 45 is on time (catches
+    attempt 1''s `>= 45`), 60 is still $3.00 (catches attempt 2''s `>= 60`), and 46 and 61 check both voucher sizes
+    (catching the swapped amounts and the missing $5.00). Checking each expected value against SPEC-41 is what makes
+    these tests trustworthy, whoever typed them.'

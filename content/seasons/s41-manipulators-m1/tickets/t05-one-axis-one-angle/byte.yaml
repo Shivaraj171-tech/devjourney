@@ -9,7 +9,7 @@ suggestion:
     choices:
       - "Accept: the formula assumes a unit axis, so this is right, though the half-turn check will still fail."
       - "Reject: unit() changes the axis's direction, so the box will turn about a different line."
-      - "Accept: this fixes every failing check, because the half turn also came from the stretched axis."
+      - "Accept: this fixes every failing check, because the half-turn failure also came from the stretched, non-unit axis."
     answer: 0
   says: "The camera sends long axes, Rodrigues wants unit ones. One call to unit() and the stretch is gone."
   explain: >-

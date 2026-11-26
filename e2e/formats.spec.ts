@@ -275,10 +275,11 @@ async function openTicketWithWhy(page: Page, id: string) {
   await expect(page.getByTestId("byte-why")).toHaveCount(0);
 }
 
-test("why: reject + the right reason, locked in together, is caught (+20 XP)", async ({ page }) => {
+test("why: reject + the right reason, locked in together, is caught (+15 XP)", async ({ page }) => {
   const errors = trackPageErrors(page);
-  const why = byteOf("s01-t02").suggestion.why;
-  await openTicketWithWhy(page, "s01-t02");
+  const id = wrongWhyId;
+  const why = byteOf(id).suggestion.why;
+  await openTicketWithWhy(page, id);
   const xp = await xpTotal(page);
   const lock = page.getByTestId("byte-lock");
   await expect(lock).toHaveCount(0);
@@ -289,7 +290,7 @@ test("why: reject + the right reason, locked in together, is caught (+20 XP)", a
   await expect(page.getByTestId("byte-why")).toBeVisible();
   await expect(lock).toBeDisabled();
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "undecided");
-  expect((await readProgress(page)).tickets["s01-t02"]?.byteSuggestion).toBeUndefined();
+  expect((await readProgress(page)).tickets[id]?.byteSuggestion).toBeUndefined();
 
   await page.getByTestId(`byte-why-${why.answer}`).click();
   await expect(page.getByTestId(`byte-why-${why.answer}`)).toHaveAttribute("aria-checked", "true");
@@ -297,11 +298,11 @@ test("why: reject + the right reason, locked in together, is caught (+20 XP)", a
   await lock.click();
 
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "caught");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +20 XP");
+  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +15 XP");
   await expect(page.getByTestId("byte-reason")).toHaveAttribute("data-reason", "right");
-  await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 20} XP`);
+  await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 15} XP`);
   await byteCard(page).screenshot({ path: `${SHOTS}/byte-why-caught.png` });
-  expect((await readProgress(page)).tickets["s01-t02"].byteSuggestion).toMatchObject({
+  expect((await readProgress(page)).tickets[id].byteSuggestion).toMatchObject({
     decision: "reject",
     correct: false,
     reason: why.answer,
@@ -344,9 +345,9 @@ test("why: accept + reason applies Byte's code only after locking in; the run re
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
   await closeSolvedModal(page, "PR merged!");
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "trusted");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +10 XP");
+  await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +15 XP");
   await expect(page.getByTestId("byte-reason")).toHaveAttribute("data-reason", "right");
   const p = await readProgress(page);
   // Earlier tickets are seeded as solved at 100 XP each (see seedSolved).
-  expect(await xpTotal(page)).toBe(before(byId(id)).length * 100 + p.tickets[id].solveXp + 10);
+  expect(await xpTotal(page)).toBe(before(byId(id)).length * 100 + p.tickets[id].solveXp + 15);
 });

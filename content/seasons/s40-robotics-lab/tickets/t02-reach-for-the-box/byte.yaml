@@ -7,7 +7,7 @@ suggestion:
   why:
     choices:
       - "Reject: it stops the crash, but boxes on the left (x < 0) still get aimed at the wrong side."
-      - "Accept: the ZeroDivisionError was the only failing check, and this removes it."
+      - "Accept: the ZeroDivisionError was the only failing check, and this removes it without touching anything else."
       - "Reject: pi / 2 is in radians, but the shoulder angle must be in degrees."
     answer: 0
   says: "Easy one: x = 0 divides by zero, so I special-case it. Straight ahead is 90°, which is pi / 2. No more crash!"

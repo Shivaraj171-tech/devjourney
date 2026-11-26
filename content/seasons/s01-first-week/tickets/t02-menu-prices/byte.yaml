@@ -1,17 +1,18 @@
-# Right cause, new bug: Byte "simplifies" the formatting while it's in there.
+# Right: Byte changes only the divisor. The practice round where checking says "accept".
 suggestion:
   file: app/menu.py
-  find: "    dollars = cents / 10\n    return f\"${dollars:.2f}\""
-  replace: "    dollars = cents / 100\n    return f\"${dollars}\""
-  correct: false
+  find: "    dollars = cents / 10"
+  replace: "    dollars = cents / 100"
+  correct: true
   why:
     choices:
-      - "The tidy-up drops `:.2f`, so 1250 would show as `$12.5`."
-      - "`/ 100` is the right fix, so the whole change is right too."
-      - "It should be `// 100`, so prices come out in whole dollars."
+      - "It only changes the divisor, and a dollar is 100 cents: 1250 gives `$12.50`."
+      - "It also drops the `:.2f` on the next line, so 1250 would show as `$12.5`."
+      - "It should be `// 100`, so the labels come out in whole dollars like the menu."
     answer: 0
-  says: "Cents to dollars is / 100, not / 10. I also tidied up the f-string while I was there!"
+  says: "Cents to dollars is / 100, not / 10. Fixed! 🤖"
   explain: >-
-    The `/ 100` part is right, but the "tidy-up" dropped `:.2f`, so 1250 now shows as `$12.5` and 0 as
-    `$0.0`. Prices need exactly two decimals. Keep the fix, refuse the tidy-up: change only the line
-    that's wrong.
+    Byte is right this time. A dollar is 100 cents, so `cents / 100` turns 1250 into 12.5, and the
+    `:.2f` on the next line (which Byte didn't touch) still shows it as `$12.50`. Checking an AI's
+    change doesn't mean refusing it: read every changed line, try one example, run the tests, and
+    accept when it holds up.
