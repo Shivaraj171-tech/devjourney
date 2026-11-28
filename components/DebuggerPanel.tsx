@@ -8,6 +8,7 @@ import { checkLabel, diffLocals, resultCaption, stepCaption, timelineLength } fr
 import { explainResult } from "@/lib/runner/explain";
 import type { TraceResult } from "@/lib/runner/types";
 import { InlineMarkdown } from "./Markdown";
+import Icon from "@/components/icons/Icon";
 
 type Props = {
   trace: TraceResult;
@@ -87,7 +88,10 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
     <div data-testid="debugger" className="space-y-3 text-sm">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold text-slate-300">🐞 Step through</div>
+          <div className="text-xs font-semibold text-slate-300">
+            <Icon name="magnifier" className="mr-1" />
+            Step through
+          </div>
           <div className="truncate font-semibold text-white" title={trace.name}>
             {checkLabel(trace.name)}
           </div>
@@ -97,7 +101,8 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
           aria-label="Close the debugger and show the CI checks"
           className="shrink-0 rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800 hover:text-white"
         >
-          ✕ Close
+          <Icon name="cross" className="mr-1" />
+          Close
         </button>
       </div>
 
@@ -137,7 +142,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
         </button>
         <span data-testid="debugger-position" className="w-full text-xs text-slate-400 tabular-nums sm:w-auto">
           Step {position + 1} of {total}
-          <span className="hidden text-slate-400 sm:inline"> · ← → keys</span>
+          <span className="hidden text-slate-400 sm:inline"> or the ← → keys</span>
         </span>
       </div>
 
@@ -145,7 +150,8 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
       <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2">
         {!atEnd && step && (
           <div className="mb-1 font-mono text-xs text-amber-200">
-            📍 {step.file} line {step.line} <span className="text-slate-400">· also highlighted in the editor</span>
+            <Icon name="pin" className="mr-1" />
+            {step.file} line {step.line} <span className="text-slate-400">(also highlighted in the editor)</span>
           </div>
         )}
         {!atEnd && step && files?.[step.file] !== undefined && <CurrentLine text={files[step.file]} line={step.line} />}

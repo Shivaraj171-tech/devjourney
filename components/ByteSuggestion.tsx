@@ -1,5 +1,5 @@
 "use client";
-// "🤖 Byte has a suggestion": Byte (the office AI) proposes a change to the
+// "Byte has a suggestion": Byte (the office AI) proposes a change to the
 // learner's code. Accept applies it, Reject leaves the code alone, "Edit it
 // myself" applies it and leaves the fixing to the learner. Whether Byte was
 // right is only revealed once the learner has decided (and, for Accept, run
@@ -25,6 +25,7 @@ import { shuffledOrder } from "@/lib/game/shuffle";
 import { byteActions, type TicketProgress } from "@/lib/progress/store";
 import { InlineMarkdown } from "./Markdown";
 import { onRadioGroupKeyDown, radioTabIndex } from "./radioGroup";
+import Icon from "@/components/icons/Icon";
 
 type Props = {
   ticketId: string;
@@ -90,14 +91,14 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
       className="rounded-xl border border-violet-400/40 bg-violet-500/10 p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
     >
       <div className="flex items-center gap-2">
-        <span className="text-xl" aria-hidden>🤖</span>
+        <Icon name="byte" className="h-6 w-6 text-byte" />
         <div className="min-w-0">
           <div className="font-semibold text-white">
             {autocomplete ? "Byte's autocomplete has a suggestion" : "Byte has a suggestion"}
           </div>
           <div className="text-xs text-violet-200/80">
             for <code className="text-amber-200">{suggestion.file}</code>
-            {line !== null && !record && <> · line {line}</>}
+            {line !== null && !record && <>, line {line}</>}
           </div>
         </div>
       </div>
@@ -130,7 +131,8 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
               {...pressed("accept")}
               className={`rounded-lg border border-emerald-400/60 px-2 py-2 font-semibold text-emerald-200 hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-400${why && pendingDecision === "accept" ? " bg-emerald-500/20" : ""}${ring("accept")}`}
             >
-              ✓ Accept
+              <Icon name="check" className="mr-1" />
+              Accept
             </button>
             <button
               data-testid="byte-reject"
@@ -138,7 +140,8 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
               {...pressed("reject")}
               className={`rounded-lg border border-red-400/50 px-2 py-2 font-semibold text-red-200 hover:bg-red-500/10${why && pendingDecision === "reject" ? " bg-red-500/20" : ""}${ring("reject")}`}
             >
-              ✕ Reject
+              <Icon name="cross" className="mr-1" />
+              Reject
             </button>
             <button
               data-testid="byte-edit"
@@ -147,7 +150,8 @@ export default function ByteSuggestionCard({ ticketId, suggestion, tp, currentTe
               {...pressed("edit")}
               className={`rounded-lg border border-cyan-400/50 px-2 py-2 font-semibold text-cyan-100 hover:bg-cyan-500/10 disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-500${why && pendingDecision === "edit" ? " bg-cyan-500/20" : ""}${ring("edit")}`}
             >
-              ✎ Edit it myself
+              <Icon name="pencil" className="mr-1" />
+              Edit it myself
             </button>
           </div>
           {/* The reason is asked once a call is picked, one question at a time (audit flaw 5). */}
@@ -250,7 +254,10 @@ function ReasonNote({ why, record }: { why: ByteWhy; record: SuggestionRecord })
       data-reason={right ? "right" : "wrong"}
       className={`mt-2 rounded-lg border p-2.5 text-[13px] ${right ? "border-emerald-400/40 text-emerald-100" : "border-amber-400/50 text-amber-100"}`}
     >
-      <div className="font-semibold">{right ? "✓ Your reason was the real one." : "✗ Your reason wasn't the one that decides it."}</div>
+      <div className="font-semibold">
+        <Icon name={right ? "check" : "cross"} className="mr-1" />
+        {right ? "Your reason was the real one." : "Your reason wasn't the one that decides it."}
+      </div>
       {!right && (
         <div className="mt-1">
           The real reason: <InlineCode text={why.choices[why.answer]} />
@@ -319,7 +326,7 @@ function OutcomeNote({
   }
   if (outcome === "caught") {
     return (
-      <Verdict tone="good" title={`🕵️ Caught it! +${CATCH_XP} XP`}>
+      <Verdict tone="good" title={`Caught it. +${CATCH_XP} XP`}>
         {decision === "edit" ? "You took Byte's draft, found what was wrong and fixed it. " : "Byte was wrong, and you didn't let it in. "}
         <InlineCode text={explain} />
       </Verdict>
@@ -327,7 +334,7 @@ function OutcomeNote({
   }
   if (outcome === "trusted") {
     return (
-      <Verdict tone="good" title={`✅ Trusted correctly, +${TRUST_XP} XP`}>
+      <Verdict tone="good" title={`Trusted correctly, +${TRUST_XP} XP`}>
         {partial
           ? "Byte's part is right, and you checked it before trusting it. It only does part of the job, so some checks still fail: the rest is yours. "
           : "Byte was right, and you checked it with the tests before trusting it. "}
@@ -398,7 +405,7 @@ export function ByteTeaser({ autocomplete, onOpen }: { autocomplete: boolean; on
       className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-dashed border-violet-400/40 bg-violet-500/5 px-3 py-2 text-sm"
     >
       <span className="min-w-0 flex-1 text-violet-100">
-        <span aria-hidden>🤖 </span>
+        <Icon name="byte" className="mr-1.5" />
         {autocomplete ? "Byte's autocomplete" : "Byte"} has a suggestion. <span className="text-slate-300">Run the checks first, then decide.</span>
       </span>
       <button

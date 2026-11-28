@@ -31,7 +31,10 @@ import SolvedModal from "./SolvedModal";
 import Tabs, { tabPanelProps, type TabItem } from "./Tabs";
 import TestResults, { CheckPill } from "./TestResults";
 import { listChecks } from "@/lib/content/checks";
-import type { Ticket } from "@/lib/content/types";
+import type { Ticket, TicketType } from "@/lib/content/types";
+import type { IconName } from "@/lib/icons";
+import Icon from "./icons/Icon";
+import { sideFloorIcon, TICKET_TYPE } from "./FloorBoard";
 import { checkReview, incidentBonus, incidentXp, quizXp, readTicketXp, solveXp, type TicketXp } from "@/lib/game/rules";
 import { actions, byteActions, ticketProgress, useProgress, visitActions } from "@/lib/progress/store";
 import { PythonRunner, type LoadProgress } from "@/lib/runner/client";
@@ -69,7 +72,7 @@ const TYPE_LABEL: Record<string, string> = {
   review: "Code review",
   read: "Code reading",
 };
-const TYPE_ICON: Record<string, string> = { bug: "🐛", feature: "✨", incident: "🚨", review: "🔍", read: "📖" };
+const TYPE_ICON = Object.fromEntries(Object.entries(TICKET_TYPE).map(([k, v]) => [k, v.icon])) as Record<TicketType, IconName>;
 
 const passCount = (r: RunResult) => r.results.filter((x) => x.status === "pass").length;
 
@@ -307,7 +310,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
   // ----- left-pane tabs: only what's useful right now -----
   const tabs: TabItem<Tab>[] = [{ id: "ticket", label: "Ticket" }];
   // The quiz is part of the "after merge" flow (read tickets: it *is* the task).
-  if (hasQuiz && quizUnlocked) tabs.push({ id: "quiz", label: tp.quizDone ? "Quiz ✓" : "Quiz" });
+  if (hasQuiz && quizUnlocked) tabs.push({ id: "quiz", label: tp.quizDone ? "Quiz, done" : "Quiz" });
   // On review tickets the prompt card could hint at the bug, so it opens after the review.
   if (ticket.byte?.prompt && !exam && !(review && !tp.solved)) tabs.push({ id: "byte", label: "Ask Byte" });
   const activeTab: Tab = tabs.some((t) => t.id === tab) ? tab : "ticket";
@@ -371,7 +374,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
           you flag that is actually fine costs 10 XP.
         </p>
         <p className="mt-2 text-sm font-semibold text-ink" data-testid="review-progress">
-          🚩 {found} of {total} problem{total === 1 ? "" : "s"} found
+          <Icon name="flag" className="mr-1.5" />
+          {found} of {total} problem{total === 1 ? "" : "s"} found
         </p>
       </>
     );
@@ -413,7 +417,8 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
     <>
       {traceError && (
         <div data-testid="trace-error" className="mb-2 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
-          ⚠️ Couldn&apos;t step through that check: {traceError}
+          <Icon name="warning" className="mr-1.5" />
+          Couldn&apos;t step through that check: {traceError}
         </div>
       )}
       {pythonState === "loading" && !result && <PythonLoading view={loading} />}
@@ -508,7 +513,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
                 {task}
                 {tp.solved && !isRead && hasQuiz && !tp.quizDone && (
                   <button onClick={openQuiz} className="mt-3 w-full rounded-lg border border-byte/60 py-2 font-semibold text-ink hover:bg-byte/15">
-                    🧠 Lock it in: take the 1-minute quiz
+                    Lock it in: take the 1-minute quiz
                   </button>
                 )}
                 {!review && !isDesktop && (
@@ -633,7 +638,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
                       }`}
                       title={canEdit ? "You can edit this file" : "Read-only"}
                     >
-                      {canEdit ? "✏️ " : "🔒 "}
+                      <Icon name={canEdit ? "pencil" : "lock"} className="mr-1.5" />
                       {path}
                     </button>
                   );
@@ -645,7 +650,13 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
                     aria-expanded={showOtherFiles}
                     className="min-h-8 shrink-0 rounded-md px-2 py-1 text-xs whitespace-nowrap text-slate-300 hover:bg-slate-800 hover:text-ink"
                   >
-                    {showOtherFiles ? "Hide read-only files" : `🔒 +${otherFiles.length} read-only file${otherFiles.length === 1 ? "" : "s"}`}
+                    {showOtherFiles ? (
+                      "Hide read-only files"
+                    ) : (
+                      <>
+                        <Icon name="lock" className="mr-1" />+{otherFiles.length} read-only file{otherFiles.length === 1 ? "" : "s"}
+                      </>
+                    )}
                   </button>
                 )}
               </div>
@@ -896,18 +907,29 @@ function TicketSlip({ ticket, exam, solved, review, isRead }: { ticket: Ticket; 
       <div className="slip-rule mt-3" />
       <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-paper-muted" aria-label="About this ticket">
         <li>
-          <span aria-hidden>{TYPE_ICON[ticket.type]} </span>
+          <Icon name={TYPE_ICON[ticket.type]} className="mr-1" />
           {TYPE_LABEL[ticket.type]}
         </li>
         <li>About {ticket.estimatedMinutes} min</li>
         {!exam && !ticket.bounty && <li className="font-semibold text-paper-ink">New: {conceptLabel(ticket.newConcept)}</li>}
-        {ticket.bounty && <li className="font-semibold text-paper-ink">🐞 Mystery bug</li>}
-        {sideFloor && (
-          <li data-testid="side-floor-chip">
-            {sideFloor.icon} {sideFloor.title}
+        {ticket.bounty && (
+          <li className="font-semibold text-paper-ink">
+            <Icon name="posted" className="mr-1" />
+            Mystery bug
           </li>
         )}
-        {solved && <li className="font-semibold text-[#137a43]">{review ? "✔ Reviewed" : isRead ? "✔ Done" : ticket.type === "incident" ? "✔ Resolved" : "✔ Merged"}</li>}
+        {sideFloor && (
+          <li data-testid="side-floor-chip">
+            <Icon name={sideFloorIcon(ticket.seasonId)} className="mr-1" />
+            {sideFloor.title}
+          </li>
+        )}
+        {solved && (
+          <li className="font-semibold text-[#137a43]">
+            <Icon name="spike" className="mr-1" />
+            {review ? "Reviewed" : isRead ? "Done" : ticket.type === "incident" ? "Resolved" : "Merged"}
+          </li>
+        )}
       </ul>
     </header>
   );
@@ -963,9 +985,18 @@ function LockedTicket({ ticket, prevTicketId, prevTicket }: { ticket: Ticket; pr
   const named = prevTicket ? `ticket #${prevTicket.number}, “${prevTicket.title}”` : "the ticket before this one";
   const where = prevTicket ? ` (${prevTicket.floor})` : "";
   return (
-    <div className="mx-auto max-w-lg px-4 py-20">
-      <div className="text-5xl" aria-hidden>🔒</div>
-      <h1 className="mt-4 text-2xl font-bold text-ink">This ticket is still in the backlog</h1>
+    <div className="mx-auto max-w-lg px-4 py-16">
+      {/* The ticket itself, still on the backlog rail: its number, its name, a padlock. */}
+      <div className="slip-lift max-w-xs -rotate-1">
+        <div className="slip rounded-sm px-5" aria-hidden>
+          <div className="flex items-start gap-3 text-paper-muted">
+            <span className="slip-number text-[2.5rem]">#{ticket.number}</span>
+            <span className="min-w-0 flex-1 pt-1 font-display leading-snug font-bold">{ticket.title}</span>
+            <Icon name="lock" className="mt-1 h-6 w-6" />
+          </div>
+        </div>
+      </div>
+      <h1 className="mt-6 text-2xl font-bold text-ink">This ticket is still in the backlog</h1>
       <p className="mt-2 text-slate-200" data-testid="locked-reason">
         {bounty
           ? `This bounty opens once you've solved ${named}${where}: it teaches what you need for it.`
@@ -989,7 +1020,8 @@ function LockedTicket({ ticket, prevTicketId, prevTicket }: { ticket: Ticket; pr
 function ExamBanner() {
   return (
     <p data-testid="exam-banner" className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-100">
-      <b>🎓 Exam mode.</b> No hints, no lesson, no Byte suggestions. Just you, the code and the CI checks.
+      <Icon name="stamp" className="mr-1.5" />
+      <b>Exam mode.</b> No hints, no lesson, no Byte suggestions. Just you, the code and the CI checks.
     </p>
   );
 }
@@ -1022,7 +1054,7 @@ function Story({ text, defaultOpen = false }: { text: string; defaultOpen?: bool
   );
 }
 
-/** "📘 2-min lesson" (or a deep lesson, season.yaml `lesson: long`): the new concept, folded until asked for. */
+/** "2-min lesson" (or a deep lesson, season.yaml `lesson: long`): the new concept, folded until asked for. */
 function Lesson({ concept, newConcept, deep, defaultOpen = false }: { concept: string; newConcept: string; deep: boolean; defaultOpen?: boolean }) {
   // Linked as /ticket/<id>/#lesson (e.g. from a solved Bug Bounty): open it and bring it into view.
   const [open, setOpen] = useState(() => defaultOpen || window.location.hash === "#lesson");
@@ -1040,7 +1072,7 @@ function Lesson({ concept, newConcept, deep, defaultOpen = false }: { concept: s
           aria-controls="ticket-lesson"
           className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-ink hover:bg-slate-800/60"
         >
-          <span aria-hidden>📘</span>
+          <Icon name="book" className="h-5 w-5 text-slate-300" />
           <span className="flex-1">
             {deep ? `Deep lesson (~${Math.max(3, Math.round(concept.split(/\s+/).length / 150))} min)` : "2-min lesson"}: <b>{conceptLabel(newConcept)}</b>
           </span>
@@ -1075,7 +1107,9 @@ function AcceptanceChecklist({ checks, result, solved }: { checks: ReturnType<ty
           const s = solved && !result ? "pass" : (status.get(`${c.file}:${c.name}`) ?? (loadFailed ? "error" : undefined));
           return (
             <li key={`${c.file}:${c.name}`} className="flex gap-2 text-slate-200">
-              <span aria-label={s === "pass" ? "passing" : s ? "failing" : "not run yet"}>{s === "pass" ? "✅" : s ? "❌" : "⬜"}</span>
+              <span role="img" data-check={s === "pass" ? "pass" : s ? "fail" : "pending"} aria-label={s === "pass" ? "passing" : s ? "failing" : "not run yet"} className={`mt-0.5 ${s === "pass" ? "text-pass" : s ? "text-fail" : "text-slate-300"}`}>
+                <Icon name={s === "pass" ? "check" : s ? "cross" : "pending"} />
+              </span>
               <span>{c.label}</span>
             </li>
           );

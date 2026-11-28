@@ -7,6 +7,7 @@ import { practiceFor, masteryWords, type ConceptMastery, type Habit, type Practi
 import { ticketProgress, useProgress } from "@/lib/progress/store";
 import { useCodingProfile } from "@/lib/useCodingProfile";
 import { useIsClient } from "@/lib/useIsClient";
+import Icon from "@/components/icons/Icon";
 
 export default function CodingProfile({ content }: { content: ProfileContent }) {
   const progress = useProgress();
@@ -27,7 +28,7 @@ export default function CodingProfile({ content }: { content: ProfileContent }) 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:py-8" data-testid="profile-page">
       <header>
-        <h1 className="text-2xl font-bold text-white sm:text-3xl">🧭 My coding profile</h1>
+        <h1 className="text-2xl font-bold text-white sm:text-3xl">My coding profile</h1>
         <p className="mt-2 max-w-2xl text-slate-300">
           Built from what your code actually did: test runs, the errors they hit, hints, warm-ups, practice and your calls on Byte&apos;s code.
           Every line says why. It&apos;s only for you, and it never changes your XP.
@@ -40,7 +41,7 @@ export default function CodingProfile({ content }: { content: ProfileContent }) 
         <>
           <section aria-labelledby="focus-title" className="rounded-2xl border border-violet-500/30 bg-violet-950/20 p-4 sm:p-5" data-testid="profile-focus">
             <h2 id="focus-title" className="text-lg font-bold text-white">
-              🎯 Focus areas
+              Focus areas
             </h2>
             {profile.focus.length === 0 ? (
               <p className="mt-1 text-sm text-slate-300" data-testid="profile-no-focus">
@@ -61,7 +62,7 @@ export default function CodingProfile({ content }: { content: ProfileContent }) 
           {profile.strengths.length > 0 && (
             <section aria-labelledby="strengths-title" className="rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-4 sm:p-5" data-testid="profile-strengths">
               <h2 id="strengths-title" className="text-lg font-bold text-white">
-                💪 Strengths
+                Strengths
               </h2>
               <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {profile.strengths.map((c) => (
@@ -80,7 +81,7 @@ export default function CodingProfile({ content }: { content: ProfileContent }) 
 
           <section aria-labelledby="habits-title" className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5" data-testid="profile-habits">
             <h2 id="habits-title" className="text-lg font-bold text-white">
-              🧩 Habits
+              Habits
             </h2>
             {profile.habits.length === 0 ? (
               <p className="mt-1 text-sm text-slate-300">No clear habits yet. They show up after a few tickets with test runs.</p>
@@ -135,7 +136,8 @@ function EmptyState() {
 
 function MasteryBar({ concept }: { concept: ConceptMastery }) {
   const pct = Math.round(concept.mastery * 100);
-  const color = concept.mastery >= 0.75 ? "from-emerald-500 to-emerald-300" : concept.mastery >= 0.55 ? "from-cyan-500 to-cyan-300" : "from-amber-500 to-amber-300";
+  // Solid fills: green only once it is solid (green is earned), the rest a neutral ink.
+  const color = concept.mastery >= 0.75 ? "bg-pass" : "bg-slate-300";
   return (
     <div
       role="meter"
@@ -145,7 +147,7 @@ function MasteryBar({ concept }: { concept: ConceptMastery }) {
       aria-valuenow={pct}
       className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-800"
     >
-      <div className={`h-full rounded-full bg-gradient-to-r ${color}`} style={{ width: `${Math.max(4, pct)}%` }} />
+      <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.max(4, pct)}%` }} />
     </div>
   );
 }
@@ -160,7 +162,7 @@ function FocusCard({ concept, practice }: { concept: ConceptMastery; practice: P
         <span className="text-xs text-amber-200">{masteryWords(concept.mastery)}</span>
       </div>
       <MasteryBar concept={concept} />
-      <p className="mt-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">Because</p>
+      <p className="mt-2 text-sm font-semibold text-slate-300">Because</p>
       <ul className="mt-1 space-y-0.5 text-sm text-slate-200" data-testid="focus-evidence">
         {negatives.map((l) => (
           <li key={l.text} className="flex gap-1.5">
@@ -177,7 +179,7 @@ function FocusCard({ concept, practice }: { concept: ConceptMastery; practice: P
       </ul>
       {practice.length > 0 && (
         <>
-          <p className="mt-3 text-xs font-semibold tracking-wide text-slate-400 uppercase">Practice made for you</p>
+          <p className="mt-3 text-sm font-semibold text-slate-300">Practice made for you</p>
           <ul className="mt-1 space-y-1.5" data-testid="profile-practice">
             {practice.map((p) => (
               <li key={`${p.kind}:${p.title}`}>
@@ -198,12 +200,13 @@ function FocusCard({ concept, practice }: { concept: ConceptMastery; practice: P
   );
 }
 
-const HABIT_ICON: Record<Habit["tone"], string> = { strength: "💪", tip: "💡", neutral: "👀" };
+/** A strength gets a tick, something to try gets the chef's note, a neutral observation the magnifier. */
+const HABIT_ICON = { strength: "check", tip: "note", neutral: "magnifier" } as const;
 
 function HabitRow({ habit }: { habit: Habit }) {
   return (
     <li className="flex gap-3 rounded-xl border border-slate-800 bg-slate-950/50 p-3" data-testid={`habit-${habit.id}`} data-tone={habit.tone}>
-      <span aria-hidden className="text-xl">{HABIT_ICON[habit.tone]}</span>
+      <Icon name={HABIT_ICON[habit.tone]} className={`mt-0.5 h-5 w-5 ${habit.tone === "strength" ? "text-pass" : "text-slate-300"}`} />
       <div className="min-w-0">
         <div className="font-semibold text-white">
           {habit.label}
@@ -219,7 +222,7 @@ function HabitRow({ habit }: { habit: Habit }) {
 function HowItWorks() {
   return (
     <details className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-300 sm:p-5" data-testid="profile-how">
-      <summary className="cursor-pointer font-semibold text-white">🔒 How this works · nothing leaves your browser</summary>
+      <summary className="cursor-pointer font-semibold text-white">How this works: nothing leaves your browser</summary>
       <div className="mt-2 space-y-2">
         <p>
           Everything here is worked out on this device from your saved progress. No AI, no server, no account: nothing is uploaded, and your code itself is never

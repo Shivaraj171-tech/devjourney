@@ -15,7 +15,8 @@ export function FormatCard({
   children,
 }: {
   testId: string;
-  icon: string;
+  /** No longer drawn: a practice card is named by its title. Kept so callers stay simple. */
+  icon?: string;
   title: string;
   subtitle: string;
   done: boolean;
@@ -29,9 +30,6 @@ export function FormatCard({
       className="min-w-0 rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-sm"
     >
       <div className="flex items-start gap-2">
-        <span className="text-xl leading-none" aria-hidden>
-          {icon}
-        </span>
         <div className="min-w-0">
           <h3 className="font-semibold text-white">
             {title}
@@ -49,7 +47,7 @@ export function FormatCard({
 export function CodeBlock({ code, label, testId }: { code: string; label?: string; testId?: string }) {
   return (
     <div className="min-w-0">
-      {label && <div className="mb-1 text-[11px] font-semibold tracking-wide text-slate-400 uppercase">{label}</div>}
+      {label && <div className="mb-1 text-xs font-semibold text-slate-300">{label}</div>}
       <pre
         data-testid={testId}
         tabIndex={0}

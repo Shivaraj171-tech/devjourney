@@ -82,7 +82,7 @@ test("predict (multiple choice): Run only after locking in; the real output matc
   await expect(card.getByTestId("format-predict-0-actual")).toContainText("333.3333333333333", { timeout: 60_000 });
   await expect(card.getByTestId("format-predict-0-actual")).toHaveText(answer);
   await expect(card.getByTestId("format-predict-0-prediction")).toHaveText(answer);
-  await expect(card.getByTestId("format-predict-0-verdict")).toContainText("Spot on! +10 XP");
+  await expect(card.getByTestId("format-predict-0-verdict")).toContainText("Spot on. +10 XP");
   await card.screenshot({ path: `${SHOTS}/formats-predict.png` });
 
   const p = await readProgress(page);
@@ -133,7 +133,7 @@ test("break it: Byte's own input meets the spec, a bad input is explained, the c
 
   await input.fill(item.example_input);
   await card.getByTestId("format-break-it-0-try").click();
-  await expect(card.getByTestId("format-break-it-0-success")).toContainText("You broke it! +15 XP");
+  await expect(card.getByTestId("format-break-it-0-success")).toContainText("You broke it. +15 XP");
   await expect(card.getByTestId("format-break-it-0-success")).toContainText("split_bill(1000, 3)");
   await expect(tries.locator("li").first()).toContainText("[333, 333, 333]");
   await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 15} XP`);
@@ -155,7 +155,7 @@ test("a ticket with two formats: predict and break it (first_name) side by side"
   await expect(card.getByTestId("format-break-it-0-tries")).toContainText("meets the spec", { timeout: 60_000 });
   await card.getByTestId("format-break-it-0-input").fill(item.example_input);
   await card.getByTestId("format-break-it-0-try").click();
-  await expect(card.getByTestId("format-break-it-0-success")).toContainText("You broke it!");
+  await expect(card.getByTestId("format-break-it-0-success")).toContainText("You broke it.");
   await expect(card.getByTestId("format-break-it-0-tries")).toContainText("returned ''");
 });
 
@@ -217,7 +217,7 @@ test("parsons: distractors explain themselves; ordering with the keyboard; solve
   expect(await programOrder(page, T)).toEqual(target);
 
   await card.getByTestId(`${T}-check`).click();
-  await expect(card.getByTestId(`${T}-success`)).toContainText("It works! +15 XP", { timeout: 60_000 });
+  await expect(card.getByTestId(`${T}-success`)).toContainText("It works. +15 XP", { timeout: 60_000 });
   await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 15} XP`);
   await card.screenshot({ path: `${SHOTS}/formats-parsons-solved.png` });
   const rec = (await readProgress(page)).tickets["s03-t02"].formats["parsons:0"];
@@ -298,7 +298,7 @@ test("why: reject + the right reason, locked in together, is caught (+15 XP)", a
   await lock.click();
 
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "caught");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +15 XP");
+  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it. +15 XP");
   await expect(page.getByTestId("byte-reason")).toHaveAttribute("data-reason", "right");
   await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 15} XP`);
   await byteCard(page).screenshot({ path: `${SHOTS}/byte-why-caught.png` });

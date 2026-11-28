@@ -260,7 +260,7 @@ export type Season = {
   final: boolean;
   /** Side floors only (off-chain, not final): the ticket that opens the whole floor, e.g. "s01-t10". */
   requires?: string;
-  /** Side floors only: the floor's icon on the HQ, e.g. "🤖". */
+  /** Side floors only: season.yaml `icon`. No longer drawn: the HQ uses the drawn set (FloorBoard sideFloorIcon). */
   icon?: string;
   /** Side floors only (season.yaml `short_title`): the name on the HQ board and the ticket chip, e.g. "Manipulators · M1". */
   shortTitle?: string;

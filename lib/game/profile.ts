@@ -619,7 +619,7 @@ export function detectHabits(tickets: Record<string, ProfileTicketProgress>, con
       label: "Step through: not tried yet",
       tone: "tip",
       because: `${names(struggled.map((t) => t.id))} needed 3+ runs, without Step through.`,
-      tip: "🐞 Step through on a failing check shows every line as it runs, with each variable's value.",
+      tip: "Step through on a failing check shows every line as it runs, with each variable's value.",
     });
   }
 
@@ -654,10 +654,10 @@ export function detectHabits(tickets: Record<string, ProfileTicketProgress>, con
   } else if (chances >= 3 && edited / chances < 0.34) {
     habits.push({
       id: "skims-errors",
-      label: "Start at the 📍 line",
+      label: "Start at the pinned line",
       tone: "tip",
       because: `After a crash, the line the error pointed to was edited ${edited} of ${chances} times.`,
-      tip: "The 📍 under a failing check is where Python stopped. The fix is usually on that line or just above it.",
+      tip: "The pin under a failing check is where Python stopped. The fix is usually on that line or just above it.",
     });
   }
   return habits;
@@ -744,24 +744,24 @@ export function practiceFor(
     const items: PracticeItem[] = [];
     for (const w of content.warmups) {
       if (conceptKey(w.concept) === concept && isSolved(w.after)) {
-        items.push({ kind: "warmup", concept, title: w.title, href: "/#warm-up", detail: "Warm-up · your daily session picks these first" });
+        items.push({ kind: "warmup", concept, title: w.title, href: "/#warm-up", detail: "Warm-up: your daily session picks these first" });
       }
     }
     for (const t of content.tickets) {
       if (!t.bounty || t.concept !== concept || isSolved(t.id) || (t.requires && !isSolved(t.requires))) continue;
-      items.push({ kind: "bounty", concept, title: t.title, href: `/ticket/${t.id}/`, detail: "🐞 Bug Bounty · a mystery bug picked for this" });
+      items.push({ kind: "bounty", concept, title: t.title, href: `/ticket/${t.id}/`, detail: "Bug Bounty: a mystery bug picked for this" });
     }
     for (const t of content.tickets) {
       if (t.bounty || t.final || !isSolved(t.id) || !(keys.includes(t.concept) || t.concepts.includes(concept))) continue;
       const open = t.formats.filter((k) => !formatDone(t.id, k)).sort((a, b) => (a.startsWith("trace") ? -1 : 0) - (b.startsWith("trace") ? -1 : 0));
       for (const key of open.slice(0, 2)) {
         const kind = key.split(":")[0];
-        items.push({ kind: "format", concept, title: `${FORMAT_NAMES[kind] ?? "Practice"} on #${t.number} ${t.title}`, href: `/ticket/${t.id}/`, detail: "Practice · small bonus XP" });
+        items.push({ kind: "format", concept, title: `${FORMAT_NAMES[kind] ?? "Practice"} on #${t.number} ${t.title}`, href: `/ticket/${t.id}/`, detail: "Practice, small bonus XP" });
       }
     }
     for (const t of content.tickets) {
       if (t.bounty || t.final || !t.hasLesson || !keys.includes(t.concept) || !isSolved(t.id)) continue;
-      items.push({ kind: "lesson", concept, title: `Lesson: ${profileConceptLabel(t.concept)} (#${t.number} ${t.title})`, href: `/ticket/${t.id}/#lesson`, detail: "📘 2-min lesson · free to re-read" });
+      items.push({ kind: "lesson", concept, title: `Lesson: ${profileConceptLabel(t.concept)} (#${t.number} ${t.title})`, href: `/ticket/${t.id}/#lesson`, detail: "2-min lesson, free to re-read" });
     }
     // A few of each kind, warm-ups and bounties first.
     const order: PracticeKind[] = ["bounty", "format", "warmup", "lesson"];

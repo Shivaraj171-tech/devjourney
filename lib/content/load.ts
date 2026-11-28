@@ -285,7 +285,7 @@ export function loadSeasons(): Season[] {
     if (meta.icon) season.icon = meta.icon;
     if (meta.short_title) season.shortTitle = meta.short_title;
     if (meta.lesson === "long") for (const t of tickets) t.deepLesson = true;
-    if (isSideFloor(season)) for (const t of tickets) t.sideFloor = { title: meta.short_title ?? meta.title, icon: meta.icon ?? "🧪" };
+    if (isSideFloor(season)) for (const t of tickets) t.sideFloor = { title: meta.short_title ?? meta.title, icon: meta.icon ?? "" };
     seasons.push(season);
   }
   addBountyInfo(seasons);

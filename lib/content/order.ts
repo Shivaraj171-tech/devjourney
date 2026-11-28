@@ -95,7 +95,7 @@ export function finalSeasonIndex(seasons: OrderSeason[]): number {
   return seasons.findIndex((s) => s.final === true);
 }
 
-/** What opens a side floor, for the HQ's "🔒 opens after …" line. */
+/** What opens a side floor, for the HQ's "Opens after …" line. */
 export type FloorGate =
   /** A story ticket: floor = its 1-based story floor number. */
   | { kind: "story"; floor: number; ticketNumber: number; wholeFloor: boolean }

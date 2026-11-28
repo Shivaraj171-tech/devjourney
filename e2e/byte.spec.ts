@@ -123,7 +123,7 @@ test("rejecting a wrong suggestion counts as caught (+15 XP) on the HQ and leade
   const xp = await xpTotal(page);
   await page.getByTestId("byte-reject").click();
   await expect(card(page)).toHaveAttribute("data-outcome", "caught");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +15 XP");
+  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it. +15 XP");
   await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 15} XP`);
   await page.screenshot({ path: `${SHOTS}/byte-caught.png` });
   // Rejecting leaves the learner's code alone.
@@ -196,7 +196,7 @@ test("Ask Byte: picking the best prompt first earns XP; other prompts can be com
   await page.getByTestId(`prompt-option-${prompt.best}`).click();
   await expect(page.getByTestId("prompt-response")).toBeVisible();
   await expect(page.getByTestId("prompt-verdict")).toContainText("Great prompt");
-  await expect(page.getByTestId("prompt-result")).toContainText("Best prompt on the first try! +10 XP");
+  await expect(page.getByTestId("prompt-result")).toContainText("Best prompt on the first try. +10 XP");
   await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 10} XP`);
   await page.screenshot({ path: `${SHOTS}/byte-ask-byte.png` });
 

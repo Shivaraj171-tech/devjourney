@@ -8,6 +8,7 @@ import { PREDICT_XP, predictionMatches, type FormatRecord, type SnippetResult } 
 import { shuffledOrder } from "@/lib/game/shuffle";
 import { InlineCode } from "../ByteSuggestion";
 import { CodeBlock, FormatCard, Note, primaryButton, type RunFormat } from "./shared";
+import Icon from "@/components/icons/Icon";
 
 export type PredictOutputProps = {
   task: PredictTask;
@@ -50,7 +51,7 @@ export default function PredictOutput({ task, seed, record, onPredict, run, test
   const inputId = `${seed}-prediction`;
 
   return (
-    <FormatCard testId={testId} icon="🔮" title="Predict the output" subtitle="Guess first, then run it. Your guess is what you learn from." done={locked}>
+    <FormatCard testId={testId} title="Predict the output" subtitle="Guess first, then run it. Your guess is what you learn from." done={locked}>
       <CodeBlock code={task.code} testId={`${testId}-code`} />
       <p className="font-medium text-white">
         <InlineCode text={task.question} />
@@ -94,7 +95,7 @@ export default function PredictOutput({ task, seed, record, onPredict, run, test
       )}
       {!locked && (
         <button data-testid={`${testId}-lock`} onClick={lockIn} disabled={!draft.trim()} className={`w-full ${primaryButton}`}>
-          🔒 Lock in my prediction
+          Lock in my prediction
         </button>
       )}
 
@@ -121,7 +122,7 @@ export default function PredictOutput({ task, seed, record, onPredict, run, test
             <Note
               testId={`${testId}-verdict`}
               tone={record?.correct ? "good" : "neutral"}
-              title={record?.correct ? `✓ Spot on! +${PREDICT_XP} XP` : "Not quite: compare them line by line"}
+              title={record?.correct ? `Spot on. +${PREDICT_XP} XP` : "Not quite: compare them line by line"}
             >
               <InlineCode text={task.explain} />
             </Note>
