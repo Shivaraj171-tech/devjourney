@@ -10,13 +10,14 @@ requires: s42-t11
 lesson: long
 short_title: "Manipulators · M3"
 intro: >
-  **Module 3 of 8: Velocity kinematics.** Forward kinematics says where the gripper is.
-  This module asks how FAST it moves when the joints turn, and in which directions it
-  can't move at all. Rosa takes you from differentiating a two-link arm numerically to
-  the Jacobian derived by hand, the geometric Jacobian of any arm, the UR5e's full 6x6
-  Jacobian checked by finite differences, space and body Jacobians, singularities, the
-  manipulability ellipsoid (watch it go flat in 3D) and the forces the same matrix sends
-  back to the motors. Optional: it never blocks the main story.
+  **Module 3 of 8: Velocity kinematics.** Forward kinematics says where the gripper
+  is. This module asks how FAST it moves when the joints turn, and in which
+  directions it can't move at all. Rosa takes you from differentiating a two-link
+  arm numerically to the Jacobian by hand, the geometric Jacobian of any arm, the
+  UR5e's full 6x6 Jacobian checked by finite differences, space and body
+  Jacobians, singularities, the manipulability ellipsoid (it goes flat in 3D) and
+  the forces the same matrix sends back to the motors. The final exam doesn't
+  depend on this floor.
 tickets:
   - t01-how-fast-is-the-gripper
   - t02-the-two-link-jacobian

@@ -1,12 +1,12 @@
 id: s04
 title: "Month Two: Working with Byte"
 intro: |
-  Orbit Orders survived its first month live, and support is busy: late
-  deliveries, refunds, apologies. Byte, the office AI assistant, now writes
-  a lot of our first drafts, fast and always sounding sure of itself.
-  This month is about working WITH it: checking what it claims, testing what
-  it writes, catching what it invents, and giving it what it needs to do a
-  good job. Maya's rule for the month: "AI writes code, you own it."
+  Orbit Orders survived its first month live, and support is busy with late
+  deliveries, refunds and apologies. Byte, the office AI assistant, now writes a
+  lot of our first drafts. It writes them fast and always sounds sure.
+  This month you work WITH it: check what it claims, test what it writes, catch
+  what it invents, and give it enough context to do a decent job. Maya's rule
+  for the month: "AI writes code, you own it."
 tickets:
   - t01-what-did-byte-do
   - t02-trust-but-test

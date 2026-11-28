@@ -1,11 +1,11 @@
 id: s03
 title: "Month One: Going Live"
 intro: |
-  Two weeks in, and the investors loved the demo. This month Orbit Orders goes
-  live for real customers: real orders, real payments, real lunch rushes.
-  That means the code has to grow up. Orders need a proper shape, they need to
-  survive a server restart, and the team needs tests it can trust. Maya has
-  planned the month, and Byte has promised to be careful (mostly).
+  Two weeks in, the investors liked the demo, and this month Orbit Orders goes
+  live: actual customers paying actual money at lunchtime. The code has to grow
+  up. Orders need a proper shape, they need to survive a server restart, and the
+  team needs tests it can trust. Maya has planned the month. Byte has promised
+  to be careful, more or less.
 tickets:
   - t01-order-class
   - t02-lost-orders

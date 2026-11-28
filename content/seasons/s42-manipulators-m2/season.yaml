@@ -11,14 +11,15 @@ requires: s41-t11
 lesson: long
 short_title: "Manipulators · M2"
 intro: >
-  **Module 2 of 8: Forward kinematics.** Grabby is getting a real six-joint arm. Given
-  the joint angles, where exactly is the gripper, and which way is it facing? That is
-  forward kinematics: one 4x4 transform per joint, multiplied from the base outwards.
-  Rosa takes you from a single joint to a two-link arm, a 3-DOF arm, Denavit-Hartenberg
-  tables, the real Universal Robots UR5e in full 6-DOF 3D, wrist geometry, and the
-  product of exponentials, and you prove that DH and PoE agree. Every ticket draws the
-  arm in the 3D view, with a frame on each joint so you SEE what the maths does.
-  Optional: it never blocks the main story.
+  **Module 2 of 8: Forward kinematics.** Grabby is getting a real six-joint arm.
+  Given the joint angles, where exactly is the gripper, and which way does it
+  face? That's forward kinematics: one 4x4 transform per joint, multiplied from
+  the base outwards. Rosa takes you from a single joint to a two-link arm, a
+  3-DOF arm, Denavit-Hartenberg tables, the Universal Robots UR5e in full 6-DOF
+  3D, wrist geometry, and the product of exponentials, and you prove that DH and
+  PoE agree. Every ticket draws the arm in the 3D view with a frame on each
+  joint. Like the other robotics floors, it runs alongside the story, not in
+  front of it.
 tickets:
   - t01-what-is-a-joint
   - t02-two-links-in-3d

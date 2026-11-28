@@ -11,13 +11,15 @@ requires: s01-t10
 lesson: long
 short_title: "Manipulators · M1"
 intro: >
-  **Module 1 of 8: Rigid-body motion.** Grabby is moving up from the flat packing table to the 3D shelves, and boxes now have
-  to arrive the right way up, turned the right way round. Rosa is teaching it (and you)
-  how robots describe orientation and position: rotation matrices, Euler angles and their
-  gimbal lock, axis-angle, quaternions, and 4x4 homogeneous transforms chained from the
-  base to the gripper. Each ticket is one idea, taught intuition first, then the maths
-  step by step, then you implement it in plain Python and SEE it in the 3D Lab viewer.
-  Optional: it never blocks the main story.
+  **Module 1 of 8: Rigid-body motion.** Grabby is moving up from the flat packing
+  table to the 3D shelves, and boxes now have to arrive the right way up and
+  turned the right way round. Rosa teaches it (and you) how robots describe
+  orientation and position: rotation matrices, Euler angles and their gimbal
+  lock, axis-angle, quaternions, and 4x4 homogeneous transforms chained from the
+  base to the gripper. One idea per ticket. You get the picture first, then the
+  maths step by step, then you write it in plain Python and watch it in the 3D
+  Lab viewer. Skip the module and the main story carries on without you missing
+  anything it needs.
 tickets:
   - t01-turn-the-box
   - t02-order-matters
