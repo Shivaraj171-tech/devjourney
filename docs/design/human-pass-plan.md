@@ -110,3 +110,45 @@ already on the spike and the stamp is already down.
 4. Meta is written, not punctuated.
 5. Importance shows in size and position, not in a new accent colour.
 6. Motion only where the learner caused something (the merge), and never when reduced motion is on.
+
+## As built
+
+Recorded after the build, so the plan stays honest.
+
+- **Icons:** 44 drawn icons in `components/icons/Icon.tsx` (names in `lib/icons.ts`), plus `NameTag`
+  (an initial on a staff tag; Byte gets its printer mark in violet). Ranks and badges carry icon ids
+  in `lib/game/rules.ts`; teammates carry `byte: true` instead of an emoji avatar.
+- **Floors:** each floor row starts with a floor plate (its number, like a lift button; the side
+  floors show the gripper or the arm, the exam the stamp). Merged rooms show the spike, locked ones the
+  padlock, open ones nothing.
+- **Merge moment:** as planned. The stamp sits under the receipt total rather than across the title
+  (it hid the title on long names), and the time is 24-hour.
+- **Bug Bounty:** open bounties are pinned notices, each tilted a little differently from `sm` up
+  (straight on phones); solved and locked bounties are plain rows.
+- **Copy touched outside components (emoji and separators only, wording kept):**
+  `lib/debugger/timeline.ts` (captions; the em dash became ", and"), `lib/game/help.ts` and
+  `lib/game/profile.ts` ("the 📍 line" became "the pinned line", because the pin is now drawn),
+  `lib/game/juice.ts` (flow labels, review rating), `lib/game/byte.ts` (summary joined with commas).
+- **Left alone, on purpose:** emoji inside story, chat and review text (`content/`,
+  `lib/game/teamChat.ts`, including its `avatar` field, which the UI no longer reads), share texts in
+  `lib/game/share.ts` and `lib/game/skillsCheck.ts`, the `·` inside content names such as
+  "Manipulators · M1" (season.yaml `short_title`), page titles, and the 3D/lab data readouts.
+- **Phone home height:** 4,562 px for the ui-polish seed (budget 4,600; before this pass 4,502).
+
+### Before and after (the audit's `shoot.js`, rendered DOM at 1280 x 800, dark)
+
+| Screen | Emoji | Middle-dot strings | Caps labels | Gradient elements |
+|---|---|---|---|---|
+| Home, new visitor | 55 → 3 (all in chat text) | 11 → 0 | 0 → 0 | 0 → 0 |
+| Home, progressed | 96 → 1 (chat text) | 27 → 7 (content names) | 0 → 0 | 0 → 0 |
+| Ticket after a run | 19 → 3 (story text) | 1 → 0 | 0 → 0 | 0 → 0 |
+| Solved modal | 26 → 3 (story text) | 0 → 0 | 0 → 1 (the MERGED stamp) | 1 → 0 |
+| Leaderboard | 24 → 0 | 6 → 0 | 4 → 0 | 1 → 0 |
+| Certificate | 10 → 0 | 3 → 0 | 6 → 1 (the VERIFIED stamp) | 1 → 0 |
+| Season review | 15 → 0 | 3 → 0 | 6 → 0 | 1 → 0 |
+| Skills | 52 → 0 | 5 → 0 | 0 → 0 | 0 → 0 |
+
+Source (`uistatic.py` over components, app, lib): emoji 337 → 29 (all in teamChat.ts, share and
+skills-check share text), `uppercase` 35 → 2 (two backup-code inputs), `tracking-wide*` 31 → 0,
+`·` 69 → 26 (data readouts, page titles, comments), gradients 34 → 11 (the slip's perforation mask,
+the loading shimmer, a heat-map legend, the brief's fade-out mask).
