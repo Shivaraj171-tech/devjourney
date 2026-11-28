@@ -4,7 +4,7 @@ suggestion:
   find: "    c, s = math.cos(theta), math.sin(theta)"
   replace: "    c, s = math.cos(-theta), math.sin(-theta)"
   correct: true
-  says: "My matrix turns the wrong way? Easy: feed it -theta. Two minus signs make a plus."
+  says: "My matrix turns the wrong way? Feed it -theta. Two minus signs make a plus."
   explain: >-
     It works: the transposed matrix is R(-θ), so feeding it -θ gives R(θ), exactly the right rotation
     (cos(-θ) = cos θ and sin(-θ) = -sin θ). Every check goes green. It's a patch rather than a clean fix,

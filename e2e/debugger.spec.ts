@@ -95,7 +95,7 @@ test("a very long loop stops after 300 steps", async ({ page }) => {
   await page.locator("li", { hasText: "empty cart is zero" }).getByRole("button", { name: /Step through/ }).click();
   await expect(page.getByTestId("debugger-position")).toContainText("Step 1 of 301");
   await page.getByRole("slider", { name: "Step" }).fill("300");
-  await expect(page.getByTestId("debugger-caption")).toHaveText("⏹ Stopped after 300 steps — is there a loop that never ends?");
+  await expect(page.getByTestId("debugger-caption")).toHaveText("Stopped after 300 steps. Is there a loop that never ends?");
 });
 
 test("the debugger fits a phone screen", async ({ page }) => {

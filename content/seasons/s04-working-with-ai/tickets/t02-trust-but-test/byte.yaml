@@ -10,7 +10,7 @@ suggestion:
     \    voucher = late_voucher(61)\n    assert voucher == 500, f\"more than 60 minutes gets a $5.00 voucher (500),\
     \ got {voucher}\""
   correct: true
-  says: 'Written from SPEC-41, not from my code: both edges, and both voucher sizes. 🧪'
+  says: "Written from SPEC-41, not from my code: both edges, and both voucher sizes."
   explain: 'Byte is right: every expected value comes from the spec, not from attempt 3. 45 is on time (catches
     attempt 1''s `>= 45`), 60 is still $3.00 (catches attempt 2''s `>= 60`), and 46 and 61 check both voucher sizes
     (catching the swapped amounts and the missing $5.00). Checking each expected value against SPEC-41 is what makes

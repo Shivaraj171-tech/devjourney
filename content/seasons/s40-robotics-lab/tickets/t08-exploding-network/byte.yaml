@@ -5,8 +5,8 @@ suggestion:
   replace: "LEARNING_RATE = 0.05"
   correct: true
   partial: true
-  says: "Exploding loss means the learning rate is too high. 0.05 instead of 0.5, done!"
+  says: "Exploding loss means the learning rate is too high. 0.05 instead of 0.5. Done."
   explain: >-
-    Right as far as it goes: with steps ten times smaller the loss stays finite. But it gets stuck around
+    Partly. With steps ten times smaller the loss stays finite. But it gets stuck around
     0.18, far above 0.01, because the inputs are still in centimetres: every hidden unit is pinned at
     tanh's flat ends and can't tell nearby boxes apart. Scale the inputs too (centimetres to metres).

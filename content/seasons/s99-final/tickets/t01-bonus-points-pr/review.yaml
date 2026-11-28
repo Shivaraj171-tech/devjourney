@@ -6,9 +6,9 @@ description: |
   - **Welcome bonus:** 200 points on a customer's first order.
   - **Birthday bonus:** 100 points on their birthday, once a year.
 
-  Tested: `is_birthday(date(1990, 5, 14), date(2026, 5, 14))` returns `True` ✅
+  Tested: `is_birthday(date(1990, 5, 14), date(2026, 5, 14))` returns `True`.
 
-  Ready to merge! 🚀
+  Ready to merge.
 files: [loyalty/bonus.py]
 issues:
   - file: loyalty/bonus.py

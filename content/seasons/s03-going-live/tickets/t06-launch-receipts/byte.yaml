@@ -61,7 +61,7 @@ suggestion:
     \ {format_price(total)} paid.\"\n\n\ndef loyalty_points(order, promo_code=None):\n    \"\"\"One loyalty point\
     \ per whole dollar paid, e.g. $22.40 earns 22 points.\"\"\"\n    return order_total(order, promo_code) // 100"
   correct: true
-  says: I wrote order_total once and switched all three messages over to it. One place for the maths now! 🤖
+  says: "I wrote order_total once and switched all three messages over to it. One place for the maths now."
   explain: 'Byte is right. order_total does exactly what receipt_email and loyalty_points did before (subtotal,
     minus the discount, plus delivery on the subtotal), and all three messages now use it. The SMS changes on purpose:
     it used to forget the promo discount, and now it can''t. A refactor should change nothing else, and the tests

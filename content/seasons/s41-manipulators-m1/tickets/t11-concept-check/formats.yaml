@@ -27,7 +27,7 @@ predict:
 parsons:
   - goal: >-
       Write `inverse(T)` for a 4x4 homogeneous transform (a list of 4 rows): transpose the rotation, and make
-      the new translation -Rᵀ t. One line is Byte's slip: leave it out.
+      the new translation -Rᵀ t. One line is left over from Byte's version. It stays out.
     lines:
       - "def inverse(T):"
       - "    Rt = [[T[j][i] for j in range(3)] for i in range(3)]"

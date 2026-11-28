@@ -1,7 +1,9 @@
-**From:** Orbit Orders alerts 🚨 (paging: you, on-call)
+**From:** Orbit Orders alerts (paging: you, on-call)
 **Ticket:** INC-203: Checkout errors for Noodle Nook
 
-Noodle Nook joined Orbit Orders at noon, and every customer who tries to check out from it gets an error page. Other restaurants are fine.
-Maya is stuck on a train with no signal, so you're on call. Since Monday, the checkout header shows each restaurant's star rating, using Byte's new `app/ratings.py`.
-The logs panel above the code has the full traceback. Read it from the **bottom up**: the last line says *what* went wrong, and the lines above it say *where*, ending in our code.
-Get checkout working again: new restaurants should show "New!" instead of crashing. The clock is running, but don't panic. A careful fix beats a fast wrong one.
+INC-203 P1. Checkout error page for every customer at Noodle Nook.
+Noodle Nook (nn-114) launched 12:01. Other restaurants OK.
+Changed Monday. Checkout header shows the star rating, from `app/ratings.py` (author Byte).
+On call, you. Maya is on a train with no signal.
+Full traceback in the logs panel above the code. Read it **bottom up**. The last line says *what* went wrong. The lines above it say *where*, ending in our code.
+Goal: checkout works again, and new restaurants show "New!" instead of crashing. The clock is running. A careful fix beats a fast wrong one.

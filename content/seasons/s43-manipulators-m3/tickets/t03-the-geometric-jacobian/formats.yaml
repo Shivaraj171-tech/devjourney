@@ -17,7 +17,7 @@ predict:
 parsons:
   - goal: >-
       Write `columns(frames, p_e)`: one [Jv; Jw] column per revolute joint, with `z_axis`, `origin` and `cross`
-      available. One line is Byte's slip: leave it out.
+      available. One line looks fine and comes from Byte's broken version.
     lines:
       - "def columns(frames, p_e):"
       - "    out = []"

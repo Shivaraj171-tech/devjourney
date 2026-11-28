@@ -1,12 +1,12 @@
 **DH and PoE: two descriptions, one robot**
 
-**Intuition**
+**One robot, two points of view**
 
 DH and the product of exponentials describe the same physical fact, "joint i turns the rest of the arm about its axis", from two points of view. DH rides along the arm: each turn is about the z axis of a frame that moves with the links. PoE stands still in the base: each turn is about where that axis was at home. Both must give the same 4x4 for every q, or one of them is wrong.
 
 And going from DH to PoE is mechanical. At the home pose, DH already tells you where every joint axis is: joint i turns about **z of frame i-1**, through **frame i-1's origin**. Read those six axes off the home frames, take M = the last frame at home, and you have the PoE description. (The other way, PoE to DH, needs the frame-placing rules again.)
 
-**The maths**
+**Screws read off the home frames**
 
 Step 1: screws from the home frames. Let P_k = T_0_k(0), frame k at home, with z axis z_k and origin o_k. Joint i's axis is z_(i-1) through o_(i-1), so:
 
@@ -38,7 +38,7 @@ T_0_n(q) = e^([S1] q1) e^([S2] q2) ... e^([Sn] qn) P_n          (= PoE, with M =
 
 That's a proof. The tests are its check in code: random poses, all six joints at once, and one joint at a time.
 
-**Worked example**
+**The conjugation trick on two links**
 
 The conjugation trick on the two-link arm: the elbow's home frame is P = Tx(0.5). Turning 90° about its z axis, written in the base, should swing the home tip (0.9, 0, 0) round the elbow to (0.5, 0.4, 0):
 
@@ -60,10 +60,10 @@ print([round(t, 3) + 0 for t in tip])
 # [0.5, 0.4, 0.0]
 ```
 
-**Watch out**
+**Frame i or frame i-1**
 
 The off-by-one: taking joint i's axis from frame i instead of frame i-1. The home pose still matches (at q = 0 every exponential is the identity, so T = M whatever the screws), and the screws even look sensible (unit ω, ω·v = 0). Only a moved joint shows it, which is why we test each joint alone. Also: a non-zero DH θ offset is already inside the home frames, so PoE's q is the same joint value DH uses.
 
-**AI check**
+**Twenty random poses before the algebra**
 
 When an AI converts between kinematic descriptions, don't review the algebra line by line first: run both on twenty random configurations and compare the full 4x4s. Agreement at random poses is strong evidence; agreement at home is none.

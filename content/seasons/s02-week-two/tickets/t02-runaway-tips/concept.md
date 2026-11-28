@@ -16,4 +16,4 @@ print(cart)                  # [500, 300, 10]  <- the cart changed!
 
 The caller only wanted a number, but their `cart` now contains a bag that was never ordered.
 
-**Watch out:** If calling a function twice gives two different answers, or your data looks different afterwards, look for a line that changes an input (like `.append()`) when the function only needed to *read* it.
+If calling a function twice gives two different answers, or your data looks different afterwards, look for a line that changes an input (like `.append()`) when the function only needed to *read* it.

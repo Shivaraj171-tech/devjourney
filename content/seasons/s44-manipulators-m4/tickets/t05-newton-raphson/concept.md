@@ -1,10 +1,10 @@
 **Numerical IK: Newton-Raphson on the position error**
 
-**Intuition**
+**Reaching blindfolded**
 
 You're blindfolded, reaching for a cup, and someone tells you "3 cm left, 1 cm up". You know your arm: moving the shoulder a bit shifts the hand this way, the elbow that way. So you pick the joint motion that should cover those 3 cm and 1 cm, do it, and ask again. You won't land exactly (your arm isn't linear), but the second miss is much smaller than the first, and the third is tiny. That's Newton-Raphson: linearise with the Jacobian, solve the linear problem exactly, repeat.
 
-**The maths**
+**Error, Jacobian, step, repeat**
 
 Step 1: the error. With target p* and the current guess q:
 
@@ -26,7 +26,7 @@ Step 5: its weaknesses. It finds the solution NEAREST to the guess in a loose se
 
 Step 6: the sign. Everything hinges on e pointing FROM where we are TO where we want to be. Flip it and every step goes the wrong way: the iteration runs away from the target, or orbits around it.
 
-**Worked example**
+**Two-link Newton to (0.6, 0.2)**
 
 Newton on the two-link arm, from (0.3, 1.2) to the box (0.6, 0.2), with the 2x2 Jacobian solved by Cramer's rule:
 
@@ -53,10 +53,10 @@ for _ in range(5):
 
 Each error is roughly the square of the one before (times a constant): quadratic convergence. One more step would give about 1e-13.
 
-**Watch out**
+**A sign error that never crashes**
 
 A sign error in e doesn't crash anything: the code runs, the arm moves, the error just never falls. Plot the error per iteration (a log scale shows convergence as a straight drop that steepens); if the very first step makes it bigger, suspect the sign before anything clever.
 
-**AI check**
+**Current minus target, or the other way?**
 
 AI-written Newton loops often compute "error = current - target" (a natural way to say "error") and then add the step. Check the convention on one iteration by hand: does the first step reduce |e|?

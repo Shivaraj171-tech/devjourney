@@ -4,7 +4,7 @@ suggestion:
   find: "    for i in range(len(prices) - 1):"
   replace: "    for i in range(1, len(prices)):"
   correct: false
-  says: "Off-by-one spotted! Start the range at 1 so the loop covers every item."
+  says: "Off-by-one: start the range at 1 so the loop covers every item. Done."
   explain: >-
     Same number of steps, wrong items. `range(1, len(prices))` gives 1, 2 for a 3-item cart, so now the
     FIRST item is skipped instead of the last (and a one-item cart costs $0.00). Step through it with

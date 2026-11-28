@@ -201,7 +201,7 @@ export function breakItFeedback(res: BreakItResult, miss: string): { tone: "good
   if (res.status === "broken") {
     return {
       tone: "good",
-      text: res.result === null ? `${res.message}. That breaks the spec!` : `Byte's code returned ${res.result}, and that breaks the spec!`,
+      text: res.result === null ? `${res.message}. That breaks the spec.` : `Byte's code returned ${res.result}, and that breaks the spec.`,
     };
   }
   if (res.status === "holds") {

@@ -16,4 +16,4 @@ print(shout("iPhone"))  # Iphone
 
 The fix works for `"hi"`, but `"iPhone"` used to stay as typed and now doesn't: `capitalize()` also lowercases the rest.
 
-**Watch out:** When you read a fix, ask "what else goes through this line?" A one-line change to a shared helper changes every caller.
+When you read a fix, ask "what else goes through this line?" A one-line change to a shared helper changes every caller.

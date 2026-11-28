@@ -14,6 +14,6 @@ print(torque)  # -1679.5: brake hard, we'll arrive soon
 
 The D part is the brake: while the error shrinks, `error - prev_error` is negative, so D pushes back. Without enough D, the joint overshoots and swings; with D's sign flipped, D pushes *harder* the faster it goes, and the swing grows.
 
-**Watch out:** a sign error in a controller doesn't crash anything. It runs, it moves, and it does exactly the wrong thing, as fast as the motor allows.
+**A sign error runs fine.** A sign error in a controller doesn't crash anything. It runs, it moves, and it does exactly the wrong thing, as fast as the motor allows.
 
-**AI check:** when an AI touches a controller, check one tick by hand: if the error is shrinking, does each term push the way you expect? Then look at the response curve, not just the final value.
+When an AI touches a controller, check one tick by hand: if the error is shrinking, does each term push the way you expect? Then look at the response curve, not just the final value.

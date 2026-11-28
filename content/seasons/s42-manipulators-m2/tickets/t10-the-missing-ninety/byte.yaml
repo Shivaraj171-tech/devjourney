@@ -7,6 +7,6 @@ suggestion:
   partial: true
   says: "The log says gripper_pose == flange pose. Return the fingertip frame from arm_frames and we're done."
   explain: >-
-    Right as far as it goes: the fingertips are now exactly 0.12 m beyond the flange along z6, and that test
+    The tool half is fixed: the fingertips are now exactly 0.12 m beyond the flange along z6, and that test
     passes. But "we're done" is wrong: the self-test still fails by most of a metre, because row 3's offset is
     still 0 and the forearm still points at the floor. One log line, one fix; the other log lines are yours.

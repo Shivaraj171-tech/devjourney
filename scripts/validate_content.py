@@ -181,9 +181,13 @@ A side floor may also set
 
     lesson: long     # deep lessons (e.g. s41-manipulators-m1): every concept.md may have
                      # up to 700 words of prose (code blocks not counted, at most 90 code
-                     # lines) and must have these section lines, in this order:
-                     #   **Intuition**  **The maths**  **Worked example**  **Watch out**  **AI check**
-                     # (a line starting with the bold name; "**Watch out:** ..." is fine).
+                     # lines) and must have at least 5 sections, each under its own
+                     # **heading** line (a line that is all bold): the picture, the maths,
+                     # a worked example, the trap, and how to check an AI's version. The
+                     # headings say what the section is about ("**Rows instead of columns**"),
+                     # not what kind of section it is. The worked example (a python block
+                     # ending in "# Output:") comes after the first two sections and before
+                     # the last; the last section must mention AI or Byte.
                      # Every ```python block must RUN cleanly (python3 -I, standard library
                      # only), and at least one must end with an "# Output:" comment block:
                      #     print(round(math.cos(0.5), 3))
@@ -235,8 +239,18 @@ Choices are balanced: across the whole check, the right answer may be the
 strictly longest choice in at most a quarter of the items (so "pick the
 longest" is no strategy).
 
+Writing ("slop check", house style in docs/writing/style-guide.md): every prose file
+(story, lesson, hints, quiz, Byte, practice formats, PR descriptions, season intros,
+warm-ups, skills check) and the chat lines in lib/game/teamChat.ts. Code (fences,
+inline code, YAML code fields), maths and quoted strings are skipped, and so are files
+under 30 words. A file fails ("slop/check") on any em or en dash, a banned phrase,
+more than 12 "!" or 15 emoji per 1,000 words (2 or more of them), or 2 or more
+"not X, but Y" rebuttals. Warnings never fail: a mid-sentence colon rate over 30 per
+1,000 words, any emoji, the same 7-word run in 3 or more files, the same long-lesson
+heading in more than 3 lessons. `--slop-warnings` lists every warning.
+
 Usage:
-    python3 scripts/validate_content.py [content_dir]
+    python3 scripts/validate_content.py [content_dir] [--slop-warnings]
 
 Exits with code 0 if everything is valid, 1 otherwise.
 Requires PyYAML.
@@ -402,7 +416,9 @@ MAX_SHORT_TITLE_CHARS = 40
 MAX_LESSON_WORDS = 230  # a 2-minute lesson (prose outside ``` blocks)
 MAX_LONG_LESSON_WORDS = 700  # season.yaml `lesson: long`
 MAX_LONG_LESSON_CODE_LINES = 90
-LONG_LESSON_SECTIONS = ("Intuition", "The maths", "Worked example", "Watch out", "AI check")
+LONG_LESSON_MIN_SECTIONS = 5  # the picture, the maths, a worked example, the trap, the AI check
+HEADING_LINE = re.compile(r"^\*\*[^*]+\*\*$")  # a section heading: a line that is all bold
+AI_WORD = re.compile(r"\b(AI|AIs|Byte)\b")
 LESSON_KINDS = ("short", "long")
 OUTPUT_MARK = "# Output:"
 
@@ -440,20 +456,43 @@ def check_concept(path, long=False):
     return errors
 
 
+def lesson_sections(text):
+    """(heading, first line index, body) for each section of a lesson: a heading is a line
+    that is all bold, outside code blocks; the title (the first line) is not a section."""
+    lines = text.splitlines()
+    in_code, heads = False, []
+    for i, line in enumerate(lines):
+        if line.startswith("```"):
+            in_code = not in_code
+            continue
+        if not in_code and i > 0 and HEADING_LINE.match(line.strip()) and lines[0].strip() != line.strip():
+            heads.append(i)
+    out = []
+    for n, i in enumerate(heads):
+        stop = heads[n + 1] if n + 1 < len(heads) else len(lines)
+        out.append((lines[i].strip()[2:-2], i, "\n".join(lines[i + 1:stop])))
+    return out
+
+
 def check_long_lesson(text):
-    """A deep lesson: its sections in order, and python blocks that run (worked examples verified)."""
+    """A deep lesson: its sections (picture, maths, worked example, trap, AI check: headings
+    free, structure checked) and python blocks that run (worked examples verified)."""
     errors = []
-    lines = [line.strip() for line in text.splitlines()]
-    at = []
-    for name in LONG_LESSON_SECTIONS:
-        found = [i for i, line in enumerate(lines) if line.startswith(f"**{name}")]
-        if not found:
-            errors.append(f"concept.md: missing the **{name}** section (a long lesson needs: "
-                          + ", ".join(LONG_LESSON_SECTIONS) + ")")
-        else:
-            at.append(found[0])
-    if not errors and at != sorted(at):
-        errors.append("concept.md: sections must come in this order: " + ", ".join(LONG_LESSON_SECTIONS))
+    sections = lesson_sections(text)
+    if len(sections) < LONG_LESSON_MIN_SECTIONS:
+        errors.append(f"concept.md: a long lesson needs at least {LONG_LESSON_MIN_SECTIONS} sections, each under its "
+                      "own **heading** line (the picture, the maths, a worked example, the trap, how to check an "
+                      f"AI's version); found {len(sections)}")
+    else:
+        last_heading, _, last_body = sections[-1]
+        if not AI_WORD.search(last_heading + "\n" + last_body):
+            errors.append("concept.md: the last section must say how to check an AI's version (mention AI or Byte)")
+        example = [m for m in PYTHON_BLOCK.finditer(text) if OUTPUT_MARK in [l.strip() for l in m.group(1).splitlines()]]
+        if example:
+            line = text.count("\n", 0, example[0].start())
+            if not sections[1][1] < line < sections[-1][1]:
+                errors.append("concept.md: the worked example (the python block with '# Output:') must come after the "
+                              "first two sections (the picture and the maths) and before the last one")
     code_lines = sum(len(m.group(1).splitlines()) for m in ANY_BLOCK.finditer(text))
     if code_lines > MAX_LONG_LESSON_CODE_LINES:
         errors.append(f"concept.md has {code_lines} lines in code blocks, at most {MAX_LONG_LESSON_CODE_LINES}")
@@ -1723,6 +1762,204 @@ def check_byte_why_lengths(seasons_root):
     return []
 
 
+# ---------- Writing: the slop check (docs/writing/style-guide.md) ----------
+# Measures the writing tells that made the old copy read machine-made: dashes, stock phrases,
+# exclamation marks and emoji as tone, the "not X, but Y" rebuttal, colon-as-dash, and
+# copy-paste frames. Code, maths and quoted strings are not voice, so they are removed first.
+
+SLOP_MIN_WORDS = 30
+SLOP_MAX_EXCL_PER_K = 12
+SLOP_MAX_EMOJI_PER_K = 15
+SLOP_MAX_REBUTTALS = 1
+SLOP_MAX_COLON_PER_K = 30
+SLOP_NGRAM = 7
+SLOP_NGRAM_FILES = 3
+SLOP_MAX_HEADING_LESSONS = 3
+SLOP_YAML_FILES = ("questions.yaml", "byte.yaml", "formats.yaml", "review.yaml", "season.yaml")
+# YAML keys whose values are code, ids or data, never prose.
+SLOP_SKIP_KEYS = {
+    "id", "file", "files", "find", "replace", "code", "starter", "solution", "files_editable", "concepts",
+    "concept", "type", "level", "track", "new_concept", "after", "path", "tests", "answer", "line", "lines",
+    "also_lines", "lang", "expected", "input", "output", "call", "setup", "fixture", "args", "kind", "format",
+    "target", "tickets", "season", "seed", "pieces", "blocks", "distractors", "snippet", "program", "source",
+    "response_code", "check", "fix", "watch", "rows", "requires", "icon", "chain", "final", "lesson", "best",
+    "correct", "partial", "author", "short_title", "bug_kind", "stdin", "func", "values", "columns",
+}
+EMOJI = re.compile("[\U0001F000-\U0001FAFF☀-➿⭐⭕⌚-⏿]")
+SLOP_WORD = re.compile(r"[A-Za-z][A-Za-z'’]*")
+SLOP_QUOTED = re.compile(r"\"[^\"\n]*\"|“[^”\n]*”|(?<![A-Za-z])'[^'\n]{1,80}'(?![A-Za-z])")
+SLOP_EXCL = re.compile(r"(?<![0-9)\]!])!(?!=)")
+SLOP_DASH = re.compile("[—–]")
+SLOP_BANNED = re.compile(
+    r"\b(delv(?:e|es|ing)|dive (?:right )?in(?:to)?|seamless(?:ly)?|leverag(?:e|es|ing)|unlock(?:s|ed|ing)?|"
+    r"elevat(?:e|es|ing)|journey|empower(?:s|ing)?|crucial(?:ly)?|vital|game[- ]changer|let[’']s|"
+    r"great (?:job|work)|awesome|you[’']ve got this|here[’']s the thing|in this lesson)\b", re.I)
+SLOP_REBUTTAL = re.compile(
+    r"\bnot (?:just |only |merely )?[^.;:!?\n]{1,50}?, but\b"
+    r"|\b(?:it|this|that)[’']?s not (?:just |only )?[^.;!?\n]{1,40}?[.;,] (?:it|this|that)[’']?s\b"
+    r"|\b(?:isn[’']t|is not|aren[’']t) (?:just|only)\b", re.I)
+SLOP_MIDCOLON = re.compile(r"[a-z)\]] ?: [a-z]")
+SLOP_STORY_HEADER = re.compile(r"^\*\*(?:From|To|Subject|Ticket|Bounty):\*\*.*$", re.M)
+
+
+def slop_prose_md(text):
+    """Markdown prose only: no fenced code, inline code, maths, link targets or markup."""
+    text = re.sub(r"^```.*?^```[ \t]*$", " ", text, flags=re.M | re.S)
+    text = re.sub(r"`[^`\n]*`", " CODE ", text)
+    text = re.sub(r"\$\$.*?\$\$", " ", text, flags=re.S)
+    text = re.sub(r"\$[^$\n]+\$", " MATH ", text)
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)
+    return text
+
+
+def slop_looks_like_code(value):
+    return "\n" in value.strip() and bool(re.search(r"^\s{2,}\S|\bdef |\breturn\b|==|^\s*#|\bimport ", value, re.M))
+
+
+def slop_yaml_strings(node, key=None):
+    """Every prose string in a YAML document (code fields and code-looking values skipped)."""
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if str(k) not in SLOP_SKIP_KEYS:
+                yield from slop_yaml_strings(v, str(k))
+    elif isinstance(node, list):
+        for v in node:
+            yield from slop_yaml_strings(v, key)
+    elif isinstance(node, str) and not slop_looks_like_code(node):
+        yield node
+
+
+def slop_chat_lines(path):
+    """The text of every chat line in lib/game/teamChat.ts (`text:` values and Byte's lines)."""
+    src = path.read_text(encoding="utf-8")
+    out = []
+    for m in re.finditer(r"text:\s*([^\n]*)", src):
+        out += [a or b for a, b in re.findall(r"`((?:[^`\\]|\\.)*)`|\"((?:[^\"\\]|\\.)*)\"", m.group(1))]
+    block = re.search(r"BYTE_LINES[^{]*\{(.*?)\n\};", src, re.S)
+    if block:
+        out += re.findall(r":\s*\"((?:[^\"\\]|\\.)*)\"", block.group(1))
+    return [re.sub(r"\$\{[^}]*\}", "X", t) for t in out]
+
+
+def slop_sources(content_dir, chat_file=None):
+    """(label, prose text) for every file the slop check reads."""
+    content_dir = Path(content_dir)
+    out = []
+    for path in sorted(content_dir.rglob("*")):
+        rel = path.relative_to(content_dir)
+        if not path.is_file() or {"starter", "solution", "tests", "pr", "team_tests"} & set(rel.parts[:-1]):
+            continue
+        label = f"content/{rel.as_posix()}"
+        if path.suffix == ".md":
+            text = path.read_text(encoding="utf-8")
+            if path.name == "story.md":  # the header lines are a form, not voice
+                text = SLOP_STORY_HEADER.sub("", text)
+            out.append((label, slop_prose_md(text)))
+        elif path.name in SLOP_YAML_FILES or rel.parts[0] == "warmups" or path.name == "skills-check.yaml":
+            if path.suffix not in (".yaml", ".yml"):
+                continue
+            try:
+                data = yaml.safe_load(path.read_text(encoding="utf-8"))
+            except yaml.YAMLError:
+                continue  # reported by the ticket's own checks
+            out.append((label, "\n".join(slop_prose_md(s) for s in slop_yaml_strings(data))))
+    if chat_file is not None and Path(chat_file).is_file():
+        out.append(("lib/game/teamChat.ts", "\n".join(slop_chat_lines(Path(chat_file)))))
+    return out
+
+
+def slop_file(prose):
+    """Fails and warnings for one file's prose. Returns (words, fails, warns)."""
+    prose = SLOP_QUOTED.sub(" ", prose)  # quoted strings are what the code prints or a person said
+    words = len(SLOP_WORD.findall(prose))
+    if words < SLOP_MIN_WORDS:
+        return words, [], []
+    per_k = 1000 / words
+    excl = len(SLOP_EXCL.findall(prose))
+    emoji = len(EMOJI.findall(prose))
+    dashes = len(SLOP_DASH.findall(prose))
+    banned = sorted({m.group(0).lower() for m in SLOP_BANNED.finditer(prose)})
+    rebuttals = len(SLOP_REBUTTAL.findall(prose))
+    colons = len(SLOP_MIDCOLON.findall(prose))
+    fails, warns = [], []
+    if dashes:
+        fails.append(f"em/en dash in prose x{dashes} (use a full stop)")
+    if banned:
+        fails.append("banned phrase: " + ", ".join(repr(b) for b in banned))
+    if excl >= 2 and excl * per_k > SLOP_MAX_EXCL_PER_K:
+        fails.append(f"{excl} '!' ({excl * per_k:.0f} per 1,000 words, at most {SLOP_MAX_EXCL_PER_K})")
+    if emoji >= 2 and emoji * per_k > SLOP_MAX_EMOJI_PER_K:
+        fails.append(f"{emoji} emoji ({emoji * per_k:.0f} per 1,000 words, at most {SLOP_MAX_EMOJI_PER_K})")
+    if rebuttals > SLOP_MAX_REBUTTALS:
+        fails.append(f"{rebuttals} 'not X, but Y' rebuttals (at most {SLOP_MAX_REBUTTALS})")
+    if colons >= 3 and colons * per_k > SLOP_MAX_COLON_PER_K:
+        warns.append(f"mid-sentence colons {colons * per_k:.0f} per 1,000 words (more than {SLOP_MAX_COLON_PER_K})")
+    if emoji:
+        warns.append(f"emoji in prose x{emoji}")
+    return words, fails, warns
+
+
+def slop_ngrams(sources):
+    """Warnings for the same SLOP_NGRAM-word run in SLOP_NGRAM_FILES or more places: a copy-paste
+    frame. A ticket's own files (story, hints, quiz, Byte) count as one place: they are meant to
+    use the same words for the same thing."""
+    seen, place = {}, {}
+    for label, prose in sources:
+        place[label] = label.rsplit("/", 1)[0] if "/tickets/" in label else label
+        words = [w.lower() for w in SLOP_WORD.findall(SLOP_QUOTED.sub(" ", prose)) if w not in ("CODE", "MATH")]
+        for i in range(len(words) - SLOP_NGRAM + 1):
+            seen.setdefault(" ".join(words[i:i + SLOP_NGRAM]), set()).add(label)
+    shared = {g: files for g, files in seen.items() if len({place[f] for f in files}) >= SLOP_NGRAM_FILES}
+    warns = {}
+    for gram, files in sorted(shared.items(), key=lambda kv: (-len(kv[1]), kv[0])):
+        others = len({place[f] for f in files}) - 1
+        for label in files:
+            warns.setdefault(label, []).append(f"'{gram}' also appears in {others} other places")
+    return warns, shared
+
+
+def slop_headings(content_dir):
+    """Warnings for a lesson heading used in more than SLOP_MAX_HEADING_LESSONS lessons: a fixed frame."""
+    where = {}
+    for path in sorted(Path(content_dir).glob("seasons/*/tickets/*/concept.md")):
+        for heading, _, _ in lesson_sections(path.read_text(encoding="utf-8")):
+            where.setdefault(heading.strip().rstrip(":.").lower(), []).append(path)
+    warns = {}
+    for heading, paths in where.items():
+        if len(paths) > SLOP_MAX_HEADING_LESSONS:
+            for path in paths:
+                label = f"content/{path.relative_to(content_dir).as_posix()}"
+                warns.setdefault(label, []).append(f"heading '{heading}' is in {len(paths)} lessons")
+    return warns
+
+
+def slop_check(content_dir, chat_file=None):
+    """The whole slop check: {label: {"words", "fails", "warns"}} for every file it reads."""
+    sources = slop_sources(content_dir, chat_file)
+    result = {}
+    for label, prose in sources:
+        words, fails, warns = slop_file(prose)
+        result[label] = {"words": words, "fails": fails, "warns": warns}
+    gram_warns, _ = slop_ngrams(sources)
+    for extra in (gram_warns, slop_headings(content_dir)):
+        for label, warns in extra.items():
+            result.setdefault(label, {"words": 0, "fails": [], "warns": []})["warns"].extend(warns)
+    return result
+
+
+def slop_summary(result):
+    """(checked, failing, warn-only, clean) over files of at least SLOP_MIN_WORDS words."""
+    checked = [r for r in result.values() if r["words"] >= SLOP_MIN_WORDS]
+    failing = sum(1 for r in checked if r["fails"])
+    warn_only = sum(1 for r in checked if not r["fails"] and r["warns"])
+    return len(checked), failing, warn_only, len(checked) - failing - warn_only
+
+
+def default_chat_file(content_dir):
+    chat = Path(content_dir).resolve().parent / "lib" / "game" / "teamChat.ts"
+    return chat if chat.is_file() else None
+
+
 def all_ticket_ids(seasons_root):
     """Every ticket id found in any season's ticket.yaml files."""
     ids = set()
@@ -1767,11 +2004,33 @@ def validate_content(content_dir):
     skills_check = Path(content_dir) / "assessment" / "skills-check.yaml"
     if skills_check.is_file():
         report["assessment/skills-check"] = check_skills_check(skills_check)
+    slop = slop_check(content_dir, default_chat_file(content_dir))
+    report["slop/check"] = [f"{label}: {fail}" for label, r in sorted(slop.items()) for fail in r["fails"]]
     return report
 
 
+def print_slop(content_dir, all_warnings=False):
+    """The slop check's summary line, warnings per rule, and (with --slop-warnings) every warning."""
+    result = slop_check(content_dir, default_chat_file(content_dir))
+    checked, failing, warn_only, clean = slop_summary(result)
+    print(f"slop check: {checked} files, {failing} fail, {warn_only} warn only, {clean} clean")
+    kinds = {}
+    for r in result.values():
+        for w in r["warns"]:
+            kind = ("shared 7-word run" if "also appears in" in w else "repeated lesson heading" if w.startswith("heading")
+                    else "mid-sentence colons" if w.startswith("mid-sentence") else "emoji in prose")
+            kinds[kind] = kinds.get(kind, 0) + 1
+    if kinds:
+        print("slop warnings: " + ", ".join(f"{k} x{n}" for k, n in sorted(kinds.items())))
+    if all_warnings:
+        for label, r in sorted(result.items()):
+            for w in r["warns"]:
+                print(f"warn {label}: {w}")
+
+
 def main(argv):
-    content_dir = Path(argv[1]) if len(argv) > 1 else REPO_ROOT / "content"
+    args = [a for a in argv[1:] if not a.startswith("--")]
+    content_dir = Path(args[0]) if args else REPO_ROOT / "content"
     report = validate_content(content_dir)
     failed = 0
     for label, errors in report.items():
@@ -1783,6 +2042,7 @@ def main(argv):
         else:
             print(f"ok   {label}")
     print()
+    print_slop(content_dir, "--slop-warnings" in argv)
     print(f"{len(report) - failed}/{len(report)} valid")
     return 1 if failed else 0
 

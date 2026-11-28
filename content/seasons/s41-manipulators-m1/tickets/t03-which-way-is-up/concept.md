@@ -1,12 +1,12 @@
 **Rotations about x, y and z, and what makes a matrix a rotation**
 
-**Intuition**
+**The flat turn, in three planes**
 
 Every 3D turn about a main axis is the flat 2D turn from ticket 1, happening in the plane **perpendicular** to that axis, while the axis itself stays put. Turn about z and x, y swing around in the floor plane. Turn about x and y, z swing in the wall plane. Which way is positive? The **right-hand rule**: thumb along the axis, fingers curl the positive way.
 
 And the safety check: a rotation must keep lengths and right angles, **and** keep the frame right-handed. A mirror keeps lengths and angles but swaps handedness, like your left hand in a mirror becoming a right hand. No physical turn can do that.
 
-**The maths**
+**Columns for x, y and z**
 
 Same recipe as ticket 1: the columns are where x, y, z go. About z, x → (cos θ, sin θ, 0), y → (-sin θ, cos θ, 0), z stays:
 
@@ -42,7 +42,7 @@ Rᵀ R = I        (orthonormal; so R⁻¹ = Rᵀ)
 
 Step 3: taking determinants, det(Rᵀ) det(R) = det(I) = 1, so det(R)² = 1: det(R) is +1 or -1. Step 4: det(R) = c₀ · (c₁ × c₂) is the signed volume of the turned unit cube. +1 means x × y still equals z (right-handed). -1 means a mirror. A proper rotation needs both: **RᵀR = I and det(R) = +1**. Mathematicians call the set of these SO(3).
 
-**Worked example**
+**The mirror that passes half the test**
 
 The mirror that flips z passes the orthonormal test but not the determinant:
 
@@ -60,10 +60,10 @@ print(det)
 # -1
 ```
 
-**Watch out**
+**Ry's signs are the odd ones out**
 
 Copying the sign pattern of Rx or Rz into Ry gives Ry(-θ): still orthonormal with det +1, so `is_rotation` can't catch it. Only a direction test can (rot_y(90°) must send z to x). And checking `abs(det) == 1` lets mirrors through: the sign is the whole point.
 
-**AI check**
+**The right-hand rule, then is_rotation**
 
 For any rotation an AI writes, check one axis with the right-hand rule (a quarter turn about y sends z to x) and run your `is_rotation` on a mirror: it must say no.

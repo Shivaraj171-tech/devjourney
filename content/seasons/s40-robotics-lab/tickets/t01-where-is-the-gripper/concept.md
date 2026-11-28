@@ -14,6 +14,6 @@ print(round(x, 2), round(y, 2))  # 1.07 1.27
 
 `math.cos` and `math.sin` work in **radians**: a full turn is `2 * math.pi`, not 360. `math.radians(90)` converts degrees for you.
 
-**Watch out:** `math.cos(90)` doesn't fail, it quietly returns -0.45 (the cosine of 90 *radians*). Unit bugs never crash; the robot just goes somewhere else. And forgetting to add the shoulder angle makes the forearm point as if the upper arm were flat.
+**Degrees into a radians function.** `math.cos(90)` doesn't fail, it quietly returns -0.45 (the cosine of 90 *radians*). Unit bugs never crash; the robot just goes somewhere else. And forgetting to add the shoulder angle makes the forearm point as if the upper arm were flat.
 
-**AI check:** test an AI's kinematics on poses you can picture: 0° and 90° should land on the axes. If straight up doesn't come out as (0, 1.8), don't trust the rest.
+Test an AI's kinematics on poses you can picture: 0° and 90° should land on the axes. If straight up doesn't come out as (0, 1.8), don't trust the rest.

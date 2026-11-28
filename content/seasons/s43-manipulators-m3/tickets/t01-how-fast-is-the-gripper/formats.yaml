@@ -42,7 +42,7 @@ predict:
 parsons:
   - goal: >-
       Write `velocity(p, q, qd, h)`: the central-difference velocity of a 1-joint "arm" p(q) moving at qd,
-      without changing anything the caller owns. One line is Byte's slip: leave it out.
+      without changing anything the caller owns. One of the lines is Byte's, and it's wrong.
     lines:
       - "def velocity(p, q, qd, h):"
       - "    ahead = p(q + h * qd)"

@@ -19,4 +19,4 @@ print(c.count)  # 6
 
 **Who is `self`?** When you write `order.add_item(450)`, Python runs `add_item` with `self` = `order` and `price_cents` = `450`. You never pass `self` yourself.
 
-**Watch out:** Inside a method, reach the object's data through `self`. Writing `count` instead of `self.count` looks for an ordinary variable and gives a `NameError`.
+Inside a method, reach the object's data through `self`. Writing `count` instead of `self.count` looks for an ordinary variable and gives a `NameError`.

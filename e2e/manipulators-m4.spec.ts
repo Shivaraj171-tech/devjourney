@@ -21,6 +21,7 @@ import {
   ticketUrl,
   trackPageErrors,
   waitForPython,
+  lessonHeadings,
 } from "./helpers";
 import { closeSolvedModal } from "./play";
 
@@ -131,8 +132,9 @@ for (const [i, t] of codeTickets.entries()) {
     await page.getByTestId("lesson-toggle").click();
     const lesson = page.locator("#ticket-lesson");
     await expect(page.getByTestId("lesson-toggle")).toContainText("Deep lesson");
-    for (const section of ["Intuition", "The maths", "Worked example", "Watch out", "AI check"])
-      await expect(lesson.getByText(section, { exact: false }).first()).toBeVisible();
+    const headings = lessonHeadings(t);
+    expect(headings.length).toBeGreaterThanOrEqual(5);
+    for (const section of headings) await expect(lesson.getByText(section, { exact: false }).first()).toBeVisible();
     await waitForPython(page);
 
     await runTests(page);

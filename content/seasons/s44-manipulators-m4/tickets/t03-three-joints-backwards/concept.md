@@ -1,10 +1,10 @@
 **Analytic IK of a 3-DOF arm: split it into problems you've solved**
 
-**Intuition**
+**Turn to face the box, then bend**
 
 The base joint turns about the vertical, and the shoulder and elbow both bend in the vertical plane that the base points at. So the base has exactly one job: face the box. Once it does, the box lies in the arm's own vertical plane, and the shoulder and elbow see a flat two-link problem: "reach a point this far out and this high up". That's decomposition, the central trick of analytic IK: find joints whose job is separable, solve them first, and hand a smaller problem to the rest.
 
-**The maths**
+**The base, then the plane**
 
 Step 1: the base. The arm's plane must contain the box (x, y, z), so it points along the box's horizontal direction:
 
@@ -28,7 +28,7 @@ Step 4: the second base solution. Turn the base half a turn (q1 + π) and the bo
 
 Step 5: the special case. If the box is right above the base (x = y = 0), atan2(0, 0) is meaningless: any q1 works. That's a shoulder singularity: infinitely many solutions, and ticket 6 of Module 3 saw it in det J.
 
-**Worked example**
+**The box at (0.3, 0.4, 0.5)**
 
 The box at (0.3, 0.4, 0.5), front solution, elbow up (D1 = 0.3, A2 = 0.4, A3 = 0.3), checked by forward kinematics:
 
@@ -50,10 +50,10 @@ print([round(v, 3) for v in (q1, q2, q3)], [round(v, 3) for v in (reach * math.c
 # [0.927, 0.962, -1.403] [0.3, 0.4, 0.5]
 ```
 
-**Watch out**
+**Measure from the shoulder**
 
 Every decomposition has a reference point, and forgetting it shifts the whole answer. The planar problem lives at the SHOULDER: measure the height from the base and every solution comes out D1 too high, and targets that are in reach look out of reach (their distance from the base is bigger than their distance from the shoulder). Also, q1 + π can land outside (-π, π]: wrap it, or two equal solutions will look different.
 
-**AI check**
+**Three checks on an AI's 3-DOF IK**
 
 Ask an AI for "IK of a 3-DOF arm" and check three things: where it measures the planar target from, whether it returns the back-reaching solutions, and what it does when the target is directly above the base. Then run all four answers through forward kinematics.

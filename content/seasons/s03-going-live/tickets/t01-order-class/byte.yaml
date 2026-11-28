@@ -5,9 +5,9 @@ suggestion:
   replace: "        return cart_subtotal(self.items)"
   correct: true
   partial: true
-  says: "subtotal() done: cart_subtotal already adds up a list of prices, so I reused it. label() is yours!"
+  says: "subtotal() done: cart_subtotal already adds up a list of prices, so I reused it. label() is yours."
   explain: >-
-    Right as far as it goes: self.items is this order's list, and cart_subtotal adds it up. label()
+    Correct for one method: self.items is this order's list, and cart_subtotal adds it up. label()
     still returns "": build it from self.order_id, self.customer and self.subtotal(), with format_price
     for the dollars.
 

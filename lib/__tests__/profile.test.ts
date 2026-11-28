@@ -133,7 +133,7 @@ test("the profile: dictionaries is a focus area, strings is not, habits say 'tru
   const trust = profile.habits.find((h) => h.id === "trusts-byte")!;
   assert.ok(trust, JSON.stringify(profile.habits));
   assert.match(trust.because, /#1, #2/);
-  assert.equal(focusLine(profile)!.text, "Focus this week: dictionaries — 3 KeyErrors on #6 “Order again”");
+  assert.equal(focusLine(profile)!.text, "Focus this week: dictionaries (3 KeyErrors on #6 “Order again”)");
   assert.ok(masteryMap(profile).dictionaries < 0.5);
 });
 

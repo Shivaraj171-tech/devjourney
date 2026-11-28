@@ -30,7 +30,7 @@ export type SkillsCheckProgress = {
 export const NOT_SURE = -1;
 
 /** What most people score on the baseline when they're starting out (shown for context). */
-export const TYPICAL_BASELINE = "2–5";
+export const TYPICAL_BASELINE = "2 to 5";
 
 /** Number of items answered with the right choice. Unknown ids are ignored. */
 export function scoreAnswers(items: Pick<SkillsCheckItem, "id" | "answer">[], answers: Record<string, number>): number {
@@ -93,7 +93,7 @@ export function skillsShareText(sc: SkillsCheckProgress | undefined, url: string
   const line = comparisonText(sc);
   const gain = improvement(sc);
   const head = line ? `My DevJourney skills check: ${line}` : "I'm taking the DevJourney skills check";
-  const tail = gain !== null && gain > 0 ? ` (+${gain}) 📈` : "";
+  const tail = gain !== null && gain > 0 ? ` (+${gain})` : "";
   return `${head}${tail}. Learning to read, debug and catch an AI teammate's code. ${url}`;
 }
 
@@ -123,7 +123,7 @@ export function certificateShareText(name: string, sc: SkillsCheckProgress | und
   const who = name === "You" ? "I" : name;
   const scores = comparisonText(sc);
   return (
-    `${who} passed "Byte's Week Alone", the DevJourney final exam. Human in the loop: verified ✅ ` +
+    `${who} passed "Byte's Week Alone", the DevJourney final exam. Human in the loop: verified. ` +
     `${exam.merged}/${exam.total} exam tickets, no hints${scores ? `, skills check ${scores}` : ""}. ${url}`
   );
 }

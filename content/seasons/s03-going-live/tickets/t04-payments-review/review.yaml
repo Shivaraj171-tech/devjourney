@@ -1,14 +1,14 @@
 title: "Card payments at checkout"
 author: "Byte 🤖"
 description: |
-  Payments are ready for launch! 💳 New module `app/payments.py`:
+  Payments, ready for launch. New module `app/payments.py`:
 
   - `payment_log_line`: one log line per payment, so support can trace problems.
   - `build_charge`: the request we send to the payment provider. I used the total the app sends us, so we never disagree with what the customer saw on screen.
   - `receipt_line`: the last line of the receipt, with the card masked.
   - `order_history_query`: the database query for the new *Your past orders* screen.
 
-  All functions are short and have docstrings. Thank you for reviewing! 🤖
+  All functions are short and have docstrings. Thanks for reviewing.
 files: [app/payments.py]
 issues:
   - file: app/payments.py

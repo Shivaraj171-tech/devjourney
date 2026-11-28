@@ -1,6 +1,6 @@
 **Joint offsets, tools, and debugging forward kinematics**
 
-**Intuition**
+**Two choices the sketch can't show**
 
 A DH table describes the arm's geometry, but two more choices sit on top of it, and both are invisible in a 3D sketch of the arm.
 
@@ -8,7 +8,7 @@ The first is the **joint zero**: which physical position the robot calls q = 0. 
 
 The second is the **tool**: DH stops at the flange (frame 6), but the gripper's fingertips are further out. That's one more fixed transform, T_6_tool, multiplied on the right. Forget it and every pose is off by the tool length, in a direction that changes with the orientation.
 
-**The maths**
+**An offset inside a DH row**
 
 Step 1: an offset is a constant turn inside one DH row. For row 3:
 
@@ -28,7 +28,7 @@ Step 3: debugging from logs, frame by frame. FK is a chain of frames, so compare
 
 Step 4: two bugs can hide each other. Check them separately: is the flange right? Then is the tool offset right **relative to the flange** (exactly the tool length along z6)? A test of the fingertips alone mixes both.
 
-**Worked example**
+**A 90° elbow offset at home**
 
 The home pose of a simple "shoulder + elbow" chain with and without a 90° elbow offset, in the plane: where does the forearm point?
 
@@ -46,10 +46,10 @@ print(forearm_direction(0, 0, math.pi / 2), forearm_direction(0, 0, 0))
 
 With the DH twists of Grabby-6 the frame that holds the forearm points along x2 only once the offset is added; drop it and the forearm points down instead. The logs show exactly that: frame 3 matches the sheet, frame 4 is 0.45 m straight below where it should be.
 
-**Watch out**
+**The numbers that get tidied**
 
 Offsets are the most "tidied" numbers in a DH table: they look like noise next to the geometry, they differ between robots of the same family (the UR5e's are all zero), and some drivers apply them in software instead of the table. Never delete one without the vendor's home pose to check against. And a missing tool offset can't be seen in a frames-only view: draw the fingertips too.
 
-**AI check**
+**Diff the table cell by cell**
 
 When an AI "cleans up" kinematics, diff the table cell by cell against the datasheet, then run the vendor's home-pose self-test and one known pick. Ask it to explain every changed number: "they're zero on another robot" is not a reason.

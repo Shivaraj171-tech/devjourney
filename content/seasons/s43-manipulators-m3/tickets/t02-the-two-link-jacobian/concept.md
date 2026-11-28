@@ -1,10 +1,10 @@
 **The analytic Jacobian of a two-link arm**
 
-**Intuition**
+**A measurement and an explanation**
 
 The numeric Jacobian is a measurement; the analytic one is an explanation. Turn joint 1 alone and the whole arm swings around the shoulder: the gripper moves on a circle of radius |p| (its distance from the shoulder), perpendicular to the line from the shoulder. Turn joint 2 alone and only the forearm swings: a circle of radius l2 around the elbow, perpendicular to the forearm. Those two velocities are the two columns of J. When the arm is stretched out, both are perpendicular to the same line, so they are parallel: the gripper can't move along the arm at all.
 
-**The maths**
+**Differentiating the two-link FK**
 
 Step 1: forward kinematics. Joint 2 is measured from the upper arm, so the forearm's direction in the base frame is the SUM q1 + q2 (write s12 = sin(q1 + q2), c12 = cos(q1 + q2)):
 
@@ -32,7 +32,7 @@ It does not depend on q1 at all (turning the whole arm changes nothing about its
 
 Step 5: what the matrix buys you. v = J q̇ costs four multiplications instead of four forward-kinematics runs, J's columns explain the motion, and det J warns you before trouble.
 
-**Worked example**
+**J at (0.3, 0.9) and its determinant**
 
 The analytic J at q = (0.3, 0.9) and its determinant, checked against l1 l2 sin(q2):
 
@@ -53,10 +53,10 @@ print(round(det, 5), round(l1 * l2 * math.sin(q2), 5))
 
 Those are the same numbers ticket 1's numeric Jacobian gives at this pose.
 
-**Watch out**
+**q1 + q2, not q2**
 
 Relative angles are the classic trap: the forearm's direction is q1 + q2, not q2. A Jacobian written with sin(q2) instead of sin(q1 + q2) agrees with the truth whenever q1 = 0, which is exactly the pose people test first. Test at several poses, including ones with every joint non-zero. And keep the chain rule in mind: q1 appears inside every "12" term, so the first column always collects terms from BOTH links.
 
-**AI check**
+**Three random poses, not home**
 
 An AI's hand-derived Jacobian is a claim; the numeric Jacobian is evidence. Compare them at three random poses, not at the home pose, and check one structural fact you can derive in your head, such as det J = l1 l2 sin(q2).

@@ -76,8 +76,8 @@ export function stepCaption(steps: TraceStep[], index: number): string {
       return `${step.func} returns ${step.value ?? "None"}`;
     case "exception": {
       const { name, detail } = splitException(step.exception ?? "an error");
-      if (step.raised_here) return `💥 ${name} raised here${detail ? `: ${detail}` : ""}`;
-      return `💥 The ${name} reaches ${step.func} (line ${step.line})`;
+      if (step.raised_here) return `${name} raised here${detail ? `: ${detail}` : ""}`;
+      return `The ${name} reaches ${step.func} (line ${step.line})`;
     }
     case "unwind": {
       const exc = exceptionInFrame(steps, index);
@@ -92,7 +92,7 @@ export function stepCaption(steps: TraceStep[], index: number): string {
       else if (prev?.event === "exception") head = `Line ${step.line}: the ${splitException(prev.exception ?? "error").name} is caught`;
       else if (prev?.event === "line" && step.line <= prev.line) head = `Line ${step.line}: back to the top of the loop`;
       const changed = describeChanges(step, changes);
-      return changed ? `${head} — ${changed}` : head;
+      return changed ? `${head}; ${changed}` : head;
     }
   }
 }
@@ -101,13 +101,13 @@ export function stepCaption(steps: TraceStep[], index: number): string {
 export function resultCaption(trace: Pick<TraceResult, "status" | "steps" | "truncated">): string {
   switch (trace.status) {
     case "pass":
-      return "✅ The check finished and passed.";
+      return "The check finished and passed.";
     case "fail":
-      return "❌ The check finished, but the answer wasn't what it expected.";
+      return "The check finished, but the answer wasn't what it expected.";
     case "error":
-      return "💥 The check crashed with an error.";
+      return "The check crashed with an error.";
     case "stopped":
-      return `⏹ Stopped after ${trace.steps.length} steps — is there a loop that never ends?`;
+      return `Stopped after ${trace.steps.length} steps. Is there a loop that never ends?`;
   }
 }
 

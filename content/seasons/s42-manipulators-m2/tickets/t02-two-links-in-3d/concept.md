@@ -1,6 +1,6 @@
 **Forward kinematics by composing transforms**
 
-**Intuition**
+**Every part of the arm, joint by joint**
 
 Forward kinematics (FK) answers one question: given every joint's value, where is each part of the arm, and which way does it face? The answer is not a new formula per robot. It is one recipe:
 
@@ -10,7 +10,7 @@ Forward kinematics (FK) answers one question: given every joint's value, where i
 
 Imagine walking along the arm with a compass. At the shoulder, you turn by q1, then walk l1 along the direction you now face. At the elbow you turn by q2 **relative to the way you were already facing**, then walk l2. You never need to know a global angle: each step is described in your own, current frame. That's why the transforms multiply on the right (Module 1, ticket 9: moving frames post-multiply).
 
-**The maths**
+**Turn, then walk the turned x axis**
 
 Step 1: one joint and its link. Turn about the joint's z axis, then walk along the **turned** x axis:
 
@@ -39,7 +39,7 @@ The matrices did the angle-adding for us. And they keep doing it when the axes a
 
 Step 4: every frame, not just the tip. The frame of joint k in the base is the **running product** T_0_k = T_0_1 T_1_2 ... T_(k-1)_k. One loop computes them all: keep a running T, multiply each link onto its right, and save a copy after each step. Drawing, collision checks and the Jacobian (Module 3) all need these intermediate frames.
 
-**Worked example**
+**90° and 90°, folded back**
 
 The arm with l1 = 0.5, l2 = 0.4 at q1 = 90°, q2 = 90°: the upper arm points along y, the forearm folds back along -x.
 
@@ -64,10 +64,10 @@ print(frames)
 
 The elbow is at (0, 0.5, 0) and the tip at (-0.4, 0.5, 0): the trigonometry agrees, since cos 180° = -1.
 
-**Watch out**
+**Link transform or running product**
 
 Saving the link transform instead of the running product looks right for the first joint (T_0_1 is both) and wrong for every joint after it. That is exactly why a test that only checks the elbow passes on broken code. Also: saving the running T itself, not a copy, is only safe because `T_mul` returns a new matrix each time.
 
-**AI check**
+**A pose you can draw, every frame**
 
 When an AI gives you FK, test a pose you can draw by hand where the joints don't cancel out, such as 90° and 90°. Then compare every intermediate frame, not just the tip.

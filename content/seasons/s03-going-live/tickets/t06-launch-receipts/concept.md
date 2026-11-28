@@ -17,4 +17,4 @@ print(with_tax(450))     # 495
 
 Every price goes through `with_tax`, so a new tax rate is a one-line change.
 
-**Watch out:** Refactor in small steps and run the tests after each one. If the tests were green before, they must still be green after: that's how you know nothing changed by accident.
+**Green before, green after.** Refactor in small steps and run the tests after each one. If the tests were green before, they must still be green after: that's how you know nothing changed by accident.

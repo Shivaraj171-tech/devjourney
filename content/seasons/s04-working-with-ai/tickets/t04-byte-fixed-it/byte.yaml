@@ -10,7 +10,7 @@ suggestion:
       - "`title()` also lowercases the rest of each word, so McKenzie is squashed again."
       - "`title()` crashes on an empty name, so the old empty-name test in the suite will now fail."
     answer: 1
-  says: "`capitalize()` was the problem. `title()` capitalises every word, so two-part names work too!"
+  says: "`capitalize()` was the problem. `title()` capitalises every word, so two-part names work too."
   explain: >-
     It fixes "sam" and "ana lucia", but title() also lowercases every letter after the first in each
     word, so McKenzie becomes "Mckenzie" all over again. Run ALL the old tests before you trust a fix.

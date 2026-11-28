@@ -1,6 +1,6 @@
 **Forward kinematics: the whole module on one page**
 
-**Intuition**
+**Each joint turns the rest of the arm**
 
 Forward kinematics turns joint values into poses, and every method in this module is the same idea in different clothes: **each joint turns (or slides) everything after it, about its own axis**. Write that as one 4x4 per joint and multiply from the base outwards.
 
@@ -12,7 +12,7 @@ PoE                 screws S_i = (ω, -ω × q) at home, in the base; T(q) = e^[
 wrist centre        spherical wrist: p_w = p - d6 z6 depends on q1..q3 only
 ```
 
-**The maths**
+**The identities under forward kinematics**
 
 The identities everything else rests on:
 
@@ -30,7 +30,7 @@ Three patterns repeat through the module. First, **order and indices carry meani
 
 Where this goes next. Module 3 differentiates T(q): how fast does the gripper move when the joints move? The columns of that Jacobian are, almost literally, this module's screw axes (moved by the joints before them). Module 4 runs FK backwards: inverse kinematics, starting with the wrist-centre trick from ticket 7.
 
-**Worked example**
+**One arm, composition and PoE**
 
 The same two-link arm (0.5 m and 0.4 m) at q = (90°, -90°), by composition and by PoE in the plane; both must give the same tip:
 
@@ -55,10 +55,10 @@ print([round(chain[i][2], 3) + 0 for i in range(2)], [round(poe[i][2], 3) + 0 fo
 # [0.4, 0.5] [0.4, 0.5]
 ```
 
-**Watch out**
+**Conventions, again**
 
 Libraries disagree on almost every convention here: DH flavour and column order, twist order (ω, v) or (v, ω), body or space screws, quaternion order in poses. When two systems meet, compare one pose you can check by hand, then random poses, before trusting either.
 
-**AI check**
+**A toolkit for AI-written kinematics**
 
 Your module-wide toolkit for AI-written kinematics: one hand-checked pose per robot (the datasheet's home pose), random poses against an independent implementation, property tests (decoupling, points on axes, DH = PoE), and a cell-by-cell diff of any table it "tidied".

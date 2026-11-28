@@ -1,12 +1,12 @@
 **Velocity kinematics: from joint speeds to gripper speed**
 
-**Intuition**
+**Your hand moves faster than your shoulder**
 
 Wave your arm with your shoulder only, slowly. Your hand moves much faster than your shoulder seems to: the same small turn moves a point far from the joint further. A robot is the same. Forward kinematics p(q) says where the gripper is; velocity kinematics asks how fast p changes when the joints turn at speeds q̇ (radians per second).
 
 Two facts drive the whole module. First, the answer depends on WHERE the arm is: stretched out, the shoulder sweeps the gripper fast; folded in, slowly. Second, for a given pose the answer is LINEAR in the joint speeds: twice the joint speeds, twice the gripper speed; two joints together, the sum of each one alone. Linear means a matrix, and that matrix is the Jacobian.
 
-**The maths**
+**Velocity is a derivative**
 
 Step 1: velocity is a derivative. The gripper is at p(q(t)), so by the chain rule
 
@@ -29,7 +29,7 @@ Step 3: the numeric Jacobian is the same trick one joint at a time: column i use
 
 Step 4: h is a trade-off. Too big and the curve's bend spoils the slope; too small and the subtraction p(q + h) - p(q - h) loses digits to rounding (1e-6 is a good choice in double precision for lengths near a metre).
 
-**Worked example**
+**q = (0.3, 0.9), against the exact answer**
 
 The two-link arm (l1 = 0.5, l2 = 0.4) at q = (0.3, 0.9) with q̇ = (0.5, -0.4), against the exact derivative:
 
@@ -54,10 +54,10 @@ print([round(x, 4) for x in v], [round(x, 4) for x in exact])
 
 Note `[a + h * b for ...]`: a NEW list for each probe point. The arm's q is never touched.
 
-**Watch out**
+**Divide by 2h**
 
 A numeric derivative is only as good as its probes. Three classic slips: dividing a central difference by h instead of 2h (everything twice too fast), stepping one way only (the error grows to about h), and nudging the caller's own list in place. That last one is pure Python, not maths: `q[i] += h` inside a helper changes the list the caller still uses, so the "behind" probe silently starts from the wrong place. Lists are passed by reference; build a new one.
 
-**AI check**
+**Questions for an AI's finite difference**
 
 Ask an AI for "the velocity of my robot's gripper" and it will often write a forward difference with h = 0.01 and call it done. Ask instead: which difference is it, what does it divide by, does it modify my list, and does it agree with an exact derivative at one hand-checked pose?

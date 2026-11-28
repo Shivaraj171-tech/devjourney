@@ -20,6 +20,6 @@ def tip(bill_cents, percent):
 print(tip(1999, 15))  # 299  (1999 * 15 is 29985, // 100 drops the rest)
 ```
 
-**Watch out:** An early `return` (like the `bill_cents <= 0` line) can end a function before the "main" calculation runs. Always check every way out of a function, not just the last line.
+**Every way out of the function.** An early `return` (like the `bill_cents <= 0` line) can end a function before the "main" calculation runs. Always check every way out of a function, not just the last line.
 
-**AI check:** when an AI explains code to you, check its summary with these 3 steps; early returns are easy to miss.
+Check an AI's summary of code with these 3 steps; early returns are easy to miss.

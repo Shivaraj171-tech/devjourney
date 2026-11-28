@@ -1,8 +1,7 @@
 parsons:
   - goal: >-
       Write `slerp(q0, q1, t)` for two unit quaternions that are NOT almost equal: flip q1 when the dot is
-      negative (the short way), then blend along the sphere at constant speed. Two lines are Byte's slips:
-      leave them out.
+      negative (the short way), then blend along the sphere at constant speed. Byte's first attempt left two lines in the pile. Neither is part of the answer.
     lines:
       - "def slerp(q0, q1, t):"
       - "    d = sum(a * b for a, b in zip(q0, q1))"

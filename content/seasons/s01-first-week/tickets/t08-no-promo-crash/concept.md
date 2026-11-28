@@ -14,6 +14,6 @@ else:
 
 Check for it with `is None` (or `is not None`). The `else:` part runs only when the `if` was not true, so here `.upper()` is never reached. `None` is not a string, a number or a list, so it has none of their abilities.
 
-**Watch out:** Calling a string method like `.lower()` on `None` crashes with `AttributeError: 'NoneType' object has no attribute ...`. If a value is optional, check for `None` before you treat it like a string.
+**`None` has no `.upper()`.** Calling a string method like `.lower()` on `None` crashes with `AttributeError: 'NoneType' object has no attribute ...`. If a value is optional, check for `None` before you treat it like a string.
 
-**AI check:** when AI code calls a method on an optional value, look for an `is None` check before it.
+When AI code calls a method on an optional value, look for an `is None` check before it.

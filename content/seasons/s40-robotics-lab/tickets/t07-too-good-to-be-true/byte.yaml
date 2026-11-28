@@ -4,7 +4,7 @@ suggestion:
   find: "FEATURES = [\"width_cm\", \"force_n\", \"offset_deg\", \"slipped\"]"
   replace: "FEATURES = [\"width_cm\", \"force_n\", \"offset_deg\"]"
   correct: true
-  says: "Oops: `slipped` is measured during the lift, so the model was peeking at the answer. Dropping it."
+  says: "`slipped` is measured during the lift, so the model was peeking at the answer. Dropping it."
   explain: >-
     Correct. Without the slip reading, the model has to use what's known beforehand (width, force,
     offset). Its logbook accuracy drops a little (from 97% to about 93%), but on tomorrow's grasps it goes

@@ -619,7 +619,7 @@ export function detectHabits(tickets: Record<string, ProfileTicketProgress>, con
       label: "Step through: not tried yet",
       tone: "tip",
       because: `${names(struggled.map((t) => t.id))} needed 3+ runs, without Step through.`,
-      tip: "🐞 Step through on a failing check shows every line as it runs, with each variable's value.",
+      tip: "Step through on a failing check shows every line as it runs, with each variable's value.",
     });
   }
 
@@ -701,13 +701,13 @@ export function masteryMap(profile: Profile): Record<string, number> {
   return Object.fromEntries(profile.concepts.filter((c) => c.confidence >= MIN_CONFIDENCE).map((c) => [c.concept, c.mastery]));
 }
 
-/** "Focus this week: Dictionaries — 3 KeyErrors on #6 Order again", or null. */
+/** "Focus this week: Dictionaries (3 KeyErrors on #6 Order again)", or null. */
 export function focusLine(profile: Profile): { concept: string; text: string } | null {
   const top = profile.focus[0];
   if (!top) return null;
   // What the code did comes first ("3 KeyErrors on #6"), then the strongest reason.
   const why = top.lines.find((l) => !l.positive && l.source === "error")?.text ?? top.because[0];
-  return { concept: top.concept, text: `Focus this week: ${inlineConceptLabel(top.concept)}${why ? ` — ${why}` : ""}` };
+  return { concept: top.concept, text: `Focus this week: ${inlineConceptLabel(top.concept)}${why ? ` (${why})` : ""}` };
 }
 
 /** How the estimate reads in words (never a grade). */
@@ -744,24 +744,24 @@ export function practiceFor(
     const items: PracticeItem[] = [];
     for (const w of content.warmups) {
       if (conceptKey(w.concept) === concept && isSolved(w.after)) {
-        items.push({ kind: "warmup", concept, title: w.title, href: "/#warm-up", detail: "Warm-up · your daily session picks these first" });
+        items.push({ kind: "warmup", concept, title: w.title, href: "/#warm-up", detail: "Your daily warm-up asks these first" });
       }
     }
     for (const t of content.tickets) {
       if (!t.bounty || t.concept !== concept || isSolved(t.id) || (t.requires && !isSolved(t.requires))) continue;
-      items.push({ kind: "bounty", concept, title: t.title, href: `/ticket/${t.id}/`, detail: "🐞 Bug Bounty · a mystery bug picked for this" });
+      items.push({ kind: "bounty", concept, title: t.title, href: `/ticket/${t.id}/`, detail: "From the Bug Bounty board, picked for this skill" });
     }
     for (const t of content.tickets) {
       if (t.bounty || t.final || !isSolved(t.id) || !(keys.includes(t.concept) || t.concepts.includes(concept))) continue;
       const open = t.formats.filter((k) => !formatDone(t.id, k)).sort((a, b) => (a.startsWith("trace") ? -1 : 0) - (b.startsWith("trace") ? -1 : 0));
       for (const key of open.slice(0, 2)) {
         const kind = key.split(":")[0];
-        items.push({ kind: "format", concept, title: `${FORMAT_NAMES[kind] ?? "Practice"} on #${t.number} ${t.title}`, href: `/ticket/${t.id}/`, detail: "Practice · small bonus XP" });
+        items.push({ kind: "format", concept, title: `${FORMAT_NAMES[kind] ?? "Practice"} on #${t.number} ${t.title}`, href: `/ticket/${t.id}/`, detail: "Practice, for a little bonus XP" });
       }
     }
     for (const t of content.tickets) {
       if (t.bounty || t.final || !t.hasLesson || !keys.includes(t.concept) || !isSolved(t.id)) continue;
-      items.push({ kind: "lesson", concept, title: `Lesson: ${profileConceptLabel(t.concept)} (#${t.number} ${t.title})`, href: `/ticket/${t.id}/#lesson`, detail: "📘 2-min lesson · free to re-read" });
+      items.push({ kind: "lesson", concept, title: `Lesson: ${profileConceptLabel(t.concept)} (#${t.number} ${t.title})`, href: `/ticket/${t.id}/#lesson`, detail: "A 2-minute lesson. Re-reading is free." });
     }
     // A few of each kind, warm-ups and bounties first.
     const order: PracticeKind[] = ["bounty", "format", "warmup", "lesson"];

@@ -20,6 +20,6 @@ export function runEncouragement(passed: number, total: number, previousPassed?:
         : "";
   // "None pass" comes before "one to go": with a single check, 0 of 1 is not "so close".
   if (passed === 0) return `${progress}No checks pass yet. Start with the first one: what did it expect, and what did your code give?`;
-  if (left === 1) return `${progress}So close: one check to go. Read its message below.`;
+  if (left === 1) return `${progress}One check to go. Read its message below.`;
   return `${progress}${left} checks to go. Fix them one at a time, starting from the top.`;
 }

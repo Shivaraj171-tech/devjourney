@@ -21,7 +21,7 @@ predict:
 parsons:
   - goal: >-
       Write `plane_target(x, y, z, D1)`: the base angle and the in-plane target (r, s) of the shoulder-elbow arm
-      (math is imported). One line is Byte's slip: leave it out.
+      (math is imported). Byte added a line. You don't need it.
     lines:
       - "def plane_target(x, y, z, D1):"
       - "    q1 = math.atan2(y, x)"

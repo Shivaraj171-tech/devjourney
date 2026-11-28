@@ -1,6 +1,6 @@
 **Joints, links and degrees of freedom**
 
-**Intuition**
+**Links, joints and the ground**
 
 A robot arm is a chain of rigid **links** joined by **joints**. Each joint lets the link after it move in exactly one way relative to the link before it:
 
@@ -11,7 +11,7 @@ Everything else about the joint is fixed geometry: where the axis is and which w
 
 The number of independent ways a mechanism can move is its **degrees of freedom** (DOF). A free rigid body in space has 6: three to say where it is, three to say which way it faces (Module 1). A serial arm gets one DOF per one-freedom joint.
 
-**The maths**
+**A joint as a transform**
 
 Step 1: what a joint does, as a transform. For a unit axis u:
 
@@ -34,7 +34,7 @@ Step 4: why six. A pose is six numbers (position x, y, z and orientation), so to
 
 Step 5: closed loops cost freedoms. A planar four-bar linkage (ground plus 3 moving links, 4 hinges, a loop) has 3 (4 - 1 - 4) + 4 = 1 DOF: one motor drives it all.
 
-**Worked example**
+**Four mechanisms, counted**
 
 The formula on four mechanisms, and what a prismatic joint does to a point:
 
@@ -52,10 +52,10 @@ print([round(c * q, 2) for c in u])
 
 A six-joint arm has 6, a seven-joint arm 7, a planar two-link arm 2, the four-bar 1. The lift moves its frame 0.2 m straight up, without turning it.
 
-**Watch out**
+**The ground is a link too**
 
 Two classic slips. First, forgetting that the ground counts as a link: N - J instead of N - 1 - J gives a six-joint arm 12 DOF. Second, a prismatic axis must be a unit vector before you multiply by q, or "slide 0.2 m" slides further. And DOF counts freedoms of the *mechanism*: near special poses (singularities, Module 3) an arm can still lose the ability to move in some direction.
 
-**AI check**
+**Two pure cases for any joint**
 
 For any AI-written joint code, test the two pure cases: a revolute joint must leave its origin where it is, and a prismatic joint must leave every axis exactly as it was. For a DOF count, try the cases you know by heart: 6 for a six-joint arm, 1 for a four-bar.

@@ -15,6 +15,6 @@ for category in board:
 
 The outer loop gives you each *key* of the dictionary (a category name, a string). The inner loop gives you each *dish dictionary* in that category's list. Before you use a variable, say out loud which level it is: "category is a string, dish is a dictionary".
 
-**Watch out:** Mixing up the levels is the classic nested-data bug: saving `category` when you meant `dish["name"]` runs without any error and gives the wrong answer.
+**Category or dish?** Mixing up the levels is the usual nested-data bug: saving `category` when you meant `dish["name"]` runs without any error and gives the wrong answer.
 
-**AI check:** when an AI "fixes" a red test, look at which file its diff changes. If it changed the test's expected value to match the code's output, the bug is still there and the test can't catch it any more.
+When an AI "fixes" a red test, look at which file its diff changes. If it changed the test's expected value to match the code's output, the bug is still there and the test can't catch it any more.

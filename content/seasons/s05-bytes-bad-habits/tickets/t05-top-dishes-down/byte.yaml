@@ -10,7 +10,7 @@ suggestion:
       - "It's wrong: try/except can't catch a ValueError raised inside a for loop."
       - "It's wrong: the error is about unpacking plain names, so every row gets skipped."
     answer: 2
-  says: "As I said in the chat: a count is text from the kitchen tablet. This skips the bad rows, and the home screen is back up! 🛟"
+  says: "As I said in the chat: a count is text from the kitchen tablet. This skips the bad rows, and the home screen is back up."
   explain: >-
     The crash goes away, but the banner becomes just "Top today: " because EVERY row is skipped.
     The traceback never mentioned a count: "too many values to unpack (expected 2)" on line 25

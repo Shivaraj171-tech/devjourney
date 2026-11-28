@@ -4,7 +4,7 @@ suggestion:
   find: "        out.append(link)"
   replace: "        out.append(T_mul(link, out[-1]) if out else link)  # new link first: it's applied first"
   correct: false
-  says: "Easy: chain each link onto the previous frame. The newest link acts first, so it goes first."
+  says: "Chain each link onto the previous frame. The newest link acts first, so it goes first."
   explain: >-
     The idea (a running product) is right, the order is not. T_1_2 is written in the ELBOW's frame, which
     moves with link 1, so it belongs on the right: T_0_2 = T_0_1 T_1_2. Byte's T_1_2 T_0_1 swings the upper

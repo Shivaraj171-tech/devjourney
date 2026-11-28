@@ -10,7 +10,7 @@ suggestion:
       - "Reject: done=True should never be returned by step(), only by the training loop."
       - "Reject: hovering near the box still pays +1 a move, more over an episode than +10 once."
     answer: 2
-  says: "Got it: reaching the box should end the episode with a bonus. I kept the 'near' reward, it helps it learn faster!"
+  says: "Reaching the box now ends the episode with a bonus. I kept the 'near' reward. It helps it learn faster."
   explain: >-
     Half right. Reaching the box now ends the episode, but every move near it still pays +1, so a learner
     that wanders near the box for 35 moves scores 35, far more than the +10 for grabbing it. And moves

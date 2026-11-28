@@ -1,11 +1,11 @@
 title: "Tidy up what customers type"
 author: "Byte 🤖"
 description: |
-  Hi team! 👋 Customers type messy things, so here are six helpers in a new
+  Customers type messy things, so here are six helpers in a new
   `app/customer_input.py`: promo codes, kitchen notes, allergies and phone numbers.
   `allergy_list` uses `split`'s handy `strip=True` option, so no loop is needed,
   and riders only ever see the last 4 digits of a phone number, for privacy.
-  The module imports cleanly, so everything works. 🤖✅
+  The module imports cleanly, so everything works.
 files: [app/customer_input.py]
 issues:
   - file: app/customer_input.py

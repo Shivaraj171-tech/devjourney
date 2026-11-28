@@ -10,7 +10,7 @@ suggestion:
       - "Reject: the home pose already agreed, so the screws must have been right."
       - "Accept: it just drops the base frame, which was a duplicate of frame 1."
     answer: 0
-  says: "Off by one, sorry: joint 1 turns about the BASE's z axis. Frames 0 to 5 hold the six axes."
+  says: "Off by one: joint 1 turns about the BASE's z axis. Frames 0 to 5 hold the six axes."
   explain: >-
     Right. Joint i turns about z(i-1) through o(i-1), so the screws come from frames 0 to 5, and the flange frame
     6 holds no axis at all. The home pose agreed before only because e^([S] 0) = I for any S. Now DH and PoE give

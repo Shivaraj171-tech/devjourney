@@ -20,7 +20,7 @@ predict:
 parsons:
   - goal: >-
       Write `adjoint(R, pR)`: the 6x6 adjoint for twists (w, v), given the 3x3 blocks R and pR = [p]R as lists
-      of rows. One line is Byte's slip: leave it out.
+      of rows. Byte contributed one line. It's wrong.
     lines:
       - "def adjoint(R, pR):"
       - "    top = [R[i] + [0.0, 0.0, 0.0] for i in range(3)]"

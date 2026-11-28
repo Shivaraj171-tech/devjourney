@@ -1,10 +1,10 @@
 **Full-pose Newton-Raphson with the body twist error**
 
-**Intuition**
+**Correcting a pose needs a motion**
 
 To correct a position you subtract: "3 cm left". To correct a pose you need a MOTION: "turn this much about this axis, while sliding like this". Ask: which constant twist, held for one second, would carry the flange from where it is onto the target? That twist is the error, and it's a 6-vector Newton can use. Written in the flange's own frame, it pairs naturally with the body Jacobian from Module 3, which says how a joint step twists the flange in that same frame.
 
-**The maths**
+**The relative pose and its log**
 
 Step 1: the relative pose. From the flange's frame, the target is at T_bd = T_sb⁻¹ T_sd. If T_bd = I we're done.
 
@@ -30,7 +30,7 @@ J_b(q) dq = V_b      q ← q + dq      until |w θ| and |v θ| < tol
 
 Step 5: why "converges" isn't "correct". Near the solution T_bd is close to I, θ is tiny, and θ G⁻¹ ≈ I - [w θ]/2: using p instead of θ G⁻¹ p makes an error of second order. Newton still reaches the same pose (zero is zero either way). But the twist error is also used to measure "how far", to damp and clamp steps, and to interpolate motions, and for those a wrong log gives wrong numbers far from the target. Test the log by itself: log(exp(S θ)) = S θ.
 
-**Worked example**
+**exp, then log, a screw at x = 0.3**
 
 A screw about the z axis through (0.3, 0, 0), turned 0.8 rad: exp it, then log it back. The translation p is not v θ:
 
@@ -50,10 +50,10 @@ print([round(x, 3) for x in p], [round(x, 3) for x in back], [round(x * th, 3) f
 # [0.091, -0.215, 0.0] [0.0, -0.24, 0.0] [0.0, -0.24, 0.0]
 ```
 
-**Watch out**
+**Body with body, space with space**
 
 Twist ordering and frames must match: (w, v) for both V_b and J_b, both in the BODY frame. Mixing a space-frame error (T_sd T_sb⁻¹) with a body Jacobian converges slowly or not at all. And the angle near π: axis-angle needs Module 1's careful branch there.
 
-**AI check**
+**Subtraction is not a twist**
 
 Ask an AI for "the twist between two poses" and check whether it subtracts positions (not a twist) or takes a real logarithm. Then do the round trip on a screw you know.

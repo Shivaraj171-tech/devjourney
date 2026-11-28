@@ -15,6 +15,6 @@ print(len(snacks))  # 3
 
 (In today's starter code, `pass` is a placeholder that does nothing, and `# TODO` marks the spot to fill in.)
 
-**Watch out:** `.append()` changes the list and gives back nothing (`None`). Writing `snacks = snacks.append("tea")` throws your list away. Just call `snacks.append("tea")` on its own line.
+**`.append()` returns nothing.** It changes the list and gives back nothing (`None`). Writing `snacks = snacks.append("tea")` throws your list away. Just call `snacks.append("tea")` on its own line.
 
-**AI check:** if an AI writes `x = x.append(...)`, that's this exact mistake.
+If Byte writes `x = x.append(...)`, that's this exact mistake.

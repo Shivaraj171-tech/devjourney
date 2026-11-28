@@ -51,9 +51,9 @@ test("diffLocals ignores steps from other function calls", () => {
 test("captions for calls, lines, loops and returns", () => {
   assert.equal(stepCaption(cart, 0), "cart_subtotal is called with prices = [450, 299]");
   assert.equal(stepCaption(cart, 1), "Line 10: cart_subtotal starts here");
-  assert.equal(stepCaption(cart, 2), "Line 11 runs next — total is set to 0");
-  assert.equal(stepCaption(cart, 3), "Line 12 runs next — i is set to 0");
-  assert.equal(stepCaption(cart, 4), "Line 11: back to the top of the loop — total is now 450");
+  assert.equal(stepCaption(cart, 2), "Line 11 runs next; total is set to 0");
+  assert.equal(stepCaption(cart, 3), "Line 12 runs next; i is set to 0");
+  assert.equal(stepCaption(cart, 4), "Line 11: back to the top of the loop; total is now 450");
   assert.equal(stepCaption(cart, 5), "Line 13 runs next");
   assert.equal(stepCaption(cart, 6), "cart_subtotal returns 450");
   assert.equal(stepCaption(cart, 7), "");
@@ -69,9 +69,9 @@ test("captions for exceptions", () => {
     step("exception", 14, [], { func: "safe_lookup", frame: 1, exception: "KeyError: 'pizza'", raised_here: false }),
     step("line", 15, [], { func: "safe_lookup", frame: 1 }),
   ];
-  assert.equal(stepCaption(steps, 2), "💥 KeyError raised here: 'pizza'");
+  assert.equal(stepCaption(steps, 2), "KeyError raised here: 'pizza'");
   assert.equal(stepCaption(steps, 3), "lookup stops early because of the KeyError");
-  assert.equal(stepCaption(steps, 4), "💥 The KeyError reaches safe_lookup (line 14)");
+  assert.equal(stepCaption(steps, 4), "The KeyError reaches safe_lookup (line 14)");
   assert.equal(stepCaption(steps, 5), "Line 15: the KeyError is caught");
   assert.deepEqual(splitException("StopIteration"), { name: "StopIteration", detail: "" });
 });
@@ -88,7 +88,7 @@ test("result captions and timeline length", () => {
   assert.match(resultCaption({ status: "error", steps: cart, truncated: false }), /crashed/);
   assert.equal(
     resultCaption({ status: "stopped", steps: Array(300).fill(cart[1]), truncated: true }),
-    "⏹ Stopped after 300 steps — is there a loop that never ends?",
+    "Stopped after 300 steps. Is there a loop that never ends?",
   );
   assert.equal(timelineLength({ steps: cart }), 8);
   assert.equal(checkLabel("test_last_item_is_counted"), "last item is counted");

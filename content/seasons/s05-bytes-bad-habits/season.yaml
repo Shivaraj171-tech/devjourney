@@ -1,14 +1,14 @@
 id: s05
 title: "Month Three: Byte's Bad Habits"
 intro: |
-  Month three, and you know Byte well by now: it's fast, it's friendly, and
-  it has habits. It swallows errors so nothing ever looks broken, it invents
-  options Python doesn't have, it "fixes" red tests by changing the test,
-  it explains errors it hasn't read, and it can't resist adding extras.
-  This month you learn the Python behind each habit (try/except, while
-  loops, string methods, nested data, tuples and sorting) and how to spot
-  the habit in a diff before it ships. Maya's rule for the month: "Small,
-  reviewable changes. If I can't read it in two minutes, it's too big."
+  Month three. You know Byte well by now. It's fast, it's friendly, and it has
+  habits. It swallows errors so nothing looks broken. It invents options Python
+  doesn't have. It "fixes" red tests by changing the test. It explains errors it
+  hasn't read, and it can't resist adding extras. This month you learn the
+  Python behind each habit (try/except, while loops, string methods, nested
+  data, tuples and sorting) and how to spot it in a diff before it ships. Maya's
+  rule for the month: "Small, reviewable changes. If I can't read it in two
+  minutes, it's too big."
 tickets:
   - t01-the-tip-box
   - t02-ping-the-riders

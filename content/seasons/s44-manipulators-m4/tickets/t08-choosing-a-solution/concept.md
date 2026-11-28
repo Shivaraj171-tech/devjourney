@@ -1,10 +1,10 @@
 **Choosing among IK solutions: limits first, then the shortest move**
 
-**Intuition**
+**Options, and the one the robot takes**
 
 IK gives you options; the robot can only take one. The choice is not cosmetic: pick the wrong one and the arm swings through half the workspace to reach a box right under its gripper, sweeping everything in between. Two rules cover most real systems. Hard constraints first: a solution outside a joint's range is not a solution (cables, hard stops, the arm's own body). Then preference: of the allowed ones, the one the arm can reach with the least joint motion, because small motions are fast, predictable and unlikely to hit anything.
 
-**The maths**
+**Limits, then distance**
 
 Step 1: joint limits. Each joint has a range [low_i, high_i]. A candidate q is allowed only if every joint is inside its range:
 
@@ -24,7 +24,7 @@ Step 3: pick. Filter by Step 1, minimise Step 2; if nothing is allowed, say so (
 
 Step 4: wrapping. For a joint that can turn freely (no hard stop), q and q + 2π are the same pose: compare wrapped differences. For a joint WITH limits, don't wrap: going from 170° to -170° really is 340° of travel through the stops.
 
-**Worked example**
+**Four solutions, one shoulder limit**
 
 Four solutions for a box, the arm just above it (elbow down), and the shoulder limited to [-0.5, 2.0]:
 
@@ -49,10 +49,10 @@ for name, q in sols.items():
 
 The real distance picks "front down" (0.23 rad away). The signed sum would rank "back up" first (-8.55: the "smallest" number is the biggest move), and an upper-limit-blind check would allow "back down".
 
-**Watch out**
+**Sums that cancel, limits half-checked**
 
 Two bugs that read like features: "total joint travel" as a plain sum (negatives cancel and win the min), and a limits check that only tests the end you thought of. Both pass a test where every difference happens to be positive and every candidate happens to be below its upper limit.
 
-**AI check**
+**Is it a norm, and does it wrap?**
 
 When an AI writes "pick the closest IK solution", look at the distance: is it a norm (squares or absolute values), and does it wrap joints that shouldn't be wrapped? Then test with a candidate whose differences have mixed signs.

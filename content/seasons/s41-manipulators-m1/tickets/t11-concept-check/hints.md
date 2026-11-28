@@ -2,4 +2,4 @@ Every question can be answered with one of three tools: "the columns are where t
 ---
 For quaternion questions, remember the half angle: (cos θ/2, sin θ/2 · u), and that q and -q are the same orientation. For transform questions, the inverse is [Rᵀ, -Rᵀ t].
 ---
-Stuck on one? Each lesson of this module has a worked example you can copy into the editor and change. Re-reading the **The maths** section of the matching ticket answers every question here.
+Stuck on one? Each lesson in this module has a worked example you can copy into the editor and change. The derivation in the matching ticket's lesson (its second section) covers every question here.

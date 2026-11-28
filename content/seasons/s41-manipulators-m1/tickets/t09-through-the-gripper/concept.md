@@ -1,12 +1,12 @@
 **Frames of reference and transform chains**
 
-**Intuition**
+**Where is the box? Depends who's asking**
 
 "Where is the box?" has no single answer. To the base, it's 50 cm to the left. To the gripper, it's 30 cm straight ahead. Same box, different **frames of reference**. A robot is a chain of frames (base, shoulder, elbow, wrist, gripper, camera, box), and most robotics bugs are a transform used in the wrong direction.
 
 The cure is a naming habit that makes direction impossible to miss, and makes the algebra check itself.
 
-**The maths**
+**T_a_b, named at both ends**
 
 Step 1, the name. Write T_a_b for the pose of frame b expressed in frame a. It converts b-coordinates into a-coordinates:
 
@@ -35,7 +35,7 @@ T_b_a = (T_a_b)⁻¹          p_gripper = T_gripper_base p_base = (T_base_grippe
 
 Step 4, a sanity rule. In any product, adjacent names must match. T_base_gripper p_base has "gripper" touching "base": the expression is nonsense even though Python happily multiplies it. That is exactly the bug in this ticket.
 
-**Worked example**
+**A box seen from a turned gripper**
 
 The gripper is 0.5 m in front of the base, turned 90° about z (its x axis points along base y). The box is at base (0.5, 0.3, 0). Where is it for the gripper?
 
@@ -53,10 +53,10 @@ print(in_gripper)
 
 0.3 m straight along the gripper's own x: right in front of the fingers.
 
-**Watch out**
+**Same code, opposite direction**
 
 The two directions look alike in code: `T_apply(T, p)` versus `T_apply(T_inv(T), p)`. Only the names tell you which is right, so name every transform variable T_from_to and every point p_frame. Many libraries (ROS tf, for one) also use "the transform from A to B" to mean opposite things in different places: always check which way the points go.
 
-**AI check**
+**Read the names, then picture one case**
 
 Read an AI's frame code by the names alone: in every product, do the touching names match? Then test one case you can picture, like a box straight ahead of the gripper, which must come out as (d, 0, 0).

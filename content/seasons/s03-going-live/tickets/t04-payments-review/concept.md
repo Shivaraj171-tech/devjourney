@@ -20,4 +20,4 @@ print(f"WHERE customer = '{name}'")  # WHERE customer = 'x' OR '1'='1'
 
 `card_number[-4:]` means "the last 4 characters" of the text. *SQL* is the language programs use to ask a database questions: `SELECT * FROM orders WHERE customer = 'Sam'` means "give me Sam's orders". The name in the last line ends the quotes early, so the query now matches *every* customer. The safe way is a placeholder, like `WHERE customer = ?`, with the name passed separately so it is always treated as data.
 
-**Watch out:** "The app already checks it" is not security. Anyone can skip your app and send requests to the server directly.
+"The app already checks it" is not security. Anyone can skip your app and send requests to the server directly.

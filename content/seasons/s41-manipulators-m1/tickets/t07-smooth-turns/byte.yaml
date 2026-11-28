@@ -11,7 +11,7 @@ suggestion:
       - "Reject: negating q1 turns the box to the opposite orientation, so Grabby will place it upside down."
       - "Accept: with the flip, normalised lerp and slerp give identical results for every t."
     answer: 0
-  says: "Long way round? q and -q are the same rotation, so flip q1 when the dot is negative. Sorted!"
+  says: "Long way round? q and -q are the same rotation, so flip q1 when the dot is negative. Sorted."
   explain: >-
     The flip is exactly right: -q1 is the same orientation, and blending towards it is the short arc, so the
     200° swing is gone. But the blend is still a normalised straight line, which rushes through the middle of a

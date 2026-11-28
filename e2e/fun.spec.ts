@@ -50,7 +50,7 @@ test("rooms merged or unlocked since the last visit get a one-time flourish", as
 
   // The chat reacts to the latest merge and names the next ticket.
   const chat = page.getByTestId("team-chat");
-  await expect(chat).toContainText(/Next up: #4/);
+  await expect(chat).toContainText(/Next: #4 /);
 });
 
 test("merging shows the XP count-up, a promotion when the rank changes, and the flow combo", async ({ page }) => {

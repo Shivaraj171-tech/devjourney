@@ -20,6 +20,6 @@ print(within_limits(46, -97), within_limits(31, -147))  # True False
 
 To *command* a joint safely, clamp it: `max(low, min(high, value))` keeps any value inside the range.
 
-**Watch out:** a check that covers only one side (the far edge, or one joint) passes every test that only tries that side. The crash comes later, on the case nobody tried.
+**Both ends of every limit.** A check that covers only one side (the far edge, or one joint) passes every test that only tries that side. The crash comes later, on the case nobody tried.
 
-**AI check:** ask "what about the other end?" For every limit an AI checks, look for the lower and the upper bound, for every joint.
+Ask "what about the other end?" For every limit an AI checks, look for the lower and the upper bound, for every joint.

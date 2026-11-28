@@ -1,12 +1,11 @@
 id: s02
 title: "Week Two: The AI Pair"
 intro: |
-  Big news on Monday: Byte, the office robot that did our autocomplete last week,
-  has been promoted to full AI pair programmer. It now writes whole features and
-  opens its own pull requests, *fast*. Not always right, but fast. This week
-  you'll review Byte's pull requests, fix what slips through, and keep
-  production alive when things go wrong. Reading and checking code is
-  now half the job, so let's get good at it.
+  Monday: Byte, the office robot that did our autocomplete last week, got
+  promoted to AI pair programmer. It now writes whole features and opens its own
+  pull requests, *fast*. Some of them are right. This week you review Byte's
+  pull requests, fix what slips through, and keep production up when it doesn't.
+  Reading and checking code is now half the job.
 tickets:
   - t01-byte-tips
   - t02-runaway-tips

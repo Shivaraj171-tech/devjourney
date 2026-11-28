@@ -1,10 +1,10 @@
 **Module 4 on one page: inverse kinematics**
 
-**Intuition**
+**Backwards, with options**
 
 Inverse kinematics runs forward kinematics backwards, and the reverse of a function isn't a function: a target can have no joint solution, one, a handful, or infinitely many. Two families of methods find them. Analytic IK splits the arm into problems with closed-form answers (a triangle, a base plane, a wrist centre) and returns ALL the solutions at once, exactly. Numerical IK guesses and corrects with the Jacobian, works for any arm, returns the one solution near its guess, and needs guard rails near singularities and outside the workspace. Real controllers often use both: an analytic solver to list the candidates, joint limits and "closest to now" to choose one, and a damped numerical solver to polish it or to handle arms (offset wrists, seven joints) that have no tidy closed form.
 
-**The maths**
+**The module in a few lines**
 
 The module in a few lines:
 
@@ -21,7 +21,7 @@ robust:      clamp the step by scaling: no joint moves more than MAX_STEP
 choose:      within limits (both ends), then the smallest joint-space norm
 ```
 
-**Worked example**
+**Analytic and Newton, side by side**
 
 Two-link IK and one Newton correction side by side: the analytic elbow-down answer, then a Newton step from a nearby guess lands on it:
 
@@ -47,10 +47,10 @@ print([round(v, 6) for v in exact], [round(v, 6) for v in q])
 
 Same answer: analytic gives it at once, Newton gets there in three steps from a guess nearby.
 
-**Watch out**
+**What broke, ticket by ticket**
 
 The module's bugs: edge cases miscounted (inner radius, the edges themselves); |s2| where the signed s2 belonged; a rounding-blind |c2| > 1; heights measured from the floor instead of the shoulder; a wrist centre that assumed the gripper points down; a reversed error; a log that forgot G⁻¹ (and still converged); "damping" with λ in the wrong place; a signed sum as a distance and a one-ended limit check; and a solver "optimised" by removing its guard rails. Most passed the obvious test. Edge cases and round trips (IK, then FK, compare) caught them.
 
-**AI check**
+**Forward kinematics on every answer**
 
 For any IK an AI writes: run every returned solution through forward kinematics, test a target at full reach, one just beyond it and one near a singularity, and ask which solution it returns when there are several, and why.

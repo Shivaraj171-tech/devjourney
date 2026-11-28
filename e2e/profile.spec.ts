@@ -75,7 +75,7 @@ test("KeyErrors + Byte waved through: dictionaries focus with evidence, 'trusts 
 
   // HQ: the Today card's personal line, and the Bug Bounty recommendation.
   const focus = page.getByTestId("today-focus");
-  await expect(focus).toContainText("Focus this week: dictionaries — 3 KeyErrors on #6");
+  await expect(focus).toContainText("Focus this week: dictionaries (3 KeyErrors on #6");
   const bounty = page.getByTestId("bug-bounty");
   await expect(bounty.getByTestId("bounty-recommended")).toHaveCount(1);
   const recommended = bounty.locator("li[data-recommended]");
@@ -120,7 +120,7 @@ test("Byte's card gets a one-line nudge for a learner who trusts Byte quickly", 
   await page.goto(ticketUrl(t8.id));
   // First visits show a teaser until the learner runs the checks or peeks.
   await revealByteCard(page);
-  await expect(page.getByTestId("byte-trust-nudge")).toHaveText(/Last few times Byte's code went through unchecked — try one example first\./);
+  await expect(page.getByTestId("byte-trust-nudge")).toHaveText(/Byte's last few changes went through unchecked\. Try one example on the next one first\./);
   await shot(page, "byte-nudge-desktop");
 
   // Without the habit: no nudge.

@@ -1,12 +1,12 @@
 **Quaternions: rotations in four numbers**
 
-**Intuition**
+**Axis-angle you can multiply**
 
 Axis-angle is the most natural description (ticket 5), but two axis-angles can't be combined directly, and a matrix uses nine numbers for three degrees of freedom. A unit quaternion packs the axis and the angle into four numbers in a way that **multiplies** like rotations do: combining two turns is one product, 16 multiplications. No gimbal lock, and a drifted one is easy to repair (divide by its length).
 
 Think of q as "how much NOT to turn" (w = cos θ/2) plus "which way, and how much" (the vector part, sin θ/2 · u).
 
-**The maths**
+**Half the angle, four numbers**
 
 Step 1, the definition. A turn of θ about the unit axis u is
 
@@ -40,7 +40,7 @@ Step 4, integrating a gyro. If the wrist spins with angular velocity ω (rad/s, 
 
 With |ω| = 2 rad/s and dt = 0.01 s that's 1.0001 per step: after 1000 steps |q|² ≈ 1.105. And q (0, v) q* scales v by |q|², so the box "grows" 10%. Fix: **renormalise** q = q / |q| after every step. Projecting back onto the sphere is cheap and keeps the direction.
 
-**Worked example**
+**A quarter turn about z**
 
 A quarter turn about z sends x to y:
 
@@ -66,10 +66,10 @@ print([round(c, 6) + 0 for c in v])
 
 The result is (0, x, y, z) = (0, 0, 1, 0): the y axis.
 
-**Watch out**
+**Double angles and slow drift**
 
 Using the full angle in cos and sin gives a turn of 2θ: everything still runs, nothing crashes. Drift is the other silent bug: it is tiny per step, so short tests pass and only long runs fail. Robots run for hours.
 
-**AI check**
+**Ninety degrees and a long loop**
 
 Check an AI's quaternion code with a 90° turn about z (must send x to y, and q must be (0.707, 0, 0, 0.707)), and with a long loop: |q| after 10,000 steps must still be 1.

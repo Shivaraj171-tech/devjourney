@@ -13,6 +13,6 @@ for i in range(steps + 1):
 
 How many steps? Enough that the joint with the **biggest** turn stays under the motor's limit per tick: `ceil(biggest_turn / max_step)`. Every other joint then moves less than that per tick.
 
-**Watch out:** `range(steps)` stops before `steps`, so `t` never reaches 1 and the goal pose is never sent. And sizing the steps from one joint only lets the others jump.
+`range(steps)` stops before `steps`, so `t` never reaches 1 and the goal pose is never sent. And sizing the steps from one joint only lets the others jump.
 
-**AI check:** for any path an AI generates, print the first pose, the last pose and the largest change between two neighbours. Those three numbers catch most trajectory bugs.
+**First, last, biggest jump.** For any path an AI generates, print the first pose, the last pose and the largest change between two neighbours. Those three numbers catch most trajectory bugs.

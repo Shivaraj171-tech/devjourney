@@ -13,6 +13,6 @@ suggestion:
     answer: 0
   says: "Lifts slide, hinges turn. Separate branch for prismatic: q times the unit axis, no rotation."
   explain: >-
-    Right as far as it goes: the lift's frame now rises 0.20 m without turning, and the rig's gripper reaches
+    One bug down: the lift's frame now rises 0.20 m without turning, and the rig's gripper reaches
     (0.45, 0, 0.45). But `mobility` is untouched: it still treats the ground as a link that can move, so a
     six-joint arm comes out with 12 DOF. That one is yours: m (N - 1 - J) + sum(f).

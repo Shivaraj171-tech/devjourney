@@ -1,12 +1,12 @@
 **Slerp: blending orientations at constant speed**
 
-**Intuition**
+**A straight line through a sphere**
 
 Blending positions is easy: go a fraction t of the straight line. Blending orientations is not. Unit quaternions live on a sphere (in 4D, but a circle shows everything). The straight line between two points on a circle cuts **inside** it: midway the blend isn't unit length, so it isn't a rotation. Push it back out (normalise) and you get a valid rotation, but equal steps along the chord become **unequal** arcs: slow at the ends, fast in the middle.
 
 Slerp (spherical linear interpolation, Shoemake 1985) walks along the arc itself, at a constant angular speed. It is the rotational version of "move in a straight line at constant speed".
 
-**The maths**
+**The angle from a dot product**
 
 Step 1: the angle between q0 and q1 on the sphere comes from their dot product, like any two unit vectors:
 
@@ -34,7 +34,7 @@ Step 5: double cover. q and -q are the same orientation, but on the sphere they'
 
 Step 6: when q0 ≈ q1, sin Ω ≈ 0 and step 3 divides by almost zero. There the sphere is flat and normalised lerp is accurate, so use it above a threshold (dot > 0.9995).
 
-**Worked example**
+**Halfway through 160°, two ways**
 
 Halfway through a 160° turn about z, with both methods, measured from the start:
 
@@ -56,10 +56,10 @@ print(turned(slerp), turned(lerp))
 
 A quarter of the time should be a quarter of the turn: slerp gives 40°, lerp lags at 34.5° (and then rushes to catch up).
 
-**Watch out**
+**The forgotten sign flip**
 
 Forgetting the sign flip is invisible in most tests (cameras usually send q with w > 0), then one day the robot swings 200°. And normalised lerp is fine for small steps, which is why it survives code review.
 
-**AI check**
+**Two tests for an AI-written slerp**
 
 Ask for t = 0.25 of a big turn (160°) and check it's exactly a quarter of the angle, then feed the same target as -q1: the answer must not change.

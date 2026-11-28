@@ -1,12 +1,12 @@
 **Building a DH table**
 
-**Intuition**
+**Frames first, numbers second**
 
 A DH table is not measured, it is **derived**: first you decide where every frame goes, using a few strict rules, and then each number in the table is just a distance or an angle you can read off the drawing. If the frames are placed by the rules, four numbers per joint always suffice. If you skip the frames and "read lengths off the drawing", numbers land in the wrong columns and the arm looks fine in a sketch but not in 3D.
 
 The key mental shift: **frame i-1 holds joint i's axis** as its z axis. The base frame's z0 is joint 1's axis, z1 is joint 2's axis, and so on. The numbers in row i describe how to get from frame i-1 to frame i.
 
-**The maths**
+**Placing the axes by the rules**
 
 Step 1: draw the joint axes. Put z(i-1) along joint i's axis (for each i = 1..n), and pick the direction so the joint turns positively about it (right-hand rule).
 
@@ -25,7 +25,7 @@ Step 4: check with poses you can picture. At q = 0 every frame should be where y
 
 Typical values: α = 0 for parallel axes (shoulder and elbow), α = ±90° where an axis tips over (a vertical base axis meeting a horizontal shoulder axis), α = 180° where an axis flips (a SCARA's downward slide).
 
-**Worked example**
+**A SCARA, frame by frame**
 
 A SCARA: two vertical hinges (links 0.4 and 0.3 m, 0.5 m up) and a slide that pushes the tool **down**. All three axes are vertical, so every a is a horizontal link length; the slide's z must point down, so row 2 twists by α = 180°. Row 3's variable is d, not θ:
 
@@ -51,10 +51,10 @@ print([round(T[i][3], 2) + 0 for i in range(3)], round(T[2][2], 2))
 
 The tool's z axis points straight down (its z component is -1), and the slide of 0.1 m took it from 0.5 down to 0.4.
 
-**Watch out**
+**Three traps in a table**
 
 Three traps. A link length in the **d** column (it is a distance along x, so it belongs in a). A forgotten **twist** (α = 0 where an axis tips over leaves every later axis vertical: the arm grows straight up). And sign: α is measured about x_i from z(i-1) to z_i, so flipping x_i flips α.
 
-**AI check**
+**Ask for the frames, not just the table**
 
 Never accept an AI-written DH table without frames: ask for the z and x axis of every frame at q = 0, check them against the rules, then compare the table's FK against a trusted implementation at random poses.

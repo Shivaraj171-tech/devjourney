@@ -13,6 +13,6 @@ suggestion:
     answer: 0
   says: "The camera sends long axes, Rodrigues wants unit ones. One call to unit() and the stretch is gone."
   explain: >-
-    Right as far as it goes: scaling the axis keeps its direction and makes R a real rotation, so the
+    Half of it. Scaling the axis keeps its direction and makes R a real rotation, so the
     stretched-axis and round-trip checks go green. The half turn is a different bug: at 180° R - Rᵀ is all
     zeros and sin θ is 0, so `to_axis_angle` still returns (0, 0, 0). That needs the symmetric-part branch.

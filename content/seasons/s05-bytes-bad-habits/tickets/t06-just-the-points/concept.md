@@ -17,6 +17,6 @@ print(points_message(22), "/", points_message_plus(22, "Sat"))  # You earned 22 
 
 When you review, hold the request next to the diff and check every changed line against it. Anything not in the request comes out, and it gets its own ticket if someone wants it.
 
-**Watch out:** Extras that tests don't cover still change behaviour. A default like `weekday="Mon"` hides an extra from every test that doesn't pass a weekday.
+Extras that tests don't cover still change behaviour. A default like `weekday="Mon"` hides an extra from every test that doesn't pass a weekday.
 
-**AI check:** ask "which line of the request does this line serve?" for every line an AI adds. If there's no answer, it's scope creep.
+**One question per added line.** Ask "which line of the request does this line serve?" for every line an AI adds. If there's no answer, it's scope creep.

@@ -17,6 +17,6 @@ print(tip_percent("15%"))  # not a whole number: 15%
 
 Keep the `try` small (just the line that can fail for a known reason), and make the `except` say something useful: what went wrong and how to fix it.
 
-**Watch out:** A bare `except:` or `except Exception:` with a default like `0` turns a crash into a wrong answer. Crashes are loud and get fixed; wrong answers stay quiet for weeks.
+**Loud crashes, quiet wrong answers.** A bare `except:` or `except Exception:` with a default like `0` turns a crash into a wrong answer. Crashes are loud and get fixed; wrong answers stay quiet for weeks.
 
-**AI check:** when AI code says "can never crash", look for `except Exception` or a bare `except:`, and ask which error it really meant to catch.
+When AI code says "can never crash", look for `except Exception` or a bare `except:`, and ask which error it really meant to catch.

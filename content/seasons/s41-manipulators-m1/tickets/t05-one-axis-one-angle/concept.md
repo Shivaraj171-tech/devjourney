@@ -1,12 +1,12 @@
 **Axis-angle and Rodrigues' formula**
 
-**Intuition**
+**One turn about one axis**
 
 Euler's rotation theorem: however you turn a rigid box about its centre, the final pose could have been reached by **one** turn about **one** fixed axis. Some line through the box ends up exactly where it started. So any orientation is "an axis u and an angle θ": four numbers with one constraint (|u| = 1), so three degrees of freedom, like Euler angles, but with no special order and no gimbal lock.
 
 Grab a pen by the tip and spin it: points on the axis stay put, points off it sweep circles around it. Rodrigues' formula is just that picture written down.
 
-**The maths**
+**Along the axis and across it**
 
 Step 1: split any vector v into a part along the unit axis and a part across it:
 
@@ -45,7 +45,7 @@ Step 5, backwards. The trace (sum of the diagonal) of R is 3 + (1 - cos θ) trac
 
 Step 6, the catch: at θ = 180°, sin θ = 0 and R - Rᵀ = 0. Use the symmetric part instead: (R + Rᵀ)/2 = cos θ I + (1 - cos θ) u uᵀ, so the diagonal gives each uᵢ² and the off-diagonals give uᵢuⱼ (and their signs). The sign of u overall doesn't matter there: 180° about u and about -u are the same turn.
 
-**Worked example**
+**A third of a turn about (1, 1, 1)**
 
 A third of a turn about (1, 1, 1) cycles the axes x → y → z → x:
 
@@ -66,10 +66,10 @@ print(round(math.degrees(math.acos((R[0][0] + R[1][1] + R[2][2] - 1) / 2)), 3))
 
 Column 0 is (0, 1, 0): x went to y.
 
-**Watch out**
+**Unit axes, and nothing over sin θ at 180°**
 
 Normalise the axis before building K. And never divide by sin θ near 180°: you get 0/0, which floating point turns into zeros or noise, not an error. The `+ 0` in the example turns -0.0 into 0.0 for printing; rounding also has signs.
 
-**AI check**
+**Non-unit, zero and 180°**
 
 Test any axis-angle code on three cases an AI tends to skip: a non-unit axis, an angle of 0, and an angle of exactly 180°. Rebuild the matrix from what comes back and compare.

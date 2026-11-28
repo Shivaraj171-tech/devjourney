@@ -18,4 +18,4 @@ Values like `299` survive the trip as numbers, but the key `7` came back as the 
 
 Today's code also walks through a dictionary with `for key, value in d.items():`, which gives you each pair in turn: the key in the first name, its value in the second.
 
-**Watch out:** In JSON, dictionary keys are always text. Number keys are quietly turned into strings when you save, so convert them back (for example with `int()`) when you load.
+**JSON keys are text.** In JSON, dictionary keys are always text. Number keys are quietly turned into strings when you save, so convert them back (for example with `int()`) when you load.

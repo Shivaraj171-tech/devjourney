@@ -10,7 +10,7 @@ suggestion:
       - "`try/except` can't catch ZeroDivisionError, so checkout still crashes."
       - "New restaurants would get an empty label instead of \"New!\"."
     answer: 2
-  says: "The check ran too late, so I moved it to the top. New restaurants get \"New!\" before any maths. 🎉"
+  says: "The check ran too late, so I moved it to the top. New restaurants get \"New!\" before any maths."
   explain: >-
     Moving the check first is the right idea, but `ratings == 0` compares a LIST with the NUMBER 0,
     which is never True, so [] still reaches average_rating and crashes. Check the length: `len(ratings)

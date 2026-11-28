@@ -1,7 +1,7 @@
 **From:** Priya (Marketing)
 **Ticket:** FEAT-204: A "Top rated" badge for our best restaurants
 
-Customers love ratings, so I'd like a 🏆 **Top rated** badge on our best restaurants' cards. Byte wrote a first draft of `is_top_rated` in `app/badges.py` in about two seconds.
-But Maya spotted a problem in review: in her quick try, a restaurant with a single 5-star rating (probably from the owner's mum 👀) came out "top rated".
-The rule we agreed on is in the docstring: at least 5 ratings **and** an average of 4.5 or more. Oh, and after Wednesday's incident, please make sure brand-new restaurants can't crash it!
-Please finish the function so the badge is something customers can trust.
+For next month's homepage I want a **Top rated** badge on our best restaurants' cards. Byte wrote a first draft of `is_top_rated` in `app/badges.py` in about two seconds.
+Maya tried it in review. A restaurant with one 5-star rating came out "top rated". The rating was from the owner's mum, I'd bet money on it.
+The rule we agreed is in the docstring: at least 5 ratings **and** an average of 4.5 or more. And after Wednesday's incident, brand-new restaurants with no ratings must not crash it.
+Please finish the function. If a customer orders from a "top rated" place and it's terrible, that's my name on the poster.

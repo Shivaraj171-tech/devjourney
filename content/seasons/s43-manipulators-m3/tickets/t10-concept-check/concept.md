@@ -1,10 +1,10 @@
 **Module 3 on one page: velocity kinematics**
 
-**Intuition**
+**Velocity kinematics in one matrix**
 
 Forward kinematics maps joint angles to a pose. Velocity kinematics is its derivative: at each pose a matrix, the Jacobian, turns joint speeds into gripper speeds. Everything in this module is a way of computing that matrix, checking it, or reading it. Its columns say what each joint does alone. Its rank says which motions are possible. Its singular values give the shape of the velocity ellipsoid, and its transpose carries forces back to the motors.
 
-**The maths**
+**Seven lines**
 
 The module in seven lines:
 
@@ -20,7 +20,7 @@ radii = σ_k = sqrt(eig(J Jᵀ)),  w = σ1 σ2 ..., κ = σ_max / σ_min
 
 Singularities: rank J drops. For the two-link arm det J = l1 l2 sin(q2) (stretched or folded). For the UR5e det J = a2 a3 sin(q3) sin(q5) (shoulder factor): the elbow, the wrist flip and the shoulder families. Near them κ explodes and resolved-rate control needs huge joint speeds.
 
-**Worked example**
+**Every tool on the two-link arm**
 
 The whole chain on the two-link arm at q = (0, π/2): J, the speeds for a target velocity, the ellipse's radii and the holding torques for a 10 N push along x:
 
@@ -41,10 +41,10 @@ print([[round(x, 2) + 0 for x in r] for r in J], round(det, 2), [round(x, 3) + 0
 
 Moving the gripper up (y) at 0.1 m/s needs the shoulder at +0.2 rad/s and the elbow at -0.2 rad/s; pushing with 10 N along x costs -4 N m on each joint.
 
-**Watch out**
+**Every bug from this module**
 
 The module's bugs, in one list: a probe that moved the caller's list; a relative angle used as an absolute one; joint i's axis taken from frame i instead of i-1; Rᵀ Ṙ where Ṙ Rᵀ was meant; a (v, w) adjoint in a (w, v) codebase; a row swap without a sign flip; eigenvalues used as radii (twice); J where Jᵀ was meant; and a "faster" monitor that squared κ. Every one of them passed SOME test. Every one was caught by a check at a pose with every joint non-zero, or by a case solvable by hand.
 
-**AI check**
+**Frame, ordering, then the numeric check**
 
 For any Jacobian an AI hands you: ask which frame its rows are in and which twist ordering it uses, then compare it with the numeric Jacobian at a random pose. Two minutes, and it catches most of the list above.

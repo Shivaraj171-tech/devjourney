@@ -1,6 +1,6 @@
 **Rigid-body motion: the whole module on one page**
 
-**Intuition**
+**Six numbers for a rigid body**
 
 A rigid body has six degrees of freedom: three for where it is, three for which way it faces. Everything in this module is a way of writing those down, and each way is good at something different:
 
@@ -14,7 +14,7 @@ homogeneous T (16)               rotation + position in one matrix: chains and i
 
 Robots convert between them constantly: a camera sends axis-angle, an IMU integrates quaternions, an operator types Euler angles, and the kinematics multiplies 4x4 transforms.
 
-**The maths**
+**The identities under rigid motion**
 
 The few identities that everything else is built from:
 
@@ -30,7 +30,7 @@ Two patterns repeat. First, **the order of operations is part of the meaning**: 
 
 Where this goes next. Module 2 (forward kinematics) multiplies one 4x4 per joint, exactly like the incident ticket, written in Denavit-Hartenberg parameters or as a product of exponentials (e to the power of a twist, the 6D cousin of Rodrigues). Module 3 differentiates that product: the Jacobian, whose singularities are gimbal lock's big sibling.
 
-**Worked example**
+**One 90° turn, three descriptions**
 
 The same 90° turn about z in three descriptions, all sending x to y:
 
@@ -46,10 +46,10 @@ print(round(angle, 1), [round(c, 3) for c in q], round(yaw, 1))
 # 90.0 [0.707, 0.0, 0.0, 0.707] 90.0
 ```
 
-**Watch out**
+**Conventions libraries disagree on**
 
 Libraries disagree on conventions: quaternions stored (w, x, y, z) or (x, y, z, w); Euler angles in a dozen orders; "transform from A to B" meaning either direction. When two systems meet, test with one pose you can picture before trusting any numbers.
 
-**AI check**
+**A toolkit for AI-written robotics code**
 
 Your module-wide toolkit for AI-written robotics code: one hand-checkable pose per function (a quarter turn about one axis), a round trip for every conversion, the edge cases (0°, 180°, pitch ±90°, a non-unit input), and the names in every product.

@@ -18,4 +18,4 @@ def free_drink(item_count):
 print(free_drink(3))  # False, but the docstring promises True
 ```
 
-**Watch out:** Bugs aren't only wrong numbers. A function can return the right-looking answer while quietly changing something it was handed. And only flag real problems: "looks unusual" is not the same as "is wrong".
+**Right answer, changed input.** Bugs aren't only wrong numbers. A function can return the right-looking answer while quietly changing something it was handed. And only flag real problems: "looks unusual" is not the same as "is wrong".

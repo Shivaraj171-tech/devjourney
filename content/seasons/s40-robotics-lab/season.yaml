@@ -6,12 +6,13 @@ icon: "🤖"
 chain: false
 requires: s01-t10
 intro: >
-  Orbit Orders just bought a packing robot arm for the kitchen: **Grabby**. Rosa,
-  our new robotics engineer, is teaching it to find boxes, reach them, move smoothly,
-  hold steady, learn by trial and error, and predict which grasps will work. Byte has
-  "helped" with every module. Each ticket teaches one robotics or machine-learning idea,
-  and the 🔭 Lab viewer shows what your code makes Grabby do after every run.
-  Optional: it never blocks the main story.
+  Orbit Orders bought a packing arm for the kitchen. It's called **Grabby**. Rosa,
+  our new robotics engineer, is teaching it to find boxes, reach them, move
+  smoothly, hold steady, learn by trial and error, and guess which grasps will
+  work. Byte has "helped" with every module. Each ticket teaches one robotics or
+  machine-learning idea, and after every run the Lab viewer shows what your code
+  made Grabby do. The floor sits beside the main story, so take it whenever you
+  like; nothing in the story waits for it.
 tickets:
   - t01-where-is-the-gripper
   - t02-reach-for-the-box

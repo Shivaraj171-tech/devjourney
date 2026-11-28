@@ -13,6 +13,6 @@ print(q_here)  # 4.0
 
 The learner maximises the **total** reward of an episode, so the rewards define the goal. `done = True` ends the episode: nothing more to collect after it.
 
-**Watch out:** the learner finds the easiest way to score, not the one you meant. Pay +1 for every move spent *near* the box and it learns to stay near forever (40 moves × 1 beats grabbing it once). Reward the result (reaching the box ends the episode with a bonus) and make every other move cost a little, so faster is better.
+The learner finds the easiest way to score, not the one you meant. Pay +1 for every move spent *near* the box and it learns to stay near forever (40 moves × 1 beats grabbing it once). Reward the result (reaching the box ends the episode with a bonus) and make every other move cost a little, so faster is better.
 
-**AI check:** for every reward an AI designs, ask: "what is the laziest behaviour that scores best?" If it isn't the behaviour you want, the reward is wrong, however good the learning code is.
+**The laziest way to score.** For every reward an AI designs, ask: "what is the laziest behaviour that scores best?" If it isn't the behaviour you want, the reward is wrong, however good the learning code is.

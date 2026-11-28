@@ -10,7 +10,7 @@ suggestion:
       - "It's right: shorter code is always better, so the version with fewer lines wins."
       - "It's wrong: removing the welcome bonus breaks Priya's spec, which promised new customers 50 extra points."
     answer: 0
-  says: "Maya's right, I got carried away. 🙈 Here's only what Priya asked for: the points from loyalty_points, in her words. The extras can be their own tickets."
+  says: "Maya's right, I got carried away. Here's only what Priya asked for: the points from loyalty_points, in her words. The extras can be their own tickets."
   explain: >-
     Correct. Priya asked for the points we already give, shown as 'You earned N points!', and that's
     all this does. The welcome bonus was never in her request (so removing it breaks nothing she
