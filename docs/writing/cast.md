@@ -8,7 +8,7 @@ Read this before writing a story, a chat line, a Byte pitch or a PR description.
 
 - **Sam** is the other new hire and nothing else. The two Bug Bounty tickets that said "Sam (Finance)" now come from **Kavya (Finance)**, a new character.
 - **Priya** is Marketing and nothing else. "Priya (Product)" on the bounty board became "Priya (Marketing)", and her two reports now come from her own patch: a coupon campaign and the homepage's featured restaurants.
-- **Rosa** is the robotics engineer. "Chef Rosa" on the bounty board is now **Ana**, head chef at Noodle Nook, one of our restaurants.
+- **Rosa** is the robotics engineer. "Chef Rosa" on the bounty board is now **Ana**, head chef at Forno 7 (`pz-007`), one of our restaurants.
 - Robotics incidents (the `INC-` tickets on the packing floor) open with the **pager**, in pager format, followed by a short note from Maya. The pager carries the numbers; Maya carries the decision.
 - **Byte** keeps 🤖 as its avatar in the UI (that belongs to the visual designer). In prose, Byte uses no emoji at all.
 
@@ -107,9 +107,9 @@ Reconciles payouts, refunds and card receipts. New in this pass, takes over the 
 - **Punctuation:** amounts and counts. Polite, never chatty.
 - **Cares about:** money that went to the wrong place, rider payouts, what the receipt shows.
 - **Never says:** "roughly", "a bit", jokes.
-- **Sample:** "Riders were short $0 tips on 41 orders yesterday. Every one of those customers typed something in the tip box."
+- **Sample:** "41 orders yesterday paid the rider a $0 tip. Every one of those customers had typed something in the tip box."
 
-### Ana Lim, Head Chef at Noodle Nook
+### Ana Lim, Head Chef at Forno 7
 
 One of our restaurants. Uses the Orbit kitchen screen. Not staff, so she writes like a customer who knows the system well.
 
@@ -121,7 +121,7 @@ One of our restaurants. Uses the Orbit kitchen screen. Not staff, so she writes 
 
 Not a person. Machine format: ticket id, severity, what is broken, numbers, times. One fact per line. No full sentences, no feelings.
 
-- **Sample:** `INC-203 P1 checkout 500s for restaurant=nn-1 since 12:04`
+- **Sample:** `INC-203 P1 checkout 500s for restaurant=nn-114 since 12:04`
 
 ### The narrator (lessons, hints, quizzes)
 
@@ -132,7 +132,7 @@ The tutor. Already the best-written voice. Plain, specific, worked examples, no 
 - **Jonas** wrote the promo-code module, then moved to the payments team. Never speaks.
 - **Ms McKenzie**, a customer, wrote in about her name.
 - **Grabby** (two-link arm) and **Grabby-6** (the six-joint arm) are machines. They don't speak.
-- **Noodle Nook** (`nn-1`, `pz-007`) and the corner-shop kiosk are restaurants and shops on the app.
+- **Noodle Nook** (`nn-114`), **Forno 7** (`pz-007`) and the corner-shop kiosk are restaurants and shops on the app.
 
 ## Names and places
 

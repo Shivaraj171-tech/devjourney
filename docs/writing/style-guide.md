@@ -73,7 +73,7 @@ State the fact. "Merged at 12:31. +125 XP." beats "PR merged!". Errors say what 
 | Generic | Specific |
 |---|---|
 | the totals don't match | $22.40 by email, $27.99 by text |
-| a restaurant | Noodle Nook (`nn-1`) |
+| a restaurant | Noodle Nook (`nn-114`) |
 | the robot | Grabby-6, tote 9, box #414 |
 | the whole team is proud of you | Leo forwarded the email with no comment |
 | customers are upset | three screenshots, two refunds |
