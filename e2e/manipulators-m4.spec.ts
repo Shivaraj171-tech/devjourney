@@ -104,8 +104,8 @@ test("HQ: 'Manipulators · M4' stays locked until Module 3 is done, then opens r
   const floor = page.getByTestId("side-floor-s44");
   await expect(page.getByTestId("side-floor-s43")).toHaveAttribute("data-state", "open");
   await expect(floor).toHaveAttribute("data-state", "locked");
-  await expect(floor.getByRole("heading").first()).toContainText("🦾 Manipulators · M4");
-  await expect(floor).toContainText("10 tickets · 🔒 opens after Manipulators · M3");
+  await expect(floor.getByRole("heading").first()).toContainText("Manipulators · M4");
+  await expect(floor).toContainText("10 tickets. Opens after Manipulators · M3");
   await page.goto(ticketUrl("s44-t01"));
   await expect(page.getByTestId("locked-reason")).toContainText("The Manipulators · M4 opens once you've merged ticket #");
 
@@ -127,7 +127,7 @@ for (const [i, t] of codeTickets.entries()) {
     await seedSolved(page, [...before, ...m4.tickets.slice(0, i)]);
     await page.goto(ticketUrl(t.id));
     await expect(page.getByText(/still in the backlog/)).toHaveCount(0);
-    await expect(page.getByTestId("side-floor-chip")).toContainText("🦾 Manipulators · M4");
+    await expect(page.getByTestId("side-floor-chip")).toContainText("Manipulators · M4");
     await page.getByTestId("lesson-toggle").click();
     const lesson = page.locator("#ticket-lesson");
     await expect(page.getByTestId("lesson-toggle")).toContainText("Deep lesson");
@@ -143,7 +143,7 @@ for (const [i, t] of codeTickets.entries()) {
     for (const path of t.filesEditable) await setEditorFile(page, t.id, path, solutionFile(t, path));
     await runTests(page);
     await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved!" : "PR merged!");
+    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved" : "PR merged");
     await expectArm(page, t.id, true);
     await checkTicketSpecifics(page, t.id);
 
@@ -215,11 +215,11 @@ test(`plays ${check.id}: the module concept check (a read ticket with practice f
   await expect(page.getByTestId("run-tests")).toHaveCount(0);
   await openQuizTab(page);
   await answerQuiz(page, check.questions);
-  await closeSolvedModal(page, "Ticket closed!");
+  await closeSolvedModal(page, "Ticket closed");
   await expect(page.getByTestId("quiz-done")).toContainText(`${check.questions.length}/${check.questions.length}`);
   expect((await readProgress(page)).tickets[check.id].solved).toBe(true);
   await page.goto("/");
-  await expect(page.getByTestId("side-floor-s44")).toContainText("✅ 10/10 merged");
+  await expect(page.getByTestId("side-floor-s44")).toContainText("10/10 merged");
   expect(errors).toEqual([]);
 });
 
@@ -232,7 +232,7 @@ test("390px phone: Newton's convergence in 3D fits, frame by frame, no sideways 
   for (const path of newton.filesEditable) await setEditorFile(page, newton.id, path, solutionFile(newton, path));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByTestId("run-tests").click();
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   const viewer = page.getByTestId("lab-viewer");
   await expect(viewer).toBeVisible({ timeout: 30_000 });
   const view = page.getByTestId("lab-3d");

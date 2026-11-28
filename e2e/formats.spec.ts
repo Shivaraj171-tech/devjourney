@@ -343,7 +343,7 @@ test("why: accept + reason applies Byte's code only after locking in; the run re
 
   await runTests(page);
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "trusted");
   await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +15 XP");
   await expect(page.getByTestId("byte-reason")).toHaveAttribute("data-reason", "right");

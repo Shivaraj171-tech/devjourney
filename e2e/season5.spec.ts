@@ -112,7 +112,7 @@ test("Byte edits the test: accepting it turns nothing green, and the real fix ke
   await setEditorFile(page, t.id, sug.file, solutionFile(t, sug.file));
   await runTests(page);
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   expect(errors).toEqual([]);
 });
 
@@ -156,7 +156,7 @@ test("the finale: Byte's trimmed version is right, and checking it pays", async 
   await expect.poll(() => editorValue(page, t.id, sug.file)).toContain(sug.replace);
   await runTests(page);
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   await expect(byteCard(page)).toHaveAttribute("data-outcome", "trusted");
   await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +15 XP");
   const p = await readProgress(page);

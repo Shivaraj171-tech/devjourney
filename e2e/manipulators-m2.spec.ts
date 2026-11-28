@@ -91,8 +91,8 @@ test("HQ: 'Manipulators · M2' stays locked until Module 1 is done ('opens after
   const floor = page.getByTestId("side-floor-s42");
   await expect(m1Floor).toHaveAttribute("data-state", "open");
   await expect(floor).toHaveAttribute("data-state", "locked");
-  await expect(floor.getByRole("heading").first()).toContainText("🦾 Manipulators · M2");
-  await expect(floor).toContainText("11 tickets · 🔒 opens after Manipulators · M1");
+  await expect(floor.getByRole("heading").first()).toContainText("Manipulators · M2");
+  await expect(floor).toContainText("11 tickets. Opens after Manipulators · M1");
   await expect(floor.locator("[data-testid^=lab-room-]")).toHaveCount(11);
   await expect(page.getByTestId("lab-room-s42-t01")).toHaveAttribute("data-state", "locked");
   // Module 1 and the Robotics Lab are unchanged.
@@ -118,7 +118,7 @@ test("HQ: 'Manipulators · M2' stays locked until Module 1 is done ('opens after
   await page.goto("/");
   await expect(page.getByTestId("final-exam")).toHaveAttribute("data-state", "open");
   await expect(page.getByTestId("side-floor-s42")).toHaveAttribute("data-state", "locked");
-  await expect(page.getByTestId("side-floor-s42")).toContainText("🔒 opens after Manipulators · M1");
+  await expect(page.getByTestId("side-floor-s42")).toContainText("Opens after Manipulators · M1");
   expect(errors).toEqual([]);
 });
 
@@ -128,7 +128,7 @@ for (const [i, t] of codeTickets.entries()) {
     await seedSolved(page, [...season1, ...m1.tickets, ...m2.tickets.slice(0, i)]);
     await page.goto(ticketUrl(t.id));
     await expect(page.getByText(/still in the backlog/)).toHaveCount(0);
-    await expect(page.getByTestId("side-floor-chip")).toContainText("🦾 Manipulators · M2");
+    await expect(page.getByTestId("side-floor-chip")).toContainText("Manipulators · M2");
     await page.getByTestId("lesson-toggle").click();
     const lesson = page.locator("#ticket-lesson");
     await expect(page.getByTestId("lesson-toggle")).toContainText("Deep lesson");
@@ -145,7 +145,7 @@ for (const [i, t] of codeTickets.entries()) {
     for (const path of t.filesEditable) await setEditorFile(page, t.id, path, solutionFile(t, path));
     await runTests(page);
     await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved!" : "PR merged!");
+    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved" : "PR merged");
     await expectArm(page, t.id);
     await checkTicketSpecifics(page, t.id);
 
@@ -221,12 +221,12 @@ test(`plays ${check.id}: the module concept check (a read ticket with practice f
   await expect(page.getByTestId("run-tests")).toHaveCount(0);
   await openQuizTab(page);
   await answerQuiz(page, check.questions);
-  await closeSolvedModal(page, "Ticket closed!");
+  await closeSolvedModal(page, "Ticket closed");
   await expect(page.getByTestId("quiz-done")).toContainText(`${check.questions.length}/${check.questions.length}`);
   expect((await readProgress(page)).tickets[check.id].solved).toBe(true);
 
   await page.goto("/");
-  await expect(page.getByTestId("side-floor-s42")).toContainText("✅ 11/11 merged");
+  await expect(page.getByTestId("side-floor-s42")).toContainText("11/11 merged");
   expect(errors).toEqual([]);
 });
 
@@ -238,7 +238,7 @@ test("390px phone: the 6-DOF UR5e fits, renders all six joint frames, turns with
   for (const path of ur5e.filesEditable) await setEditorFile(page, ur5e.id, path, solutionFile(ur5e, path));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByTestId("run-tests").click();
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   const viewer = page.getByTestId("lab-viewer");
   await expect(viewer).toBeVisible({ timeout: 30_000 });
   const canvas = page.getByTestId("lab-3d-canvas");

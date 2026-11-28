@@ -8,7 +8,6 @@ import { PREDICT_XP, predictionMatches, type FormatRecord, type SnippetResult } 
 import { shuffledOrder } from "@/lib/game/shuffle";
 import { InlineCode } from "../ByteSuggestion";
 import { CodeBlock, FormatCard, Note, primaryButton, type RunFormat } from "./shared";
-import Icon from "@/components/icons/Icon";
 
 export type PredictOutputProps = {
   task: PredictTask;

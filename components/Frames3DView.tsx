@@ -308,7 +308,7 @@ export default function Frames3DView({ item }: { item: Frames3DItem }) {
           Reset view
         </button>
         <span className="text-[11px] text-slate-400" data-testid="lab-3d-view">
-          {view} · drag or ←↑→↓
+          {view}: drag or use ←↑→↓
         </span>
       </div>
       <ReplayBar frame={frame} last={last} playing={playing} onToggle={toggle} onScrub={scrub} valueText={summary} />

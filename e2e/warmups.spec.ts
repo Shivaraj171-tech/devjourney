@@ -59,7 +59,7 @@ test("a session of 3: the missed one comes back first with its reason, mixed con
 
   const card = page.getByTestId("daily-warmup");
   await expect(card).toBeVisible();
-  await expect(page.getByTestId("today-warmup")).toContainText("Ready");
+  await expect(page.getByTestId("today-warmup")).toContainText(/ready/i);
   await expect(card.getByTestId("warmup-progress")).toHaveText("1 of 3");
   await expect(card.getByTestId("warmup-item")).toHaveAttribute("data-warmup-id", "w001");
   await expect(card.getByTestId("warmup-reason")).toHaveText("Review: you missed this 3 days ago");
@@ -81,7 +81,7 @@ test("a session of 3: the missed one comes back first with its reason, mixed con
   const done = card.getByTestId("warmup-done");
   await expect(done).toContainText("2 of 3 right first try (+20 XP)");
   await expect(done).toContainText("Next review: tomorrow");
-  await expect(page.getByTestId("today-warmup")).toContainText("Done");
+  await expect(page.getByTestId("today-warmup")).toContainText(/done/i);
 
   const progress = await readProgress(page);
   const today = await dayKey(page, 0);

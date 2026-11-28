@@ -119,7 +119,7 @@ test("newcomers see the side floors as locked floors, with what's inside and wha
   for (const id of ["s40", "manipulators", "bounty"]) {
     const row = page.getByTestId(`locked-floor-${id}`);
     await expect(row).toHaveAttribute("data-state", "locked");
-    await expect(row).toContainText("🔒");
+    await expect(row.locator('[data-icon="lock"]')).toHaveCount(1);
     await expect(row).toContainText(/[Oo]pens/);
   }
   await expect(page.getByTestId("locked-floor-s40")).toContainText("Robotics Lab");

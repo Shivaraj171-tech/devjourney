@@ -65,11 +65,11 @@ test("merging shows the XP count-up, a promotion when the rank changes, and the 
 
   const modal = page.getByTestId("solved-modal");
   await expect(modal).toBeVisible();
-  await expect(modal).toContainText("Ticket closed!");
+  await expect(modal).toContainText("Ticket closed");
   // 600 + a junior read ticket crosses Trusted Intern (700 XP).
   const promo = modal.getByTestId("promotion");
   await expect(promo).toBeVisible();
-  await expect(promo).toContainText("You're now a Trusted Intern!");
+  await expect(promo).toContainText("Promoted to Trusted Intern.");
   const total = (await page.getByTestId("xp-total").textContent())!;
   await expect(modal.getByTestId("xp-countup")).toHaveText(total);
   await expect(modal.getByRole("progressbar")).toHaveAttribute("aria-label", /Progress to Junior Developer/);

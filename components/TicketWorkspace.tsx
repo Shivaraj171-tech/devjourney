@@ -687,7 +687,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
             </div>
           </div>
 
-          {/* Run · progress · hints. Phone: a sticky bottom bar. Desktop: the top of the results pane. */}
+          {/* Run, progress, hints. Phone: a sticky bottom bar. Desktop: the top of the results pane. */}
           {!isRead && (
             <div
               data-testid="run-bar"
@@ -925,7 +925,7 @@ function TicketSlip({ ticket, exam, solved, review, isRead }: { ticket: Ticket; 
           </li>
         )}
         {solved && (
-          <li className="font-semibold text-[#137a43]">
+          <li className="font-semibold text-[#137a43]" data-testid="slip-state">
             <Icon name="spike" className="mr-1" />
             {review ? "Reviewed" : isRead ? "Done" : ticket.type === "incident" ? "Resolved" : "Merged"}
           </li>

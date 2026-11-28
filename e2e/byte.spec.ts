@@ -107,7 +107,7 @@ test("accepting a wrong suggestion: the next run fails and the lesson is shown",
   await setEditorFile(page, t.id, sug.file, solutionFile(t, sug.file));
   await runTests(page);
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   await expect(card(page)).toHaveAttribute("data-outcome", "waved-through");
 
   await page.goto("/");
@@ -158,7 +158,7 @@ test("'Edit it myself' on a wrong suggestion: fixing it until the tests pass cou
   await expect(card(page)).toHaveAttribute("data-outcome", "pending");
   await setEditorFile(page, t.id, sug.file, solutionFile(t, sug.file));
   await runTests(page);
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   await expect(card(page)).toHaveAttribute("data-outcome", "caught");
   const p = await readProgress(page);
   expect(await xpTotal(page)).toBe(xp + p.tickets[t.id].solveXp + 15);
@@ -173,7 +173,7 @@ test("accepting a correct suggestion: the tests pass and it counts as trusted co
   await expect.poll(() => editorValue(page, t.id, sug.file)).toContain(sug.replace);
   await runTests(page);
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   await expect(card(page)).toHaveAttribute("data-outcome", "trusted");
   await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +15 XP");
   await page.screenshot({ path: `${SHOTS}/byte-trusted.png` });

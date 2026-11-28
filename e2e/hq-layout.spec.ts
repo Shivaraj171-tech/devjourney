@@ -81,7 +81,7 @@ test("later floors are one-line rows that expand on demand", async ({ page }) =>
   const toggle = floor2.getByRole("button", { name: /Floor 2/ });
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(toggle).toContainText(`${season2.length} tickets`);
-  await expect(toggle).toContainText("🔒");
+  await expect(toggle.locator('[data-icon="lock"]')).toHaveCount(1);
   // Rooms are still in the page (with their state), just not shown.
   await expect(page.getByTestId(`room-${season2[0].id}`)).toHaveAttribute("data-state", "locked");
   await expect(page.getByTestId(`room-${season2[0].id}`)).toBeHidden();
@@ -99,7 +99,7 @@ test("returning player: a Today card replaces the pitch, and the current floor i
   await expect(today).toContainText("Welcome back");
   await expect(today.getByRole("heading", { level: 1 })).toContainText(/#\d+/);
   await expect(page.getByTestId("continue")).toHaveAttribute("href", new RegExp(`/ticket/${season2[0].id}/?$`));
-  await expect(page.getByTestId("today-warmup")).toContainText(/Ready|Done/);
+  await expect(page.getByTestId("today-warmup")).toContainText(/ready|done/i);
   await expect(page.getByTestId("today-rank")).toContainText(/XP to|max rank/);
   await expect(page.getByRole("heading", { name: /catch its mistakes/ })).toHaveCount(0);
 

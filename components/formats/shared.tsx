@@ -8,7 +8,6 @@ export type RunFormat = <T>(request: FormatRequest) => Promise<{ value: T } | { 
 
 export function FormatCard({
   testId,
-  icon,
   title,
   subtitle,
   done,

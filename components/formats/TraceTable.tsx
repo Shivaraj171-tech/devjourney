@@ -20,7 +20,6 @@ import {
 } from "@/lib/game/formats";
 import { InlineCode } from "../ByteSuggestion";
 import { FormatCard, ghostButton, Note, primaryButton, type RunFormat } from "./shared";
-import Icon from "@/components/icons/Icon";
 
 export type TraceTableProps = {
   task: TraceTask;

@@ -3,7 +3,6 @@
 // Falls back to a hidden-textarea copy, then to a selectable box the learner
 // can copy by hand, so it never silently fails.
 import { useRef, useState } from "react";
-import Icon from "@/components/icons/Icon";
 
 export async function copyText(text: string): Promise<boolean> {
   try {

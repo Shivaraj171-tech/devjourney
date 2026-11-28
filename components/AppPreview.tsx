@@ -38,7 +38,7 @@ export default function AppPreview({ solved, playerName, bare = false }: Props) 
   return (
     <section className={bare ? "px-5 pb-5" : "rounded-xl border border-rule bg-panel p-5"}>
       <div className="flex items-baseline justify-between gap-3">
-        {!bare && <h3 className="font-display text-lg font-bold text-ink">📱 The app you&apos;re building</h3>}
+        {!bare && <h3 className="font-display text-lg font-bold text-ink">The app you&apos;re building</h3>}
         {!bare && <span className="text-sm text-slate-300">{shipped}/{FEATURE_TICKETS.length} features shipped</span>}
       </div>
       <p className="mt-1 text-sm text-slate-300">Every ticket you merge fixes or adds a piece of the real Orbit Orders app.</p>
@@ -54,31 +54,31 @@ export default function AppPreview({ solved, playerName, bare = false }: Props) 
         <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-slate-700" />
         <div className="space-y-2 rounded-2xl bg-white p-3 text-[13px] text-slate-800">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-violet-700">🛰️ Orbit Orders</span>
+            <span className="font-bold text-violet-700">Orbit Orders</span>
             <Feature on={has(5)} label="cart badge">
-              <span className="rounded-full bg-violet-600 px-2 py-0.5 text-xs font-bold text-white">🛒 3</span>
+              <span className="rounded-full bg-violet-600 px-2 py-0.5 text-xs font-bold text-white">Cart 3</span>
             </Feature>
           </div>
           <div className="flex flex-wrap gap-1.5">
             <Feature on={has(3, 2)} label="Noodle Nook back online">
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px]">🍜 Noodle Nook · open</span>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px]">Noodle Nook, open</span>
             </Feature>
             <Feature on={has(4, 2)} label="Top rated badge">
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] text-amber-800">⭐ Top rated</span>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] text-amber-800">Top rated</span>
             </Feature>
             <Feature on={has(5, 3)} label="fast checkout at lunch rush">
-              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] text-sky-800">⚡ Fast checkout</span>
+              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] text-sky-800">Fast checkout</span>
             </Feature>
           </div>
           <Feature on={has(1)} label="greeting by name">
             <p className="font-medium">Welcome back to Orbit Orders, {customer}!</p>
           </Feature>
           <Feature on={has(3)} label="free delivery over $25">
-            <p className="rounded-lg bg-emerald-100 px-2 py-1 text-xs text-emerald-800">🚚 Free delivery on orders of $25 or more</p>
+            <p className="rounded-lg bg-emerald-100 px-2 py-1 text-xs text-emerald-800">Free delivery on orders of $25 or more</p>
           </Feature>
           <Feature on={has(2)} label="menu prices">
             <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
-              {[["🍕 Margherita", "$12.50"], ["🥖 Garlic bread", "$4.50"], ["🍋 Lemonade", "$2.99"]].map(([n, p]) => (
+              {[["Margherita", "$12.50"], ["Garlic bread", "$4.50"], ["Lemonade", "$2.99"]].map(([n, p]) => (
                 <li key={n} className="flex justify-between px-2 py-1">
                   <span>{n}</span>
                   <span className="font-mono">{p}</span>
@@ -91,7 +91,7 @@ export default function AppPreview({ solved, playerName, bare = false }: Props) 
               <span className="block rounded-lg border border-violet-300 px-2 py-1 text-xs text-violet-700">↻ Order again</span>
             </Feature>
             <Feature on={has(8)} label="promo codes">
-              <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-500">🏷️ Promo code</span>
+              <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-500">Promo code</span>
             </Feature>
           </div>
           <Feature on={has(2, 2)} label="rider tips">
@@ -112,10 +112,10 @@ export default function AppPreview({ solved, playerName, bare = false }: Props) 
           </Feature>
           <div className="flex gap-2">
             <Feature on={has(2, 3)} label="order tracking survives restarts">
-              <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600">📦 Track order #1001</span>
+              <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600">Track order #1001</span>
             </Feature>
             <Feature on={has(6, 3)} label="SMS receipts">
-              <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600">📱 SMS receipt</span>
+              <span className="block rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600">SMS receipt</span>
             </Feature>
           </div>
           <Feature on={has(10)} label="separate orders per customer">

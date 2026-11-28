@@ -10,7 +10,6 @@ import { cleanRunLog } from "@/lib/game/runLog";
 import { useProgress, type TicketProgress } from "@/lib/progress/store";
 import { useHabits } from "@/lib/useCodingProfile";
 import type { RunResult, TestResult } from "@/lib/runner/types";
-import Icon from "@/components/icons/Icon";
 
 type Props = {
   ticket: Ticket;

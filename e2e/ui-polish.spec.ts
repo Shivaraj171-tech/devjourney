@@ -202,7 +202,7 @@ test.describe("phone", () => {
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(4600);
     // The side floors are still listed, each with what opens it.
     await expect(page.getByTestId("side-floors")).toContainText("Robotics Lab");
-    await expect(page.getByTestId("side-floors")).toContainText(/opens after/);
+    await expect(page.getByTestId("side-floors")).toContainText(/Opens after/);
     // Locked bounties fold into one line that opens.
     const fold = page.getByTestId("bounty-locked-fold");
     if (await fold.count()) {
