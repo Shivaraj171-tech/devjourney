@@ -164,7 +164,7 @@ function BackupSection({ progress }: { progress: Progress }) {
             backedUp();
           }}
         >
-          ⬇️ Download backup file
+          Download backup file
         </button>
         <button
           type="button"

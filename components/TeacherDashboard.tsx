@@ -241,7 +241,7 @@ function ClassView({
               className={BTN_PRIMARY}
               onClick={() => downloadText(csvFileName(classCode, dayKey(new Date())), classCsv(reports, floorLabel), "text/csv;charset=utf-8")}
             >
-              ⬇️ Download CSV
+              Download CSV
             </button>
             <DeleteClass classCode={classCode} onDelete={onDelete} />
           </div>
