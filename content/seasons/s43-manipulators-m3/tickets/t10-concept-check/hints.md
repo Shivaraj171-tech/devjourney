@@ -2,4 +2,4 @@ For "what does this column mean" questions, picture one joint turning alone at 1
 ---
 For ellipsoid and monitor questions: the radii are σ = sqrt(eigenvalues of J Jᵀ), w is their product, κ is the biggest over the smallest. For force questions: τ = Jᵀ F, with F what the gripper exerts.
 ---
-Stuck on one? The **The maths** section of the matching ticket answers every question here, and each worked example can be pasted into the editor and changed.
+Stuck on one? Every answer is in the step-by-step derivation of some earlier lesson. Paste that lesson's example into the editor and change a number.

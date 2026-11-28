@@ -1,12 +1,12 @@
 **Matrix products and why the order of turns matters**
 
-**Intuition**
+**Turn your phone twice**
 
 Pick up your phone, screen facing you. Turn it a quarter turn about the vertical axis, then tip it a quarter turn about the left-right axis. Now start again and do the two turns the other way round. The phone ends up in a different pose. In 3D, turns **don't commute**: the order is part of the instruction.
 
 So composing turns needs a tool that keeps track of order. That tool is the matrix product.
 
-**The maths**
+**Rows dotted with columns**
 
 A 3x3 rotation R turns a vector v into Rv. Each entry of Rv is a row of R dotted with v:
 
@@ -39,7 +39,7 @@ Different results, so Rx Rz ≠ Rz Rx. In 2D all turns share one axis, so they c
 
 Shapes: an n×m matrix times an m×p matrix is n×p. The inner sizes must match. The identity I (1s on the diagonal) changes nothing: IA = AI = A.
 
-**Worked example**
+**A 2x3 times a 3x2, by hand**
 
 The 2x3 times 3x2 product from the first test, with plain loops:
 
@@ -55,10 +55,10 @@ print(1 * 7 + 2 * 9 + 3 * 11)
 # 58
 ```
 
-**Watch out**
+**"Then" runs right to left**
 
 "Then" reads left to right in English, but the matrix for "A then B" is B A. Writing `matmul(first, second)` gives the turns in the opposite order. Careful too: this rule is for turns about the **fixed world** axes. Turns about the box's **own moving** axes compose the other way (A B); you'll meet that in transform chains (ticket 9).
 
-**AI check**
+**Two quarter turns you can picture**
 
 Ask the AI's composed rotation where the x axis goes, using two quarter turns you can picture (z then x should send x to z). One hand-checkable case catches a swapped product every time.

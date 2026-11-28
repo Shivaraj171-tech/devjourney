@@ -133,6 +133,21 @@ export async function answerQuiz(page: Page, questions: Question[]) {
   }
 }
 
+/**
+ * The section headings of a ticket's lesson (concept.md), as the page shows them: lines that
+ * are all bold, outside code blocks, after the title. Deep lessons have at least five.
+ */
+export function lessonHeadings(t: TicketInfo): string[] {
+  const lines = readFileSync(join(t.dir, "concept.md"), "utf-8").split("\n");
+  let inCode = false;
+  const out: string[] = [];
+  lines.forEach((line, i) => {
+    if (line.startsWith("```")) inCode = !inCode;
+    else if (!inCode && i > 0 && /^\*\*[^*]+\*\*$/.test(line.trim())) out.push(plainText(line.trim()));
+  });
+  return out;
+}
+
 /** Content text as the page shows it: Markdown-style `code` and **bold** without their marks. */
 export function plainText(s: string): string {
   return s.replace(/`([^`]+)`/g, "$1").replace(/\*\*([^*]+)\*\*/g, "$1");

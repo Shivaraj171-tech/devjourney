@@ -1,6 +1,6 @@
 **Wrist geometry: the spherical wrist and its centre**
 
-**Intuition**
+**The point your wrist turns about**
 
 Hold your forearm still and move only your wrist: your hand turns, but one point inside your wrist stays put. Most industrial arms copy that: their last three joints (often called roll, pitch, roll) have axes that **intersect at one point**, the wrist centre. That's a **spherical wrist**: the hand can take any orientation, like a ball joint, while the wrist centre stays fixed.
 
@@ -8,7 +8,7 @@ That gives the robot a clean division of labour. The first three joints (base, s
 
 The UR5e is a counter-example: its wrist axes are offset by d5 (and d4, d6) and never meet. Its IK still has a closed form, but a messier one.
 
-**The maths**
+**Where z3, z4 and z5 meet**
 
 Step 1: the wrist centre p_w is the point where z3, z4 and z5 meet. In the DH table of a spherical wrist, rows 4 and 5 have a = 0 and d5 = 0, so frames 4 and 5 both sit at that point: p_w = o4 = o5. Row 6's d6 is the distance from the wrist centre out to the flange, along z5 = z6.
 
@@ -28,7 +28,7 @@ p_w = T_0_3(q1, q2, q3) (0, 0, d4)       depends on q1, q2, q3 only
 
 That's the decoupling, in one line: three joints for position, three for orientation.
 
-**Worked example**
+**Row or column, gripper pointing down**
 
 Row or column? A flange pose with the gripper pointing straight down at (0.5, 0.2, 0.3), d6 = 0.1, and the gripper's x axis turned along y:
 
@@ -46,10 +46,10 @@ print([round(p[i] - d6 * z_col[i], 2) for i in range(3)], [round(p[i] - d6 * z_r
 
 Both agree here, because this R happens to be symmetric. Tilt the gripper in any less special way and they don't: a test at a symmetric pose (like home) can pass with the row. That is the lesson of this ticket's bug.
 
-**Watch out**
+**Tests that can't see a row bug**
 
 Row-versus-column bugs survive any test that uses identity-like or symmetric rotations: home poses, quarter turns about a single axis. Also, d6 is the wrist-centre-to-flange distance only; if a gripper is mounted on the flange, the tool length is added on top (ticket 10).
 
-**AI check**
+**R[i][2] or R[2]?**
 
 When AI code pulls an axis out of a rotation matrix, check: is it indexing `R[i][2]` over i (a column: an axis) or `R[2]` (a row)? Then test at a random, unsymmetric pose, and check the property that must hold: moving only joints 4-6 must not move the wrist centre.

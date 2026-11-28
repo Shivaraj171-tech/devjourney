@@ -29,17 +29,17 @@ FLOOR = "id: s41\ntitle: Deep\nintro: I\nchain: false\nrequires: s01-t01\n{extra
 LONG_LESSON = """\
 **A deep lesson**
 
-**Intuition**
+**Two arrows stuck to the box**
 
 Words.
 
-**The maths**
+**Where each arrow lands**
 
 ```text
 R = [[cos θ, -sin θ], [sin θ, cos θ]]
 ```
 
-**Worked example**
+**The corner at half a radian**
 
 ```python
 import math
@@ -48,9 +48,11 @@ print(round(math.cos(0.5), 3))
 # 0.878
 ```
 
-**Watch out:** units.
+**Degrees into a radians function**
 
-**AI check**
+Units.
+
+**Ask the AI's matrix where x goes**
 
 Check one pose.
 """
@@ -97,12 +99,34 @@ class LongLessonTests(unittest.TestCase):
         self.assertEqual(vc.lesson_words("one two\n```python\nx = 1 + 2 + 3\n```\nthree\n"), 3)
 
     def test_sections_are_required_in_order(self):
-        errors = self.floor(LONG_LESSON.replace("**AI check**", "**Checks**"))["s41-deep/t01"]
-        self.assertTrue(any("missing the **AI check** section" in e for e in errors), errors)
+        # Five sections, each under its own heading line; the headings themselves are free.
+        merged = LONG_LESSON.replace("**Degrees into a radians function**\n\n", "")
+        errors = self.floor(merged)["s41-deep/t01"]
+        self.assertTrue(any("needs at least 5 sections" in e and "found 4" in e for e in errors), errors)
         shutil.rmtree(self.seasons / "s41-deep")
-        swapped = LONG_LESSON.replace("**Intuition**", "**TMP**").replace("**The maths**", "**Intuition**").replace("**TMP**", "**The maths**")
-        errors = self.floor(swapped)["s41-deep/t01"]
-        self.assertTrue(any("sections must come in this order" in e for e in errors), errors)
+        # The last section is the AI check: it has to be about checking an AI's version.
+        no_ai = LONG_LESSON.replace("**Ask the AI's matrix where x goes**", "**One pose by hand**")
+        errors = self.floor(no_ai)["s41-deep/t01"]
+        self.assertTrue(any("last section must say how to check an AI's version" in e for e in errors), errors)
+        shutil.rmtree(self.seasons / "s41-deep")
+        # The worked example comes after the picture and the maths, not first.
+        example = LONG_LESSON[LONG_LESSON.index("```python"):LONG_LESSON.index("**Degrees")]
+        early = LONG_LESSON.replace(example, "").replace("Words.\n", "Words.\n\n" + example)
+        errors = self.floor(early)["s41-deep/t01"]
+        self.assertTrue(any("must come after the first two sections" in e for e in errors), errors)
+        shutil.rmtree(self.seasons / "s41-deep")
+        # A bold lead-in inside a paragraph ("**Units:** ...") is not a heading.
+        inline = LONG_LESSON.replace("**Degrees into a radians function**\n\nUnits.", "**Units:** degrees into radians.")
+        errors = self.floor(inline)["s41-deep/t01"]
+        self.assertTrue(any("found 4" in e for e in errors), errors)
+
+    def test_old_fixed_section_names_still_count_as_headings(self):
+        old = LONG_LESSON
+        for new, name in [("Two arrows stuck to the box", "Intuition"), ("Where each arrow lands", "The maths"),
+                          ("The corner at half a radian", "Worked example"), ("Degrees into a radians function", "Watch out"),
+                          ("Ask the AI's matrix where x goes", "AI check")]:
+            old = old.replace(f"**{new}**", f"**{name}**")
+        self.assertEqual(self.floor(old)["s41-deep/t01"], [])
 
     def test_worked_example_output_is_checked_by_running_it(self):
         errors = self.floor(LONG_LESSON.replace("# 0.878", "# 0.877"))["s41-deep/t01"]

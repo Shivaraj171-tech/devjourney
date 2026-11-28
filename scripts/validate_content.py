@@ -181,9 +181,13 @@ A side floor may also set
 
     lesson: long     # deep lessons (e.g. s41-manipulators-m1): every concept.md may have
                      # up to 700 words of prose (code blocks not counted, at most 90 code
-                     # lines) and must have these section lines, in this order:
-                     #   **Intuition**  **The maths**  **Worked example**  **Watch out**  **AI check**
-                     # (a line starting with the bold name; "**Watch out:** ..." is fine).
+                     # lines) and must have at least 5 sections, each under its own
+                     # **heading** line (a line that is all bold): the picture, the maths,
+                     # a worked example, the trap, and how to check an AI's version. The
+                     # headings say what the section is about ("**Rows instead of columns**"),
+                     # not what kind of section it is. The worked example (a python block
+                     # ending in "# Output:") comes after the first two sections and before
+                     # the last; the last section must mention AI or Byte.
                      # Every ```python block must RUN cleanly (python3 -I, standard library
                      # only), and at least one must end with an "# Output:" comment block:
                      #     print(round(math.cos(0.5), 3))
@@ -235,8 +239,18 @@ Choices are balanced: across the whole check, the right answer may be the
 strictly longest choice in at most a quarter of the items (so "pick the
 longest" is no strategy).
 
+Writing ("slop check", house style in docs/writing/style-guide.md): every prose file
+(story, lesson, hints, quiz, Byte, practice formats, PR descriptions, season intros,
+warm-ups, skills check) and the chat lines in lib/game/teamChat.ts. Code (fences,
+inline code, YAML code fields), maths and quoted strings are skipped, and so are files
+under 30 words. A file fails ("slop/check") on any em or en dash, a banned phrase,
+more than 12 "!" or 15 emoji per 1,000 words (2 or more of them), or 2 or more
+"not X, but Y" rebuttals. Warnings never fail: a mid-sentence colon rate over 30 per
+1,000 words, any emoji, the same 7-word run in 3 or more files, the same long-lesson
+heading in more than 3 lessons. `--slop-warnings` lists every warning.
+
 Usage:
-    python3 scripts/validate_content.py [content_dir]
+    python3 scripts/validate_content.py [content_dir] [--slop-warnings]
 
 Exits with code 0 if everything is valid, 1 otherwise.
 Requires PyYAML.
@@ -402,7 +416,9 @@ MAX_SHORT_TITLE_CHARS = 40
 MAX_LESSON_WORDS = 230  # a 2-minute lesson (prose outside ``` blocks)
 MAX_LONG_LESSON_WORDS = 700  # season.yaml `lesson: long`
 MAX_LONG_LESSON_CODE_LINES = 90
-LONG_LESSON_SECTIONS = ("Intuition", "The maths", "Worked example", "Watch out", "AI check")
+LONG_LESSON_MIN_SECTIONS = 5  # the picture, the maths, a worked example, the trap, the AI check
+HEADING_LINE = re.compile(r"^\*\*[^*]+\*\*$")  # a section heading: a line that is all bold
+AI_WORD = re.compile(r"\b(AI|AIs|Byte)\b")
 LESSON_KINDS = ("short", "long")
 OUTPUT_MARK = "# Output:"
 
@@ -440,20 +456,43 @@ def check_concept(path, long=False):
     return errors
 
 
+def lesson_sections(text):
+    """(heading, first line index, body) for each section of a lesson: a heading is a line
+    that is all bold, outside code blocks; the title (the first line) is not a section."""
+    lines = text.splitlines()
+    in_code, heads = False, []
+    for i, line in enumerate(lines):
+        if line.startswith("```"):
+            in_code = not in_code
+            continue
+        if not in_code and i > 0 and HEADING_LINE.match(line.strip()) and lines[0].strip() != line.strip():
+            heads.append(i)
+    out = []
+    for n, i in enumerate(heads):
+        stop = heads[n + 1] if n + 1 < len(heads) else len(lines)
+        out.append((lines[i].strip()[2:-2], i, "\n".join(lines[i + 1:stop])))
+    return out
+
+
 def check_long_lesson(text):
-    """A deep lesson: its sections in order, and python blocks that run (worked examples verified)."""
+    """A deep lesson: its sections (picture, maths, worked example, trap, AI check: headings
+    free, structure checked) and python blocks that run (worked examples verified)."""
     errors = []
-    lines = [line.strip() for line in text.splitlines()]
-    at = []
-    for name in LONG_LESSON_SECTIONS:
-        found = [i for i, line in enumerate(lines) if line.startswith(f"**{name}")]
-        if not found:
-            errors.append(f"concept.md: missing the **{name}** section (a long lesson needs: "
-                          + ", ".join(LONG_LESSON_SECTIONS) + ")")
-        else:
-            at.append(found[0])
-    if not errors and at != sorted(at):
-        errors.append("concept.md: sections must come in this order: " + ", ".join(LONG_LESSON_SECTIONS))
+    sections = lesson_sections(text)
+    if len(sections) < LONG_LESSON_MIN_SECTIONS:
+        errors.append(f"concept.md: a long lesson needs at least {LONG_LESSON_MIN_SECTIONS} sections, each under its "
+                      "own **heading** line (the picture, the maths, a worked example, the trap, how to check an "
+                      f"AI's version); found {len(sections)}")
+    else:
+        last_heading, _, last_body = sections[-1]
+        if not AI_WORD.search(last_heading + "\n" + last_body):
+            errors.append("concept.md: the last section must say how to check an AI's version (mention AI or Byte)")
+        example = [m for m in PYTHON_BLOCK.finditer(text) if OUTPUT_MARK in [l.strip() for l in m.group(1).splitlines()]]
+        if example:
+            line = text.count("\n", 0, example[0].start())
+            if not sections[1][1] < line < sections[-1][1]:
+                errors.append("concept.md: the worked example (the python block with '# Output:') must come after the "
+                              "first two sections (the picture and the maths) and before the last one")
     code_lines = sum(len(m.group(1).splitlines()) for m in ANY_BLOCK.finditer(text))
     if code_lines > MAX_LONG_LESSON_CODE_LINES:
         errors.append(f"concept.md has {code_lines} lines in code blocks, at most {MAX_LONG_LESSON_CODE_LINES}")

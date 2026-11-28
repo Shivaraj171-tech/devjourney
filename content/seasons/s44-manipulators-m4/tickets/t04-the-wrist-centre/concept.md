@@ -1,10 +1,10 @@
 **Decoupling: the wrist centre splits a 6-DOF IK in two**
 
-**Intuition**
+**Hand still, cup turning**
 
 Hold a cup and keep your wrist still in space: your hand can still tilt and turn the cup in every direction. A spherical wrist is that, engineered: its three axes meet in one point, so turning joints 4, 5 and 6 spins the gripper about the wrist centre without ever moving it. Turn that around for IK: wherever the target flange is, the wrist centre must sit a fixed distance behind it, along the gripper's approach direction. Find that point, and the big arm (joints 1-3) has a position problem you already solved; what's left for the wrist is a pure orientation problem.
 
-**The maths**
+**Back off D6 along z6**
 
 Step 1: the wrist centre from the target. The flange is D6 beyond the wrist centre along the flange's own approach axis z6, the third COLUMN of the target's rotation R. Back off:
 
@@ -24,7 +24,7 @@ For this wrist R_3_6 has the structure of ZYZ Euler angles, so q4, q5, q6 come o
 
 Step 4: the count. Two shoulder choices × two elbows from step 2, × two wrists from step 3: up to 8 solutions for one pose, like the UR5e. (The UR5e's wrist is NOT spherical: its axes are offset by d4, d5, d6. Its closed form exists but is messier; ticket 6 solves it numerically instead.)
 
-**Worked example**
+**A flange tilted 90°**
 
 A target flange tilted 90° (z6 pointing along +x), 0.1 m beyond the wrist (D6 = 0.1): where is the wrist centre?
 
@@ -44,10 +44,10 @@ print(z6, p_w, [p[0], p[1], round(p[2] + D6, 3)])
 
 The gripper points along x, so the wrist centre is 10 cm behind it along x. "10 cm above it" (the last list) would only be right for a gripper pointing straight down.
 
-**Watch out**
+**Only true when the gripper points down**
 
 Assumptions from the usual case: most picks come from above, gripper pointing down, and then "the wrist is D6 above the flange" happens to be true. Tests that only use pick-from-above poses pass it. Always include a tilted target. Also: the approach axis is the third COLUMN of R (Module 2's bug was reading it from a row).
 
-**AI check**
+**Start with the wrist-centre line**
 
 When an AI writes decoupled IK, check the wrist-centre line first: does it use the target's own z axis? Then test a pose made by forward kinematics with every wrist joint non-zero: solving it must give back the same pose.

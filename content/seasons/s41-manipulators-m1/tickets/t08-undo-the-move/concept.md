@@ -1,12 +1,12 @@
 **Homogeneous transforms: rotation and position in one 4x4 matrix**
 
-**Intuition**
+**Orientation plus position**
 
 A box on the shelf has an orientation R (which way its axes point) and a position t (where its corner sits). A point written in the box's own frame, say "the handle, 10 cm along the box's x", is in the world at: turn it with the box, then shift it by where the box is. That's p_world = R p_box + t.
 
 Turn-then-shift isn't a single matrix product (the "+ t" spoils it), which makes chaining many frames messy. The trick: add a fourth coordinate, always 1, to every point. Then the shift becomes part of a 4x4 matrix, and every pose, every chain and every inverse is plain matrix algebra.
 
-**The maths**
+**R, t and a bottom row**
 
 Step 1, the matrix. Put R top-left, t in the last column, and [0, 0, 0, 1] at the bottom:
 
@@ -38,7 +38,7 @@ Check it with step 2: T T⁻¹ has rotation R Rᵀ = I and translation R(-Rᵀ t
 
 Step 4, why the full transpose fails. Tᵀ puts tᵀ in the bottom row and zeros in the last column: it's not even a homogeneous transform. And the "almost right" -t (instead of -Rᵀ t) only works when R = I: it undoes the shift along the world axes when it must be undone along the box's turned axes.
 
-**Worked example**
+**The handle of a turned box**
 
 The box is turned 90° about z and sits at (0.6, 0.2, 0.3). Where is its handle (0.1, 0, 0 in the box frame), and does the inverse bring it back?
 
@@ -59,10 +59,10 @@ print([round(v, 3) for v in back_t])
 
 The handle is 0.1 further along world y (the box's x points along y), and the inverse's translation is -Rᵀ t = (-0.2, 0.6, -0.3), not (-0.6, -0.2, -0.3).
 
-**Watch out**
+**Read the bottom row**
 
 A transposed 4x4 doesn't crash: it just multiplies. Look at the bottom row: anything but [0, 0, 0, 1] means the matrix isn't a pose. And keep points as 4-vectors with a 1 (or use `T_apply`): forgetting the 1 silently drops the translation.
 
-**AI check**
+**Turn and move, then T times its inverse**
 
 Check any AI-written inverse with T · T_inv(T) == I on a pose that has BOTH a rotation and a translation. A pure move or a pure turn lets the wrong formulas pass.

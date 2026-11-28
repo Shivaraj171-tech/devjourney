@@ -1,12 +1,12 @@
 **2D rotation matrices: the columns are the turned axes**
 
-**Intuition**
+**Two arrows stuck to the box**
 
 Stick a tiny pair of arrows on the box: x pointing right, y pointing up. Turning the box turns those arrows. Here is the key idea of this whole module: *if you know where the arrows end up, you know the turn*. Any point on the box is "a bit of x plus a bit of y", so once the two arrows are turned, every point follows.
 
 A rotation matrix is just those two turned arrows written side by side, as **columns**.
 
-**The maths**
+**Where each arrow lands**
 
 Turn by an angle θ (radians, anticlockwise positive). Step 1: where does the x arrow (1, 0) go? It stays length 1 and now makes angle θ with the old x axis, so by the definition of cos and sin:
 
@@ -37,7 +37,7 @@ Row 0 of R dotted with v gives the new x; row 1 gives the new y. Two checks you 
 
 Two more facts fall out. Lengths don't change (x' and y' are unit length and perpendicular). And turning back is the **transpose**: R(-θ) = R(θ)ᵀ, because cos(-θ) = cos θ and sin(-θ) = -sin θ. Keep that one: it is why rotations are so cheap to undo.
 
-**Worked example**
+**The box corner at (0.3, 0.2)**
 
 The box's corner sits at (0.3, 0.2). Turn the box 30° anticlockwise:
 
@@ -59,10 +59,10 @@ print(round(math.hypot(*new), 3), round(math.hypot(*corner), 3))
 
 The corner moved up and left (anticlockwise) and stayed 0.361 m from the centre.
 
-**Watch out**
+**Rows instead of columns**
 
 If you write the turned axes as the **rows** instead of the columns, you get Rᵀ = R(-θ): a perfectly valid rotation, the wrong way round. Nothing crashes, lengths are kept, half the tests still pass. That is exactly the bug in this ticket. Also: `math.cos` wants radians.
 
-**AI check**
+**Ask the matrix where x goes**
 
 When an AI hands you a rotation matrix, feed it the x axis (1, 0) and a 90° turn. The answer must be (0, 1), the first column. If it comes out (0, -1), it is turning clockwise: the matrix is transposed.

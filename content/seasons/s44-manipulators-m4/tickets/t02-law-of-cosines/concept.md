@@ -1,10 +1,10 @@
 **Analytic IK of a two-link arm**
 
-**Intuition**
+**Three sides of a triangle**
 
 Shoulder, elbow and gripper form a triangle whose three sides you know: the two links and the distance to the target. Three sides pin down a triangle's angles (school geometry: the law of cosines), so they pin down the elbow's bend. Then the shoulder has to point the whole folded arm at the target: the direction to the target, corrected by the angle the bent forearm adds. The only choice left is which way to fold, and that sign is the whole difference between elbow up and elbow down.
 
-**The maths**
+**Law of cosines for the elbow**
 
 Step 1: the elbow. Forward kinematics says the gripper's squared distance from the shoulder is
 
@@ -29,7 +29,7 @@ Step 4: why atan2. atan(y/x) loses the quadrant (and divides by zero straight up
 
 Step 5: the edge. On full reach, c2 = 1 exactly in theory, but floating point can compute 1.0000000000000002. A strict |c2| > 1 test then calls a reachable box unreachable, and sqrt(1 - c2²) raises a math domain error. Accept a tiny tolerance and clamp c2 into [-1, 1].
 
-**Worked example**
+**Both elbows to (0.6, 0.2)**
 
 The box at (0.6, 0.2), both elbows, checked by forward kinematics:
 
@@ -50,10 +50,10 @@ for name, s2 in (("up", -math.sqrt(1 - c2 * c2)), ("down", math.sqrt(1 - c2 * c2
 
 Same elbow bend, opposite signs; the shoulder angles differ by 1.37 rad.
 
-**Watch out**
+**Signed s2, and rounding at full reach**
 
 Two classic slips. Using |s2| in β (or forgetting the sign entirely) gives the elbow-down shoulder angle to the elbow-up bend: the arm lands somewhere else, and only one of the two elbows is ever tested. And comparing floats at an edge with no tolerance: c2 computed from a measured target is never exactly 1.
 
-**AI check**
+**Copied IK, different conventions**
 
 AI-written two-link IK is everywhere and often copied from a source with y up, angles measured from a different axis or "elbow up" meaning the opposite sign. Check every solution by plugging it into forward kinematics, for BOTH elbows, and for a target exactly at full reach.

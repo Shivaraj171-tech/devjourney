@@ -20,6 +20,7 @@ import {
   ticketUrl,
   trackPageErrors,
   waitForPython,
+  lessonHeadings,
 } from "./helpers";
 import { closeSolvedModal } from "./play";
 
@@ -114,12 +115,13 @@ for (const [i, t] of codeTickets.entries()) {
     await page.goto(ticketUrl(t.id));
     await expect(page.getByText(/still in the backlog/)).toHaveCount(0);
     await expect(page.getByTestId("side-floor-chip")).toContainText("🦾 Manipulators · M1");
-    // The deep lesson: intuition, the maths, a worked example, watch out, AI check.
+    // The deep lesson: five sections (picture, maths, worked example, trap, AI check), each with its own heading.
     await page.getByTestId("lesson-toggle").click();
     const lesson = page.locator("#ticket-lesson");
     await expect(page.getByTestId("lesson-toggle")).toContainText("Deep lesson");
-    for (const section of ["Intuition", "The maths", "Worked example", "Watch out", "AI check"])
-      await expect(lesson.getByText(section, { exact: false }).first()).toBeVisible();
+    const headings = lessonHeadings(t);
+    expect(headings.length).toBeGreaterThanOrEqual(5);
+    for (const section of headings) await expect(lesson.getByText(section, { exact: false }).first()).toBeVisible();
     await waitForPython(page);
     await expect(page.getByTestId("lab-viewer")).toHaveCount(0);
 

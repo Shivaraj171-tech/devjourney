@@ -1,6 +1,6 @@
 **The Denavit-Hartenberg convention**
 
-**Intuition**
+**Six numbers become four**
 
 A general rigid transform needs six numbers. Denavit and Hartenberg noticed that if you are clever about **where you put each link's frame**, four are enough. The rules: frame i's z axis lies along joint i+1's axis, and frame i's x axis lies along the **common normal**, the shortest line between the joint axes z(i-1) and z(i). With frames placed like that, getting from one frame to the next is always the same four moves:
 
@@ -11,7 +11,7 @@ A general rigid transform needs six numbers. Denavit and Hartenberg noticed that
 
 Two parameters are about the joint (θ, d: along and about z), two about the link (a, α: along and about x). One table row per joint, and the whole robot is a table.
 
-**The maths**
+**Four moves, each in the last frame**
 
 Step 1: the four moves as matrices, each in the frame produced by the move before (so they post-multiply):
 
@@ -34,7 +34,7 @@ Step 3: reading a table. A row is (a, α, d, θ_offset) in this module and in ou
 
 Step 4: Rz and Tz commute (both along z), and so do Tx and Rx (both along x), so you may meet "Tz(d) Rz(θ) Rx(α) Tx(a)": the same matrix. But a z-move and an x-move do NOT commute: the pairs must stay in that order.
 
-**Worked example**
+**A two-link arm on a pedestal**
 
 A two-link arm on a 0.2 m pedestal, as a table. Row 1 lifts 0.2 (d) and walks 0.5 (a); row 2 walks 0.4:
 
@@ -59,10 +59,10 @@ print([round(T[i][3], 2) + 0 for i in range(3)])
 
 Joint 1 at 90° points the upper arm along y; joint 2 at -90° turns the forearm back to x. The pedestal height comes from d.
 
-**Watch out**
+**When d and θ swap columns**
 
 The classic off-by-one: unpacking a row in the wrong column order. If d and θ_offset swap, a 0.2 m pedestal becomes a 0.2 rad turn (about 11°) and the arm sits on the floor, and nothing crashes. Second trap: **modified DH** (Craig's book) puts Rx(α_(i-1)) Tx(a_(i-1)) BEFORE Rz(θ_i) Tz(d_i), and its tables are shifted by one row. A table only means something with its convention.
 
-**AI check**
+**One non-zero parameter per row**
 
 Ask which convention and which column order an AI's DH code uses, then test with a row where only one parameter is non-zero (each must give a pure move) and with a row where all four are: only that catches the wrong move order.

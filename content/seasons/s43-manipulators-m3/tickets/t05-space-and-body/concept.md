@@ -1,10 +1,10 @@
 **Space and body Jacobians, and the adjoint**
 
-**Intuition**
+**The velocity of which point?**
 
 A rigid body's motion right now is a spin w plus a velocity, but the velocity of WHICH point? Every point of a spinning body moves differently. A twist V = (w, v) picks one: v is the velocity of the body point that is currently passing through the reference frame's origin (imagine the body extended forever, bolted to the gripper). Choose the base frame and you get the space twist V_s; choose the gripper's own frame and you get the body twist V_b: same motion, different bookkeeping. Twists are what the product of exponentials speaks, and Module 4's inverse kinematics uses the body one.
 
-**The maths**
+**From pose rates to twists**
 
 Step 1: from pose rates to twists. With T the gripper's pose and Ṫ its rate of change:
 
@@ -35,7 +35,7 @@ Step 4: the body Jacobian is the same columns in the gripper's frame: J_b = Ad(T
 
 Step 5: back to the geometric Jacobian. The gripper point's own velocity is v_s + w × p: Jw = top rows of J_s, Jv = bottom rows + w × p. Three Jacobians, one motion.
 
-**Worked example**
+**A frame spinning 1 m up**
 
 A frame 1 m up z, spinning about its own x axis: in the base frame, the base origin (1 m below that axis) is dragged along +y:
 
@@ -56,10 +56,10 @@ print([sum(Ad[i][k] * V_b[k] for k in range(6)) for i in range(6)])
 
 w is unchanged (the frames aren't turned); v = p × w = (0, 0, 1) × (1, 0, 0) = (0, 1, 0).
 
-**Watch out**
+**Where [p]R goes**
 
 Ordering conventions bite. Modern Robotics (and this course) orders twists (w, v), with [p]R in the BOTTOM-left of the adjoint. Other books order them (v, w), and their adjoint has [p]R in the TOP-right. Each is right for its own ordering; mixing them is wrong in a way that passes any test where p = 0. Also, v_s is NOT the gripper's velocity: in the 3D view it's drawn at the base origin, and it can be large even when the gripper barely moves.
 
-**AI check**
+**A spin 1 m from the origin, by hand**
 
 When an AI writes an adjoint, ask which twist ordering it assumes and check it on one case you can do by hand: a pure spin about an axis 1 m away from the origin. If the answer has no linear part, the lever is missing.

@@ -1,12 +1,12 @@
 **Euler angles (ZYX) and gimbal lock**
 
-**Intuition**
+**Three numbers instead of nine**
 
 Three numbers are friendlier than nine. Euler angles describe an orientation as three turns about main axes, in a fixed order. ZYX (yaw, pitch, roll) is the aircraft and robot convention: point the nose (yaw, about z), tip it up or down (pitch, about y), then roll about the nose itself (roll, about x).
 
 Picture a camera on a three-ring gimbal: the outer ring yaws, the middle ring pitches, the inner ring rolls. Pitch the middle ring 90° and the inner (roll) axis swings round until it lines up with the outer (yaw) axis. Now two knobs turn the camera about the **same** axis, and no knob turns it about the third. You haven't lost a motor, you've lost a **direction**. That is gimbal lock: a property of the three-number description, not of the hardware alone.
 
-**The maths**
+**Roll, pitch, yaw, multiplied**
 
 Step 1: compose. Turning about the world axes, roll first (x), then pitch (y), then yaw (z), puts the first turn on the right (ticket 2):
 
@@ -34,7 +34,7 @@ Only the **difference** ψ - φ appears: infinitely many (yaw, roll) pairs give 
 
 Near the lock it's bad too: a tiny turn of the box can need a huge jump in yaw and roll. Remember this shape of problem; in Module 3 you'll meet it again as a **singularity** of the Jacobian.
 
-**Worked example**
+**Pitch 90°: two knobs, one motion**
 
 Pitch 90°: yaw 40° and roll 0° gives the same matrix as yaw 0° and roll -40°.
 
@@ -55,10 +55,10 @@ print(max(abs(x - y) for ra, rb in zip(a, b) for x, y in zip(ra, rb)) < 1e-12)
 # True
 ```
 
-**Watch out**
+**Rounding errors at the lock**
 
 Floating point never gives exactly 0 at the lock: cos(π/2) is 6e-17, so atan2 of two rounding errors returns a confident, random angle. Test |cos θ| against a small threshold. And clamp before asin: rounding can make -R[2][0] = 1.0000000000000002, a math domain error.
 
-**AI check**
+**Round-trip the matrices, not the angles**
 
 Round-trip every conversion an AI writes: angles → matrix → angles → matrix, and compare the **matrices**, including at pitch ±90°. Comparing the angles would wrongly fail at the lock, where many answers are right.

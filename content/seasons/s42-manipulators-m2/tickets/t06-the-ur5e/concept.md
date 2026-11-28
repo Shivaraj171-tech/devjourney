@@ -1,12 +1,12 @@
 **Forward kinematics of a real 6-DOF arm: the UR5e**
 
-**Intuition**
+**Six rows, one real robot**
 
 Six revolute joints, six DH rows, six 4x4 matrices multiplied together: nothing new compared with ticket 5, just more of it. What's new is that the table comes from a datasheet, and the numbers can look strange: negative link lengths, offsets along z where you'd expect lengths along x. They're not mistakes, they're the consequence of where the manufacturer chose to put each frame.
 
 The UR5e is a "shoulder, elbow, three-wrist" arm. Joint 1 turns the whole arm about the vertical. Joints 2 and 3 (shoulder, elbow) have parallel horizontal axes, like ticket 3's arm. Joints 4, 5 and 6 are the wrist, each axis at 90° to the one before, but **offset** from each other by a few centimetres rather than meeting in one point (ticket 7 is about why that matters).
 
-**The maths**
+**The UR5e table**
 
 Step 1: the table (nominal values from Universal Robots' own UR5e description files, standard DH, metres):
 
@@ -36,7 +36,7 @@ Step 4: the general pose. T_0_6 = A1 A2 A3 A4 A5 A6, each Ai the DH matrix of ro
 
 Step 5: nominal versus real. These are design values. Each real UR5e leaves the factory with its own calibration (slightly different a, d, α and offsets), so for real millimetre accuracy you read the robot's calibration file. Our numbers are the nominal, uncalibrated ones.
 
-**Worked example**
+**Home pose from the table**
 
 The UR5e's home pose, chained from the table:
 
@@ -60,10 +60,10 @@ print([round(T[i][3], 6) for i in range(3)])
 # [-0.8172, -0.2329, 0.0628]
 ```
 
-**Watch out**
+**Typos that still look like a robot**
 
 Datasheet tables are typed by hand into code, and typos produce robots that look plausible: a flipped sign mirrors the arm, a swapped d4/d5 tilts the wrist. Universal Robots' arms (the older CB-series UR3, UR5, UR10 and the e-Series UR3e, UR5e, UR10e, ...) share this structure with different numbers, so check the model: the older UR5's d1 is 0.089159 m, the UR5e's 0.1625 m. And check the convention: some UR documents and libraries use their own frame choices, so a table only matches its own home pose.
 
-**AI check**
+**A recalled table needs two checks**
 
 An AI will happily "recall" a robot's DH table, often mixing models or signs. Never accept it without two checks: the documented home pose (a hand calculation like Step 3) and a few random poses against an independent implementation.

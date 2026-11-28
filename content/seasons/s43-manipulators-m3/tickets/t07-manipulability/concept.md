@@ -1,10 +1,10 @@
 **Manipulability and the velocity ellipsoid**
 
-**Intuition**
+**What a speed budget buys**
 
 Give the joints a "speed budget": any q̇ with |q̇| ≤ 1. The gripper velocities v = J q̇ that budget can buy fill an ellipsoid (a linear map turns a ball into an ellipsoid). Its long axis is the direction the arm moves in most easily; its short axis the hardest one. Near a singularity the short axis shrinks to nothing: the ellipsoid goes flat, and moving that way costs enormous joint speed. Two numbers summarise the shape: its volume (Yoshikawa's manipulability w) and how stretched it is (the condition number κ, longest over shortest radius).
 
-**The maths**
+**Radii from singular values**
 
 Step 1: which ellipsoid? With J invertible, q̇ = J⁻¹ v, so |q̇|² ≤ 1 becomes
 
@@ -32,7 +32,7 @@ Step 4: two different questions. w falls to 0 at a singularity but also shrinks 
 
 Step 5: computing it without numpy. Jacobi's method repeatedly turns pairs of axes to zero the off-diagonal entries of a symmetric matrix; what's left on the diagonal are the eigenvalues, and the accumulated turns are the eigenvectors (`sym_eig`, given).
 
-**Worked example**
+**Stretch x by 2, y by 0.5**
 
 A 2x2 Jacobian that stretches x by 2 and y by 0.5 (and is then turned by 90°): radii and manipulability.
 
@@ -53,10 +53,10 @@ print(eig, radii, math.sqrt(eig[0] * eig[1]), abs(det))
 
 The eigenvalues are 4 and 0.25; the ellipse's radii are their square roots, 2 and 0.5, and w = 2 x 0.5 = |det J|.
 
-**Watch out**
+**λ is not the radius**
 
 Using λ as the radius squares everything: big directions look bigger, small ones much smaller, and the ellipsoid looks flatter than it is (κ squared). Using det(J Jᵀ) without the root gives w², which is tiny when w is merely small. Both mistakes keep the eigenvectors right, so the picture points the right way and looks plausible. Check the units: radii are in m/s per rad/s, like J's entries.
 
-**AI check**
+**The missing square root**
 
 "The singular values are the eigenvalues of J Jᵀ" is a sentence AIs (and people) write all the time. It's missing a square root. When you're given a formula for an ellipsoid, check one diagonal case by hand, like the worked example.

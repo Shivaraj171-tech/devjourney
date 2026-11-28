@@ -1,10 +1,10 @@
 **The UR5e's 6x6 Jacobian, checked by finite differences**
 
-**Intuition**
+**Six columns, six rows**
 
 Six joints, six columns; six numbers of gripper motion (three of speed, three of spin), six rows. The UR5e's geometric Jacobian is the 3-DOF recipe applied to the six DH frames of Module 2. But a Jacobian is only trustworthy once something independent agrees with it, and the most independent thing there is: wiggle each joint a tiny bit and watch the flange. The linear part is easy (a position moves). The angular part is subtler: you can't subtract two orientations. You have to ask how the rotation MATRIX changes, and turn that change into a spin vector.
 
-**The maths**
+**Columns from frames, checked by differences**
 
 Step 1: the Jacobian. frames = ur5e_frames(q) gives [T_0_0, ..., T_0_6]; column i = [z(i-1) × (p6 - p(i-1)); z(i-1)]. A 6 × 6 matrix, in base-frame axes.
 
@@ -27,7 +27,7 @@ v_i = (p(q + h e_i) - p(q - h e_i)) / 2h
 
 Step 5: compare entry by entry, at several random poses, with a tolerance (1e-6 is generous for h = 1e-6).
 
-**Worked example**
+**A tipped flange spinning about z**
 
 A single joint spinning a tipped flange about the base's z axis: whatever way the flange is tipped, its base-frame spin is (0, 0, 1). The two products tell different stories:
 
@@ -53,10 +53,10 @@ print(vee(mul(Rd, Rt)), vee(mul(Rt, Rd)))
 
 Base frame: a spin about z, as expected. Flange frame: the same spin, but the flange's own y axis is what points up.
 
-**Watch out**
+**Check the checker**
 
 When two pieces of code disagree, the newer, smaller one is not automatically right, and neither is the older. Test the checker itself on a case you can solve in your head. And a skew-symmetric result is not a correctness check: both Ṙ Rᵀ and Rᵀ Ṙ are skew-symmetric. Finally, compare the whole matrix: a check that only looks at the linear rows would have passed a Jacobian whose angular rows were garbage.
 
-**AI check**
+**Angular velocity in which frame?**
 
 Ask an AI to "compute angular velocity from rotation matrices" and it may give either product without saying which frame the answer is in. Always ask: in which frame is this w expressed, and does that match the frame of what I compare it with?

@@ -1,10 +1,10 @@
 **Statics: τ = Jᵀ F**
 
-**Intuition**
+**Shopping bag at arm's length**
 
 Hold a bag of shopping with your arm straight out: your shoulder burns, your elbow less so, your wrist hardly at all. Every joint resists the bag's weight with a torque equal to the force times its lever arm, and the lever arms are exactly what the Jacobian's columns measure: how far, and in which direction, the hand moves when that joint turns. A joint that can't move the hand in the force's direction doesn't feel the force at all. Speeds go out through J; forces come back through Jᵀ.
 
-**The maths**
+**Power in equals power out**
 
 Step 1: power balance. At rest the motors don't do net work, but imagine a tiny motion q̇ (virtual work). The power the motors put in is τ · q̇; the power the gripper delivers to the box is F · v. With no losses they're equal, and v = J q̇:
 
@@ -31,7 +31,7 @@ Step 4: the arm straight out and level (our 3-DOF arm, q = 0). The shoulder's co
 
 Step 5: the duality. Near a singularity the arm can't MOVE in some direction, and in that same direction it can RESIST forces with almost no torque: a stretched arm holds a pull along its length on its bones, not its motors.
 
-**Worked example**
+**Holding 2 kg straight out**
 
 Our 3-DOF arm straight out, holding 2 kg:
 
@@ -48,10 +48,10 @@ print([round(t, 3) for t in tau], [round(t, 3) for t in wrong])
 
 Jᵀ F: the shoulder carries 13.7 N m, the elbow 5.9. J F (rows instead of columns) mixes up which joint gets which lever, and it says the shoulder holds nothing.
 
-**Watch out**
+**J F runs too**
 
 For a square J, J F and Jᵀ F both run without error, and for special (symmetric) Jacobians they even agree. The shape check is free: an n-joint arm with a 6-row J needs a 6-entry wrench and gives n torques. The sign matters too: F is the force the gripper EXERTS on the world (up, to hold the box), not the force of gravity on the box.
 
-**AI check**
+**Transposed, and which way F points**
 
 Ask an AI for holding torques and check two things: does it transpose J, and is its F what the gripper exerts? Then check a pose you can do in your head: straight out and level, the shoulder holds weight × reach.
