@@ -32,6 +32,7 @@ import {
 } from "@/lib/lab/viz";
 import Frames3DView from "./Frames3DView";
 import { ReplayBar, useReplay } from "./LabReplay";
+import Icon from "@/components/icons/Icon";
 
 /** Series colours, in a fixed order (never cycled past 4: a 5th+ line reuses the last with a dash). */
 const SERIES = [
@@ -46,8 +47,8 @@ export default function LabViewer({ items }: { items: VizItem[] }) {
   if (items.length === 0) return null;
   return (
     <section data-testid="lab-viewer" aria-labelledby="lab-viewer-title" className="mb-3 rounded-xl border border-cyan-500/30 bg-slate-950/60 p-3">
-      <h3 id="lab-viewer-title" className="text-xs font-semibold tracking-wide text-cyan-200 uppercase">
-        🔭 Lab viewer <span className="font-normal normal-case text-slate-400">· what your code just did</span>
+      <h3 id="lab-viewer-title" className="text-sm font-semibold text-cyan-100">
+        Lab viewer<span className="font-normal text-slate-300">: what your code just did</span>
       </h3>
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item, i) => (
@@ -164,7 +165,7 @@ function ArmView({ item }: { item: ArmItem }) {
         entries={[
           { swatch: <span className="inline-block h-2.5 w-2.5 rounded-full bg-cyan-300" />, label: "gripper" },
           ...(target ? [{ swatch: <span className="inline-block h-2.5 w-2.5 rounded-full border-2 border-amber-400" />, label: "target" }] : []),
-          ...(item.ghost ? [{ swatch: <span className="font-bold text-pink-400">✕</span>, label: "your code's answer" }] : []),
+          ...(item.ghost ? [{ swatch: <Icon name="cross" className="h-3 w-3 text-pink-400" />, label: "your code's answer" }] : []),
           { swatch: <span className="inline-block h-2.5 w-2.5 rounded-sm bg-cyan-500/30" />, label: item.limits ? "reachable within limits" : "reachable" },
         ]}
       />
@@ -365,7 +366,7 @@ function ChartView({ item }: { item: ChartItem }) {
       {item.series.length === 1 && item.hline !== null && (
         <Legend entries={[{ swatch: <span className="inline-block w-3 border-t border-dashed border-slate-300" />, label: `target ${short(item.hline)}` }]} />
       )}
-      {exploded && <p className="mt-1 text-[11px] font-semibold text-rose-300">⚠️ Some values were not finite (∞ or NaN): the numbers blew up.</p>}
+      {exploded && <p className="mt-1 text-[11px] font-semibold text-rose-300"><Icon name="warning" className="mr-1" />Some values were not finite (∞ or NaN): the numbers blew up.</p>}
       <p className="mt-1 text-xs text-slate-300" data-testid="lab-chart-summary">
         {chartSummary(item)}
       </p>
@@ -428,7 +429,7 @@ function GridView({ item }: { item: GridItem }) {
       {(item.xLabel || item.yLabel) && (
         <p className="mt-1 text-[11px] text-slate-400">
           {item.yLabel && <>rows: {item.yLabel}</>}
-          {item.xLabel && item.yLabel && " · "}
+          {item.xLabel && item.yLabel && ", "}
           {item.xLabel && <>columns: {item.xLabel}</>}
         </p>
       )}
@@ -466,7 +467,7 @@ function PointsView({ item }: { item: PointsItem }) {
         <Legend
           entries={[
             { swatch: <span className="inline-block h-2.5 w-2.5 rounded-full bg-cyan-600" />, label: item.classes[1] },
-            { swatch: <span className="font-bold text-amber-600">✕</span>, label: item.classes[0] },
+            { swatch: <Icon name="cross" className="h-3 w-3 text-amber-600" />, label: item.classes[0] },
           ]}
         />
       )}

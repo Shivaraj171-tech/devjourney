@@ -92,7 +92,7 @@ async function playReview(page: Page, t: TicketInfo, tryFalseAlarm: boolean) {
 
   const modal = page.getByTestId("solved-modal");
   await expect(modal).toBeVisible();
-  await expect(modal).toContainText("Review submitted!");
+  await expect(modal).toContainText("Review submitted");
   if (tryFalseAlarm) {
     await expect(modal).toContainText("False alarms");
     await expect(modal).toContainText("−10");
@@ -101,7 +101,7 @@ async function playReview(page: Page, t: TicketInfo, tryFalseAlarm: boolean) {
     await expect(modal).not.toContainText("False alarms");
     await expect(modal).toContainText("+150 XP");
   }
-  await closeModal(page, "Review submitted!");
+  await closeModal(page, "Review submitted");
   await expect(page.getByTestId("review-verdict")).toContainText("Review complete");
   await expect(page.getByTestId("submit-review")).toHaveCount(0);
 }
@@ -138,14 +138,14 @@ async function playCode(page: Page, t: TicketInfo) {
 
   if (isIncident) {
     const modal = page.getByTestId("solved-modal");
-    await expect(modal).toContainText("Incident resolved!");
-    await expect(modal).toContainText("⚡ Speed bonus");
+    await expect(modal).toContainText("Incident resolved");
+    await expect(modal).toContainText("Speed bonus");
     await expect(modal).toContainText("+50");
-    await closeModal(page, "Incident resolved!");
+    await closeModal(page, "Incident resolved");
     await expect(page.getByTestId("incident-panel")).toContainText("Incident resolved");
     await expect(page.getByTestId("incident-status")).toContainText("speed bonus +50 XP");
   } else {
-    await closeModal(page, "PR merged!");
+    await closeModal(page, "PR merged");
   }
 }
 

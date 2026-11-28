@@ -8,6 +8,7 @@ import { teammates } from "@/lib/game/rules";
 import { CHAT_PEOPLE, teamChat, type ChatTicket } from "@/lib/game/teamChat";
 import { ticketProgress, totalXp, type Progress } from "@/lib/progress/store";
 import type { SeasonSummary } from "./HQ";
+import NameTag from "./icons/NameTag";
 
 type Props = {
   seasons: SeasonSummary[];
@@ -59,13 +60,12 @@ export default function TeamChat({ seasons, progress, streak, recent }: Props) {
 
   return (
     <section className="rounded-xl border border-rule bg-panel" aria-labelledby="team-chat-title" data-testid="team-chat">
-      <div className="flex items-center justify-between border-b border-rule px-4 py-2.5">
-        <h2 id="team-chat-title" className="font-mono text-sm font-bold text-white">
-          <span className="text-slate-300">#</span>orbit-team
+      {/* No presence dot or "online" count: the team is fictional, so the header says what the channel is. */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 border-b border-rule px-4 py-2.5">
+        <h2 id="team-chat-title" className="font-display text-base font-bold text-ink">
+          #orbit-team
         </h2>
-        <span className="flex items-center gap-1.5 text-xs text-slate-300">
-          <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden />5 online
-        </span>
+        <span className="text-xs text-slate-300">Fictional teammates, reacting to what you ship</span>
       </div>
       {earlier.length > 0 && (
         <details className="border-b border-rule px-4 py-2" data-testid="chat-earlier">
@@ -90,12 +90,10 @@ export default function TeamChat({ seasons, progress, streak, recent }: Props) {
         data-from={m.from}
         data-id={m.id}
       >
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-800 text-lg" aria-hidden>
-          {who.avatar}
-        </span>
+        <NameTag name={who.name} byte={m.from === "byte"} />
         <div className="min-w-0">
           <div className="text-xs">
-            <b className="text-white">{who.name}</b> <span className="text-slate-300">{who.role}</span>
+            <b className={m.from === "byte" ? "text-byte" : "text-ink"}>{who.name}</b> <span className="text-slate-300">{who.role}</span>
           </div>
           <p className="text-sm break-words text-slate-300">{m.text}</p>
           {m.link && (

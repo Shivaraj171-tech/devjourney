@@ -94,7 +94,7 @@ export async function playReview(page: Page, t: TicketInfo, opts: ReviewOptions 
 
   const modal = page.getByTestId("solved-modal");
   await expect(modal).toBeVisible();
-  await expect(modal).toContainText("Review submitted!");
+  await expect(modal).toContainText("Review submitted");
   if (opts.tryFalseAlarm) {
     await expect(modal).toContainText("False alarms");
     await expect(modal).toContainText(`+${base - FALSE_ALARM_COST} XP`);
@@ -102,7 +102,7 @@ export async function playReview(page: Page, t: TicketInfo, opts: ReviewOptions 
     await expect(modal).not.toContainText("False alarms");
     await expect(modal).toContainText(`+${base} XP`);
   }
-  await closeSolvedModal(page, "Review submitted!");
+  await closeSolvedModal(page, "Review submitted");
   await expect(page.getByTestId("review-verdict")).toContainText("Review complete");
   await expect(page.getByTestId("submit-review")).toHaveCount(0);
   // Every issue is revealed as a real problem on its main line once the review is done.
@@ -141,12 +141,12 @@ export async function playCode(page: Page, t: TicketInfo) {
 
   if (isIncident) {
     const modal = page.getByTestId("solved-modal");
-    await expect(modal).toContainText("⚡ Speed bonus");
-    await closeSolvedModal(page, "Incident resolved!");
+    await expect(modal).toContainText("Speed bonus");
+    await closeSolvedModal(page, "Incident resolved");
     await expect(page.getByTestId("incident-panel")).toContainText("Incident resolved");
     await expect(page.getByTestId("incident-status")).toContainText("speed bonus +");
   } else {
-    await closeSolvedModal(page, "PR merged!");
+    await closeSolvedModal(page, "PR merged");
   }
 }
 
@@ -164,7 +164,7 @@ export async function playTicket(page: Page, t: TicketInfo, reviewOpts: ReviewOp
   if (t.questions.length > 0) {
     await openQuizTab(page);
     await answerQuiz(page, t.questions);
-    if (t.type === "read") await closeSolvedModal(page, "Ticket closed!");
+    if (t.type === "read") await closeSolvedModal(page, "Ticket closed");
     await expect(page.getByTestId("quiz-done")).toContainText(`${t.questions.length}/${t.questions.length}`);
   }
 

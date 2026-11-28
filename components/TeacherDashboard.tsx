@@ -23,6 +23,7 @@ import {
 } from "@/lib/teacher/classroom";
 import { catchRate, normalizeClassCode, skillsGain, ticketsMerged, type ClassReport } from "@/lib/teacher/report";
 import { useIsClient } from "@/lib/useIsClient";
+import Icon from "@/components/icons/Icon";
 
 export type FloorInfo = { id: string; short: string; title: string };
 
@@ -62,11 +63,11 @@ export default function TeacherDashboard({ floors }: { floors: FloorInfo[] }) {
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header>
-        <p className="text-sm font-semibold tracking-widest text-cyan-300 uppercase">DevJourney · for teachers</p>
-        <h1 className="mt-1 text-2xl font-bold text-white sm:text-3xl">🍎 Teacher view</h1>
+        <p className="text-sm text-slate-300">DevJourney, for teachers</p>
+        <h1 className="mt-1 text-2xl font-bold text-white sm:text-3xl">Teacher view</h1>
         <p className="mt-2 max-w-3xl text-slate-300">
           See how your class is doing without accounts. Give students a class code; each one opens{" "}
-          <Link href="/settings" className="font-semibold text-cyan-300 underline hover:text-cyan-200">Settings</Link> (⚙️ in the top bar),
+          <Link href="/settings" className="font-semibold text-cyan-300 underline hover:text-cyan-200">Settings</Link> (the wrench in the top bar),
           types it in, and sends you their <b className="text-white">class report code</b>. Paste the codes here.
         </p>
       </header>
@@ -79,7 +80,7 @@ export default function TeacherDashboard({ floors }: { floors: FloorInfo[] }) {
 function PrivacyNote() {
   return (
     <aside data-testid="privacy-note" aria-label="Privacy" className="rounded-2xl border border-emerald-400/30 bg-emerald-950/20 p-4 text-sm text-slate-200">
-      <p className="font-bold text-emerald-100">🔒 Nothing leaves this device.</p>
+      <p className="font-bold text-emerald-100">Nothing leaves this device.</p>
       <p className="mt-1">
         Report codes are decoded right here in your browser and saved only in this browser&apos;s local storage. There is no server,
         no account and no tracking: DevJourney never sees your class. A code holds a student&apos;s name, the class code, tickets merged
@@ -110,7 +111,8 @@ function Classroom({ floors }: { floors: FloorInfo[] }) {
       <ClassPicker store={store} current={classCode} onOpen={open} />
       {!storageOk && (
         <p role="alert" className="rounded-lg border border-amber-400/40 bg-amber-950/40 p-3 text-sm text-amber-100">
-          ⚠️ This browser won&apos;t let the page save (private window or blocked site data). The class works until you close the tab: download the CSV to keep it.
+          <Icon name="warning" className="mr-1" />
+          This browser won&apos;t let the page save (private window or blocked site data). The class works until you close the tab: download the CSV to keep it.
         </p>
       )}
       {classCode && (
@@ -174,7 +176,7 @@ function ClassPicker({ store, current, onOpen }: { store: TeacherStore; current:
         </div>
         <button type="submit" data-testid="teacher-open" className={BTN_PRIMARY}>Open class</button>
       </form>
-      {error && <p id={errorId} role="alert" className="mt-2 text-sm text-rose-200">⚠️ {error}</p>}
+      {error && <p id={errorId} role="alert" className="mt-2 text-sm text-rose-200"><Icon name="warning" className="mr-1" />{error}</p>}
       {saved.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
           <span className="text-slate-300">Saved in this browser:</span>
@@ -239,7 +241,7 @@ function ClassView({
               className={BTN_PRIMARY}
               onClick={() => downloadText(csvFileName(classCode, dayKey(new Date())), classCsv(reports, floorLabel), "text/csv;charset=utf-8")}
             >
-              ⬇️ Download CSV
+              Download CSV
             </button>
             <DeleteClass classCode={classCode} onDelete={onDelete} />
           </div>
@@ -338,7 +340,7 @@ function Averages({ reports, floorById }: { reports: ClassReport[]; floorById: M
         <Stat label="Byte catch rate" value={pct(s.catchRate)} testId="avg-catch" hint={`${s.catchRateStudents} student${s.catchRateStudents === 1 ? "" : "s"} with Byte bugs`} />
         <Stat label="Skills check gain" value={s.avgGain === null ? "–" : `${s.avgGain > 0 ? "+" : ""}${num(s.avgGain)}`} testId="avg-gain" hint={`${s.gainStudents} with baseline + final`} />
       </dl>
-      <h3 className="mt-5 text-sm font-semibold tracking-wide text-slate-300 uppercase">Tickets merged per floor (average)</h3>
+      <h3 className="mt-5 text-sm font-semibold text-slate-200">Tickets merged per floor (average)</h3>
       <ul className="mt-2 space-y-2" data-testid="avg-floors">
         {s.floors.map((f) => {
           const info = floorById.get(f.id);
@@ -346,10 +348,10 @@ function Averages({ reports, floorById }: { reports: ClassReport[]; floorById: M
           return (
             <li key={f.id} data-testid={`avg-floor-${f.id}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-sm sm:grid-cols-[14rem_minmax(0,1fr)_5rem]">
               <span className="truncate text-slate-200">
-                <b className="text-white">{info?.short ?? f.id}</b>{info ? ` · ${info.title}` : ""}
+                <b className="text-white">{info?.short ?? f.id}</b>{info ? `: ${info.title}` : ""}
               </span>
               <span className="order-last col-span-2 h-2 overflow-hidden rounded-full bg-slate-800 sm:order-none sm:col-span-1" aria-hidden>
-                <span className="block h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${Math.round(share * 100)}%` }} />
+                <span className="block h-full rounded-full bg-slate-300" style={{ width: `${Math.round(share * 100)}%` }} />
               </span>
               <span className="text-right font-mono text-cyan-200">{num(f.avgMerged)}/{f.total}</span>
             </li>
@@ -364,7 +366,7 @@ function Averages({ reports, floorById }: { reports: ClassReport[]; floorById: M
 function Stat({ label, value, hint, testId }: { label: string; value: string; hint?: string; testId: string }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
-      <dt className="text-xs tracking-wide text-slate-300 uppercase">{label}</dt>
+      <dt className="text-xs text-slate-300">{label}</dt>
       <dd className="mt-1 font-mono text-xl font-bold text-white" data-testid={testId}>{value}</dd>
       {hint && <dd className="text-xs text-slate-400">{hint}</dd>}
     </div>
@@ -393,7 +395,7 @@ function StudentTable({ students, floorLabel }: { students: Student[]; floorLabe
       <div className="mt-3 overflow-x-auto rounded-xl border border-slate-800" tabIndex={0} role="region" aria-label="Students table, scrolls sideways">
         <table className="w-full min-w-[44rem] text-left text-sm" data-testid="teacher-table">
           <caption className="sr-only">One row per student, sorted by {COLUMNS.find((c) => c.key === sort.key)?.label} ({sort.dir === "asc" ? "ascending" : "descending"})</caption>
-          <thead className="bg-slate-950/70 text-xs text-slate-300 uppercase">
+          <thead className="bg-slate-950/70 text-xs text-slate-300">
             <tr>
               {COLUMNS.map((c) => {
                 const active = sort.key === c.key;
@@ -403,7 +405,7 @@ function StudentTable({ students, floorLabel }: { students: Student[]; floorLabe
                       type="button"
                       data-testid={`sort-${c.key}`}
                       onClick={() => setSort(active ? { key: c.key, dir: sort.dir === "asc" ? "desc" : "asc" } : { key: c.key, dir: c.numeric ? "desc" : "asc" })}
-                      className={`inline-flex items-center gap-1 rounded px-1 py-0.5 uppercase hover:text-white focus-visible:outline-2 focus-visible:outline-cyan-300 ${active ? "text-cyan-200" : ""}`}
+                      className={`inline-flex items-center gap-1 rounded px-1 py-0.5 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan-300 ${active ? "text-cyan-200" : ""}`}
                     >
                       {c.label}
                       <span aria-hidden>{active ? (sort.dir === "asc" ? "▲" : "▼") : "↕"}</span>
@@ -447,7 +449,7 @@ function StudentCards({ students, floorLabel, onRemove }: { students: Student[];
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="truncate font-bold text-white">{r.name}</h3>
-                  <p className="text-xs text-slate-300">Last active {r.lastActive ?? "never"} · report from {r.generatedOn}</p>
+                  <p className="text-xs text-slate-300">Last active {r.lastActive ?? "never"}, report from {r.generatedOn}</p>
                 </div>
                 <span className="shrink-0 font-mono text-sm text-cyan-200">{r.xp} XP</span>
               </div>
@@ -456,7 +458,7 @@ function StudentCards({ students, floorLabel, onRemove }: { students: Student[];
                   <li key={f.id} className="flex items-center gap-2">
                     <span className="w-20 shrink-0 text-slate-300">{floorLabel(f.id)}</span>
                     <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800" aria-hidden>
-                      <span className="block h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${f.total ? Math.round((f.merged / f.total) * 100) : 0}%` }} />
+                      <span className="block h-full rounded-full bg-slate-300" style={{ width: `${f.total ? Math.round((f.merged / f.total) * 100) : 0}%` }} />
                     </span>
                     <span className="w-10 shrink-0 text-right font-mono text-slate-200">{f.merged}/{f.total}</span>
                   </li>
@@ -464,7 +466,7 @@ function StudentCards({ students, floorLabel, onRemove }: { students: Student[];
               </ul>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <div className="rounded-lg bg-slate-950/50 p-2">
-                  <dt className="text-slate-300">🤖 Byte bugs caught</dt>
+                  <dt className="text-slate-300">Byte bugs caught</dt>
                   <dd className="font-mono text-white">{r.byte.caught}/{r.byte.caught + r.byte.wavedThrough} ({pct(catchRate(r))})</dd>
                 </div>
                 <div className="rounded-lg bg-slate-950/50 p-2">
@@ -472,7 +474,7 @@ function StudentCards({ students, floorLabel, onRemove }: { students: Student[];
                   <dd className="font-mono text-white">{r.byte.bestPrompts}/{r.byte.promptsTried}</dd>
                 </div>
                 <div className="col-span-2 rounded-lg bg-slate-950/50 p-2">
-                  <dt className="text-slate-300">📝 Skills check</dt>
+                  <dt className="text-slate-300">Skills check</dt>
                   <dd className="font-mono text-white">
                     {r.skills.baseline === null && r.skills.final === null
                       ? "not taken"

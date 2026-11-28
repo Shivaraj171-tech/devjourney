@@ -51,10 +51,10 @@ export default function AdaptiveHelpCard({ ticket, tp, result, onStepThrough, on
 
   const check = result?.results.find((r) => r.name === help.check);
   let button: { label: string; onClick: () => void } | null = null;
-  if (help.action === "step-through" && check && onStepThrough) button = { label: help.actionLabel ?? "🐞 Step through", onClick: () => onStepThrough(check) };
+  if (help.action === "step-through" && check && onStepThrough) button = { label: help.actionLabel ?? "Step through", onClick: () => onStepThrough(check) };
   if (help.action === "lesson") {
     button = {
-      label: help.actionLabel ?? "📘 Re-read the lesson",
+      label: help.actionLabel ?? "Re-read the lesson",
       onClick: () => {
         onShowBrief();
         reveal("#lesson", "[data-testid=lesson-toggle]");
@@ -79,11 +79,10 @@ export default function AdaptiveHelpCard({ ticket, tp, result, onStepThrough, on
       className="mb-3 rounded-xl border border-cyan-400/40 bg-cyan-500/10 p-3 text-sm text-cyan-50"
     >
       <p className="font-semibold text-white">
-        <span aria-hidden>🧭 </span>
         {help.title}
       </p>
       <p className="mt-1 text-cyan-50/90">{help.body}</p>
-      {help.action === "hint" && <p className="mt-1 text-cyan-50/90">Open 💡 Hints next to Run when you&apos;re ready.</p>}
+      {help.action === "hint" && <p className="mt-1 text-cyan-50/90">Open Hints next to Run when you&apos;re ready.</p>}
       <p className="mt-1 text-xs text-cyan-200" data-testid="adaptive-help-why">
         Why this: {help.because} Picked from your runs and your coding profile.
       </p>

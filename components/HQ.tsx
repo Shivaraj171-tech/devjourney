@@ -9,7 +9,10 @@
 // the app you're building) closes the page.
 import Link from "next/link";
 import { useState } from "react";
-import FloorBoard, { type Room } from "./FloorBoard";
+import FloorBoard, { sideFloorIcon, type Room } from "./FloorBoard";
+import Icon from "./icons/Icon";
+import NameTag from "./icons/NameTag";
+import type { IconName } from "@/lib/icons";
 import TodayCard from "./TodayCard";
 import NextTicketSlip from "./NextTicketSlip";
 import { useIsClient } from "@/lib/useIsClient";
@@ -267,7 +270,7 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
                   extra={
                     season.final && certificate.eligible ? (
                       <Link href="/certificate" data-testid="certificate-link" className="inline-block py-1 text-sm font-semibold text-amber-300 hover:underline">
-                        🎓 Your certificate
+                        Your certificate
                       </Link>
                     ) : undefined
                   }
@@ -302,7 +305,8 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
                       season={lab}
                       rooms={rooms}
                       floorOpen={labOpen}
-                      label={`${lab.icon} ${lab.label}`}
+                      label={lab.label}
+                      plateIcon={sideFloorIcon(lab.id)}
                       gateText={lab.gateText}
                       testId={`side-floor-${lab.id}`}
                       roomPrefix="lab-room"
@@ -342,13 +346,18 @@ export default function HQ({ seasons, warmups, hasSkillsCheck, bounties = [], pr
               <HumanInTheLoop score={hitl} />
             </div>
           )}
-          <div className="mt-4 grid gap-4 sm:gap-6 lg:grid-cols-3">
-            <Badges ctx={badgeCtx} foldUpNext={compact} />
+          <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-10">
             <MiniLeaderboard board={board} myPlace={myPlace} playerName={progress.playerName} rows={compact ? 3 : 5} />
+            <Badges ctx={badgeCtx} foldUpNext={compact} />
+          </div>
+          <div className="mt-6">
             {returning || compact ? (
-              <details className="rounded-xl border border-rule bg-panel" data-testid="app-preview-fold">
+              <details className="rounded-lg border border-rule" data-testid="app-preview-fold">
                 <summary className="min-h-11 cursor-pointer px-5 py-3">
-                  <span className="font-display font-bold text-ink">📱 The app you&apos;re building</span>
+                  <span className="font-display font-bold text-ink">
+                    <Icon name="scooter" className="mr-2 h-5 w-5" />
+                    The app you&apos;re building
+                  </span>
                   <span className="mt-0.5 block text-sm text-slate-300">{featuresShippedText(solvedIds)}</span>
                 </summary>
                 <AppPreview solved={solvedIds} playerName={progress.playerName} bare />
@@ -400,15 +409,15 @@ function LockedSideFloors({ sideFloors, bounties, ticketIndex }: { sideFloors: S
   const modules = sideFloors.filter((s) => s.id !== "s40");
   // The bounty that opens first: the one whose required ticket comes earliest in the story.
   const firstBounty = bounties.filter((b) => b.requires).sort((a, b) => ticketIndex(a.requires!.id) - ticketIndex(b.requires!.id))[0];
-  const rows: { id: string; icon: string; name: string; inside: string; opens: string; size: string }[] = [];
+  const rows: { id: string; icon: IconName; name: string; inside: string; opens: string; size: string }[] = [];
   if (lab) {
-    rows.push({ id: lab.id, icon: lab.icon, name: lab.label, inside: SIDE_PREVIEW[lab.id] ?? "", opens: `Opens after ${lab.gateText}.`, size: `${lab.tickets.length} tickets` });
+    rows.push({ id: lab.id, icon: sideFloorIcon(lab.id), name: lab.label, inside: SIDE_PREVIEW[lab.id] ?? "", opens: `Opens after ${lab.gateText}.`, size: `${lab.tickets.length} tickets` });
   }
   if (modules.length > 0) {
     const n = modules.reduce((sum, m) => sum + m.tickets.length, 0);
     rows.push({
       id: "manipulators",
-      icon: modules[0].icon,
+      icon: sideFloorIcon(modules[0].id),
       name: modules.length > 1 ? `Manipulators, modules 1 to ${modules.length}` : modules[0].label,
       inside: "A real robot arm (the UR5e) in a 3D viewer: rotations, forward and inverse kinematics, Jacobians. Deep lessons with the maths step by step.",
       opens: `Module 1 opens after ${modules[0].gateText}; each module opens the next.`,
@@ -418,7 +427,7 @@ function LockedSideFloors({ sideFloors, bounties, ticketIndex }: { sideFloors: S
   if (bounties.length > 0) {
     rows.push({
       id: "bounty",
-      icon: "🐞",
+      icon: "posted",
       name: "Bug Bounty",
       inside: "Short mystery bugs from all over the app. No lesson and no label: part of the job is working out what kind of bug it is.",
       opens: firstBounty?.requires ? `The first opens after ticket #${firstBounty.requires.number} of ${firstBounty.requires.seasonTitle}; the rest open as you learn.` : "Each opens once you've learned what it needs.",
@@ -431,13 +440,14 @@ function LockedSideFloors({ sideFloors, bounties, ticketIndex }: { sideFloors: S
         <li key={r.id} className="grid gap-x-4 gap-y-1 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:px-5" data-testid={`locked-floor-${r.id}`} data-state="locked">
           <div className="min-w-0">
             <h3 className="font-display text-lg font-bold text-slate-100">
-              <span aria-hidden>{r.icon}</span> {r.name} <span className="sr-only">(locked)</span>
+              <Icon name={r.icon} className="mr-2 h-5 w-5 text-slate-300" />
+              {r.name} <span className="sr-only">(locked)</span>
             </h3>
             <p className="mt-1 max-w-prose text-[15px] text-slate-300">{r.inside}</p>
           </div>
           <div className="text-sm sm:text-right">
             <p className="font-semibold text-slate-100">
-              <span aria-hidden>🔒 </span>
+              <Icon name="lock" className="mr-1" />
               {r.opens}
             </p>
             <p className="text-slate-300">{r.size}</p>
@@ -454,15 +464,16 @@ function Badges({ ctx, foldUpNext = false }: { ctx: BadgeContext; foldUpNext?: b
   const locked = BADGES.filter((b) => !b.earned(ctx));
   const upNext = locked.slice(0, 3);
   return (
-    <section className="rounded-xl border border-rule bg-panel p-5" data-testid="badges">
+    <section className="lg:pt-5" data-testid="badges">
       <h3 className="font-display text-lg font-bold text-ink">
-        {earned.length === 0 ? "🏅 Badges you can earn" : `🏅 Badges, ${earned.length} of ${BADGES.length}`}
+        {earned.length === 0 ? "Badges you can earn" : `Badges, ${earned.length} of ${BADGES.length}`}
       </h3>
       {earned.length > 0 && (
         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Earned badges">
           {earned.map((b) => (
-            <li key={b.id} title={b.description} className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-semibold text-amber-100">
-              <span aria-hidden>{b.emoji}</span> {b.title}
+            <li key={b.id} title={b.description} className="rounded-md border border-slate-600 px-2.5 py-1 text-sm font-semibold text-ink">
+              <Icon name={b.icon} className="mr-1.5" />
+              {b.title}
             </li>
           ))}
         </ul>
@@ -491,7 +502,7 @@ function BadgeList({ badges }: { badges: typeof BADGES }) {
           <ul className="mt-2 space-y-2">
             {badges.map((b) => (
               <li key={b.id} className="flex items-start gap-3">
-                <span className="text-xl grayscale" aria-hidden>{b.emoji}</span>
+                <Icon name={b.icon} className="mt-0.5 h-5 w-5 text-slate-300" />
                 <div>
                   <div className="text-sm font-semibold text-ink">{b.title}</div>
                   <div className="text-sm text-slate-300">{b.description}</div>
@@ -509,7 +520,7 @@ function MiniLeaderboard({ board, myPlace, playerName, rows }: { board: ReturnTy
   return (
     <section className="rounded-xl border border-rule bg-panel p-5" data-testid="mini-leaderboard">
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="font-display text-lg font-bold text-ink">🏆 Office leaderboard</h3>
+        <h3 className="font-display text-lg font-bold text-ink">Office leaderboard</h3>
         <Link href="/leaderboard" className="py-1 text-sm font-semibold text-ink underline decoration-signal decoration-2 underline-offset-4">
           See all
         </Link>
@@ -522,7 +533,7 @@ function MiniLeaderboard({ board, myPlace, playerName, rows }: { board: ReturnTy
         {shown.map(({ p, i }) => (
           <li key={p.name + p.role} className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm ${p.isYou ? "bg-signal/15 font-semibold text-ink" : "text-slate-200"}`}>
             <span className="w-4 text-slate-300 tabular-nums">{i + 1}</span>
-            <span className="text-lg" aria-hidden>{p.avatar}</span>
+            <NameTag name={boardName(p, playerName)} byte={p.byte} you={p.isYou} size="sm" />
             <span className="min-w-0 flex-1 truncate" data-testid="board-name">{boardName(p, playerName)}</span>
             <span className="tabular-nums">{p.xp}</span>
           </li>

@@ -66,7 +66,7 @@ test("a wrong answer: step through first; a hint for learners who already step t
   assert.equal(adaptiveHelp([w(), w({ stepped: true }), w()], { ...TICKET, hintsLeft: 0 })!.action, "step-through");
 });
 
-test("habits tune the wording: learners who skip the 📍 line get pointed at it", () => {
+test("habits tune the wording: learners who skip the pinned line get pointed at it", () => {
   const h = adaptiveHelp([run({}), run({}), run({})], TICKET, ["skims-errors"])!;
-  assert.match(h.body, /📍/);
+  assert.match(h.body, /pinned line/);
 });

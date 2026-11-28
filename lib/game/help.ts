@@ -51,7 +51,7 @@ const label = (check: string) => check.replace(/^test_/, "").replace(/_/g, " ");
 /**
  * The most useful next help, or null when the learner isn't stuck. Order:
  *   1. the last runs used the same code: change one thing, then run;
- *   2. the code doesn't load (SyntaxError / IndentationError / NameError on import): look at the 📍 line;
+ *   2. the code doesn't load (SyntaxError / IndentationError / NameError on import): look at the pinned line;
  *   3. the error kind of the stuck check (KeyError, None, IndexError, TypeError, timeout...);
  *   4. a failing edge-case check: the trace table, else the lesson;
  *   5. a wrong answer: Step through, or a hint for learners who already use the debugger.
@@ -80,7 +80,7 @@ export function adaptiveHelp(log: RunLogEntry[], ticket: HelpTicket, habits: Hab
 
   const kinds = last.errors.filter((k) => k !== "AssertionFail");
   const kind = kinds[0];
-  const pointer = habits.includes("skims-errors") ? " Start at the 📍 line under the check: that's where Python stopped." : "";
+  const pointer = habits.includes("skims-errors") ? " Start at the pinned line under the check: that's where Python stopped." : "";
   const because = (what: string) => `${n} runs in a row, ${name ? `${name} ` : ""}${what}.`;
 
   // 2. Code that doesn't load.
@@ -88,7 +88,7 @@ export function adaptiveHelp(log: RunLogEntry[], ticket: HelpTicket, habits: Hab
     return {
       id: "syntax",
       check,
-      title: "Look at the 📍 line and the one above it",
+      title: "Look at the pinned line and the one above it",
       body: "Python couldn't read the file. Check the marked line and the line just above it: a missing colon at the end of an if/for/def, a bracket or quote that isn't closed, or spaces at the start that don't line up.",
       action: "none",
       because: because(`stopped with ${errorKindLabel(kind ?? "SyntaxError", 1)}`),

@@ -44,7 +44,7 @@ export default function Home() {
   const sideFloors: SideFloorSummary[] = sideFloorSeasons().flatMap((s) => {
     const gate = sideFloorGate(all, all.findIndex((x) => x.id === s.id));
     if (!gate) return [];
-    return [{ ...summary(s), requires: s.requires as string, gateText: floorGateText(gate, floorName), icon: s.icon ?? "🧪", label: s.shortTitle ?? s.title }];
+    return [{ ...summary(s), requires: s.requires as string, gateText: floorGateText(gate, floorName), icon: s.icon ?? "", label: s.shortTitle ?? s.title }];
   });
   const bounties: BountyCard[] = sideQuestSeasons().flatMap((s) =>
     s.tickets.map((t) => {

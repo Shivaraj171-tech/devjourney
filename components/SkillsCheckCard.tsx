@@ -22,7 +22,7 @@ export default function SkillsCheckCard({ skillsCheck, finalUnlocked, certificat
     >
       <div className="min-w-0 flex-1">
         <h2 id="skills-card-title" className="font-display text-lg font-bold text-ink">
-          📝 Skills check{line ? <span className="ml-2 font-semibold text-slate-200 tabular-nums" data-testid="skills-card-score">{line}</span> : null}
+          Skills check{line ? <span className="ml-2 font-semibold text-slate-200 tabular-nums" data-testid="skills-card-score">{line}</span> : null}
         </h2>
         <p className="mt-0.5 text-sm text-slate-300">
           {state === "offer-baseline" && "Optional: 12 quick questions (about 6 minutes) to see where you're starting from. You'll retake it before the final exam."}
@@ -49,7 +49,7 @@ export default function SkillsCheckCard({ skillsCheck, finalUnlocked, certificat
         )}
         {state === "done" && certificateReady && (
           <Link href="/certificate" data-testid="skills-card-certificate" className="rounded-xl bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-300">
-            🎓 Certificate
+            Certificate
           </Link>
         )}
         {(state === "baseline-done" || state === "done") && (

@@ -76,8 +76,8 @@ test("HQ: the lab is locked until Season 1 is done, then opens; it never blocks 
   const floor = page.getByTestId("side-floor-s40");
   await expect(floor).toBeVisible();
   await expect(floor).toHaveAttribute("data-state", "locked");
-  await expect(floor.getByRole("heading").first()).toContainText("🤖 Robotics Lab");
-  await expect(floor).toContainText("8 tickets · 🔒 opens after Floor 1");
+  await expect(floor.getByRole("heading").first()).toContainText("Robotics Lab");
+  await expect(floor).toContainText("8 tickets. Opens after Floor 1");
   await expect(floor.locator("[data-testid^=lab-room-]")).toHaveCount(8);
   // The story floors are unchanged: rooms only for on-chain tickets.
   await expect(page.locator("[data-testid^=room-]")).toHaveCount(onChain.length);
@@ -108,7 +108,7 @@ test("HQ: a finished lab shows 8/8 merged, with no performance review link (that
   await seedSolved(page, [...season1, ...lab.tickets]);
   await page.goto("/");
   const floor = page.getByTestId("side-floor-s40");
-  await expect(floor).toContainText("✅ 8/8 merged");
+  await expect(floor).toContainText("8/8 merged");
   await expect(floor.locator("[data-testid^=lab-room-][data-state=done]")).toHaveCount(8);
   await expect(page.getByTestId("review-link-s40")).toHaveCount(0);
 });
@@ -119,7 +119,7 @@ for (const [i, t] of lab.tickets.entries()) {
     await seedSolved(page, [...season1, ...lab.tickets.slice(0, i)]);
     await page.goto(ticketUrl(t.id));
     await expect(page.getByText(/still in the backlog/)).toHaveCount(0);
-    await expect(page.getByTestId("side-floor-chip")).toContainText("🤖 Robotics Lab");
+    await expect(page.getByTestId("side-floor-chip")).toContainText("Robotics Lab");
     await waitForPython(page);
     await expect(page.getByTestId("lab-viewer")).toHaveCount(0); // nothing drawn before the first run
 
@@ -134,7 +134,7 @@ for (const [i, t] of lab.tickets.entries()) {
     for (const path of t.filesEditable) await setEditorFile(page, t.id, path, solutionFile(t, path));
     await runTests(page);
     await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved!" : "PR merged!");
+    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved" : "PR merged");
     await expectDrawings(page, t.id);
     await checkTicketSpecifics(page, t);
 

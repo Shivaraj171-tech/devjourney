@@ -8,6 +8,7 @@ import { checkLabel, diffLocals, resultCaption, stepCaption, timelineLength } fr
 import { explainResult } from "@/lib/runner/explain";
 import type { TraceResult } from "@/lib/runner/types";
 import { InlineMarkdown } from "./Markdown";
+import Icon from "@/components/icons/Icon";
 
 type Props = {
   trace: TraceResult;
@@ -39,7 +40,7 @@ function CurrentLine({ text, line }: { text: string; line: number }) {
           className={`flex ${n === line ? "bg-yellow-400/15 text-white" : "text-slate-400"}`}
         >
           <span className={`w-8 shrink-0 pr-2 text-right select-none ${n === line ? "text-yellow-300" : "text-slate-500"}`}>
-            {n === line ? "▶" : ""}
+            {n === line ? <Icon name="play" className="h-3 w-3" /> : ""}
             {n}
           </span>
           <span className="min-w-0 flex-1 pr-2 whitespace-pre-wrap [overflow-wrap:anywhere]">{lines[n - 1] || " "}</span>
@@ -87,7 +88,10 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
     <div data-testid="debugger" className="space-y-3 text-sm">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold text-slate-300">🐞 Step through</div>
+          <div className="text-xs font-semibold text-slate-300">
+            <Icon name="magnifier" className="mr-1" />
+            Step through
+          </div>
           <div className="truncate font-semibold text-white" title={trace.name}>
             {checkLabel(trace.name)}
           </div>
@@ -97,7 +101,8 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
           aria-label="Close the debugger and show the CI checks"
           className="shrink-0 rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800 hover:text-white"
         >
-          ✕ Close
+          <Icon name="cross" className="mr-1" />
+          Close
         </button>
       </div>
 
@@ -133,11 +138,12 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
           aria-label="Next step"
           className="rounded-lg bg-violet-600 px-3 py-1.5 font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
         >
-          Next ▶
+          Next
+          <Icon name="play" className="ml-1 h-3 w-3" />
         </button>
         <span data-testid="debugger-position" className="w-full text-xs text-slate-400 tabular-nums sm:w-auto">
           Step {position + 1} of {total}
-          <span className="hidden text-slate-400 sm:inline"> · ← → keys</span>
+          <span className="hidden text-slate-400 sm:inline"> or the ← → keys</span>
         </span>
       </div>
 
@@ -145,7 +151,8 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
       <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2">
         {!atEnd && step && (
           <div className="mb-1 font-mono text-xs text-amber-200">
-            📍 {step.file} line {step.line} <span className="text-slate-400">· also highlighted in the editor</span>
+            <Icon name="pin" className="mr-1" />
+            {step.file} line {step.line} <span className="text-slate-400">(also highlighted in the editor)</span>
           </div>
         )}
         {!atEnd && step && files?.[step.file] !== undefined && <CurrentLine text={files[step.file]} line={step.line} />}
@@ -156,7 +163,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
 
       {atEnd && (
         <div data-testid="debugger-result" className="rounded-lg bg-slate-950/70 p-3">
-          <div className="text-xs font-semibold tracking-wide text-slate-400 uppercase">What the check expected</div>
+          <div className="text-xs font-semibold text-slate-300">What the check expected</div>
           {trace.status === "pass" ? (
             <p className="mt-1 text-emerald-300">Everything matched what the check expected.</p>
           ) : (
@@ -179,7 +186,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
         <div className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           {/* ----- variables ----- */}
           <div>
-            <div className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+            <div className="mb-1 text-xs font-semibold text-slate-300">
               Variables in <span className="font-mono normal-case">{step.func}</span>
             </div>
             {step.locals.length === 0 ? (
@@ -220,7 +227,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
 
           {/* ----- call stack ----- */}
           <div>
-            <div className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">Call stack</div>
+            <div className="mb-1 text-xs font-semibold text-slate-300">Call stack</div>
             <ol data-testid="debugger-stack" className="space-y-0.5 font-mono text-xs">
               {step.stack.map((name, i) => (
                 <li

@@ -107,7 +107,7 @@ test("accepting a wrong suggestion: the next run fails and the lesson is shown",
   await setEditorFile(page, t.id, sug.file, solutionFile(t, sug.file));
   await runTests(page);
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   await expect(card(page)).toHaveAttribute("data-outcome", "waved-through");
 
   await page.goto("/");
@@ -123,7 +123,7 @@ test("rejecting a wrong suggestion counts as caught (+15 XP) on the HQ and leade
   const xp = await xpTotal(page);
   await page.getByTestId("byte-reject").click();
   await expect(card(page)).toHaveAttribute("data-outcome", "caught");
-  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it! +15 XP");
+  await expect(page.getByTestId("byte-outcome")).toContainText("Caught it. +15 XP");
   await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 15} XP`);
   await page.screenshot({ path: `${SHOTS}/byte-caught.png` });
   // Rejecting leaves the learner's code alone.
@@ -158,7 +158,7 @@ test("'Edit it myself' on a wrong suggestion: fixing it until the tests pass cou
   await expect(card(page)).toHaveAttribute("data-outcome", "pending");
   await setEditorFile(page, t.id, sug.file, solutionFile(t, sug.file));
   await runTests(page);
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   await expect(card(page)).toHaveAttribute("data-outcome", "caught");
   const p = await readProgress(page);
   expect(await xpTotal(page)).toBe(xp + p.tickets[t.id].solveXp + 15);
@@ -173,7 +173,7 @@ test("accepting a correct suggestion: the tests pass and it counts as trusted co
   await expect.poll(() => editorValue(page, t.id, sug.file)).toContain(sug.replace);
   await runTests(page);
   await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   await expect(card(page)).toHaveAttribute("data-outcome", "trusted");
   await expect(page.getByTestId("byte-outcome")).toContainText("Trusted correctly, +15 XP");
   await page.screenshot({ path: `${SHOTS}/byte-trusted.png` });
@@ -196,7 +196,7 @@ test("Ask Byte: picking the best prompt first earns XP; other prompts can be com
   await page.getByTestId(`prompt-option-${prompt.best}`).click();
   await expect(page.getByTestId("prompt-response")).toBeVisible();
   await expect(page.getByTestId("prompt-verdict")).toContainText("Great prompt");
-  await expect(page.getByTestId("prompt-result")).toContainText("Best prompt on the first try! +10 XP");
+  await expect(page.getByTestId("prompt-result")).toContainText("Best prompt on the first try. +10 XP");
   await expect(page.getByTestId("xp-total")).toHaveText(`${xp + 10} XP`);
   await page.screenshot({ path: `${SHOTS}/byte-ask-byte.png` });
 

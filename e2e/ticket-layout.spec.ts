@@ -89,7 +89,7 @@ test("review tickets: an instruction bar above the code and a flag on every line
   const lines = page.getByTestId("pr-file").locator("button[data-line]:not([disabled])");
   const n = await lines.count();
   expect(n).toBeGreaterThan(3);
-  for (let i = 0; i < n; i++) await expect(lines.nth(i)).toContainText("⚑");
+  for (let i = 0; i < n; i++) await expect(lines.nth(i).locator('[data-icon="flag"]')).toHaveCount(1);
 });
 
 test("Esc closes the solved modal, and focus stays inside it while open", async ({ page }) => {

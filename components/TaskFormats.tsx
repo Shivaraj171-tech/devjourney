@@ -73,7 +73,7 @@ export default function TaskFormats({ ticket, tp, getRunner, onXp }: TaskFormats
   return (
     <div className="space-y-3" data-testid="task-formats">
       <h2 className="text-sm font-semibold text-white">
-        <span aria-hidden>🎯 </span>Practice <span className="font-normal text-slate-400">· small bonus XP, no penalties</span>
+        Practice <span className="font-normal text-slate-300">(small bonus XP, no penalties)</span>
       </h2>
       {f.predict.map((task, i) => (
         <PredictOutput

@@ -24,7 +24,7 @@ test("revealing a hint before solving reduces the XP awarded", async ({ page }) 
   // Hints live next to Run, in a popover.
   await page.getByTestId("hints-toggle").click();
   await page.getByRole("button", { name: /Reveal hint 1/ }).click();
-  await expect(page.getByText("Hint 1 · Nudge")).toBeVisible();
+  await expect(page.getByText("Hint 1: Nudge")).toBeVisible();
   await expect(page.getByTestId("hints-toggle")).toContainText("Hints (1/");
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("hints-popover")).toHaveCount(0);
@@ -71,7 +71,7 @@ test("progress persists across a reload", async ({ page }) => {
   await expect(page.getByTestId("solved-modal")).toBeVisible();
 
   await page.reload();
-  await expect(page.getByText("✔ Merged")).toBeVisible();
+  await expect(page.getByTestId("slip-state")).toHaveText("Merged");
   await expect.poll(() => editorValue(page, t01.id, file), { timeout: 30_000 }).toBe(solution);
   await expect(page.getByRole("link", { name: /Next ticket/ })).toBeVisible();
 

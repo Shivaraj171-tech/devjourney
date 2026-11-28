@@ -15,6 +15,7 @@ import {
 } from "@/lib/game/formats";
 import { InlineCode } from "../ByteSuggestion";
 import { FormatCard, ghostButton, Note, primaryButton, type RunFormat } from "./shared";
+import Icon from "@/components/icons/Icon";
 
 export type ParsonsPuzzleProps = {
   task: ParsonsTask;
@@ -93,13 +94,13 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
   const lineLabel = (id: number) => (byId.get(id)?.text.trim() ?? "").slice(0, 60);
 
   return (
-    <FormatCard testId={testId} icon="🧩" title="Put the lines in order" subtitle="Some lines are Byte's slips: take them out." done={done}>
+    <FormatCard testId={testId} title="Put the lines in order" subtitle="Some lines are Byte's slips: take them out." done={done}>
       <p className="text-slate-200">
         <InlineCode text={task.goal} />
       </p>
 
       <div>
-        <div className="mb-1 text-[11px] font-semibold tracking-wide text-slate-400 uppercase" id={`${seed}-program`}>
+        <div className="mb-1 text-xs font-semibold text-slate-300" id={`${seed}-program`}>
           Your program
         </div>
         <ol aria-labelledby={`${seed}-program`} className="space-y-1" data-testid={`${testId}-program`}>
@@ -145,7 +146,7 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
                     data-testid={`${testId}-remove-${id}`}
                     className={`${ghostButton} px-2 py-1 text-red-200`}
                   >
-                    ✕
+                    <Icon name="cross" className="h-4 w-4" />
                   </button>
                 </span>
               )}
@@ -156,7 +157,7 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
 
       {!done && unused.length > 0 && (
         <div>
-          <div className="mb-1 text-[11px] font-semibold tracking-wide text-slate-400 uppercase" id={`${seed}-unused`}>
+          <div className="mb-1 text-xs font-semibold text-slate-300" id={`${seed}-unused`}>
             Taken out
           </div>
           <ul aria-labelledby={`${seed}-unused`} className="space-y-1" data-testid={`${testId}-unused`}>
@@ -179,12 +180,12 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
 
       {!done && (
         <button data-testid={`${testId}-check`} onClick={check} disabled={running || order.length === 0} className={`w-full ${primaryButton}`}>
-          {running ? "Running your program…" : "▶ Check my program"}
+          {running ? "Running your program…" : "Check my program"}
         </button>
       )}
 
       {done && (
-        <Note testId={`${testId}-success`} tone="good" title={`✓ It works! +${record?.xp ?? 0} XP`}>
+        <Note testId={`${testId}-success`} tone="good" title={`It works. +${record?.xp ?? 0} XP`}>
           {task.explain ? <InlineCode text={task.explain} /> : "Every check passed."}
           {/* Solved: now every one of Byte's slips can explain itself. */}
           {traps.length > 0 && (

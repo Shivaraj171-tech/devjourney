@@ -10,13 +10,16 @@ import Markdown from "./Markdown";
 import { conceptLabel } from "@/lib/content/concepts";
 import type { TicketType } from "@/lib/content/types";
 import type { SeasonSummary, TicketSummary } from "./HQ";
+import type { IconName } from "@/lib/icons";
+import Icon from "./icons/Icon";
 
-export const TICKET_TYPE: Record<TicketType, { icon: string; label: string }> = {
-  bug: { icon: "🐛", label: "Bug fix" },
-  feature: { icon: "✨", label: "Feature" },
-  incident: { icon: "🚨", label: "Incident" },
-  review: { icon: "🔍", label: "Code review" },
-  read: { icon: "📖", label: "Read the code" },
+/** Each ticket type's drawn icon (components/icons) and its name. */
+export const TICKET_TYPE: Record<TicketType, { icon: IconName; label: string }> = {
+  bug: { icon: "bug", label: "Bug fix" },
+  feature: { icon: "ladle", label: "Feature" },
+  incident: { icon: "pager", label: "Incident" },
+  review: { icon: "spoon", label: "Code review" },
+  read: { icon: "recipe", label: "Read the code" },
 };
 
 export type RoomState = "done" | "open" | "locked";
@@ -39,8 +42,10 @@ type Props = {
   gateFloor?: number;
   /** Extra links next to the review link (e.g. the certificate). */
   extra?: ReactNode;
-  /** A side floor's name instead of "🏢 Floor N · title", e.g. "🤖 Robotics Lab". */
+  /** A side floor's name instead of "Floor N" and the season title, e.g. "Robotics Lab". */
   label?: string;
+  /** A side floor's mark on its floor plate (the story floors show their number). */
+  plateIcon?: IconName;
   /** What opens the floor, instead of "Floor <gateFloor>", e.g. "Floor 1". */
   gateText?: string;
   /** data-testid prefix of its rooms instead of room-<id> (e.g. "lab-room"). */
@@ -57,7 +62,7 @@ type Props = {
 
 const BACKLOG_SHOWN = 4;
 
-export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, onToggle, gateFloor = floor - 1, extra, label, gateText, testId, roomPrefix, hasReview = true, preview, compact = false }: Props) {
+export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, onToggle, gateFloor = floor - 1, extra, label, plateIcon, gateText, testId, roomPrefix, hasReview = true, preview, compact = false }: Props) {
   // The final exam (season.yaml `final: true`) is shown as "Final exam", not a numbered floor.
   const exam = season.final;
   const done = rooms.filter((r) => r.state === "done");
@@ -66,11 +71,19 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
   const allDone = done.length === rooms.length;
   const boardId = `${testId ?? `floor-${floor}`}-board`;
   const gate = gateText ?? `Floor ${gateFloor}`;
-  const status = allDone
-    ? `✅ ${done.length}/${rooms.length} merged`
-    : !floorOpen
-      ? `${rooms.length} tickets · 🔒 opens after ${gate}`
-      : `${done.length}/${rooms.length} merged`;
+  const status = allDone ? (
+    <>
+      <Icon name="spike" className="mr-1" />
+      {done.length}/{rooms.length} merged
+    </>
+  ) : !floorOpen ? (
+    <>
+      <Icon name="lock" className="mr-1" />
+      {rooms.length} tickets. Opens after {gate}.
+    </>
+  ) : (
+    `${done.length}/${rooms.length} merged`
+  );
   const [moreBacklog, setMoreBacklog] = useState(false);
   const shownBacklog = moreBacklog ? backlog : backlog.slice(0, compact ? 2 : BACKLOG_SHOWN);
   const hiddenBacklog = backlog.slice(shownBacklog.length);
@@ -85,29 +98,34 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
       className={expanded ? "bg-panel px-4 py-4 sm:px-5" : "px-4 py-3 sm:px-5"}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h2 className="min-w-0 flex-1">
+        <h2 className="min-w-0 flex-1 basis-full sm:basis-auto">
           <button
             type="button"
             onClick={onToggle}
             aria-expanded={expanded}
             aria-controls={boardId}
-            className="flex min-h-10 w-full flex-wrap items-baseline gap-x-3 gap-y-0.5 rounded-md text-left"
+            className="flex min-h-10 w-full items-center gap-3 rounded-md text-left"
           >
-            <span className={`font-display font-bold sm:text-lg ${floorOpen ? "text-ink" : "text-slate-200"}`}>
-              <span aria-hidden className="mr-1.5 inline-block w-3 text-slate-300">{expanded ? "▾" : "▸"}</span>
-              {label ?? (exam ? <>🎓 Final exam · {season.title}</> : <>🏢 Floor {floor} · {season.title}</>)}
+            <FloorPlate open={floorOpen}>
+              {plateIcon ? <Icon name={plateIcon} className="h-5 w-5" /> : exam ? <Icon name="stamp" className="h-5 w-5" /> : floor}
+            </FloorPlate>
+            <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+              <span className={`font-display font-bold sm:text-lg ${floorOpen ? "text-ink" : "text-slate-200"}`}>
+                {label ?? (exam ? <>Final exam: {season.title}</> : <><span className="sr-only">Floor {floor}: </span>{season.title}</>)}
+              </span>
+              <span className={`text-sm ${allDone ? "text-pass" : "text-slate-300"}`}>{status}</span>
             </span>
-            <span className={`text-sm ${allDone ? "text-pass" : "text-slate-300"}`}>{status}</span>
+            <span aria-hidden className="text-slate-300">{expanded ? "▾" : "▸"}</span>
           </button>
         </h2>
         {allDone && hasReview && (
           <Link href={`/review/${season.id}`} data-testid={`review-link-${season.id}`} className="py-1 text-sm font-semibold text-ink underline decoration-signal decoration-2 underline-offset-4">
-            📋 Your performance review
+            Your performance review
           </Link>
         )}
         {extra}
       </div>
-      {!expanded && !floorOpen && preview && <p className="mt-0.5 ml-[1.15rem] max-w-3xl text-sm text-slate-300" data-testid="floor-preview">{preview}</p>}
+      {!expanded && !floorOpen && preview && <p className="mt-0.5 max-w-3xl sm:ml-12 text-sm text-slate-300" data-testid="floor-preview">{preview}</p>}
 
       <div id={boardId} hidden={!expanded}>
         {done.length === 0 ? (
@@ -136,9 +154,12 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
             {next.length > 0 ? (
               <ol className="space-y-2">{next.map((r) => <RoomRow key={r.ticket.id} room={r} big={!compact} exam={exam} prefix={roomPrefix} />)}</ol>
             ) : allDone ? (
-              <Empty>🎉 Floor complete. Every ticket merged.</Empty>
+              <Empty>Floor complete. Every ticket merged.</Empty>
             ) : (
-              <Empty>🔒 Opens when you finish {gate}.</Empty>
+              <Empty>
+                <Icon name="lock" className="mr-1" />
+                Opens when you finish {gate}.
+              </Empty>
             )}
           </Lane>
           <Lane title="Backlog" count={backlog.length}>
@@ -204,7 +225,8 @@ function RoomRow({ room, big = false, exam = false, prefix, hidden = false }: { 
     <div className="relative rounded-lg border-2 border-ink/80 bg-page p-4 transition-colors hover:border-signal">
       <div className="flex items-center justify-between gap-2 text-sm text-slate-200">
         <span>
-          <span aria-hidden>{type.icon}</span> {type.label}
+          <Icon name={type.icon} className="mr-1" />
+          {type.label}
         </span>
         <span>About {t.estimatedMinutes} min</span>
       </div>
@@ -221,7 +243,7 @@ function RoomRow({ room, big = false, exam = false, prefix, hidden = false }: { 
         state === "done" ? "bg-pass/10 hover:bg-pass/15" : "bg-slate-950/40"
       }`}
     >
-      <span className="text-lg" aria-hidden>{type.icon}</span>
+      <Icon name={type.icon} className="h-5 w-5 text-slate-300" />
       <div className="min-w-0 flex-1">
         <div className={`text-sm leading-snug font-semibold ${state === "done" ? "text-ink" : "text-slate-200"}`}>
           <span className="text-slate-300">#{t.number}</span> {t.title}
@@ -235,7 +257,7 @@ function RoomRow({ room, big = false, exam = false, prefix, hidden = false }: { 
           )}
         </div>
       </div>
-      <span aria-hidden>{state === "done" ? "✅" : "🔒"}</span>
+      {state !== "open" && <Icon name={state === "done" ? "spike" : "lock"} className={`h-5 w-5 ${state === "done" ? "text-pass" : "text-slate-300"}`} />}
       <span className="sr-only">({stateText})</span>
     </div>
   );
@@ -248,21 +270,38 @@ function RoomRow({ room, big = false, exam = false, prefix, hidden = false }: { 
   );
 }
 
-/** One-time flourish on a room that changed since the last visit: a MERGED stamp, or a door glow. */
+/** One-time mark on a room that changed since the last visit: a MERGED stamp, or a "New" tag. */
 function RoomFlourish({ change }: { change: "merged" | "unlocked" }) {
   if (change === "merged") {
     return (
-      <span className="room-stamp pointer-events-none absolute top-1 right-10 rounded-md border-2 border-pass bg-page/80 px-1.5 py-0.5 text-[11px] font-black tracking-widest text-pass uppercase">
-        Merged<span className="sr-only"> since your last visit</span>
+      <span className="room-stamp pointer-events-none absolute top-1 right-10 rounded-sm border-2 border-pass bg-page/80 px-1.5 py-0.5 font-display text-[11px] font-black text-pass">
+        MERGED<span className="sr-only"> since your last visit</span>
       </span>
     );
   }
   return (
-    <>
-      <span className="room-unlocked pointer-events-none absolute inset-0 rounded-lg" aria-hidden />
-      <span className="pop-in pointer-events-none absolute -top-2 right-2 rounded-full bg-signal px-2 py-0.5 text-[11px] font-bold text-signal-ink shadow-lg">
-        🔓 New<span className="sr-only">: unlocked since your last visit</span>
-      </span>
-    </>
+    <span className="pointer-events-none absolute -top-2 right-2 rounded-sm border border-slate-500 bg-page px-1.5 py-0.5 text-[11px] font-semibold text-ink">
+      <Icon name="unlock" className="mr-0.5" />
+      New<span className="sr-only">: unlocked since your last visit</span>
+    </span>
   );
+}
+
+/** The floor's sign in the building directory, like a lift button: its number, or a side floor's mark. */
+function FloorPlate({ open, children }: { open: boolean; children: ReactNode }) {
+  return (
+    <span
+      aria-hidden
+      className={`grid h-9 w-9 shrink-0 place-items-center rounded-md border-2 font-display text-lg font-bold tabular-nums ${
+        open ? "border-ink text-ink" : "border-slate-600 text-slate-300"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** A side floor's mark: Grabby's gripper for the Robotics Lab (s40), the jointed arm for the manipulator modules. */
+export function sideFloorIcon(seasonId: string): IconName {
+  return seasonId === "s40" ? "gripper" : "arm";
 }

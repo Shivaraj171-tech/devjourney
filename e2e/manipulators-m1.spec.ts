@@ -84,8 +84,8 @@ test("HQ: '🦾 Manipulators · M1' is locked until Season 1 is done, then opens
   await page.goto("/");
   const floor = page.getByTestId("side-floor-s41");
   await expect(floor).toHaveAttribute("data-state", "locked");
-  await expect(floor.getByRole("heading").first()).toContainText("🦾 Manipulators · M1");
-  await expect(floor).toContainText("11 tickets · 🔒 opens after Floor 1");
+  await expect(floor.getByRole("heading").first()).toContainText("Manipulators · M1");
+  await expect(floor).toContainText("11 tickets. Opens after Floor 1");
   await expect(floor.locator("[data-testid^=lab-room-]")).toHaveCount(11);
   // The Robotics Lab is still there, unchanged.
   await expect(page.getByTestId("side-floor-s40")).toContainText("8 tickets");
@@ -114,7 +114,7 @@ for (const [i, t] of codeTickets.entries()) {
     await seedSolved(page, [...season1, ...m1.tickets.slice(0, i)]);
     await page.goto(ticketUrl(t.id));
     await expect(page.getByText(/still in the backlog/)).toHaveCount(0);
-    await expect(page.getByTestId("side-floor-chip")).toContainText("🦾 Manipulators · M1");
+    await expect(page.getByTestId("side-floor-chip")).toContainText("Manipulators · M1");
     // The deep lesson: five sections (picture, maths, worked example, trap, AI check), each with its own heading.
     await page.getByTestId("lesson-toggle").click();
     const lesson = page.locator("#ticket-lesson");
@@ -134,7 +134,7 @@ for (const [i, t] of codeTickets.entries()) {
     for (const path of t.filesEditable) await setEditorFile(page, t.id, path, solutionFile(t, path));
     await runTests(page);
     await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved!" : "PR merged!");
+    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved" : "PR merged");
     await expect3d(page, t.id);
     if (t.id === "s41-t08") await expect(page.getByTestId("lab-3d-warning")).toHaveCount(0);
     await checkTicketSpecifics(page, t.id);
@@ -228,12 +228,12 @@ test(`plays ${check.id}: the module concept check (a read ticket with practice f
   await expect(page.getByTestId("run-tests")).toHaveCount(0);
   await openQuizTab(page);
   await answerQuiz(page, check.questions);
-  await closeSolvedModal(page, "Ticket closed!");
+  await closeSolvedModal(page, "Ticket closed");
   await expect(page.getByTestId("quiz-done")).toContainText(`${check.questions.length}/${check.questions.length}`);
   expect((await readProgress(page)).tickets[check.id].solved).toBe(true);
 
   await page.goto("/");
-  await expect(page.getByTestId("side-floor-s41")).toContainText("✅ 11/11 merged");
+  await expect(page.getByTestId("side-floor-s41")).toContainText("11/11 merged");
   expect(errors).toEqual([]);
 });
 
@@ -247,7 +247,7 @@ test("390px phone: the 3D view fits, renders, turns with the keyboard, no sidewa
   for (const path of t.filesEditable) await setEditorFile(page, t.id, path, solutionFile(t, path));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByTestId("run-tests").click();
-  await closeSolvedModal(page, "Incident resolved!");
+  await closeSolvedModal(page, "Incident resolved");
   const viewer = page.getByTestId("lab-viewer");
   await expect(viewer).toBeVisible({ timeout: 30_000 });
   const canvas = page.getByTestId("lab-3d-canvas");

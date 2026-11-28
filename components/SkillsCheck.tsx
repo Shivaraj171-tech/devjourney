@@ -23,6 +23,7 @@ import {
 } from "@/lib/game/skillsCheck";
 import { skillsCheckActions, ticketProgress, useProgress } from "@/lib/progress/store";
 import { useIsClient } from "@/lib/useIsClient";
+import Icon from "@/components/icons/Icon";
 
 type Props = {
   check: SkillsCheckContent;
@@ -33,10 +34,10 @@ type Props = {
 };
 
 const KIND_LABEL: Record<SkillsCheckItem["kind"], string> = {
-  predict: "🔮 Predict the output",
-  catch_input: "🧪 Which input catches the bug?",
-  spot_line: "🐞 Spot the bug",
-  pick_answer: "🤖 Which of Byte's answers is right?",
+  predict: "Predict the output",
+  catch_input: "Which input catches the bug?",
+  spot_line: "Spot the bug",
+  pick_answer: "Which of Byte's answers is right?",
 };
 
 export default function SkillsCheck({ check, finalGate, finalTickets }: Props) {
@@ -64,9 +65,9 @@ export default function SkillsCheck({ check, finalGate, finalTickets }: Props) {
   if (!started) {
     return (
       <Shell>
-        <section className="rounded-3xl border border-violet-500/30 bg-gradient-to-br from-violet-950 via-slate-900 to-cyan-950 p-6" data-testid="skills-intro">
-          <p className="text-sm font-semibold tracking-widest text-cyan-300 uppercase">
-            📝 {attempt === "baseline" ? "Baseline" : "Final"} skills check
+        <section className="rounded-lg border border-rule bg-panel p-6" data-testid="skills-intro">
+          <p className="text-sm text-slate-300">
+            {attempt === "baseline" ? "Baseline" : "Final"} skills check
           </p>
           <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
             {attempt === "baseline" ? "Where are you starting from?" : "How far have you come?"}
@@ -144,7 +145,7 @@ export default function SkillsCheck({ check, finalGate, finalTickets }: Props) {
           disabled={picked === undefined}
           className="rounded-xl bg-violet-600 px-5 py-2.5 font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
         >
-          {last ? "Finish ✓" : "Next"}
+          {last ? "Finish" : "Next"}
         </button>
       </div>
     </Shell>
@@ -180,7 +181,7 @@ function Question({ item, seed, picked, onPick }: { item: SkillsCheckItem; seed:
   const codeChoices = item.kind === "pick_answer" || item.choices.some((c) => c.includes("\n"));
   return (
     <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5" data-testid="skills-question" data-item-id={item.id}>
-      <p className="text-xs font-semibold tracking-wide text-violet-200 uppercase">{KIND_LABEL[item.kind]}</p>
+      <p className="text-sm font-semibold text-violet-200">{KIND_LABEL[item.kind]}</p>
       <h1 className="text-lg font-bold text-white">{item.prompt}</h1>
       {item.code && <CodeBlock code={item.code} numbered={item.kind === "spot_line"} />}
       <div role="radiogroup" aria-label="Your answer" className={codeChoices ? "grid gap-2 md:grid-cols-3" : "grid gap-2 sm:grid-cols-2"}>
@@ -222,7 +223,7 @@ function Question({ item, seed, picked, onPick }: { item: SkillsCheckItem; seed:
             picked === NOT_SURE ? "border-violet-400 bg-violet-500/20 text-white" : "border-slate-600 text-slate-300 hover:border-cyan-400/60"
           }`}
         >
-          🤷 Not sure yet <span className="text-xs text-slate-400">(counts as wrong, and that&apos;s fine: it&apos;s honest)</span>
+          Not sure yet <span className="text-xs text-slate-400">(counts as wrong, and that&apos;s fine: it&apos;s honest)</span>
         </button>
       </div>
     </section>
@@ -234,8 +235,8 @@ function Results({ check, sc, finalUnlocked, certificateReady }: { check: Skills
   const final = sc?.final;
   return (
     <Shell>
-      <section className="rounded-3xl border border-violet-500/30 bg-gradient-to-br from-violet-950 via-slate-900 to-cyan-950 p-6" data-testid="skills-result">
-        <p className="text-sm font-semibold tracking-widest text-cyan-300 uppercase">📝 Skills check</p>
+      <section className="rounded-lg border border-rule bg-panel p-6" data-testid="skills-result">
+        <p className="text-sm text-slate-300">Skills check</p>
         <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl" data-testid="skills-comparison">
           {line ?? "Not taken yet"}
         </h1>
@@ -258,10 +259,10 @@ function Results({ check, sc, finalUnlocked, certificateReady }: { check: Skills
           </Link>
           {certificateReady && (
             <Link href="/certificate" data-testid="skills-certificate-link" className="rounded-xl border border-amber-300/60 bg-amber-400/10 px-5 py-3 font-semibold text-amber-100 hover:bg-amber-400/20">
-              🎓 See your certificate
+              See your certificate
             </Link>
           )}
-          {line && <ShareButton getText={() => skillsShareText(sc, currentSiteUrl())} testId="skills-share" label="📣 Share my progress" />}
+          {line && <ShareButton getText={() => skillsShareText(sc, currentSiteUrl())} testId="skills-share" label="Share my progress" />}
         </div>
       </section>
 
@@ -274,7 +275,10 @@ function Results({ check, sc, finalUnlocked, certificateReady }: { check: Skills
             return (
               <li key={item.id} className={`rounded-2xl border p-4 ${right ? "border-emerald-500/30 bg-emerald-950/20" : "border-red-500/30 bg-red-950/20"}`}>
                 <p className="text-sm font-semibold text-white">
-                  {right ? "✅" : "❌"} {i + 1}. {item.prompt}
+                  <span role="img" aria-label={right ? "right" : "wrong"} className={right ? "text-pass" : "text-fail"}>
+                <Icon name={right ? "check" : "cross"} className="mr-1" />
+              </span>
+              {i + 1}. {item.prompt}
                   {before !== undefined && (
                     <span className="ml-2 text-xs font-normal text-slate-400">(baseline: {before === item.answer ? "right" : "wrong"})</span>
                   )}

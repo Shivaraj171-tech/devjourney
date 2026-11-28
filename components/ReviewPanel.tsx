@@ -7,6 +7,7 @@ import type { Review, Ticket } from "@/lib/content/types";
 import { checkReview, FALSE_ALARM_COST, reviewXp, type TicketXp } from "@/lib/game/rules";
 import { reviewActions, type TicketProgress } from "@/lib/progress/store";
 import { changedLines, removedLines } from "@/lib/review/diff";
+import Icon from "@/components/icons/Icon";
 
 type Props = {
   ticket: Ticket & { review: Review };
@@ -64,10 +65,11 @@ export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
               {path}
             </FileTab>
           ))}
-          <span className="shrink-0 px-2 text-[11px] tracking-wide text-slate-400 uppercase">codebase</span>
+          <span className="shrink-0 px-2 text-xs text-slate-300">Rest of the codebase</span>
           {codebasePaths.map((path) => (
             <FileTab key={path} path={path} active={activeFile === path} onClick={() => setActiveFile(path)} muted>
-              🔒 {path}
+              <Icon name="lock" className="mr-1" />
+              {path}
             </FileTab>
           ))}
         </div>
@@ -79,7 +81,14 @@ export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
             }`}
           >
             <span className="font-semibold">
-              {solved ? "✅ Review finished. These are the problems that were in this PR." : "👆 Tap a line to flag it 🚩"}
+              {solved ? (
+                "Review finished. These are the problems that were in this PR."
+              ) : (
+                <>
+                  <Icon name="flag" className="mr-1.5" />
+                  Tap a line to flag it
+                </>
+              )}
             </span>
             <span className="rounded-full bg-slate-950/60 px-2 py-0.5 text-xs font-semibold tabular-nums">
               {found}/{total} found
@@ -124,7 +133,8 @@ export default function ReviewPanel({ ticket, tp, onSolved, actions }: Props) {
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-sm font-semibold text-ink">Your review</h2>
           <span className="text-sm text-slate-300" data-testid="flag-count">
-            🚩 {flags.length} line{flags.length === 1 ? "" : "s"} flagged
+            <Icon name="flag" className="mr-1" />
+            {flags.length} line{flags.length === 1 ? "" : "s"} flagged
           </span>
           {!solved && (
             <button
@@ -240,9 +250,17 @@ function PrFileView({ path, text, before, review, flags, last, solved, onToggle 
               {/* The accessible name is the visible text ("Line 12, <code>") plus the state, so voice
                   control users can say what they see (axe label-content-name-mismatch). */}
               <span aria-hidden className="w-8 shrink-0 text-center select-none">
-                {revealed ? "✅" : falseAlarm ? "⚠️" : flagged ? "🚩" : blank || solved ? null : (
-                  // A flag on every line says "these are tappable" before anyone hovers.
-                  <span aria-hidden className="text-slate-500 group-hover:text-violet-300">⚑</span>
+                {revealed ? (
+                  <Icon name="check" className="text-pass" />
+                ) : falseAlarm ? (
+                  <Icon name="warning" className="text-amber-300" />
+                ) : flagged ? (
+                  <Icon name="flag" className="text-fail" />
+                ) : blank || solved ? null : (
+                  // A faint flag on every line says "these are tappable" before anyone hovers.
+                  <span className="text-slate-500 group-hover:text-violet-300">
+                    <Icon name="flag" />
+                  </span>
                 )}
               </span>
               <span className="w-10 shrink-0 pr-2 text-right text-slate-300 select-none">
@@ -295,7 +313,7 @@ function Verdict({ review, last, solved, onJump }: { review: Review; last: Retur
     return (
       <div data-testid="review-verdict" className="mt-3 space-y-2">
         <p className="text-sm font-semibold text-emerald-300">
-          ✅ Review complete: you caught {total === 1 ? "the problem" : `all ${total} problems`} in {review.author}&apos;s PR.
+          Review complete: you caught {total === 1 ? "the problem" : `all ${total} problems`} in {review.author}&apos;s PR.
         </p>
         <ul className="space-y-1.5 text-sm">
           {review.issues.map((issue, i) => (
@@ -325,7 +343,8 @@ function Verdict({ review, last, solved, onJump }: { review: Review; last: Retur
       </p>
       {last.falseAlarms.length > 0 && (
         <p className="text-amber-200">
-          ⚠️ {last.falseAlarms.length} flagged line{last.falseAlarms.length === 1 ? " was a false alarm" : "s were false alarms"} (marked in the code).
+          <Icon name="warning" className="mr-1" />
+          {last.falseAlarms.length} flagged line{last.falseAlarms.length === 1 ? " was a false alarm" : "s were false alarms"} (marked in the code).
         </p>
       )}
       {missing > 0 && (

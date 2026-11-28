@@ -9,6 +9,7 @@ import { conceptLabel } from "@/lib/content/concepts";
 import { dayKey, WARMUP_XP } from "@/lib/game/rules";
 import { missSignals, nextReviewDay, planWarmups, reasonText, daysBetween, type WarmupSession } from "@/lib/game/warmups";
 import { actions, warmupHistory, type Progress } from "@/lib/progress/store";
+import Icon from "@/components/icons/Icon";
 
 /**
  * Today's session for this learner. `ticketConcepts`: ticket id -> the concept it teaches.
@@ -59,11 +60,14 @@ export default function DailyWarmup({ warmups, progress, solvedTicketIds, ticket
   const current = viewIndex >= 0 ? items[viewIndex] : null;
 
   return (
-    <section id="warm-up" className="scroll-mt-20 rounded-2xl border border-rule bg-panel p-5" data-testid="daily-warmup">
+    <section id="warm-up" className="scroll-mt-20 rounded-lg border border-rule bg-panel p-5" data-testid="daily-warmup">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-bold text-white">☕ Daily warm-up</h2>
-        <span className="text-xs text-amber-200">
-          {items.length > 1 ? `${items.length} quick questions` : "2 minutes"} · keeps your 🔥 streak · +{WARMUP_XP} XP each if right first try
+        <h2 className="text-lg font-bold text-white">
+          <Icon name="mug" className="mr-2 h-5 w-5 text-slate-300" />
+          Daily warm-up
+        </h2>
+        <span className="text-sm text-slate-300">
+          {items.length > 1 ? `${items.length} quick questions` : "2 minutes"}. Keeps your streak going, +{WARMUP_XP} XP each if right first try.
         </span>
       </div>
       {items.length === 0 ? (
@@ -161,13 +165,13 @@ function WarmupQuestion({
         {answer && (
           <>
             <p className="mt-2 text-xs text-slate-300" data-testid="warmup-feedback">
-              {answer.correct ? `✔ Nice! +${WARMUP_XP} XP. ` : "Not quite. It'll come back for review tomorrow. "}
+              {answer.correct ? `Right. +${WARMUP_XP} XP. ` : "Not quite. It'll come back for review tomorrow. "}
               {warmup.explain}
             </p>
             <button
               data-testid="warmup-next"
               onClick={onNext}
-              className="mt-3 rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-semibold text-slate-950 hover:bg-amber-400"
+              className="mt-3 rounded-lg border border-slate-500 px-3 py-1.5 text-sm font-semibold text-ink hover:bg-slate-800"
             >
               {last ? "Finish warm-up" : "Next question"}
             </button>
@@ -184,15 +188,17 @@ function WarmupDone({ session, history }: { session: WarmupSession<Warmup>; hist
   return (
     <div className="mt-3" data-testid="warmup-done">
       <p className="text-sm font-semibold text-emerald-200">
-        ✅ Warm-up done: {session.correctFirstTry} of {session.items.length} right first try
-        {session.correctFirstTry > 0 && ` (+${session.correctFirstTry * WARMUP_XP} XP)`}. Your 🔥 streak is safe today.
+        Warm-up done: {session.correctFirstTry} of {session.items.length} right first try
+        {session.correctFirstTry > 0 && ` (+${session.correctFirstTry * WARMUP_XP} XP)`}. Your streak is safe today.
       </p>
       <ul className="mt-2 space-y-1">
         {session.items.map((it) => (
           <li key={it.warmup.id} className="flex gap-2 text-xs text-slate-300">
-            <span aria-label={it.answer?.correct ? "right" : "missed"}>{it.answer?.correct ? "✔" : "✘"}</span>
+            <span role="img" aria-label={it.answer?.correct ? "right" : "missed"} className={it.answer?.correct ? "text-pass" : "text-fail"}>
+              <Icon name={it.answer?.correct ? "check" : "cross"} />
+            </span>
             <span className="min-w-0">
-              <span className="text-slate-100">{it.warmup.title}</span> · {conceptLabel(it.warmup.concept)}
+              <span className="text-slate-100">{it.warmup.title}</span>, {conceptLabel(it.warmup.concept)}
             </span>
           </li>
         ))}

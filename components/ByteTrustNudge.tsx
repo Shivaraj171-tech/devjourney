@@ -5,13 +5,14 @@ import { BYTE_TRUST_NUDGE } from "@/lib/game/help";
 import { hasHabit } from "@/lib/game/profile";
 import { useProgress, type TicketProgress } from "@/lib/progress/store";
 import { useHabits } from "@/lib/useCodingProfile";
+import Icon from "@/components/icons/Icon";
 
 export default function ByteTrustNudge({ tp }: { tp: TicketProgress }) {
   const habits = useHabits(useProgress());
   if (tp.byteSuggestion || !hasHabit(habits, "trusts-byte")) return null;
   return (
     <p data-testid="byte-trust-nudge" role="note" className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 text-xs text-amber-100">
-      <span aria-hidden>💡 </span>
+      <Icon name="byte" className="mr-1.5" />
       {BYTE_TRUST_NUDGE}
     </p>
   );

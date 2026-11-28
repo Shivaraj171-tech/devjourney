@@ -20,6 +20,7 @@ import {
 } from "@/lib/game/formats";
 import { InlineCode } from "../ByteSuggestion";
 import { FormatCard, ghostButton, Note, primaryButton, type RunFormat } from "./shared";
+import Icon from "@/components/icons/Icon";
 
 export type TraceTableProps = {
   task: TraceTask;
@@ -98,7 +99,6 @@ export default function TraceTable({ task, seed, record, onCheck, onWatch, run, 
   return (
     <FormatCard
       testId={testId}
-      icon="📋"
       title="Trace table"
       subtitle="Be the computer: write down each value, step by step. Then check it against Python."
       done={done}
@@ -174,18 +174,18 @@ export default function TraceTable({ task, seed, record, onCheck, onWatch, run, 
 
       {!done && (
         <button data-testid={`${testId}-check`} onClick={check} disabled={running || !traceGridStarted(grid)} className={`w-full ${primaryButton}`}>
-          {running ? "Tracing it in Python…" : "▶ Check against Python"}
+          {running ? "Tracing it in Python…" : "Check against Python"}
         </button>
       )}
       {runError && <Note tone="warn" title="Python couldn't run it">{runError}</Note>}
 
       {done && (
-        <Note testId={`${testId}-success`} tone="good" title={`✓ Every cell right! +${record?.xp ?? 0} XP`}>
+        <Note testId={`${testId}-success`} tone="good" title={`Every cell right. +${record?.xp ?? 0} XP`}>
           <InlineCode text={task.explain} />
         </Note>
       )}
       {!done && feedback && (
-        <Note testId={`${testId}-feedback`} tone={feedback.tone} title={result?.all_right ? "✓ All right" : "Not quite yet"}>
+        <Note testId={`${testId}-feedback`} tone={feedback.tone} title={result?.all_right ? "All right" : "Not quite yet"}>
           <p>{feedback.text}</p>
           {checks >= 1 && (
             <p className="mt-1 text-xs text-slate-300">
@@ -197,7 +197,7 @@ export default function TraceTable({ task, seed, record, onCheck, onWatch, run, 
 
       {(checks > 0 || done) && watchStep === null && (
         <button data-testid={`${testId}-watch-open`} onClick={watch} disabled={running} className={`w-full ${ghostButton}`}>
-          👀 Watch it run (show the real values)
+          Watch it run (show the real values)
         </button>
       )}
       {realRows && watchStep !== null && (
@@ -267,7 +267,7 @@ function WatchItRun({
   return (
     <div data-testid={testId} className="space-y-2 rounded-lg border border-violet-400/40 bg-violet-500/5 p-2.5">
       <div className="flex items-center justify-between gap-2">
-        <h4 className="text-xs font-semibold tracking-wide text-violet-100 uppercase">👀 What Python really did</h4>
+        <h4 className="text-sm font-semibold text-violet-100">What Python really did</h4>
         <button onClick={onClose} className="text-xs text-slate-300 hover:text-white">
           Close
         </button>
@@ -306,7 +306,8 @@ function WatchItRun({
       {shown < rows.length ? (
         <div className="flex gap-2">
           <button data-testid={`${testId}-next`} onClick={onNext} className={`flex-1 ${primaryButton}`}>
-            Next step ▶
+            Next step
+            <Icon name="play" className="ml-1 h-3 w-3" />
           </button>
           <button data-testid={`${testId}-all`} onClick={onAll} className={ghostButton}>
             Show all

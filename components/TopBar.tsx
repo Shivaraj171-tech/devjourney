@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useIsClient } from "@/lib/useIsClient";
 import { currentStreak, rankFor } from "@/lib/game/rules";
 import { totalXp, useProgress } from "@/lib/progress/store";
+import Icon from "./icons/Icon";
 
 const NAV = [
   { href: "/", label: "Office" },
@@ -56,14 +57,15 @@ export default function TopBar() {
           ))}
         </nav>
         <div className="ml-auto flex shrink-0 items-center gap-1.5 text-sm sm:gap-3">
-          <span title="Daily streak" data-testid="streak" className="hidden items-center gap-1 rounded-full bg-orange-500/10 px-2.5 py-1 font-semibold whitespace-nowrap text-orange-300 sm:inline-flex">
-            <span className={streak > 0 ? "flame" : "opacity-50 grayscale"} aria-hidden>🔥</span> {streak}
+          <span title="Daily streak" data-testid="streak" className={`hidden items-center gap-1 px-1 py-1 font-semibold whitespace-nowrap sm:inline-flex ${streak > 0 ? "text-orange-300" : "text-slate-300"}`}>
+            <Icon name="flame" className="h-[1.2em] w-[1.2em]" /> {streak}
             <span className="sr-only"> day streak</span>
           </span>
           <div className="flex items-center gap-2" title={next ? `${next.minXp - xp} XP to ${next.title}` : "Max rank"}>
             <div className="hidden w-36 lg:block">
               <div className="text-xs whitespace-nowrap text-slate-300">
-                <span aria-hidden>{rank.emoji}</span> {rank.title}
+                <Icon name={rank.icon} className="mr-1 h-[1.15em] w-[1.15em]" />
+                {rank.title}
               </div>
               <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-800" aria-hidden>
                 <div className="h-full rounded-full bg-signal transition-all" style={{ width: `${Math.round(pct * 100)}%` }} />
@@ -80,7 +82,7 @@ export default function TopBar() {
             title="Settings and backup"
             className="grid h-9 w-9 shrink-0 place-items-center rounded-md text-base text-slate-300 hover:bg-slate-800 hover:text-ink sm:text-lg"
           >
-            <span aria-hidden>⚙️</span>
+            <Icon name="wrench" className="h-5 w-5" />
           </Link>
         </div>
       </div>
@@ -89,10 +91,10 @@ export default function TopBar() {
 }
 
 /** The Orbit Orders mark: an order dot on its orbit. Pure CSS, no image. */
-export function OrbitMark({ className = "h-7 w-7" }: { className?: string }) {
+export function OrbitMark({ className = "h-7 w-7", ink = "bg-ink" }: { className?: string; ink?: string }) {
   return (
     <span aria-hidden className={`relative grid shrink-0 place-items-center rounded-full border-2 border-signal ${className}`}>
-      <span className="h-2 w-2 rounded-full bg-ink" />
+      <span className={`h-2 w-2 rounded-full ${ink}`} />
       <span className="absolute -top-[3px] right-[1px] h-2 w-2 rounded-full bg-signal" />
     </span>
   );

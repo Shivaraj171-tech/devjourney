@@ -106,12 +106,12 @@ test("HQ: 'Manipulators · M3' stays locked until Module 2 is done ('opens after
   const floor = page.getByTestId("side-floor-s43");
   await expect(page.getByTestId("side-floor-s42")).toHaveAttribute("data-state", "open");
   await expect(floor).toHaveAttribute("data-state", "locked");
-  await expect(floor.getByRole("heading").first()).toContainText("🦾 Manipulators · M3");
-  await expect(floor).toContainText("10 tickets · 🔒 opens after Manipulators · M2");
+  await expect(floor.getByRole("heading").first()).toContainText("Manipulators · M3");
+  await expect(floor).toContainText("10 tickets. Opens after Manipulators · M2");
   await expect(floor.locator("[data-testid^=lab-room-]")).toHaveCount(10);
   // Module 4 is further down the line: it waits for Module 3.
   await expect(page.getByTestId("side-floor-s44")).toHaveAttribute("data-state", "locked");
-  await expect(page.getByTestId("side-floor-s44")).toContainText("🔒 opens after Manipulators · M3");
+  await expect(page.getByTestId("side-floor-s44")).toContainText("Opens after Manipulators · M3");
   await page.goto(ticketUrl("s43-t01"));
   await expect(page.getByTestId("locked-reason")).toContainText("The Manipulators · M3 opens once you've merged ticket #");
 
@@ -133,7 +133,7 @@ for (const [i, t] of codeTickets.entries()) {
     await seedSolved(page, [...before, ...m3.tickets.slice(0, i)]);
     await page.goto(ticketUrl(t.id));
     await expect(page.getByText(/still in the backlog/)).toHaveCount(0);
-    await expect(page.getByTestId("side-floor-chip")).toContainText("🦾 Manipulators · M3");
+    await expect(page.getByTestId("side-floor-chip")).toContainText("Manipulators · M3");
     await page.getByTestId("lesson-toggle").click();
     const lesson = page.locator("#ticket-lesson");
     await expect(page.getByTestId("lesson-toggle")).toContainText("Deep lesson");
@@ -150,7 +150,7 @@ for (const [i, t] of codeTickets.entries()) {
     for (const path of t.filesEditable) await setEditorFile(page, t.id, path, solutionFile(t, path));
     await runTests(page);
     await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
-    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved!" : "PR merged!");
+    await closeSolvedModal(page, t.type === "incident" ? "Incident resolved" : "PR merged");
     await expectArm(page, t.id, true);
     await checkTicketSpecifics(page, t.id);
 
@@ -232,11 +232,11 @@ test(`plays ${check.id}: the module concept check (a read ticket with practice f
   await expect(page.getByTestId("run-tests")).toHaveCount(0);
   await openQuizTab(page);
   await answerQuiz(page, check.questions);
-  await closeSolvedModal(page, "Ticket closed!");
+  await closeSolvedModal(page, "Ticket closed");
   await expect(page.getByTestId("quiz-done")).toContainText(`${check.questions.length}/${check.questions.length}`);
   expect((await readProgress(page)).tickets[check.id].solved).toBe(true);
   await page.goto("/");
-  await expect(page.getByTestId("side-floor-s43")).toContainText("✅ 10/10 merged");
+  await expect(page.getByTestId("side-floor-s43")).toContainText("10/10 merged");
   // Module 3 done: Module 4 opens.
   await expect(page.getByTestId("side-floor-s44")).toHaveAttribute("data-state", "open");
   expect(errors).toEqual([]);
@@ -251,7 +251,7 @@ test("390px phone: the manipulability ellipsoid flattens near the singularity, n
   for (const path of ellipsoidTicket.filesEditable) await setEditorFile(page, ellipsoidTicket.id, path, solutionFile(ellipsoidTicket, path));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByTestId("run-tests").click();
-  await closeSolvedModal(page, "PR merged!");
+  await closeSolvedModal(page, "PR merged");
   const viewer = page.getByTestId("lab-viewer");
   await expect(viewer).toBeVisible({ timeout: 30_000 });
   const view = page.getByTestId("lab-3d");

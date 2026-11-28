@@ -4,8 +4,10 @@ import { runEncouragement } from "@/lib/game/feedback";
 import { explainResult, findLocation } from "@/lib/runner/explain";
 import type { RunResult, TestResult } from "@/lib/runner/types";
 import { InlineMarkdown } from "./Markdown";
+import Icon from "@/components/icons/Icon";
 
-const ICON = { pass: "✅", fail: "❌", error: "💥" } as const;
+/** Check status as drawn marks: a tick, a cross, a burnt pan for a crash. */
+const ICON = { pass: "check", fail: "cross", error: "burnt" } as const;
 
 /** Turns `test_exactly_25_dollars_is_free` into "exactly 25 dollars is free". */
 function prettyName(name: string, file: string, traceback: string) {
@@ -45,7 +47,7 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
     return (
       <div className="space-y-1.5 text-sm text-slate-300">
         <p>
-          Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 font-sans text-slate-100">▶ Run tests</kbd> to check your fix
+          Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 font-sans text-slate-100">Run tests</kbd> to check your fix
           <span className="pointer-coarse:hidden"> (or Ctrl/⌘ + Enter)</span>.
         </p>
         <p className="text-slate-300">
@@ -58,7 +60,8 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
   if (result.error) {
     return (
       <div data-testid="run-error" className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
-        ⚠️ {result.error}
+        <Icon name="warning" className="mr-1.5" />
+        {result.error}
       </div>
     );
   }
@@ -84,10 +87,12 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
           <li
             key={`${r.file}-${r.name}`}
             data-status={r.status}
-            className={`rounded-lg border-l-4 bg-slate-950/60 p-2.5 text-sm ${r.status === "pass" ? "border-pass" : "border-fail"}`}
+            className={`rounded-lg border p-2.5 text-sm ${r.status === "pass" ? "border-pass/40 bg-pass/5" : "border-fail/50 bg-fail/5"}`}
           >
             <div className="flex items-start gap-2">
-              <span>{ICON[r.status]}</span>
+              <span role="img" aria-label={r.status === "pass" ? "passed" : r.status === "fail" ? "failed" : "crashed"} className={r.status === "pass" ? "text-pass" : "text-fail"}>
+                <Icon name={ICON[r.status]} className="h-[1.2em] w-[1.2em]" />
+              </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
                   <div className={`min-w-0 flex-1 ${r.status === "pass" ? "text-slate-300" : "text-white"}`}>{prettyName(r.name, r.file, r.traceback)}</div>
@@ -103,7 +108,14 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
                           : "border border-violet-400/40 bg-violet-500/15 font-semibold text-violet-100 hover:bg-violet-500/30"
                       }`}
                     >
-                      {tracing === `${r.file}:${r.name}` ? "Tracing…" : "🐞 Step through"}
+                      {tracing === `${r.file}:${r.name}` ? (
+                        "Tracing…"
+                      ) : (
+                        <>
+                          <Icon name="magnifier" className="mr-1" />
+                          Step through
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
@@ -138,7 +150,8 @@ function Explained({ result }: { result: RunResult["results"][number] }) {
         <p className="text-xs text-slate-300" data-testid="explanation">
           {e.location && (
             <span className="mr-1.5 rounded bg-amber-500/15 px-1.5 py-0.5 font-mono text-amber-200">
-              📍 {e.location.file} line {e.location.line}
+              <Icon name="pin" className="mr-1" />
+              Stopped at {e.location.file} line {e.location.line}
             </span>
           )}
           {e.summary && <InlineMarkdown text={e.summary} />}
@@ -150,7 +163,7 @@ function Explained({ result }: { result: RunResult["results"][number] }) {
 }
 
 /**
- * "●●○○ 2/4 ✓  +1 since last run": a compact progress pill that sits next to Run,
+ * "●●○○ 2/4  +1 since last run": a compact progress pill that sits next to Run,
  * so the result of a run shows where the learner is looking.
  */
 export function CheckPill({ total, result, previousPassed }: { total: number; result: RunResult | null; previousPassed?: number }) {
@@ -175,7 +188,7 @@ export function CheckPill({ total, result, previousPassed }: { total: number; re
       )}
       <span aria-hidden>
         {ran ? `${passed}/${total}` : `0/${total}`}
-        {done ? " ✓" : ""}
+        {done && <Icon name="check" className="ml-1" />}
       </span>
       {delta !== 0 && (
         <span aria-hidden data-testid="check-delta" className={`rounded-full px-1.5 py-px ${delta > 0 ? "bg-emerald-500/20 text-emerald-200" : "bg-red-500/20 text-red-200"}`}>

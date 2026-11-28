@@ -13,6 +13,7 @@ import { ticketProgress, totalXp, useProgress } from "@/lib/progress/store";
 import { useIsClient } from "@/lib/useIsClient";
 import type { TicketType } from "@/lib/content/types";
 import ShareButton from "./ShareButton";
+import Icon from "./icons/Icon";
 
 type Props = {
   /** "Floor 3", or "Final exam" for the final season. */
@@ -40,141 +41,134 @@ export default function PerformanceReviewView({ floorLabel, season, tickets, nex
   const skills = comparisonText(progress.skillsCheck);
   const bugsSeen = hitl.caught + hitl.wavedThrough;
   const shareText = () =>
-    (bugsSeen > 0 ? `I caught ${hitl.caught} of ${bugsSeen} of Byte's AI bugs on DevJourney 🤖🪤 ` : "") +
-    `My Orbit Orders review for "${season.title}": ${r.rating.emoji} ${r.rating.title}. ` +
+    (bugsSeen > 0 ? `I caught ${hitl.caught} of ${bugsSeen} of Byte's AI bugs on DevJourney. ` : "") +
+    `My Orbit Orders review for "${season.title}": ${r.rating.title}. ` +
     `${r.merged}/${r.total} tickets, ${r.clean} clean merges.` +
     (learned.length ? ` Learned: ${learned.join(", ")}.` : "") +
     (skills ? ` Skills check: ${skills}.` : "") +
     ` ${currentSiteUrl()}`;
 
+  // A memo from Maya, set like one: who it's from, who it's to, what it's about, then the
+  // numbers in sentences. No stat tiles, no gradient header, no eyebrow.
+  const shipped = TYPE_ORDER.filter((t) => r.byType[t]).map((t) => typeCount(t, r.byType[t]!));
+  const you = progress.playerName === "You" ? "You" : progress.playerName;
   return (
-    <article className="mx-auto max-w-3xl space-y-6 px-4 py-8" data-testid="performance-review" data-complete={r.complete}>
-      <header className="rounded-3xl border border-amber-400/30 bg-gradient-to-br from-amber-950/60 via-slate-900 to-violet-950/60 p-6">
-        <p className="text-sm font-semibold tracking-widest text-amber-300 uppercase">
-          📋 {r.complete ? "Performance review" : "Mid-season check-in"} · {floorLabel}
-        </p>
-        <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{season.title}</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          From: Maya (Tech Lead) · To: {progress.playerName === "You" ? "you" : progress.playerName} · {rank.emoji} {rank.title}
-        </p>
-        <div className="pop-in mt-5 inline-flex items-center gap-3 rounded-2xl border border-amber-300/50 bg-amber-400/10 px-4 py-3" data-testid="review-rating">
-          <span className="text-4xl" aria-hidden>{r.rating.emoji}</span>
-          <div>
-            <div className="text-xs tracking-wide text-amber-200/80 uppercase">Overall</div>
-            <div className="text-xl font-bold text-white">{r.rating.title}</div>
-          </div>
-        </div>
-        {!r.complete && (
-          <p className="mt-4 text-sm text-slate-300">
-            You&apos;ve merged {r.merged} of {r.total} tickets on this floor. The full review lands when the floor is done.
-          </p>
-        )}
-      </header>
+    <article className="mx-auto max-w-2xl px-4 py-8" data-testid="performance-review" data-complete={r.complete}>
+      <h1 className="text-2xl font-bold text-ink sm:text-3xl">{season.title}</h1>
+      <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-0.5 text-[15px]">
+        <dt className="text-slate-300">From</dt>
+        <dd className="text-ink">Maya, tech lead</dd>
+        <dt className="text-slate-300">To</dt>
+        <dd className="text-ink">
+          {you}, {rank.title}
+        </dd>
+        <dt className="text-slate-300">About</dt>
+        <dd className="text-ink">
+          {r.complete ? "Performance review" : "Mid-season check-in"}, {floorLabel}
+        </dd>
+      </dl>
 
-      <section aria-label="Season stats" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Tile label="Tickets merged" value={`${r.merged}/${r.total}`} testId="review-merged" />
-        <Tile label="Clean merges" value={String(r.clean)} hint="first try, no hints" testId="review-clean" />
-        <Tile label="Perfect quizzes" value={`${r.quizzesPerfect}/${r.quizzes}`} />
-        <Tile label="XP earned" value={String(r.xp)} />
-      </section>
-
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-        <h2 className="text-lg font-bold text-white">🚢 What you shipped</h2>
-        <ul className="mt-2 flex flex-wrap gap-2 text-sm">
-          {TYPE_ORDER.filter((t) => r.byType[t]).map((t) => (
-            <li key={t} className="rounded-full bg-slate-800 px-3 py-1 text-slate-200">{typeCount(t, r.byType[t]!)}</li>
-          ))}
-          {r.merged === 0 && <li className="text-slate-400">Nothing yet. Your first ticket is waiting.</li>}
-        </ul>
+      <div className="mt-6 space-y-5 border-t border-rule pt-6 text-[15px] leading-relaxed text-slate-200">
+        <p className="text-lg text-ink">
+          Overall: <b data-testid="review-rating">{r.rating.title}</b>.
+        </p>
+        <p>
+          You merged <b className="text-ink tabular-nums" data-testid="review-merged">{`${r.merged}/${r.total}`}</b> tickets on this floor, and{" "}
+          <b className="text-ink tabular-nums" data-testid="review-clean">{String(r.clean)}</b> of them were clean merges (first try, no hints).
+          {r.quizzes > 0 && (
+            <>
+              {" "}
+              Quizzes right first time: {r.quizzesPerfect} of {r.quizzes}.
+            </>
+          )}{" "}
+          XP earned here: {r.xp}.
+        </p>
+        {!r.complete && <p>The full review lands when the floor is done.</p>}
+        <p>
+          {r.merged === 0 ? (
+            "Nothing shipped yet. Your first ticket is waiting."
+          ) : (
+            <>What you shipped: {shipped.join(", ")}.</>
+          )}
+        </p>
         {learned.length > 0 && (
-          <>
-            <h2 className="mt-5 text-lg font-bold text-white">🧠 What you learned</h2>
-            <ul className="mt-2 flex flex-wrap gap-2 text-sm" data-testid="review-learned">
+          <div>
+            <p>What you learned:</p>
+            <ul className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-ink" data-testid="review-learned">
               {learned.map((c, i) => (
-                <li key={`${i}-${c}`} className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-100">{c}</li>
+                <li key={`${i}-${c}`}>
+                  {c}
+                  {i < learned.length - 1 ? "," : "."}
+                </li>
               ))}
             </ul>
-          </>
-        )}
-      </section>
-
-      {skills && (
-        <section className="rounded-2xl border border-cyan-500/30 bg-cyan-950/20 p-5" data-testid="review-skills">
-          <h2 className="text-lg font-bold text-white">📝 Skills check</h2>
-          <p className="mt-1 font-mono text-2xl font-bold text-cyan-100" data-testid="review-skills-line">{skills}</p>
-          <p className="mt-1 text-sm text-slate-300">
-            {progress.skillsCheck?.final
-              ? "Same 12 questions, before and after. That's how far you've come."
-              : "Your starting point. You'll retake it before the final exam."}
-          </p>
-          <div className="mt-3">
-            <ShareButton getText={() => skillsShareText(progress.skillsCheck, currentSiteUrl())} testId="review-skills-share" label="📣 Share my skills check" />
           </div>
+        )}
+
+        <section data-testid="review-hitl">
+          <h2 className="text-lg font-bold text-ink">
+            <Icon name="byte" className="mr-2 h-5 w-5 text-byte" />
+            You and Byte this season
+          </h2>
+          {hitl.caught + hitl.wavedThrough + hitl.trusted + hitl.doubted + hitl.promptsTried === 0 ? (
+            <p className="mt-1">Byte stayed quiet on this floor. It won&apos;t next time.</p>
+          ) : (
+            <p className="mt-1">
+              You caught {hitl.caught} of {hitl.caught + hitl.wavedThrough} of Byte&apos;s bugs and waved {hitl.wavedThrough} through. You trusted
+              its good code {hitl.trusted} of {hitl.trusted + hitl.doubted} times, and picked the best prompt first {hitl.bestPrompts} of{" "}
+              {hitl.promptsTried} times.
+            </p>
+          )}
         </section>
-      )}
 
-      <section className="rounded-2xl border border-violet-500/30 bg-violet-950/30 p-5" data-testid="review-hitl">
-        <h2 className="text-lg font-bold text-white">🤖 You and Byte this season</h2>
-        {hitl.caught + hitl.wavedThrough + hitl.trusted + hitl.doubted + hitl.promptsTried === 0 ? (
-          <p className="mt-1 text-sm text-slate-400">Byte stayed quiet on this floor. It won&apos;t next time.</p>
-        ) : (
-          <ul className="mt-2 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-            <Mini label="Bugs caught" value={`${hitl.caught}/${hitl.caught + hitl.wavedThrough}`} />
-            <Mini label="Waved through" value={String(hitl.wavedThrough)} />
-            <Mini label="Trusted correctly" value={`${hitl.trusted}/${hitl.trusted + hitl.doubted}`} />
-            <Mini label="Best prompts" value={`${hitl.bestPrompts}/${hitl.promptsTried}`} />
+        {skills && (
+          <section data-testid="review-skills">
+            <h2 className="text-lg font-bold text-ink">Skills check</h2>
+            <p className="mt-1 font-display text-xl font-bold text-ink" data-testid="review-skills-line">{skills}</p>
+            <p className="mt-1">
+              {progress.skillsCheck?.final
+                ? "Same 12 questions, before and after. That's how far you've come."
+                : "Your starting point. You'll retake it before the final exam."}
+            </p>
+            <div className="mt-3">
+              <ShareButton getText={() => skillsShareText(progress.skillsCheck, currentSiteUrl())} testId="review-skills-share" label="Share my skills check" />
+            </div>
+          </section>
+        )}
+
+        <section>
+          <h2 className="text-lg font-bold text-ink">Strengths</h2>
+          <ul className="mt-2 space-y-1.5" data-testid="review-strengths">
+            {r.strengths.map((s) => (
+              <li key={s} className="flex gap-2">
+                <Icon name="check" className="mt-1 text-pass" />
+                <span>{s}</span>
+              </li>
+            ))}
           </ul>
-        )}
-      </section>
-
-      <section className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5">
-        <h2 className="text-lg font-bold text-white">🌱 Strengths</h2>
-        <ul className="mt-2 space-y-1.5 text-sm text-slate-200" data-testid="review-strengths">
-          {r.strengths.map((s) => (
-            <li key={s} className="flex gap-2"><span aria-hidden>✅</span><span>{s}</span></li>
-          ))}
-        </ul>
-        {r.nextStep && (
-          <p className="mt-4 rounded-xl bg-slate-950/50 p-3 text-sm text-slate-200" data-testid="review-next-step">
-            <b className="text-white">🎯 One thing to try next:</b> {r.nextStep}
-          </p>
-        )}
-        <p className="mt-4 text-sm text-slate-300 italic">
+          {r.nextStep && (
+            <p className="mt-4" data-testid="review-next-step">
+              <b className="text-ink">One thing to try next:</b> {r.nextStep}
+            </p>
+          )}
+        </section>
+        <p className="italic">
           “Proud of you, {name}. Keep reading the code, keep running the checks, and keep Byte honest.” Maya
         </p>
-      </section>
+      </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="mt-8 flex flex-col gap-2 sm:flex-row">
         {r.complete && next?.firstTicketId ? (
-          <Link href={`/ticket/${next.firstTicketId}`} className="rounded-xl btn-signal px-5 py-3 text-center ">
+          <Link href={`/ticket/${next.firstTicketId}`} className="rounded-lg btn-signal px-5 py-3 text-center ">
             {next.final ? "Start the final exam" : `Start next floor: ${next.title}`}
           </Link>
         ) : (
-          <Link href="/" className="rounded-xl btn-signal px-5 py-3 text-center ">
+          <Link href="/" className="rounded-lg btn-signal px-5 py-3 text-center ">
             Back to the office
           </Link>
         )}
         <ShareButton getText={shareText} testId="review-copy" className="w-full px-5 py-3 text-base sm:w-auto" />
       </div>
     </article>
-  );
-}
-
-function Tile({ label, value, hint, testId }: { label: string; value: string; hint?: string; testId?: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-      <div className="text-xs tracking-wide text-slate-400 uppercase">{label}</div>
-      <div className="mt-1 text-xl font-bold text-white" data-testid={testId}>{value}</div>
-      {hint && <div className="text-[11px] text-slate-400">{hint}</div>}
-    </div>
-  );
-}
-
-function Mini({ label, value }: { label: string; value: string }) {
-  return (
-    <li className="rounded-xl border border-slate-800 bg-slate-950/50 p-2.5">
-      <div className="text-[11px] tracking-wide text-slate-400 uppercase">{label}</div>
-      <div className="font-mono text-lg font-bold text-white">{value}</div>
-    </li>
   );
 }

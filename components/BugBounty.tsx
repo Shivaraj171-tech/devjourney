@@ -5,6 +5,7 @@
 // kind of bug and links back to the lesson.
 import Link from "next/link";
 import { withBase } from "@/lib/basePath";
+import Icon from "./icons/Icon";
 import { bountyProgress, bountyState, lessonHref, revealText, type BountyCard, type BountyState } from "@/lib/game/bounty";
 
 type Props = {
@@ -32,112 +33,127 @@ export default function BugBounty({ bounties, isSolved, xpFor, recommended = [],
   const foldSolved = solved >= 4;
   const lockedCards = cards.filter((c) => c.state === "locked");
   const foldingLocked = foldLocked && lockedCards.length > 0;
+  const openCards = cards.filter((c) => c.state === "open");
+  const doneCards = cards.filter((c) => c.state === "done");
+  const row = ({ card, state }: (typeof cards)[number]) => <BountyRow key={card.id} card={card} state={state} xp={xpFor(card.id)} />;
   return (
-    <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-xl border border-rule bg-panel p-4 sm:p-5">
+    <section data-testid="bug-bounty" aria-labelledby="bug-bounty-title" className="rounded-lg border border-rule p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h2 id="bug-bounty-title" className="font-display text-lg font-bold text-ink">
-          🐞 Bug Bounty
+          <Icon name="posted" className="mr-2 h-5 w-5" />
+          Bug Bounty
         </h2>
         <span className="text-sm text-slate-300" data-testid="bounty-progress">
-          {solved}/{total} solved{open > 0 ? ` · ${open} open` : ""}
+          {solved} of {total} solved{open > 0 ? `, ${open} open` : ""}
         </span>
       </div>
       <p className="mt-1 max-w-3xl text-sm text-slate-300">
         Mystery bugs from all over Orbit Orders. No lesson, no label: working out <i>what kind</i> of bug it is is part of the job.
         <span className={foldLocked ? "sr-only" : undefined}> Optional, and they never block your next ticket.</span>
       </p>
-      <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {cards
-          .filter((c) => !(foldSolved && c.state === "done") && !(foldingLocked && c.state === "locked"))
-          .map(({ card, state, recommended: rec }) => (
-            <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} recommended={rec} />
+      {/* Open bounties are the notices pinned up: big, and first. Solved and locked ones are a plain list. */}
+      {openCards.length > 0 && (
+        <ul className="mt-4 flex flex-wrap gap-3 sm:gap-4">
+          {openCards.map(({ card, recommended: rec }, i) => (
+            <OpenNotice key={card.id} card={card} recommended={rec} tilt={TILT[i % TILT.length]} />
           ))}
-      </ul>
+        </ul>
+      )}
+      {doneCards.length > 0 && !foldSolved && <ul className="mt-4 divide-y divide-rule border-y border-rule">{doneCards.map(row)}</ul>}
+      {lockedCards.length > 0 && !foldingLocked && <ul className="mt-4 divide-y divide-rule border-y border-rule">{lockedCards.map(row)}</ul>}
       {foldingLocked && (
         <details className="mt-3" data-testid="bounty-locked-fold">
           <summary className="min-h-8 cursor-pointer py-1 text-sm font-semibold text-slate-200">
-            🔒 {lockedCards.length} more open as you learn, see what opens them
+            {lockedCards.length} more open as you learn. See what opens them
           </summary>
-          <ul className="mt-2 grid grid-cols-1 gap-3">
-            {lockedCards.map(({ card, state }) => (
-              <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} />
-            ))}
-          </ul>
+          <ul className="mt-2 divide-y divide-rule border-y border-rule">{lockedCards.map(row)}</ul>
         </details>
       )}
       {/* Many solved: they fold into one line, so the home screen stays short (audit flaw 8). */}
       {foldSolved && (
         <details className="mt-3">
           <summary className="min-h-8 cursor-pointer py-1 text-sm font-semibold text-slate-200">{solved} solved bounties</summary>
-          <ul className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {cards
-              .filter((c) => c.state === "done")
-              .map(({ card, state }) => (
-                <BountyCardView key={card.id} card={card} state={state} xp={xpFor(card.id)} />
-              ))}
-          </ul>
+          <ul className="mt-2 divide-y divide-rule border-y border-rule">{doneCards.map(row)}</ul>
         </details>
       )}
     </section>
   );
 }
 
-function BountyCardView({ card, state, xp, recommended = false }: { card: BountyCard; state: BountyState; xp: number; recommended?: boolean }) {
-  const header = (
-    <div className="flex items-center justify-between gap-2 text-xs font-semibold text-lime-100">
-      <span>🐞 Mystery bug · ~{card.estimatedMinutes} min</span>
-      <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-amber-50" data-testid="bounty-xp">
-        {state === "done" ? `+${xp} XP` : `🪙 ${card.xp} XP`}
+/** "Mystery bug, about 5 min" and the reward: the same facts on every bounty. */
+function Facts({ card, state, xp }: { card: BountyCard; state: BountyState; xp: number }) {
+  return (
+    <span className="text-sm text-slate-300">
+      Mystery bug, about {card.estimatedMinutes} min,{" "}
+      <span className="font-semibold text-ink tabular-nums" data-testid="bounty-xp">
+        {state === "done" ? `+${xp} XP` : `${card.xp} XP`}
       </span>
-    </div>
+    </span>
   );
-  const title = <div className="mt-1.5 text-sm leading-snug font-bold text-white">{card.title}</div>;
+}
 
-  if (state === "locked") {
-    return (
-      <li data-testid={`bounty-${card.id}`} data-state="locked" className="rounded-xl border border-slate-800 bg-slate-950/40 p-3 opacity-80">
-        {header}
-        {title}
-        <p className="mt-2 text-xs text-slate-300">
-          {/* Not the ticket's title: that would name the concept, and the bug is a mystery. */}
-          🔒 Opens after ticket #{card.requires?.number} of {card.requires?.seasonTitle}
-        </p>
-      </li>
-    );
-  }
+/** Pinned by hand: each notice sits a little off straight, and none the same (from sm up; phones stay straight). */
+const TILT = ["sm:-rotate-1", "sm:rotate-[0.7deg]", "sm:rotate-0", "sm:-rotate-[0.5deg]"];
+
+/** An open bounty: a notice pinned to the board, as wide as its title, the one you can take now. */
+function OpenNotice({ card, recommended, tilt }: { card: BountyCard; recommended: boolean; tilt: string }) {
+  return (
+    <li data-testid={`bounty-${card.id}`} data-state="open" data-recommended={recommended || undefined} className={`relative w-full pt-2 sm:w-auto sm:max-w-[19rem] ${tilt}`}>
+      <Icon name="pin" className="absolute top-0 left-1/2 z-10 h-5 w-5 -translate-x-1/2 text-slate-300" />
+      <Link href={`/ticket/${card.id}`} className="block rounded-sm border border-slate-500 bg-panel p-3 pt-4 hover:border-ink sm:p-4 sm:pt-5">
+        {recommended && (
+          <span data-testid="bounty-recommended" className="mb-1 block text-sm font-semibold text-byte">
+            Picked for you<span className="sr-only"> (from your coding profile)</span>
+          </span>
+        )}
+        <span className="block font-display text-lg leading-snug font-bold text-ink">{card.title}</span>
+        <span className="mt-1 block">
+          <Facts card={card} state="open" xp={0} />
+        </span>
+        <span className="mt-3 inline-block text-sm font-semibold text-ink underline decoration-signal decoration-2 underline-offset-4">Take the bounty</span>
+      </Link>
+    </li>
+  );
+}
+
+/** A solved or locked bounty: one row of the list. */
+function BountyRow({ card, state, xp }: { card: BountyCard; state: BountyState; xp: number }) {
   if (state === "done") {
     return (
-      <li data-testid={`bounty-${card.id}`} data-state="done" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-        {header}
-        <Link href={`/ticket/${card.id}`} className="block py-1 hover:underline">
-          {title}
-        </Link>
-        <p className="mt-2 text-xs text-emerald-100" data-testid="bounty-reveal">
-          ✅ {revealText(card.bugKind)}
-        </p>
-        {card.requires && (
-          <a href={withBase(lessonHref(card.requires.id))} data-testid="bounty-lesson-link" className="mt-1 inline-block min-h-6 py-1 text-xs font-semibold text-cyan-300 hover:underline">
-            📘 Revisit the lesson
-          </a>
-        )}
+      <li data-testid={`bounty-${card.id}`} data-state="done" className="flex items-start gap-3 py-3">
+        <Icon name="spike" className="mt-0.5 h-5 w-5 text-pass" />
+        <div className="min-w-0">
+          <Link href={`/ticket/${card.id}`} className="font-semibold text-ink hover:underline">
+            {card.title}
+          </Link>
+          <div>
+            <Facts card={card} state={state} xp={xp} />
+          </div>
+          <p className="mt-1 text-sm text-pass" data-testid="bounty-reveal">
+            {revealText(card.bugKind)}
+          </p>
+          {card.requires && (
+            <a href={withBase(lessonHref(card.requires.id))} data-testid="bounty-lesson-link" className="inline-block min-h-6 py-1 text-sm font-semibold text-ink underline underline-offset-4">
+              Revisit the lesson
+            </a>
+          )}
+        </div>
       </li>
     );
   }
   return (
-    <li data-testid={`bounty-${card.id}`} data-state="open" data-recommended={recommended || undefined}>
-      <Link
-        href={`/ticket/${card.id}`}
-        className="block rounded-xl border-2 border-lime-400/60 bg-lime-500/10 p-3 transition hover:bg-lime-500/20"
-      >
-        {recommended && (
-          <span data-testid="bounty-recommended" className="mb-1.5 inline-block rounded-full bg-cyan-400/15 px-2 py-0.5 text-[11px] font-semibold text-cyan-100">
-            ⭐ Recommended for you<span className="sr-only"> (from your coding profile)</span>
-          </span>
-        )}
-        {header}
-        {title}
-        <span className="mt-2 inline-block rounded-lg bg-lime-400 px-2.5 py-1 text-xs font-semibold text-slate-950">Take the bounty</span>
-      </Link>
+    <li data-testid={`bounty-${card.id}`} data-state="locked" className="flex items-start gap-3 py-3">
+      <Icon name="lock" className="mt-0.5 h-5 w-5 text-slate-300" />
+      <div className="min-w-0">
+        <div className="font-semibold text-slate-200">{card.title}</div>
+        <div>
+          <Facts card={card} state={state} xp={xp} />
+        </div>
+        <p className="text-sm text-slate-300">
+          {/* Not the ticket's title: that would name the concept, and the bug is a mystery. */}
+          Opens after ticket #{card.requires?.number} of {card.requires?.seasonTitle}
+        </p>
+      </div>
     </li>
   );
 }

@@ -14,6 +14,7 @@ import {
 } from "@/lib/game/formats";
 import { InlineCode } from "../ByteSuggestion";
 import { CodeBlock, FormatCard, Note, primaryButton, type RunFormat } from "./shared";
+import Icon from "@/components/icons/Icon";
 
 export type BreakBytesCodeProps = {
   task: BreakItTask;
@@ -53,9 +54,10 @@ export default function BreakBytesCode({ task, seed, record, onAttempt, run, tes
   }
 
   return (
-    <FormatCard testId={testId} icon="🔨" title="Break Byte's code" subtitle="Find ONE input where Byte's code breaks the spec." done={done}>
+    <FormatCard testId={testId} title="Break Byte's code" subtitle="Find ONE input where Byte's code breaks the spec." done={done}>
       <p className="rounded-lg border border-violet-400/40 bg-violet-500/10 p-2 text-violet-50">
-        <span aria-hidden>🤖 “</span>
+        <Icon name="byte" className="mr-1 text-byte" />
+          <span aria-hidden>“</span>
         <InlineCode text={task.says} />
         <span aria-hidden>”</span>
       </p>
@@ -64,7 +66,7 @@ export default function BreakBytesCode({ task, seed, record, onAttempt, run, tes
         Byte&apos;s own test: <code className="font-mono text-slate-200">{callPreview(task.call, task.normalInput)}</code> meets the spec.
       </p>
       <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-2.5">
-        <div className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase">The spec</div>
+        <div className="text-xs font-semibold text-slate-300">The spec</div>
         <p className="mt-1 text-slate-200">
           <InlineCode text={task.spec} />
         </p>
@@ -91,13 +93,13 @@ export default function BreakBytesCode({ task, seed, record, onAttempt, run, tes
             <span className="shrink-0 text-slate-400">{task.call.split("{input}")[1] ?? ""}</span>
           </div>
           <button type="submit" data-testid={`${testId}-try`} disabled={!input.trim() || running} className={`w-full ${primaryButton}`}>
-            {running ? "Running Byte's code…" : "🔨 Try to break it"}
+            {running ? "Running Byte's code…" : "Try to break it"}
           </button>
         </form>
       )}
 
       {done && (
-        <Note testId={`${testId}-success`} tone="good" title={`🕵️ You broke it! +${BREAK_IT_XP} XP`}>
+        <Note testId={`${testId}-success`} tone="good" title={`You broke it. +${BREAK_IT_XP} XP`}>
           {record?.input && (
             <p className="mb-1 font-mono text-xs">
               {callPreview(task.call, record.input)}

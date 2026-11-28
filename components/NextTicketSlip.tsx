@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { conceptLabel } from "@/lib/content/concepts";
 import { TICKET_TYPE } from "./FloorBoard";
+import Icon from "./icons/Icon";
 import type { TicketSummary } from "./HQ";
 
 type Props = {
@@ -24,6 +25,7 @@ export default function NextTicketSlip({ ticket, where, isExam = false, cta, hea
   const type = TICKET_TYPE[ticket.type];
   const H = headingLevel === 1 ? "h1" : "h2";
   return (
+    <div className="slip-lift w-full">
     <div className="slip w-full rounded-sm px-5 sm:px-6" data-testid="next-slip">
       {kicker && <p className="text-sm font-semibold text-paper-muted">{kicker}</p>}
       <H id={headingId} className="mt-1 flex items-start gap-3 text-paper-ink">
@@ -33,14 +35,16 @@ export default function NextTicketSlip({ ticket, where, isExam = false, cta, hea
       <div className="slip-rule mt-4" />
       <ul className="mt-3 space-y-1 text-[15px] text-paper-ink" aria-label="About this ticket">
         <li>
-          <span aria-hidden>{type.icon}</span> {type.label}, about {ticket.estimatedMinutes} min
+          <Icon name={type.icon} className="mr-1.5" />
+          {type.label}, about {ticket.estimatedMinutes} min
         </li>
-        <li>{isExam ? "🎓 Final exam: no hints, no lesson" : <>New idea: <b>{conceptLabel(ticket.newConcept)}</b></>}</li>
+        <li>{isExam ? "Final exam: no hints, no lesson" : <>New idea: <b>{conceptLabel(ticket.newConcept)}</b></>}</li>
         <li className="text-paper-muted">{where}</li>
       </ul>
       <Link href={`/ticket/${ticket.id}`} data-testid="continue" className="btn-signal mt-5 block rounded-lg px-5 py-3.5 text-center text-lg">
         {cta}
       </Link>
+    </div>
     </div>
   );
 }

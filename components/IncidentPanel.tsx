@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Incident } from "@/lib/content/types";
 import { incidentSecondsLeft, INCIDENT_SPEED_BONUS } from "@/lib/game/rules";
 import { incidentActions, type TicketProgress } from "@/lib/progress/store";
+import Icon from "@/components/icons/Icon";
 
 type Props = {
   ticketId: string;
@@ -52,8 +53,9 @@ export default function IncidentPanel({ ticketId, incident, tp, logsOpenAtStart 
     const inTime = took <= limit * 60;
     status = (
       <span data-testid="incident-status">
-        ✅ Resolved in {clock(took)}
-        {inTime ? ` · ⚡ speed bonus +${INCIDENT_SPEED_BONUS} XP` : " · no speed bonus this time"}
+        <Icon name="check" className="mr-1" />
+        Resolved in {clock(took)}
+        {inTime ? `, speed bonus +${INCIDENT_SPEED_BONUS} XP` : ", no speed bonus this time"}
       </span>
     );
   } else if (started !== null) {
@@ -61,12 +63,14 @@ export default function IncidentPanel({ ticketId, incident, tp, logsOpenAtStart 
     status =
       left > 0 ? (
         <span data-testid="incident-status">
-          ⏱ <span className="font-mono text-lg font-bold text-white" data-testid="incident-timer">{clock(left)}</span> left for
-          the ⚡ +{INCIDENT_SPEED_BONUS} XP speed bonus
+          <Icon name="timer" className="mr-1" />
+          <span className="font-mono text-lg font-bold text-white" data-testid="incident-timer">{clock(left)}</span> left for
+          the +{INCIDENT_SPEED_BONUS} XP speed bonus
         </span>
       ) : (
         <span data-testid="incident-status">
-          ⏱ <span className="font-mono font-bold">00:00</span> Speed bonus missed. No stress: fix it anyway, customers are still waiting.
+          <Icon name="timer" className="mr-1" />
+          <span className="font-mono font-bold">00:00</span> Speed bonus missed. No stress: fix it anyway, customers are still waiting.
         </span>
       );
   }
@@ -130,7 +134,7 @@ export function IncidentLogs({ logs, className = "max-h-80 lg:max-h-[min(14rem,2
   );
 }
 
-/** Phone: the logs live in the Brief step, so the Code step gets a "📜 Logs" chip that opens them in place. */
+/** Phone: the logs live in the Brief step, so the Code step gets a "Logs" chip that opens them in place. */
 export function LogsChip({ logs }: { logs: string }) {
   const [open, setOpen] = useState(false);
   return (
@@ -142,8 +146,8 @@ export function LogsChip({ logs }: { logs: string }) {
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-left text-sm font-semibold text-red-100"
       >
-        <span aria-hidden>📜</span> Logs
-        <span className="font-normal text-red-200/80">· production</span>
+        <Icon name="logs" className="h-5 w-5" /> Logs
+        <span className="font-normal text-red-200/80">from production</span>
         <span aria-hidden className="ml-auto text-xs">{open ? "▲" : "▼"}</span>
       </button>
       {open && <IncidentLogs logs={logs} className="max-h-[40dvh] border-t border-red-500/20" />}

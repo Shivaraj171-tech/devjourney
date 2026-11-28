@@ -35,7 +35,7 @@ test("export a backup code, reset, import it: progress is back", async ({ page }
   await page.getByTestId("settings-link").click();
   await expect(page).toHaveURL(/\/settings\/?$/);
   await expect(page.getByRole("heading", { name: /Settings & backup/ })).toBeVisible();
-  await expect(page.getByTestId("settings-summary")).toContainText("Ana · 3 tickets merged");
+  await expect(page.getByTestId("settings-summary")).toContainText("Ana: 3 tickets merged");
 
   await page.getByTestId("backup-show-code").click();
   // The code is built asynchronously (compression), so wait for it before reading.
@@ -65,7 +65,7 @@ test("export a backup code, reset, import it: progress is back", async ({ page }
   const restored = await readProgress(page);
   expect(restored.playerName).toBe("Ana");
   expect(Object.values(restored.tickets).filter((t) => (t as { solved: boolean }).solved)).toHaveLength(3);
-  await expect(page.getByTestId("settings-summary")).toContainText("Ana · 3 tickets merged");
+  await expect(page.getByTestId("settings-summary")).toContainText("Ana: 3 tickets merged");
 
   await page.goto("/");
   for (const t of tickets.slice(0, 3)) await expect(page.getByTestId(`room-${t.id}`)).toHaveAttribute("data-state", "done");

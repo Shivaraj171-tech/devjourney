@@ -46,14 +46,14 @@ test("HQ: the board shows locked cards with what opens them; floors are unchange
   await page.goto("/");
   const board = page.getByTestId("bug-bounty");
   await expect(board).toBeVisible();
-  await expect(board.getByRole("heading", { name: "🐞 Bug Bounty" })).toBeVisible();
+  await expect(board.getByRole("heading", { name: "Bug Bounty" })).toBeVisible();
   await expect(board.locator("[data-testid^=bounty-s50-]")).toHaveCount(bounties.length);
 
   for (const b of bounties) {
     const card = page.getByTestId(`bounty-${b.id}`);
     const open = onChain.indexOf(byId(b.requires!)) <= onChain.indexOf(byId("s01-t04"));
     await expect(card).toHaveAttribute("data-state", open ? "open" : "locked");
-    await expect(card).toContainText("Mystery bug · ~5 min");
+    await expect(card).toContainText("Mystery bug, about 5 min");
     await expect(card.getByTestId("bounty-xp")).toContainText("XP");
     // No concept label anywhere on the card, and no reveal before it's solved.
     await expect(card).not.toContainText(b.bugKind!);
@@ -67,7 +67,7 @@ test("HQ: the board shows locked cards with what opens them; floors are unchange
   }
   const first = bounties.find((b) => b.requires === "s01-t04")!;
   await expect(page.getByTestId(`bounty-${first.id}`).locator("a")).toHaveAttribute("href", new RegExp(`/ticket/${first.id}/?$`));
-  await expect(board.getByTestId("bounty-progress")).toContainText(`0/${bounties.length} solved · 1 open`);
+  await expect(board.getByTestId("bounty-progress")).toContainText(`0 of ${bounties.length} solved, 1 open`);
 
   // The floors are still the story: rooms only for on-chain tickets, and no extra floor.
   await expect(page.locator("[data-testid^=room-]")).toHaveCount(onChain.length);
@@ -88,7 +88,7 @@ test("a mystery bug: no concept chip or lesson; solved, it reveals the kind of b
   await expect(page.getByTestId("bounty-banner")).toBeVisible();
   await expect(page.getByText(/^New: /)).toHaveCount(0);
   await expect(page.getByTestId("lesson")).toHaveCount(0);
-  await expect(page.getByText("🐞 Mystery bug")).toBeVisible();
+  await expect(page.getByText("Mystery bug", { exact: true })).toBeVisible();
   await expect(page.getByTestId("hints-toggle").first()).toBeVisible(); // hints are allowed
   await page.screenshot({ path: join(SHOTS, "bounty-ticket.png") });
 
@@ -169,7 +169,7 @@ test("every bounty can be solved: starter fails, the fix passes", async ({ page 
   const p = await readProgress(page);
   for (const b of bounties) expect(p.tickets[b.id].solved, b.id).toBe(true);
   await page.goto("/");
-  await expect(page.getByTestId("bounty-progress")).toContainText(`${bounties.length}/${bounties.length} solved`);
+  await expect(page.getByTestId("bounty-progress")).toContainText(`${bounties.length} of ${bounties.length} solved`);
   for (const b of bounties) {
     await expect(page.getByTestId(`bounty-${b.id}`).getByTestId("bounty-reveal")).toContainText(b.bugKind!);
   }

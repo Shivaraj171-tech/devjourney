@@ -32,7 +32,7 @@ test("every Season 1 ticket can be solved in the browser", async ({ page }) => {
         await answerQuiz(page, t.questions);
         const modal = page.getByTestId("solved-modal");
         await expect(modal).toBeVisible();
-        await expect(modal).toContainText("Ticket closed!");
+        await expect(modal).toContainText("Ticket closed");
         await modal.getByRole("button", { name: "Stay here" }).click();
         await expect(modal).toHaveCount(0);
         await expect(page.getByTestId("quiz-done")).toBeVisible();
@@ -53,7 +53,7 @@ test("every Season 1 ticket can be solved in the browser", async ({ page }) => {
         await expect(page.getByTestId("run-summary")).toContainText("All checks passed");
         const modal = page.getByTestId("solved-modal");
         await expect(modal).toBeVisible();
-        await expect(modal).toContainText("PR merged!");
+        await expect(modal).toContainText("PR merged");
         await modal.getByRole("button", { name: "Stay here" }).click();
         await expect(modal).toHaveCount(0);
 

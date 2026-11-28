@@ -2,6 +2,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Markdown from "./Markdown";
 import { HINT_COST } from "@/lib/game/rules";
+import Icon from "@/components/icons/Icon";
 
 const LABELS = ["Nudge", "Direction", "Almost the answer"];
 
@@ -21,8 +22,8 @@ export default function HintPanel({ hints, revealed, solved, onReveal }: Props) 
       </p>
       {hints.slice(0, revealed).map((hint, i) => (
         <div key={i} className="rounded-lg border border-violet-500/30 bg-violet-500/10 p-3 text-sm text-slate-200">
-          <div className="mb-1 text-xs font-semibold tracking-wide text-violet-300 uppercase">
-            Hint {i + 1} · {LABELS[i] ?? "Hint"}
+          <div className="mb-1 text-sm font-semibold text-violet-200">
+            Hint {i + 1}: {LABELS[i] ?? "Hint"}
           </div>
           <Markdown text={hint} />
         </div>
@@ -32,7 +33,8 @@ export default function HintPanel({ hints, revealed, solved, onReveal }: Props) 
           onClick={onReveal}
           className="w-full rounded-lg border border-dashed border-slate-500 px-3 py-2 text-sm text-slate-200 hover:border-violet-400 hover:text-white"
         >
-          💡 Reveal hint {revealed + 1} of {hints.length}
+          <Icon name="note" className="mr-1.5" />
+          Reveal hint {revealed + 1} of {hints.length}
           {!solved && <span className="text-amber-300"> (−{HINT_COST} XP)</span>}
         </button>
       ) : (
@@ -43,7 +45,7 @@ export default function HintPanel({ hints, revealed, solved, onReveal }: Props) 
 }
 
 /**
- * "💡 Hints (1/3)": a button that opens the staged hints in a small popover,
+ * "Hints (1/3)": a button that opens the staged hints in a small popover,
  * so hints sit next to the action they help with (Run, Submit review…).
  */
 export function HintsButton({ placement = "up", ...props }: Props & { placement?: "up" | "down" }) {
@@ -86,7 +88,8 @@ export function HintsButton({ placement = "up", ...props }: Props & { placement?
           open ? "border-violet-400 bg-violet-500/20 text-white" : "border-slate-600 text-slate-200 hover:border-violet-400 hover:text-white"
         }`}
       >
-        💡 Hints ({props.revealed}/{props.hints.length})
+        <Icon name="note" className="mr-1.5" />
+        Hints ({props.revealed}/{props.hints.length})
       </button>
       {open && (
         <div

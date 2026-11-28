@@ -22,7 +22,7 @@ export default function BackupReminder({ ticketsMerged, startedAt, now }: Props)
       className="flex flex-col gap-3 rounded-xl border border-amber-400/40 bg-panel p-4 sm:flex-row sm:items-center"
     >
       <div className="min-w-0 flex-1">
-        <h2 id="backup-reminder-title" className="font-bold text-white">💾 Keep your progress safe</h2>
+        <h2 id="backup-reminder-title" className="font-bold text-white">Keep your progress safe</h2>
         <p className="mt-0.5 text-sm text-slate-300">
           Your {ticketsMerged} merged ticket{ticketsMerged === 1 ? " lives" : "s live"} only in this browser, and some browsers clear sites
           you haven&apos;t visited for a week. A backup takes 10 seconds.
