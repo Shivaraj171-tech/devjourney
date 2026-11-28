@@ -122,7 +122,7 @@ export function teamChat(input: ChatInput): ChatMessage[] {
       const text = pick(
         [
           `i'm ${gap} XP ahead. not that i check. i check hourly.`,
-          `${gap} XP ahead of you. also every test customer called Sam is me, and i'd like a refund.`,
+          `${gap} XP ahead. every test customer called Sam is me btw.`,
         ],
         last.id,
       );
