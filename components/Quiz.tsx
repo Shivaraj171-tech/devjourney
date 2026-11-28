@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Question } from "@/lib/content/types";
 import { QUIZ_XP_PER_CORRECT } from "@/lib/game/rules";
 import { InlineMarkdown } from "./Markdown";
+import Icon from "@/components/icons/Icon";
 
 type Props = {
   questions: Question[];
@@ -84,7 +85,8 @@ export default function Quiz({ questions, firstPicks, done, onAnswer, onComplete
             )}
             {isCorrect && (
               <p className="mt-2 text-xs text-emerald-300">
-                ✔ <InlineMarkdown text={q.explain} />
+                <Icon name="check" className="mr-1" />
+                <InlineMarkdown text={q.explain} />
               </p>
             )}
           </div>

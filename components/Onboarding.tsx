@@ -6,10 +6,10 @@ import { useEffect, useRef } from "react";
 import { actions } from "@/lib/progress/store";
 
 const STEPS = [
-  { icon: "📨", title: "Read the ticket", text: "A teammate explains what's broken and why it matters to customers." },
-  { icon: "📘", title: "Learn the idea", text: "Each ticket brings one new idea, explained in a 2-minute lesson: one new idea at a time, built on what you already know." },
-  { icon: "▶️", title: "Fix the code & run the checks", text: "Edit the real app's code right in your browser. Run the checks as often as you like: no lives, no penalties." },
-  { icon: "🎉", title: "Merge, earn XP, level up", text: "When every check is green, your change is accepted into the app (developers call this \"merging a pull request\", or PR). Stuck? Each hint costs 20 XP of the ticket's reward (at most 60%). A quick quiz earns bonus XP." },
+  { title: "Read the ticket", text: "A teammate explains what's broken and why it matters to customers." },
+  { title: "Learn the idea", text: "Each ticket brings one new idea, explained in a 2-minute lesson: one new idea at a time, built on what you already know." },
+  { title: "Fix the code & run the checks", text: "Edit the real app's code right in your browser. Run the checks as often as you like: no lives, no penalties." },
+  { title: "Merge, earn XP, level up", text: "When every check is green, your change is accepted into the app (developers call this \"merging a pull request\", or PR). Stuck? Each hint costs 20 XP of the ticket's reward (at most 60%). A quick quiz earns bonus XP." },
 ];
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -61,9 +61,9 @@ export default function Onboarding() {
       aria-labelledby="onboarding-title"
       data-testid="onboarding"
     >
-      <div className="w-full max-w-lg rounded-2xl border border-rule bg-panel p-6 shadow-2xl">
+      <div className="w-full max-w-lg rounded-lg border border-rule bg-panel p-6 shadow-2xl">
         <p className="text-sm font-semibold text-slate-300">Day 1 at Orbit Orders</p>
-        <h2 id="onboarding-title" className="mt-1 text-2xl font-bold text-white">You&apos;re hired! 🎉</h2>
+        <h2 id="onboarding-title" className="mt-1 text-2xl font-bold text-white">You&apos;re hired.</h2>
         <p className="mt-2 text-slate-300">
           You just joined a small food-delivery startup as a junior developer. Your teammate Byte is an AI that writes code
           fast but not always right. You&apos;ll learn to code by working on the real app, one short ticket at a time, and
@@ -72,10 +72,14 @@ export default function Onboarding() {
         <ol className="mt-5 space-y-3">
           {STEPS.map((s, i) => (
             <li key={s.title} className="flex gap-3">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-800 text-lg">{s.icon}</span>
+              {/* A real sequence, so it is numbered: the number on a plate, like the floors. */}
+              <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-md border-2 border-slate-500 font-display text-lg font-bold text-ink">
+                {i + 1}
+              </span>
               <div>
                 <div className="font-semibold text-white">
-                  {i + 1}. {s.title}
+                  <span className="sr-only">{i + 1}. </span>
+                  {s.title}
                 </div>
                 <div className="text-sm text-slate-300">{s.text}</div>
               </div>

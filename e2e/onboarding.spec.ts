@@ -7,7 +7,7 @@ test("first-visit onboarding can be dismissed and stays dismissed", async ({ pag
   await page.goto("/");
   const onboarding = page.getByTestId("onboarding");
   await expect(onboarding).toBeVisible();
-  await expect(onboarding).toContainText("You're hired!");
+  await expect(onboarding).toContainText("You're hired.");
 
   await onboarding.getByRole("button", { name: /Let's go/ }).click();
   await expect(onboarding).toHaveCount(0);

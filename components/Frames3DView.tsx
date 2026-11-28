@@ -30,6 +30,7 @@ import {
   placeLabels,
 } from "@/lib/lab/view3d";
 import { ReplayBar, useReplay } from "./LabReplay";
+import Icon from "@/components/icons/Icon";
 
 /** The app's palette (Tailwind 400s on slate-950), as canvas colours. */
 const C = {
@@ -349,7 +350,7 @@ export default function Frames3DView({ item }: { item: Frames3DItem }) {
       </ul>
       {item.badBottom && (
         <p className="mt-1 text-[11px] font-semibold text-rose-300" data-testid="lab-3d-warning">
-          ⚠️ A transform&apos;s bottom row is not [0, 0, 0, 1]: that is not a proper homogeneous transform (drawn from its top three rows).
+          <Icon name="warning" className="mr-1" />A transform&apos;s bottom row is not [0, 0, 0, 1]: that is not a proper homogeneous transform (drawn from its top three rows).
         </p>
       )}
       <p className="mt-1 text-xs text-slate-300" data-testid="lab-3d-summary" aria-live={playing ? "off" : "polite"}>

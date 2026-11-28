@@ -3,6 +3,7 @@
 // Falls back to a hidden-textarea copy, then to a selectable box the learner
 // can copy by hand, so it never silently fails.
 import { useRef, useState } from "react";
+import Icon from "@/components/icons/Icon";
 
 export async function copyText(text: string): Promise<boolean> {
   try {
@@ -37,7 +38,7 @@ type Props = {
   className?: string;
 };
 
-export default function ShareButton({ getText, label = "📣 Share my score", testId = "share-score", className = "" }: Props) {
+export default function ShareButton({ getText, label = "Share my score", testId = "share-score", className = "" }: Props) {
   const [status, setStatus] = useState<"idle" | "copied" | "manual">("idle");
   const [text, setText] = useState("");
   const fallback = useRef<HTMLTextAreaElement>(null);
@@ -61,7 +62,7 @@ export default function ShareButton({ getText, label = "📣 Share my score", te
         data-testid={testId}
         className={`rounded-xl border border-violet-400/50 bg-violet-500/15 px-4 py-2 text-sm font-semibold text-violet-100 hover:bg-violet-500/25 ${className}`}
       >
-        {status === "copied" ? "✓ Copied! Paste it anywhere" : label}
+        {status === "copied" ? "Copied. Paste it anywhere" : label}
       </button>
       <span role="status" aria-live="polite" className="sr-only">
         {status === "copied" ? "Your score was copied to the clipboard." : status === "manual" ? "Copy the text below to share it." : ""}

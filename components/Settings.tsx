@@ -23,6 +23,7 @@ import { useIsClient } from "@/lib/useIsClient";
 import { applyTheme, readTheme, type ThemeChoice } from "@/lib/theme";
 import { onRadioGroupKeyDown, radioTabIndex } from "./radioGroup";
 import { copyText } from "./ShareButton";
+import Icon from "@/components/icons/Icon";
 
 export type ReportSeason = { id: string; ticketIds: string[] };
 
@@ -48,13 +49,13 @@ function SettingsView({ seasons }: { seasons: ReportSeason[] }) {
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
       <header>
-        <h1 className="text-2xl font-bold text-white sm:text-3xl">⚙️ Settings &amp; backup</h1>
+        <h1 className="text-2xl font-bold text-white sm:text-3xl">Settings &amp; backup</h1>
         <p className="mt-2 text-slate-300">
           Your progress is saved only in this browser, never on a server. Browsers can clear it (Safari does after 7 days without a
           visit), so keep a backup somewhere safe.
         </p>
-        <p className="mt-3 inline-block rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-200" data-testid="settings-summary">
-          {summary.playerName === "You" ? "You" : summary.playerName} · {summary.ticketsMerged} ticket{summary.ticketsMerged === 1 ? "" : "s"} merged · {xp} XP
+        <p className="mt-3 text-sm text-slate-200" data-testid="settings-summary">
+          {summary.playerName === "You" ? "You" : summary.playerName}: {summary.ticketsMerged} ticket{summary.ticketsMerged === 1 ? "" : "s"} merged, {xp} XP
         </p>
       </header>
       <ThemeSection />
@@ -93,7 +94,7 @@ function ThemeSection() {
               choice === o.id ? "border-signal bg-signal/15 text-ink" : "border-slate-600 text-slate-200 hover:bg-slate-800"
             }`}
           >
-            {choice === o.id && <span aria-hidden="true">✓ </span>}
+            {choice === o.id && <Icon name="check" className="mr-1" />}
             {o.label}
           </button>
         ))}
@@ -125,7 +126,7 @@ function CopyButton({ text, testId, onCopied }: { text: string; testId: string; 
           onCopied?.();
         }}
       >
-        {copied === "ok" ? "✓ Copied" : "Copy"}
+        {copied === "ok" ? "Copied" : "Copy"}
       </button>
       <span role="status" aria-live="polite" className="text-sm text-slate-300">
         {copied === "ok" ? "Copied to the clipboard." : copied === "manual" ? "Select the code above and copy it." : ""}
@@ -148,7 +149,7 @@ function BackupSection({ progress }: { progress: Progress }) {
   };
 
   return (
-    <Section id="backup-title" title="💾 Back up your progress" testId="backup-section">
+    <Section id="backup-title" title="Back up your progress" testId="backup-section">
       <p className="mt-1 text-sm text-slate-300">
         Download a file, or copy a backup code and keep it in your notes or email. Either one brings everything back on any browser.
       </p>
@@ -174,7 +175,7 @@ function BackupSection({ progress }: { progress: Progress }) {
             requestAnimationFrame(() => area.current?.focus());
           }}
         >
-          {code ? "↻ Refresh backup code" : "🔑 Show backup code"}
+          {code ? "↻ Refresh backup code" : "Show backup code"}
         </button>
       </div>
       {code && (
@@ -240,7 +241,7 @@ function RestoreSection({ current }: { current: string }) {
   }
 
   return (
-    <Section id="restore-title" title="📥 Restore from a backup" testId="restore-section">
+    <Section id="restore-title" title="Restore from a backup" testId="restore-section">
       <p className="mt-1 text-sm text-slate-300">You&apos;ll see what&apos;s in the backup before anything changes.</p>
       <div className="mt-3">
         <label htmlFor={fileId} className="text-sm font-semibold text-slate-200">Backup file (.json)</label>
@@ -281,7 +282,8 @@ function RestoreSection({ current }: { current: string }) {
       </form>
       {error && (
         <p id={errorId} role="alert" data-testid="restore-error" className="mt-3 rounded-lg border border-rose-400/40 bg-rose-950/40 p-3 text-sm text-rose-100">
-          ⚠️ {error}
+          <Icon name="warning" className="mr-1" />
+          {error}
         </p>
       )}
       {preview && (
@@ -302,7 +304,8 @@ function RestoreSection({ current }: { current: string }) {
       )}
       {done && (
         <p role="status" data-testid="restore-done" className="mt-3 rounded-lg border border-emerald-400/40 bg-emerald-950/40 p-3 text-sm text-emerald-100">
-          ✅ {done} <Link href="/" className="font-semibold text-emerald-200 underline">Back to the office</Link>
+          <Icon name="check" className="mr-1" />
+          {done} <Link href="/" className="font-semibold text-emerald-200 underline">Back to the office</Link>
         </p>
       )}
     </Section>
@@ -367,7 +370,7 @@ function ClassReportSection({ progress, seasons, xp }: { progress: Progress; sea
   const area = useRef<HTMLTextAreaElement>(null);
 
   return (
-    <Section id="report-title" title="🎓 Class report for your teacher" testId="report-section">
+    <Section id="report-title" title="Class report for your teacher" testId="report-section">
       <p className="mt-1 text-sm text-slate-300">
         If your teacher gave you a class code, make a report code and send it to them. It contains only your name, the class code,
         tickets merged per floor, XP, your Byte (human-in-the-loop) stats, skills check scores and the day you last played. No code,
@@ -427,7 +430,8 @@ function ClassReportSection({ progress, seasons, xp }: { progress: Progress; sea
       </form>
       {error && (
         <p id={errorId} role="alert" data-testid="report-error" className="mt-3 rounded-lg border border-rose-400/40 bg-rose-950/40 p-3 text-sm text-rose-100">
-          ⚠️ {error}
+          <Icon name="warning" className="mr-1" />
+          {error}
         </p>
       )}
       {code && (
@@ -455,7 +459,7 @@ function ResetSection() {
   const [done, setDone] = useState(false);
   const inputId = useId();
   return (
-    <Section id="reset-title" title="🗑️ Reset progress" testId="reset-section">
+    <Section id="reset-title" title="Reset progress" testId="reset-section">
       <p className="mt-1 text-sm text-slate-300">
         Start over from day one in this browser. Everything (tickets, XP, streak, skills check) is deleted. Back up first if you might want it back.
       </p>

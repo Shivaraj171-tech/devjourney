@@ -162,7 +162,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
 
       {atEnd && (
         <div data-testid="debugger-result" className="rounded-lg bg-slate-950/70 p-3">
-          <div className="text-xs font-semibold tracking-wide text-slate-400 uppercase">What the check expected</div>
+          <div className="text-xs font-semibold text-slate-300">What the check expected</div>
           {trace.status === "pass" ? (
             <p className="mt-1 text-emerald-300">Everything matched what the check expected.</p>
           ) : (
@@ -185,7 +185,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
         <div className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           {/* ----- variables ----- */}
           <div>
-            <div className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+            <div className="mb-1 text-xs font-semibold text-slate-300">
               Variables in <span className="font-mono normal-case">{step.func}</span>
             </div>
             {step.locals.length === 0 ? (
@@ -226,7 +226,7 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
 
           {/* ----- call stack ----- */}
           <div>
-            <div className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">Call stack</div>
+            <div className="mb-1 text-xs font-semibold text-slate-300">Call stack</div>
             <ol data-testid="debugger-stack" className="space-y-0.5 font-mono text-xs">
               {step.stack.map((name, i) => (
                 <li

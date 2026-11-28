@@ -4,6 +4,7 @@
 // Reduced motion: no autoplay, it starts on the last frame (the result).
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import Icon from "@/components/icons/Icon";
 
 const FPS = 30;
 
@@ -71,7 +72,7 @@ export function ReplayBar({
         aria-label={playing ? "Pause" : frame >= last ? "Replay" : "Play"}
         className="shrink-0 rounded-md bg-slate-800 px-2.5 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-40"
       >
-        {playing ? "⏸" : frame >= last ? "↺" : "▶"}
+        {playing ? <Icon name="pause" className="h-4 w-4" /> : frame >= last ? "↺" : <Icon name="play" className="h-4 w-4" />}
       </button>
       <input
         type="range"

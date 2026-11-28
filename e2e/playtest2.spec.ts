@@ -294,7 +294,7 @@ test.describe("phone", () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   });
 
-  test("incident: a '📜 Logs' chip on the Code step opens the logs, scrolled to the end", async ({ page }) => {
+  test("incident: a 'Logs' chip on the Code step opens the logs, scrolled to the end", async ({ page }) => {
     await openFresh(page, "s02-t03");
     await page.getByTestId("goto-code").click();
     const chip = page.getByTestId("logs-chip");

@@ -7,6 +7,7 @@ import Markdown from "./Markdown";
 import { conceptLabel } from "@/lib/content/concepts";
 import { ticketProgress, useProgress } from "@/lib/progress/store";
 import { useIsClient } from "@/lib/useIsClient";
+import Icon from "@/components/icons/Icon";
 
 export type Skill = {
   ticketId: string;
@@ -41,7 +42,7 @@ export default function SkillTree({ skills }: { skills: Skill[] }) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-3xl font-bold text-white">🌳 Skill tree</h1>
+      <h1 className="text-3xl font-bold text-white">Skill tree</h1>
       <p className="mt-2 text-slate-300">
         Every ticket teaches exactly one new idea. Here&apos;s everything you&apos;ve learned so far ({learned}/{skills.length}),
         with the lessons to re-read whenever you like.
@@ -52,7 +53,7 @@ export default function SkillTree({ skills }: { skills: Skill[] }) {
           return (
             <section key={g.title} aria-labelledby={`skills-floor-${floor + 1}`}>
               <h2 id={`skills-floor-${floor + 1}`} className="mb-3 flex flex-wrap items-baseline gap-x-3 text-lg font-bold text-white">
-                🏢 Floor {floor + 1} · {g.title}
+                Floor {floor + 1}: {g.title}
                 <span className="text-sm font-normal text-slate-300">{groupDone}/{g.items.length} learned</span>
               </h2>
               <ol className="relative space-y-3 border-l-2 border-slate-800 pl-6">
@@ -71,7 +72,7 @@ export default function SkillTree({ skills }: { skills: Skill[] }) {
                           <span className="text-xs text-slate-300">{n}</span>
                           <span className={`font-semibold ${done ? "text-white" : "text-slate-200"}`}>{conceptLabel(s.concept)}</span>
                           <span className={`rounded-full px-2 py-0.5 text-[11px] ${TRACK_COLOR[s.track] ?? "bg-slate-800 text-slate-300"}`}>{s.track}</span>
-                          <span className="ml-auto text-xs text-slate-300">{done ? "✅ learned" : <><span aria-hidden>🔒</span><span className="sr-only">not learned yet</span></>}</span>
+                          <span className="ml-auto text-xs text-slate-300">{done ? <><Icon name="check" className="mr-1 text-pass" />learned</> : <><Icon name="lock" /><span className="sr-only">not learned yet</span></>}</span>
                         </div>
                         <div className="mt-1 text-xs text-slate-300">
                           Ticket:{" "}
@@ -81,7 +82,7 @@ export default function SkillTree({ skills }: { skills: Skill[] }) {
                         </div>
                         {done && s.lesson && (
                           <button onClick={() => setOpen(isOpen ? null : s.ticketId)} className="mt-1 inline-block min-h-6 py-1 text-xs text-violet-300 hover:underline">
-                            {isOpen ? "Hide lesson" : "📘 Re-read the lesson"}
+                            {isOpen ? "Hide lesson" : "Re-read the lesson"}
                           </button>
                         )}
                         {isOpen && s.lesson && <Markdown text={s.lesson} className="mt-3 text-sm text-slate-300" />}
