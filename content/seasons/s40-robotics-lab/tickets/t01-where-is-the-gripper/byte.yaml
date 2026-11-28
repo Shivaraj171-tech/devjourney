@@ -7,6 +7,6 @@ suggestion:
   partial: true
   says: "math.cos wants radians, so I convert both angles first. Grabby should be fine now."
   explain: >-
-    Right as far as it goes: the radians fix is real, and the flat-shoulder checks go green. But the
+    The radians fix is real, and the flat-shoulder checks go green. But the
     forearm still points along the elbow angle alone, so `forward(90, 0)` lands at (0.8, 1.0) instead of
     straight up. The elbow is measured from the upper arm: the forearm's direction is shoulder + elbow.

@@ -7,7 +7,7 @@ suggestion:
   partial: true
   says: "Here's the test that would have caught my `>` slip: exactly $25.00 must be free."
   explain: >-
-    Right as far as it goes: it catches Byte's `>` bug. But a threshold typo that makes delivery free
+    A start. It catches Byte's `>` bug. But a threshold typo that makes delivery free
     from $24.00 passes it too. Which amount just below $25.00 would catch that?
 
 # Prompt card: getting useful tests out of Byte.
