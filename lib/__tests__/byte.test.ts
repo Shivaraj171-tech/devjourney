@@ -129,7 +129,7 @@ test("hitlScore leaves tutorial (practice) decisions out", () => {
 
 test("hitlSummary and hitlAccuracy", () => {
   const s = hitlScore(sample);
-  assert.equal(hitlSummary(s), "Caught 2 of 3 of Byte's bugs · trusted 1/2 good suggestions · 1/2 best prompts");
+  assert.equal(hitlSummary(s), "Caught 2 of 3 of Byte's bugs, trusted 1/2 good suggestions, 1/2 best prompts");
   assert.equal(hitlSummary(hitlScore([])), "");
   assert.equal(hitlSummary(hitlScore([{ runs: 0, solved: false, bytePrompt: { firstPick: 0, best: true } }])), "1/1 best prompts");
   // right calls: 2 caught + 1 trusted + 1 best prompt, out of 3 bugs + 2 correct + 2 prompts

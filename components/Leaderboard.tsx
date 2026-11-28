@@ -6,8 +6,7 @@ import HumanInTheLoop from "./HumanInTheLoop";
 import { boardName } from "./boardName";
 import { useIsClient } from "@/lib/useIsClient";
 import { totalXp, useProgress } from "@/lib/progress/store";
-
-const MEDALS = ["🥇", "🥈", "🥉"];
+import NameTag from "./icons/NameTag";
 
 export default function Leaderboard() {
   const progress = useProgress();
@@ -19,46 +18,45 @@ export default function Leaderboard() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-3xl font-bold text-white">🏆 Office leaderboard</h1>
+      <h1 className="text-3xl font-bold text-ink">Office leaderboard</h1>
       <p className="mt-2 text-slate-300">Everyone at Orbit Orders earns XP by shipping tickets.</p>
       {/* Honest up front, not in the last line (audit flaw 12). */}
-      <p data-testid="fictional-note" className="mt-3 rounded-xl border border-rule bg-panel px-3 py-2 text-sm text-slate-200">
+      <p data-testid="fictional-note" className="mt-3 max-w-prose text-sm text-slate-200">
         <b className="text-ink">Practice board.</b> {FICTIONAL_NOTE} Real leaderboards come once accounts exist.
       </p>
       {above && (
-        <p className="mt-4 rounded-xl border border-violet-500/30 bg-violet-500/10 p-3 text-sm text-violet-100">
-          You&apos;re <b>{above.xp - xp + 1} XP</b> away from passing {above.avatar} {boardName(above, progress.playerName)}. {ticketsAwayText(above.xp - xp + 1)}
+        <p className="mt-4 text-[15px] text-ink">
+          You&apos;re <b>{above.xp - xp + 1} XP</b> away from passing {boardName(above, progress.playerName)}. {ticketsAwayText(above.xp - xp + 1)}
         </p>
       )}
-      <ol className="mt-6 space-y-2" data-testid="leaderboard">
+      {/* The board as a staff rota: rows on rules, place numbers, name tags. No medals. */}
+      <ol className="mt-6 divide-y divide-rule border-y border-rule" data-testid="leaderboard">
         {board.map((p, i) => {
           const r = rankFor(p.xp).rank;
           return (
             <li
               key={p.name + p.role}
-              className={`flex items-center gap-4 rounded-2xl border px-4 py-3 ${
-                p.isYou ? "border-violet-400/60 bg-violet-500/15" : "border-slate-800 bg-slate-900/60"
-              }`}
+              className={`flex items-center gap-3 px-2 py-3 sm:gap-4 sm:px-3 ${p.isYou ? "bg-panel" : ""}`}
             >
-              <span className="w-8 text-center text-xl">{MEDALS[i] ?? <span className="text-sm text-slate-400">{i + 1}</span>}</span>
-              <span className="text-3xl" aria-hidden>{p.avatar}</span>
-              <div className="flex-1">
-                <div className="font-semibold text-white" data-you={p.isYou || undefined} data-testid="board-name">
+              <span className={`w-6 text-right font-display tabular-nums ${i < 3 ? "text-xl font-bold text-ink" : "text-base text-slate-300"}`}>{i + 1}</span>
+              <NameTag name={boardName(p, progress.playerName)} byte={p.byte} you={p.isYou} />
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-ink" data-you={p.isYou || undefined} data-testid="board-name">
                   {boardName(p, progress.playerName)}
                 </div>
-                <div className="text-xs text-slate-400">
-                  {p.isYou ? "New hire" : p.role} · {r.emoji} {r.title}
+                <div className="text-sm text-slate-300">
+                  {p.isYou ? "New hire" : p.role}, {r.title}
                 </div>
               </div>
-              <span className="font-mono text-lg text-cyan-300">{p.xp} XP</span>
+              <span className="text-lg font-semibold text-ink tabular-nums">{p.xp} XP</span>
             </li>
           );
         })}
       </ol>
       <div className="mt-6">
         <HumanInTheLoop score={hitlScore(Object.values(progress.tickets))} />
-        <p className="mt-2 text-xs text-slate-400">
-          🤖 Byte has plenty of XP, but it can&apos;t check its own work. XP says how much you&apos;ve shipped; this score says how
+        <p className="mt-2 text-sm text-slate-300">
+          Byte has plenty of XP, but it can&apos;t check its own work. XP says how much you&apos;ve shipped; this score says how
           well you catch an AI&apos;s mistakes.
         </p>
       </div>

@@ -6,12 +6,14 @@
 import { withBase } from "@/lib/basePath";
 import type { BountyInfo } from "@/lib/content/types";
 import { lessonHref, revealText } from "@/lib/game/bounty";
+import Icon from "./icons/Icon";
 
 export default function BountyReveal({ bounty, solved, compact = false }: { bounty: BountyInfo; solved: boolean; compact?: boolean }) {
   if (!solved) {
     return (
       <p data-testid="bounty-banner" className="mt-2 rounded-lg border border-lime-400/40 bg-lime-400/10 px-3 py-2 text-xs text-lime-100">
-        <b>🐞 Bug Bounty.</b> A mystery bug: no lesson and no label. Work out what kind of bug it is, then fix it. Hints are allowed.
+        <Icon name="posted" className="mr-1 h-4 w-4" />
+        <b>Bug Bounty.</b> A mystery bug: no lesson and no label. Work out what kind of bug it is, then fix it. Hints are allowed.
       </p>
     );
   }
@@ -21,13 +23,13 @@ export default function BountyReveal({ bounty, solved, compact = false }: { boun
       className={`${compact ? "mt-3 text-left" : "mt-2"} rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-50`}
     >
       <p>
-        🔎 <b>{revealText(bounty.bugKind)}</b>
+        <b>{revealText(bounty.bugKind)}</b>
       </p>
       {bounty.requires && (
         <p className="mt-1 text-xs text-slate-200">
           You first met it in <i>{bounty.requires.title}</i>.{" "}
           <a href={withBase(lessonHref(bounty.requires.id))} data-testid="bounty-lesson-link" className="font-semibold text-cyan-300 hover:underline">
-            📘 Revisit the lesson
+            Revisit the lesson
           </a>
         </p>
       )}

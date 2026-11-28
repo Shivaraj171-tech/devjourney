@@ -164,13 +164,13 @@ export function correctSeen(s: HitlScore): number {
   return s.trusted + s.doubted;
 }
 
-/** e.g. "Caught 4 of 5 of Byte's bugs · 3/4 best prompts". Empty string if there's nothing yet. */
+/** e.g. "Caught 4 of 5 of Byte's bugs, 3/4 best prompts". Empty string if there's nothing yet. */
 export function hitlSummary(s: HitlScore): string {
   const parts: string[] = [];
   if (wrongSeen(s) > 0) parts.push(`Caught ${s.caught} of ${wrongSeen(s)} of Byte's bugs`);
   if (correctSeen(s) > 0) parts.push(`trusted ${s.trusted}/${correctSeen(s)} good suggestions`);
   if (s.promptsTried > 0) parts.push(`${s.bestPrompts}/${s.promptsTried} best prompts`);
-  const text = parts.join(" · ");
+  const text = parts.join(", ");
   return text ? text[0].toUpperCase() + text.slice(1) : "";
 }
 

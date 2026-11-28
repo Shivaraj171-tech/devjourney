@@ -5,7 +5,7 @@ import type { TicketType } from "../content/types";
 import type { HitlScore } from "./byte";
 
 /** A rank as rules.ts RANKS defines it (only the fields used here). */
-export type RankLike = { id: string; title: string; emoji: string; minXp: number };
+export type RankLike = { id: string; title: string; icon: string; minXp: number };
 
 /** Index of the rank for an XP total (ranks sorted by minXp, first at 0). */
 function rankIndex(xp: number, ranks: readonly RankLike[]): number {
@@ -89,9 +89,9 @@ export function flowStreak(tickets: FlowTicket[]): number {
 /** Flow labels: shown from 2 clean merges in a row. */
 export function flowLabel(streak: number): string | null {
   if (streak < 2) return null;
-  if (streak >= 5) return `🌊 Deep flow ×${streak}`;
-  if (streak >= 3) return `🔥 On a roll ×${streak}`;
-  return `🎯 Flow ×${streak}`;
+  if (streak >= 5) return `Deep flow ×${streak}`;
+  if (streak >= 3) return `On a roll ×${streak}`;
+  return `Flow ×${streak}`;
 }
 
 // ---------- Season performance review ----------
@@ -118,7 +118,7 @@ export type PerformanceReview = {
   learned: string[];
   /** Merged tickets by type, e.g. { bug: 5, review: 1 }. */
   byType: Partial<Record<TicketType, number>>;
-  rating: { title: string; emoji: string };
+  rating: { title: string };
   strengths: string[];
   /** One friendly suggestion for next season (null if there's nothing to suggest). */
   nextStep: string | null;
@@ -151,7 +151,7 @@ export function performanceReview(tickets: ReviewTicket[], progress: Record<stri
 
   const share = done.length ? clean / done.length : 0;
   const rating =
-    share >= 0.7 ? { title: "Outstanding", emoji: "🌟" } : share >= 0.4 ? { title: "Exceeds expectations", emoji: "🚀" } : { title: "Solid progress", emoji: "💪" };
+    share >= 0.7 ? { title: "Outstanding" } : share >= 0.4 ? { title: "Exceeds expectations" } : { title: "Solid progress" };
 
   const strengths: string[] = [];
   if (done.length > 0) strengths.push(`Shipped ${done.length} ticket${done.length === 1 ? "" : "s"} to real (fictional) customers.`);

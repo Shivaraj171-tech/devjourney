@@ -1,6 +1,10 @@
 "use client";
+// The merge moment (docs/design/human-pass-plan.md): the order slip you worked on goes
+// onto the receipt spike and gets stamped, like a finished ticket at the pass. The XP
+// prints on the slip as receipt lines. No confetti, no exclamation marks. With reduced
+// motion the slip is already on the spike and the stamp is already down.
 import Link from "next/link";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { TicketType } from "@/lib/content/types";
 import { QUIZ_XP_PER_CORRECT, type TicketXp } from "@/lib/game/rules";
 import MergeJuice from "./MergeJuice";
@@ -10,6 +14,8 @@ type Props = {
   isRead: boolean;
   /** The ticket type, for the review/incident wording. */
   variant?: TicketType;
+  /** The ticket on the slip. */
+  ticket?: { number: number; title: string };
   hasQuiz: boolean;
   nextTicket: { id: string; title: string } | null;
   /** Optional extra under the blurb (e.g. a Bug Bounty's "This was a ___ bug" reveal). */
@@ -18,19 +24,20 @@ type Props = {
   onClose: () => void;
 };
 
-const CONFETTI = ["🎉", "✨", "🚀", "⭐", "🍕", "🎊"];
+type Wording = { title: string; stamp: string; blurb: string };
 
-const VARIANT_TEXT: Partial<Record<TicketType, { icon: string; title: string; blurb: string }>> = {
-  review: { icon: "🔍", title: "Review submitted!", blurb: "You caught the bugs before they reached customers. That's what good reviewers do." },
-  incident: { icon: "🧯", title: "Incident resolved!", blurb: "Production is back up. Leo can finally answer the support queue." },
+const VARIANT_TEXT: Partial<Record<TicketType, Wording>> = {
+  review: { title: "Review submitted", stamp: "REVIEWED", blurb: "You flagged the problems before they reached customers." },
+  incident: { title: "Incident resolved", stamp: "RESOLVED", blurb: "Production is back up. Leo can answer the support queue again." },
 };
 
-export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, reveal, onQuiz, onClose }: Props) {
-  const text = (variant && VARIANT_TEXT[variant]) ?? {
-    icon: isRead ? "📖" : "🚀",
-    title: isRead ? "Ticket closed!" : "PR merged!",
-    blurb: isRead ? "You understood code you didn't write. That's a real superpower." : "All checks green. Customers will never know it was broken.",
-  };
+export default function SolvedModal({ xp, isRead, variant, ticket, hasQuiz, nextTicket, reveal, onQuiz, onClose }: Props) {
+  const text: Wording = (variant && VARIANT_TEXT[variant]) ?? (isRead
+    ? { title: "Ticket closed", stamp: "CLOSED", blurb: "You read code you didn't write, and explained what it does." }
+    : { title: "PR merged", stamp: "MERGED", blurb: "All checks green. It goes out with the next release." });
+  // The time on the stamp: when the merge happened (the modal opens right then).
+  const [time] = useState(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+
   // A real dialog: focus starts on the main action, Tab stays inside, Esc closes,
   // and focus goes back to where it was (usually the Run button) afterwards.
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -74,33 +81,46 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
     : { href: "/", label: "Back to the office", skip: "Back to the office" };
 
   return (
-    <div ref={dialogRef} className="fixed inset-0 z-50 flex overflow-y-auto bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="solved-title" data-testid="solved-modal">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {Array.from({ length: 24 }).map((_, i) => (
-          <span
-            key={i}
-            className="confetti absolute text-2xl"
-            style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 8) * 0.12}s` }}
-          >
-            {CONFETTI[i % CONFETTI.length]}
-          </span>
-        ))}
-      </div>
-      <div className="relative m-auto w-full max-w-md rounded-2xl border border-emerald-500/40 bg-slate-900 p-6 text-center shadow-2xl shadow-emerald-500/10">
-        <div className="text-5xl">{text.icon}</div>
-        <h2 id="solved-title" className="mt-3 text-2xl font-bold text-white">{text.title}</h2>
-        <p className="mt-1 text-slate-300">{text.blurb}</p>
+    <div ref={dialogRef} className="fixed inset-0 z-50 flex overflow-y-auto bg-page/90 p-4" role="dialog" aria-modal="true" aria-labelledby="solved-title" data-testid="solved-modal">
+      <div className="relative m-auto w-full max-w-sm">
+        <h2 id="solved-title" className="font-display text-2xl font-bold text-ink">{text.title}</h2>
+        <p className="mt-1 text-slate-200">{text.blurb}</p>
         {reveal}
-        <div className="mt-5 space-y-1 rounded-xl bg-slate-950/70 p-4 text-left font-mono text-sm">
-          <Row label="Ticket XP" value={`+${xp.base}`} />
-          {xp.hintPenalty > 0 && <Row label="Hints used" value={`−${xp.hintPenalty}`} className="text-amber-300" />}
-          {!!xp.falseAlarmPenalty && <Row label="False alarms" value={`−${xp.falseAlarmPenalty}`} className="text-amber-300" />}
-          {xp.firstRunBonus > 0 && <Row label="🎯 First-run bonus" value={`+${xp.firstRunBonus}`} className="text-cyan-300" />}
-          {!!xp.speedBonus && <Row label="⚡ Speed bonus" value={`+${xp.speedBonus}`} className="text-cyan-300" />}
-          <div className="my-1 border-t border-slate-800" />
-          <Row label="Total" value={`+${xp.total} XP`} className="font-bold text-emerald-300" />
+
+        {/* The spike: its point shows above the slip, the slip is pushed down onto it. */}
+        <div className="relative mt-5 pt-7">
+          <svg aria-hidden viewBox="0 0 12 40" className="absolute top-0 left-1/2 h-10 w-3 -translate-x-1/2 text-slate-300" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+            <path d="M6 1.5 6.1 39" />
+          </svg>
+          <div className="slip spike-drop relative rounded-sm px-5" data-testid="solved-slip">
+            {/* The hole the spike went through. */}
+            <span aria-hidden className="absolute top-[0.55rem] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-slate-300" />
+            <p
+              className="stamp-press absolute top-6 right-3 rounded-sm border-2 border-current px-2 py-0.5 font-display text-sm font-black text-[#137a43]"
+              data-testid="solved-stamp"
+            >
+              {text.stamp} {time}
+            </p>
+            {ticket && (
+              <p className="flex items-start gap-3 pr-20 text-paper-ink">
+                <span className="slip-number text-[2.5rem]">#{ticket.number}</span>
+                <span className="min-w-0 pt-1 font-display leading-snug font-bold">{ticket.title}</span>
+              </p>
+            )}
+            <div className="slip-rule mt-3" />
+            <dl className="mt-3 space-y-1 font-mono text-sm text-paper-ink" aria-label="XP for this ticket">
+              <Line label="Ticket" value={`+${xp.base}`} />
+              {xp.hintPenalty > 0 && <Line label="Hints used" value={`−${xp.hintPenalty}`} />}
+              {!!xp.falseAlarmPenalty && <Line label="False alarms" value={`−${xp.falseAlarmPenalty}`} />}
+              {xp.firstRunBonus > 0 && <Line label="First-run bonus" value={`+${xp.firstRunBonus}`} />}
+              {!!xp.speedBonus && <Line label="Speed bonus" value={`+${xp.speedBonus}`} />}
+              <Line label="Total" value={`+${xp.total} XP`} strong />
+            </dl>
+            <div className="slip-rule mt-3" />
+            <MergeJuice earned={xp.total} />
+          </div>
         </div>
-        <MergeJuice earned={xp.total} />
+
         {/* One clear next step: the quiz locks in what was just learned. */}
         <div className="mt-5 flex flex-col gap-2">
           {hasQuiz ? (
@@ -111,11 +131,11 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
                 }}
                 data-testid="solved-quiz"
                 onClick={onQuiz}
-                className="rounded-lg bg-violet-600 py-2.5 font-semibold text-white hover:bg-violet-500"
+                className="btn-signal rounded-lg py-2.5"
               >
-                🧠 Lock it in: 1-minute quiz <span className="font-normal text-violet-50">(+{QUIZ_XP_PER_CORRECT} XP each)</span>
+                Lock it in: 1-minute quiz <span className="font-normal">(+{QUIZ_XP_PER_CORRECT} XP each)</span>
               </button>
-              <Link href={next.href} className="py-1 text-sm font-semibold text-emerald-300 hover:text-emerald-200">
+              <Link href={next.href} className="py-1 text-center text-sm font-semibold text-ink underline decoration-signal decoration-2 underline-offset-4">
                 {next.skip}
               </Link>
             </>
@@ -125,12 +145,12 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
                 primaryRef.current = el;
               }}
               href={next.href}
-              className="rounded-lg btn-signal py-2.5"
+              className="btn-signal rounded-lg py-2.5 text-center"
             >
               {next.label}
             </Link>
           )}
-          <button onClick={onClose} className="py-1 text-sm text-slate-300 hover:text-white">
+          <button onClick={onClose} className="py-1 text-sm text-slate-300 hover:text-ink">
             Stay here
           </button>
         </div>
@@ -139,11 +159,13 @@ export default function SolvedModal({ xp, isRead, variant, hasQuiz, nextTicket, 
   );
 }
 
-function Row({ label, value, className = "text-slate-300" }: { label: string; value: string; className?: string }) {
+/** A receipt line: label, dotted leader, amount. */
+function Line({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className={`flex justify-between ${className}`}>
-      <span>{label}</span>
-      <span>{value}</span>
+    <div className={`flex items-baseline gap-2 ${strong ? "pt-1 text-base font-bold" : ""}`}>
+      <dt>{label}</dt>
+      <span aria-hidden className="mb-1 min-w-4 flex-1 border-b-2 border-dotted border-paper-ink/30" />
+      <dd className="tabular-nums">{value}</dd>
     </div>
   );
 }

@@ -777,6 +777,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
           xp={celebrate}
           isRead={isRead}
           variant={ticket.type}
+          ticket={{ number: ticket.number, title: ticket.title }}
           hasQuiz={hasQuiz && !isRead}
           nextTicket={nextTicket}
           reveal={bounty ? <BountyReveal bounty={bounty} solved compact /> : undefined}

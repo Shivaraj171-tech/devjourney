@@ -2,6 +2,7 @@
 // Pure functions only, so they're easy to test and tweak.
 import type { Level, TicketType } from "../content/types";
 import type { HitlScore } from "./byte";
+import type { IconName } from "../icons";
 
 // ---------- XP ----------
 export const BASE_XP: Record<Level, number> = { intern: 100, junior: 150, mid: 200, senior: 300 };
@@ -35,11 +36,11 @@ export function readTicketXp(level: Level, correctFirstTry: number, total: numbe
 export const RANKS = [
   // Thresholds follow the story: clearing Seasons 1-3 ("Month One") is roughly
   // 3,000-3,500 XP, which is when Maya promotes you to Junior Developer.
-  { id: "intern", title: "Intern", minXp: 0, emoji: "🌱" },
-  { id: "trusted-intern", title: "Trusted Intern", minXp: 700, emoji: "🌿" },
-  { id: "junior", title: "Junior Developer", minXp: 2800, emoji: "💻" },
-  { id: "mid", title: "Developer", minXp: 7000, emoji: "🚀" },
-  { id: "senior", title: "Senior Developer", minXp: 15000, emoji: "🧠" },
+  { id: "intern", title: "Intern", minXp: 0, icon: "apron" },
+  { id: "trusted-intern", title: "Trusted Intern", minXp: 700, icon: "keys" },
+  { id: "junior", title: "Junior Developer", minXp: 2800, icon: "knife" },
+  { id: "mid", title: "Developer", minXp: 7000, icon: "toque" },
+  { id: "senior", title: "Senior Developer", minXp: 15000, icon: "bell" },
 ] as const;
 
 export type Rank = (typeof RANKS)[number];
@@ -131,28 +132,28 @@ export type BadgeContext = {
 export const BUG_CATCHER_CATCHES = 3;
 export const PROMPT_PRO_PICKS = 3;
 
-export const BADGES: { id: string; emoji: string; title: string; description: string; earned: (c: BadgeContext) => boolean }[] = [
-  { id: "first-commit", emoji: "🎉", title: "First Commit", description: "Ship your first ticket.",
+export const BADGES: { id: string; icon: IconName; title: string; description: string; earned: (c: BadgeContext) => boolean }[] = [
+  { id: "first-commit", icon: "spike", title: "First Commit", description: "Ship your first ticket.",
     earned: (c) => c.solved.length >= 1 },
-  { id: "no-hints", emoji: "🧭", title: "Self-Starter", description: "Solve a ticket without any hints.",
+  { id: "no-hints", icon: "match", title: "Self-Starter", description: "Solve a ticket without any hints.",
     earned: (c) => c.solved.some((s) => s.hintsUsed === 0) },
-  { id: "first-try", emoji: "🎯", title: "Sharpshooter", description: "Pass all tests on your first run.",
+  { id: "first-try", icon: "check", title: "Sharpshooter", description: "Pass all tests on your first run.",
     earned: (c) => c.solved.some((s) => s.runs === 1 && s.type !== "read") },
-  { id: "quiz-whiz", emoji: "🧠", title: "Quiz Whiz", description: "Get every quiz question right first try.",
+  { id: "quiz-whiz", icon: "pencil", title: "Quiz Whiz", description: "Get every quiz question right first try.",
     earned: (c) => c.solved.some((s) => s.quizPerfect) },
-  { id: "bug-squasher", emoji: "🐛", title: "Bug Squasher", description: "Fix 5 bugs.",
+  { id: "bug-squasher", icon: "swatter", title: "Bug Squasher", description: "Fix 5 bugs.",
     earned: (c) => c.solved.filter((s) => s.type === "bug").length >= 5 },
-  { id: "eagle-eye", emoji: "🦅", title: "Eagle Eye", description: "Finish a code review with no false alarms.",
+  { id: "eagle-eye", icon: "glasses", title: "Eagle Eye", description: "Finish a code review with no false alarms.",
     earned: (c) => c.solved.some((s) => s.type === "review" && s.falseAlarms === 0) },
-  { id: "firefighter", emoji: "🧯", title: "Firefighter", description: "Fix a production incident before the clock runs out.",
+  { id: "firefighter", icon: "extinguisher", title: "Firefighter", description: "Fix a production incident before the clock runs out.",
     earned: (c) => c.solved.some((s) => s.type === "incident" && s.beatTheClock === true) },
-  { id: "bug-catcher", emoji: "🪤", title: "Bug Catcher", description: `Catch ${BUG_CATCHER_CATCHES} of Byte's wrong suggestions.`,
+  { id: "bug-catcher", icon: "jar", title: "Bug Catcher", description: `Catch ${BUG_CATCHER_CATCHES} of Byte's wrong suggestions.`,
     earned: (c) => (c.hitl?.caught ?? 0) >= BUG_CATCHER_CATCHES },
-  { id: "prompt-pro", emoji: "💬", title: "Prompt Pro", description: `Pick the best prompt for Byte first, ${PROMPT_PRO_PICKS} times.`,
+  { id: "prompt-pro", icon: "speech", title: "Prompt Pro", description: `Pick the best prompt for Byte first, ${PROMPT_PRO_PICKS} times.`,
     earned: (c) => (c.hitl?.bestPrompts ?? 0) >= PROMPT_PRO_PICKS },
-  { id: "on-fire", emoji: "🔥", title: "On Fire", description: "Keep a 3-day streak.",
+  { id: "on-fire", icon: "flame", title: "On Fire", description: "Keep a 3-day streak.",
     earned: (c) => c.streak >= 3 },
-  { id: "week-one", emoji: "🏆", title: "Survived Week One", description: "Finish Season 1.",
+  { id: "week-one", icon: "calendar", title: "Survived Week One", description: "Finish Season 1.",
     earned: (c) => {
       const total = c.seasonTicketCounts["s01"] ?? 0;
       return total > 0 && c.solved.filter((s) => s.seasonId === "s01").length >= total;
@@ -192,7 +193,8 @@ export function pickWarmup<W extends { id: string; after: string }>(
 // UI says so wherever they appear. Sam, the other new hire, learns on the days YOU
 // practise (days in the streak log), not with the calendar: a week away doesn't put
 // you further behind (audit flaw 12).
-export type Teammate = { name: string; role: string; avatar: string; xp: number; isYou?: boolean };
+/** `byte`: the office AI, drawn as Byte's printer mark. Everyone else shows their initials, like a name tag. */
+export type Teammate = { name: string; role: string; xp: number; isYou?: boolean; byte?: boolean };
 
 /** One line that says the board is made up, for every place it is shown. */
 export const FICTIONAL_NOTE = "Your teammates are fictional for now. Sam earns XP only on the days you practise.";
@@ -200,16 +202,16 @@ export const FICTIONAL_NOTE = "Your teammates are fictional for now. Sam earns X
 export function teammates(daysPractised: number): Teammate[] {
   const samXp = Math.min(150 + Math.max(0, daysPractised) * 90, 3200);
   return [
-    { name: "Maya", role: "Tech Lead", avatar: "👩🏾‍💻", xp: 16400 },
-    { name: "Byte", role: "AI Assistant", avatar: "🤖", xp: 2200 },
-    { name: "Sam", role: "New Hire (your rival)", avatar: "🧑‍🎓", xp: samXp },
-    { name: "Leo", role: "Customer Support", avatar: "🎧", xp: 340 },
-    { name: "Priya", role: "Marketing", avatar: "📣", xp: 220 },
+    { name: "Maya", role: "Tech Lead", xp: 16400 },
+    { name: "Byte", role: "AI Assistant", xp: 2200, byte: true },
+    { name: "Sam", role: "New Hire (your rival)", xp: samXp },
+    { name: "Leo", role: "Customer Support", xp: 340 },
+    { name: "Priya", role: "Marketing", xp: 220 },
   ];
 }
 
 export function leaderboard(you: { name: string; xp: number }, daysPractised: number): Teammate[] {
-  return [...teammates(daysPractised), { name: you.name, role: "You", avatar: "⭐", xp: you.xp, isYou: true }]
+  return [...teammates(daysPractised), { name: you.name, role: "You", xp: you.xp, isYou: true }]
     .sort((a, b) => b.xp - a.xp);
 }
 

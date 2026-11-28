@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { rankFor, WARMUP_XP } from "@/lib/game/rules";
 import NextTicketSlip from "./NextTicketSlip";
+import Icon from "./icons/Icon";
 import type { TicketSummary } from "./HQ";
 
 type Props = {
@@ -41,36 +42,36 @@ export default function TodayCard({ playerName, next, nextFloor, nextIsExam = fa
             kicker={<>Welcome back{name ? `, ${name}` : ""}. Up next:</>}
           />
         ) : (
-          <div className="slip rounded-sm px-6">
+          <div className="slip-lift"><div className="slip rounded-sm px-6">
             <p className="text-sm font-semibold text-paper-muted">Welcome back{name ? `, ${name}` : ""}.</p>
             <h1 id="today-title" className="mt-1 font-display text-2xl font-bold text-paper-ink">
-              🏆 Every floor is done. More seasons are coming soon.
+              Every floor is done. More seasons are coming soon.
             </h1>
-          </div>
+          </div></div>
         )}
       </div>
 
       <div className="min-w-0 md:order-1 md:pt-2">
         <h2 className="font-display text-2xl font-bold text-ink sm:text-3xl">Your day at Orbit Orders</h2>
-        <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-[15px]" aria-label="Your day">
-          <Fact label="Streak" testId="today-streak">
-            <span aria-hidden>🔥</span> {streak > 0 ? `${streak}-day streak` : "Start one today"}
+        <ul className="mt-4 space-y-2.5 text-[15px]" aria-label="Your day">
+          <Fact icon={<Icon name="flame" className={streak > 0 ? "text-orange-300" : "text-slate-300"} />} testId="today-streak">
+            {streak > 0 ? `${streak}-day streak` : "No streak yet. Start one today"}
           </Fact>
-          <Fact label="Warm-up" testId="today-warmup">
+          <Fact icon={<Icon name="mug" />} testId="today-warmup">
             {warmup === "ready" ? (
-              <a href="#warm-up" className="inline-block py-1 underline decoration-signal decoration-2 underline-offset-4">
-                ☕ Ready, +{WARMUP_XP} XP
+              <a href="#warm-up" className="inline-block underline decoration-signal decoration-2 underline-offset-4">
+                Warm-up ready, +{WARMUP_XP} XP
               </a>
             ) : warmup === "done" ? (
-              <>☕ Done for today ✓</>
+              <>Warm-up done for today</>
             ) : (
-              <span className="text-slate-300">☕ Unlocks soon</span>
+              <span className="font-normal text-slate-300">Warm-up opens after a few more tickets</span>
             )}
           </Fact>
-          <Fact label="Rank" testId="today-rank">
+          <Fact icon={<Icon name={rank.icon} />} testId="today-rank">
             {nextRank ? (
               <>
-                {nextRank.minXp - xp} XP to {nextRank.emoji} {nextRank.title}
+                {rank.title}, {nextRank.minXp - xp} XP to {nextRank.title}
                 <span
                   className="mt-1.5 block h-1.5 max-w-48 overflow-hidden rounded-full bg-slate-800"
                   role="progressbar"
@@ -84,16 +85,15 @@ export default function TodayCard({ playerName, next, nextFloor, nextIsExam = fa
               </>
             ) : (
               <>
-                {rank.emoji} {rank.title}, max rank
+                {rank.title}, max rank
               </>
             )}
           </Fact>
-          <Fact label="Merged" testId="today-merged">
-            {merged} of {total} tickets
+          <Fact icon={<Icon name="spike" />} testId="today-merged">
+            {merged} of {total} tickets merged
           </Fact>
         </ul>
         <p className="mt-5 max-w-prose text-[15px] text-slate-200" data-testid="today-focus">
-          <span aria-hidden>🧭 </span>
           {focus ? <span className="font-semibold text-ink">{focus}</span> : <span>Your coding profile shows what your runs say about you.</span>}{" "}
           <Link href="/profile" data-testid="today-profile-link" className="inline-block py-1 font-semibold whitespace-nowrap text-ink underline decoration-signal decoration-2 underline-offset-4">
             {focus ? "See why" : "Open your profile"}
@@ -104,11 +104,11 @@ export default function TodayCard({ playerName, next, nextFloor, nextIsExam = fa
   );
 }
 
-function Fact({ label, testId, children }: { label: string; testId: string; children: ReactNode }) {
+function Fact({ icon, testId, children }: { icon: ReactNode; testId: string; children: ReactNode }) {
   return (
-    <li className="min-w-0 border-l-2 border-rule pl-3" data-testid={testId}>
-      <div className="text-xs text-slate-300">{label}</div>
-      <div className="mt-0.5 font-semibold text-ink">{children}</div>
+    <li className="flex min-w-0 items-start gap-2.5" data-testid={testId}>
+      <span className="mt-0.5 text-slate-300">{icon}</span>
+      <div className="min-w-0 font-semibold text-ink">{children}</div>
     </li>
   );
 }
