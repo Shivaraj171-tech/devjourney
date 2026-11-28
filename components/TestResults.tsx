@@ -47,7 +47,7 @@ export default function TestResults({ result, running, onStepThrough, tracing = 
     return (
       <div className="space-y-1.5 text-sm text-slate-300">
         <p>
-          Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 font-sans text-slate-100">▶ Run tests</kbd> to check your fix
+          Press <kbd className="rounded bg-slate-800 px-1.5 py-0.5 font-sans text-slate-100">Run tests</kbd> to check your fix
           <span className="pointer-coarse:hidden"> (or Ctrl/⌘ + Enter)</span>.
         </p>
         <p className="text-slate-300">

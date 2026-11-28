@@ -111,7 +111,7 @@ export default function PredictOutput({ task, seed, record, onPredict, run, test
             ) : (
               <div className="flex items-end">
                 <button data-testid={`${testId}-run`} onClick={runIt} disabled={running} className={`w-full ${primaryButton}`}>
-                  {running ? "Running… (Python may take a few seconds to start)" : "▶ Run it"}
+                  {running ? "Running… (Python may take a few seconds to start)" : "Run it"}
                 </button>
               </div>
             )}

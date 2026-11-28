@@ -91,10 +91,10 @@ export default function TopBar() {
 }
 
 /** The Orbit Orders mark: an order dot on its orbit. Pure CSS, no image. */
-export function OrbitMark({ className = "h-7 w-7" }: { className?: string }) {
+export function OrbitMark({ className = "h-7 w-7", ink = "bg-ink" }: { className?: string; ink?: string }) {
   return (
     <span aria-hidden className={`relative grid shrink-0 place-items-center rounded-full border-2 border-signal ${className}`}>
-      <span className="h-2 w-2 rounded-full bg-ink" />
+      <span className={`h-2 w-2 rounded-full ${ink}`} />
       <span className="absolute -top-[3px] right-[1px] h-2 w-2 rounded-full bg-signal" />
     </span>
   );

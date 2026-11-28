@@ -36,7 +36,7 @@ export default function SolvedModal({ xp, isRead, variant, ticket, hasQuiz, next
     ? { title: "Ticket closed", stamp: "CLOSED", blurb: "You read code you didn't write, and explained what it does." }
     : { title: "PR merged", stamp: "MERGED", blurb: "All checks green. It goes out with the next release." });
   // The time on the stamp: when the merge happened (the modal opens right then).
-  const [time] = useState(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+  const [time] = useState(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }));
 
   // A real dialog: focus starts on the main action, Tab stays inside, Esc closes,
   // and focus goes back to where it was (usually the Run button) afterwards.
@@ -81,7 +81,7 @@ export default function SolvedModal({ xp, isRead, variant, ticket, hasQuiz, next
     : { href: "/", label: "Back to the office", skip: "Back to the office" };
 
   return (
-    <div ref={dialogRef} className="fixed inset-0 z-50 flex overflow-y-auto bg-page/90 p-4" role="dialog" aria-modal="true" aria-labelledby="solved-title" data-testid="solved-modal">
+    <div ref={dialogRef} className="fixed inset-0 z-50 flex overflow-y-auto bg-page/95 p-4" role="dialog" aria-modal="true" aria-labelledby="solved-title" data-testid="solved-modal">
       <div className="relative m-auto w-full max-w-sm">
         <h2 id="solved-title" className="font-display text-2xl font-bold text-ink">{text.title}</h2>
         <p className="mt-1 text-slate-200">{text.blurb}</p>
@@ -95,14 +95,8 @@ export default function SolvedModal({ xp, isRead, variant, ticket, hasQuiz, next
           <div className="slip spike-drop relative rounded-sm px-5" data-testid="solved-slip">
             {/* The hole the spike went through. */}
             <span aria-hidden className="absolute top-[0.55rem] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-slate-300" />
-            <p
-              className="stamp-press absolute top-6 right-3 rounded-sm border-2 border-current px-2 py-0.5 font-display text-sm font-black text-[#137a43]"
-              data-testid="solved-stamp"
-            >
-              {text.stamp} {time}
-            </p>
             {ticket && (
-              <p className="flex items-start gap-3 pr-20 text-paper-ink">
+              <p className="flex items-start gap-3 text-paper-ink">
                 <span className="slip-number text-[2.5rem]">#{ticket.number}</span>
                 <span className="min-w-0 pt-1 font-display leading-snug font-bold">{ticket.title}</span>
               </p>
@@ -116,7 +110,13 @@ export default function SolvedModal({ xp, isRead, variant, ticket, hasQuiz, next
               {!!xp.speedBonus && <Line label="Speed bonus" value={`+${xp.speedBonus}`} />}
               <Line label="Total" value={`+${xp.total} XP`} strong />
             </dl>
-            <div className="slip-rule mt-3" />
+            {/* The rubber stamp, pressed once across the bottom of the receipt. */}
+            <div className="mt-2 flex justify-end">
+              <p className="stamp-press rounded-sm border-2 border-current px-2 py-0.5 font-display text-base font-black text-[#137a43]" data-testid="solved-stamp">
+                {text.stamp} {time}
+              </p>
+            </div>
+            <div className="slip-rule mt-2" />
             <MergeJuice earned={xp.total} />
           </div>
         </div>

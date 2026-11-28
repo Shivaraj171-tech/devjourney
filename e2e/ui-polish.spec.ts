@@ -129,7 +129,7 @@ test.describe("slow network", () => {
     await expect(page.getByTestId("run-summary")).toHaveCount(0);
     await waitForPython(page);
     await expect(run).not.toHaveAttribute("aria-disabled", /.*/);
-    await expect(run).toHaveText("▶ Run tests");
+    await expect(run).toHaveText("Run tests");
   });
 });
 

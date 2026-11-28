@@ -63,7 +63,7 @@ export default function Certificate({ examTitle, tickets }: Props) {
       <div className="slip-lift">
       <article data-testid="certificate" className="slip relative rounded-sm px-6 sm:px-10 print:text-black">
         <p className="flex items-center gap-2 font-display font-bold text-paper-ink">
-          <OrbitMark className="h-6 w-6" />
+          <OrbitMark className="h-6 w-6" ink="bg-paper-ink" />
           Orbit Orders
         </p>
         <h1 className="mt-4 text-3xl leading-tight font-black text-paper-ink sm:text-4xl">Human in the loop: verified</h1>

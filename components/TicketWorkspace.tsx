@@ -399,7 +399,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
 
   const loading = loadingView(loadProgress);
   // While Python loads, the button itself names the stage (plan: "the Run button shows the real stage").
-  const runLabel = pythonState === "loading" ? runStageLabel(loadProgress) : pythonState === "failed" ? "Python failed to load" : running ? "Running…" : "▶ Run tests";
+  const runLabel = pythonState === "loading" ? runStageLabel(loadProgress) : pythonState === "failed" ? "Python failed to load" : running ? "Running…" : "Run tests";
   const runOff = running || pythonState !== "ready";
   // Said politely by screen readers: the run started, and how it ended (the results pane may be off screen).
   const runNews = running
@@ -703,6 +703,7 @@ export default function TicketWorkspace({ ticket, prevTicketId, prevTicket = nul
                 data-stage={pythonState === "loading" ? loading.step : undefined}
                 className="btn-signal shrink-0 rounded-lg px-4 py-2 text-sm whitespace-nowrap"
               >
+                {runLabel === "Run tests" && <Icon name="play" className="mr-1.5 h-4 w-4" />}
                 {runLabel}
               </button>
               {pythonState === "loading" && (

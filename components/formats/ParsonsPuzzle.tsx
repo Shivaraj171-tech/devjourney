@@ -180,7 +180,7 @@ export default function ParsonsPuzzle({ task, seed, record, onAttempt, run, test
 
       {!done && (
         <button data-testid={`${testId}-check`} onClick={check} disabled={running || order.length === 0} className={`w-full ${primaryButton}`}>
-          {running ? "Running your program…" : "▶ Check my program"}
+          {running ? "Running your program…" : "Check my program"}
         </button>
       )}
 

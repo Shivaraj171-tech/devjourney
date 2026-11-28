@@ -40,7 +40,7 @@ function CurrentLine({ text, line }: { text: string; line: number }) {
           className={`flex ${n === line ? "bg-yellow-400/15 text-white" : "text-slate-400"}`}
         >
           <span className={`w-8 shrink-0 pr-2 text-right select-none ${n === line ? "text-yellow-300" : "text-slate-500"}`}>
-            {n === line ? "▶" : ""}
+            {n === line ? <Icon name="play" className="h-3 w-3" /> : ""}
             {n}
           </span>
           <span className="min-w-0 flex-1 pr-2 whitespace-pre-wrap [overflow-wrap:anywhere]">{lines[n - 1] || " "}</span>
@@ -138,7 +138,8 @@ export default function DebuggerPanel({ trace, position, onPosition, onClose, st
           aria-label="Next step"
           className="rounded-lg bg-violet-600 px-3 py-1.5 font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
         >
-          Next ▶
+          Next
+          <Icon name="play" className="ml-1 h-3 w-3" />
         </button>
         <span data-testid="debugger-position" className="w-full text-xs text-slate-400 tabular-nums sm:w-auto">
           Step {position + 1} of {total}

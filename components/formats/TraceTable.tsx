@@ -20,6 +20,7 @@ import {
 } from "@/lib/game/formats";
 import { InlineCode } from "../ByteSuggestion";
 import { FormatCard, ghostButton, Note, primaryButton, type RunFormat } from "./shared";
+import Icon from "@/components/icons/Icon";
 
 export type TraceTableProps = {
   task: TraceTask;
@@ -173,7 +174,7 @@ export default function TraceTable({ task, seed, record, onCheck, onWatch, run, 
 
       {!done && (
         <button data-testid={`${testId}-check`} onClick={check} disabled={running || !traceGridStarted(grid)} className={`w-full ${primaryButton}`}>
-          {running ? "Tracing it in Python…" : "▶ Check against Python"}
+          {running ? "Tracing it in Python…" : "Check against Python"}
         </button>
       )}
       {runError && <Note tone="warn" title="Python couldn't run it">{runError}</Note>}
@@ -305,7 +306,8 @@ function WatchItRun({
       {shown < rows.length ? (
         <div className="flex gap-2">
           <button data-testid={`${testId}-next`} onClick={onNext} className={`flex-1 ${primaryButton}`}>
-            Next step ▶
+            Next step
+            <Icon name="play" className="ml-1 h-3 w-3" />
           </button>
           <button data-testid={`${testId}-all`} onClick={onAll} className={ghostButton}>
             Show all

@@ -54,8 +54,8 @@ export default function BugBounty({ bounties, isSolved, xpFor, recommended = [],
       {/* Open bounties are the notices pinned up: big, and first. Solved and locked ones are a plain list. */}
       {openCards.length > 0 && (
         <ul className="mt-4 flex flex-wrap gap-4">
-          {openCards.map(({ card, recommended: rec }) => (
-            <OpenNotice key={card.id} card={card} recommended={rec} />
+          {openCards.map(({ card, recommended: rec }, i) => (
+            <OpenNotice key={card.id} card={card} recommended={rec} tilt={TILT[i % TILT.length]} />
           ))}
         </ul>
       )}
@@ -92,11 +92,15 @@ function Facts({ card, state, xp }: { card: BountyCard; state: BountyState; xp: 
   );
 }
 
-/** An open bounty: a notice pinned to the board, the one you can take now. */
-function OpenNotice({ card, recommended }: { card: BountyCard; recommended: boolean }) {
+/** Pinned by hand: each notice sits a little off straight, and none the same (from sm up; phones stay straight). */
+const TILT = ["sm:-rotate-1", "sm:rotate-[0.7deg]", "sm:rotate-0", "sm:-rotate-[0.5deg]"];
+
+/** An open bounty: a notice pinned to the board, as wide as its title, the one you can take now. */
+function OpenNotice({ card, recommended, tilt }: { card: BountyCard; recommended: boolean; tilt: string }) {
   return (
-    <li data-testid={`bounty-${card.id}`} data-state="open" data-recommended={recommended || undefined} className="w-full sm:w-80">
-      <Link href={`/ticket/${card.id}`} className="block rounded-md border-2 border-slate-500 bg-panel p-4 hover:border-ink">
+    <li data-testid={`bounty-${card.id}`} data-state="open" data-recommended={recommended || undefined} className={`relative w-full pt-2 sm:w-auto sm:max-w-[19rem] ${tilt}`}>
+      <Icon name="pin" className="absolute top-0 left-1/2 z-10 h-5 w-5 -translate-x-1/2 text-slate-300" />
+      <Link href={`/ticket/${card.id}`} className="block rounded-sm border border-slate-500 bg-panel p-4 pt-5 hover:border-ink">
         {recommended && (
           <span data-testid="bounty-recommended" className="mb-1 block text-sm font-semibold text-byte">
             Picked for you<span className="sr-only"> (from your coding profile)</span>

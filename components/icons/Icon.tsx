@@ -268,13 +268,14 @@ const PATHS: Record<IconName, string[]> = {
 
 type Props = {
   name: IconName;
-  /** Size and colour utilities. Default: 1.15em square, in the text colour. */
+  /** Extra utilities (margin, colour, size). Without an h-/w- size it is 1.15em square, in the text colour. */
   className?: string;
   /** Only when the icon stands alone: its accessible name. Otherwise it is hidden from screen readers. */
   label?: string;
 };
 
-export default function Icon({ name, className = "h-[1.15em] w-[1.15em]", label }: Props) {
+export default function Icon({ name, className = "", label }: Props) {
+  const sized = /(^|\s)(h|w|size)-/.test(className);
   return (
     <svg
       viewBox="0 0 24 24"
@@ -283,7 +284,7 @@ export default function Icon({ name, className = "h-[1.15em] w-[1.15em]", label 
       strokeWidth={1.6}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`inline-block shrink-0 align-[-0.2em] ${className}`}
+      className={`inline-block shrink-0 align-[-0.2em] ${sized ? "" : "h-[1.15em] w-[1.15em] "}${className}`}
       aria-hidden={label ? undefined : true}
       role={label ? "img" : undefined}
       aria-label={label}
