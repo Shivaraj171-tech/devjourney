@@ -89,9 +89,9 @@ export function flowStreak(tickets: FlowTicket[]): number {
 /** Flow labels: shown from 2 clean merges in a row. */
 export function flowLabel(streak: number): string | null {
   if (streak < 2) return null;
-  if (streak >= 5) return `🌊 Deep flow ×${streak}`;
-  if (streak >= 3) return `🔥 On a roll ×${streak}`;
-  return `🎯 Flow ×${streak}`;
+  if (streak >= 5) return `Deep flow ×${streak}`;
+  if (streak >= 3) return `On a roll ×${streak}`;
+  return `Flow ×${streak}`;
 }
 
 // ---------- Season performance review ----------
@@ -160,7 +160,7 @@ export function performanceReview(tickets: ReviewTicket[], progress: Record<stri
   if (hitl.trusted > 0) strengths.push(`Checked Byte's good code instead of trusting it blindly (${hitl.trusted}×).`);
   if (withQuiz.length > 0 && quizzesPerfect === withQuiz.length) strengths.push("Every quiz perfect on the first try.");
   if ((byType.review ?? 0) > 0 && falseAlarms === 0) strengths.push("Code reviews with zero false alarms.");
-  if (hintsUsed > 0) strengths.push("Asked for help when stuck, which is exactly what good teammates do.");
+  if (hintsUsed > 0) strengths.push("Asked for a hint when stuck instead of guessing for an hour.");
 
   let nextStep: string | null = null;
   if (hitl.wavedThrough > 0) nextStep = "Byte got a bug past you. Next season, run the tests before you trust its code.";

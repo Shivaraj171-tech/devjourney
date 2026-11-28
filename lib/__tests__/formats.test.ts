@@ -120,7 +120,7 @@ test("break_it: request, call preview and feedback", () => {
   assert.equal(broken.tone, "good");
   assert.match(broken.text, /\[333, 333, 333\].*breaks the spec/);
   const crashBroken = breakItFeedback({ status: "broken", message: "Byte's code crashed: IndexError: x", result: null, stdout: "" }, "");
-  assert.match(crashBroken.text, /^Byte's code crashed: IndexError: x\. That breaks the spec!$/);
+  assert.match(crashBroken.text, /^Byte's code crashed: IndexError: x\. That breaks the spec\.$/);
   const holds = breakItFeedback({ status: "holds", message: "", result: "[300, 300, 300]", stdout: "" }, "Try another total.");
   assert.equal(holds.tone, "neutral");
   assert.match(holds.text, /meets the spec\. Try another total\.$/);

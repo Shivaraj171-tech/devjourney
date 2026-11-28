@@ -112,7 +112,7 @@ export function adaptiveHelp(log: RunLogEntry[], ticket: HelpTicket, habits: Hab
     title,
     body: body + pointer,
     action: "step-through",
-    actionLabel: "🐞 Step through this check",
+    actionLabel: "Step through this check",
     because: because(what),
   });
   switch (kind) {
@@ -168,7 +168,7 @@ export function adaptiveHelp(log: RunLogEntry[], ticket: HelpTicket, habits: Hab
       title: "Check the edge: exactly at the limit",
       body: `This check tests an edge case: an exact limit, an empty list, the first or last item. Work it out by hand for that one input, line by line, and compare with what the code does (> and >=, range ends and empty lists are the usual suspects).`,
       action,
-      actionLabel: action === "trace" ? "Try the trace table" : action === "lesson" ? "📘 Re-read the lesson" : "🐞 Step through this check",
+      actionLabel: action === "trace" ? "Try the trace table" : action === "lesson" ? "Re-read the lesson" : "Step through this check",
       because: because("still fails, and it's an edge case"),
     };
   }
@@ -182,7 +182,7 @@ export function adaptiveHelp(log: RunLogEntry[], ticket: HelpTicket, habits: Hab
       title: "Time for a hint",
       body: "You've already stepped through it. The next hint points you at the part to change.",
       action: "hint",
-      actionLabel: "💡 Show the next hint",
+      actionLabel: "Show the next hint",
       because: because("still gives a different answer"),
     };
   }
@@ -195,4 +195,4 @@ export function adaptiveHelp(log: RunLogEntry[], ticket: HelpTicket, habits: Hab
 }
 
 /** One line for Byte's card when the learner tends to accept Byte's code without checking. */
-export const BYTE_TRUST_NUDGE = "Last few times Byte's code went through unchecked — try one example first.";
+export const BYTE_TRUST_NUDGE = "Byte's last few changes went through unchecked. Try one example on the next one first.";

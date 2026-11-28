@@ -53,7 +53,7 @@ test("keyboard: Ctrl+M makes Tab move focus out of the editor (and back to inden
   await expect(page.getByTestId("run-tests")).toBeFocused();
 });
 
-test("feedback: code that fails to load says so, keeps the real check count, and is never 'So close'", async ({ page }) => {
+test("feedback: code that fails to load says so, keeps the real check count, and never says 'one check to go'", async ({ page }) => {
   await seedSolved(page, []);
   await page.goto(ticketUrl(t01.id));
   await waitForPython(page);
@@ -65,7 +65,7 @@ test("feedback: code that fails to load says so, keeps the real check count, and
   expect(total).toBeGreaterThan(1);
   await expect(page.getByTestId("run-summary")).toContainText(`0 of ${total} checks could run`);
   await expect(page.getByTestId("run-encouragement")).toContainText("didn't load");
-  await expect(page.getByTestId("run-encouragement")).not.toContainText("So close");
+  await expect(page.getByTestId("run-encouragement")).not.toContainText(/one check to go/i);
 });
 
 test("results pane: a real separator that resizes with the arrow keys, and grows after a run", async ({ page }) => {

@@ -104,7 +104,7 @@ test("certificate share text uses the name, or 'I' for the default name", () => 
   assert.match(certificateShareText("Ana", sc, { merged: 3, total: 3 }, "u"), /^Ana passed "Byte's Week Alone"/);
   const mine = certificateShareText("You", sc, { merged: 3, total: 3 }, "https://x/");
   assert.match(mine, /^I passed/);
-  assert.match(mine, /Human in the loop: verified/);
+  assert.match(mine, /Human in the loop: verified\./);
   assert.match(mine, /3\/3 exam tickets, no hints, skills check Baseline 4\/12 → Final 10\/12/);
   assert.ok(mine.endsWith("https://x/"));
 });

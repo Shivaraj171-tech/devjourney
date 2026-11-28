@@ -15,7 +15,7 @@ test("XP gaps are converted to a realistic number of tickets", () => {
   assert.equal(ticketsForXp(1), 1);
   assert.equal(ticketsForXp(150), 1);
   assert.equal(ticketsForXp(1001), 8);
-  assert.equal(ticketsAwayText(90), "That's about one ticket!");
+  assert.equal(ticketsAwayText(90), "That's about one ticket.");
   assert.equal(ticketsAwayText(1001), "That's about 8 tickets.");
   assert.match(ticketsAwayText(15000), /Keep shipping/);
 });

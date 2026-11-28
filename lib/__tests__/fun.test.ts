@@ -126,7 +126,7 @@ test("performanceReview: counts, learned concepts, rating and strengths", () => 
   assert.equal(r.rating.title, "Outstanding");
   assert.ok(r.strengths.some((s) => s.includes("Caught 2 of Byte's bugs")));
   assert.ok(r.strengths.some((s) => s.includes("zero false alarms")));
-  assert.ok(r.strengths.some((s) => s.includes("Asked for help")));
+  assert.ok(r.strengths.some((s) => s.includes("Asked for a hint when stuck")));
   assert.match(r.nextStep!, /Done-when/);
 });
 

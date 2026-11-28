@@ -123,7 +123,7 @@ test("skills check: 'Not sure yet' on every question, and the baseline result ha
     await page.getByTestId("skills-next").click();
   }
   await expect(page.getByTestId("skills-comparison")).toHaveText("Baseline 0/12");
-  await expect(page.getByTestId("skills-baseline-context")).toHaveText("Most people starting out score 2–5. You'll take it again at the end.");
+  await expect(page.getByTestId("skills-baseline-context")).toHaveText("Most people starting out score 2 to 5. You'll take it again at the end.");
   const saved = (await readProgress(page)).skillsCheck.baseline;
   expect(Object.values(saved.answers).every((a) => a === -1)).toBe(true);
 });
