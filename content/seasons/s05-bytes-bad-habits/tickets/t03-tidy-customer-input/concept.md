@@ -14,6 +14,6 @@ print(phone.startswith("+1"))  # True
 print(" Nuts, dairy ".strip().lower().split(", "))  # ['nuts', 'dairy']
 ```
 
-**Watch out:** `split(",")` keeps the spaces next to the commas: `"a, b".split(",")` is `['a', ' b']`. Strip each part afterwards.
+`split(",")` keeps the spaces next to the commas: `"a, b".split(",")` is `['a', ' b']`. Strip each part afterwards.
 
-**AI check:** when AI code passes a keyword to a built-in method (`split(..., strip=True)`), check that the option really exists with `help(str.split)` or one quick run. Python only complains when the line runs.
+**Options that don't exist.** When AI code passes a keyword to a built-in method (`split(..., strip=True)`), check that the option really exists with `help(str.split)` or one quick run. Python only complains when the line runs.

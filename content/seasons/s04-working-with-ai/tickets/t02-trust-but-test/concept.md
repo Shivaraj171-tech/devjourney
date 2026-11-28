@@ -15,4 +15,4 @@ print(shipping(10) == 0)   # False
 
 The second check comes from the spec's edge and catches the `>=` slip.
 
-**Watch out:** Don't copy the code's logic into your tests (like `expected = 5 if kg >= 10 else 0`). Then the test agrees with the code by definition, mistakes included. Write the expected numbers yourself, from the spec.
+**Tests that agree by definition.** Don't copy the code's logic into your tests (like `expected = 5 if kg >= 10 else 0`). Then the test agrees with the code by definition, mistakes included. Write the expected numbers yourself, from the spec.

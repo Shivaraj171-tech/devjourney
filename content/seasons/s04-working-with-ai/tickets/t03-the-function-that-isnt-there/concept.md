@@ -16,4 +16,4 @@ print("imported fine")  # imported fine
 area(2)  # AttributeError: module 'math' has no attribute 'circle_area'
 ```
 
-**Watch out:** "It imports" and "it compiles" don't prove a function exists. For every function an AI's code calls, open the module and find the `def`, or run that line once.
+**Find the `def`.** "It imports" and "it compiles" don't prove a function exists. For every function an AI's code calls, open the module and find the `def`, or run that line once.

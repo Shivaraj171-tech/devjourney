@@ -16,6 +16,6 @@ print(filled)  # We deliver in Lisbon
 
 Only the second line has the `f`, so only it fills in the blank.
 
-**Watch out:** Python won't warn you if you forget the `f`. The curly braces just show up as normal characters, so the mistake is easy to miss until a customer sees it.
+**The missing `f` is silent.** Python won't warn you if you forget the `f`. The curly braces just show up as normal characters, so the mistake is easy to miss until a customer sees it.
 
-**AI check:** when an AI writes a string with `{ }` in it, check the `f` is there, then run it once with a real value.
+**Strings from Byte.** When an AI writes a string with `{ }` in it, check the `f` is there, then run it once with a real value.

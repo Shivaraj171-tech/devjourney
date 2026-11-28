@@ -14,4 +14,4 @@ print(is_late(45))  # False
 
 The claim says 45 is late, but `>` means *more than* 45, so the example at exactly 45 disproves it.
 
-**Watch out:** Confidence is not evidence. "100% tested" means nothing until you see the tests, and edges like "exactly 45" are where descriptions and code most often disagree.
+Confidence is not evidence. "100% tested" means nothing until you see the tests, and edges like "exactly 45" are where descriptions and code most often disagree.

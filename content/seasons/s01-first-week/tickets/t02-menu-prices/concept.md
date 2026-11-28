@@ -14,6 +14,6 @@ print(cents / 10)       # 37.5
 
 Dividing with `/` always gives a float. In an f-string, `:.2f` means "show exactly 2 digits after the decimal point".
 
-**Watch out:** Unit conversions are a classic source of bugs. Before you divide or multiply, ask "how many of the small unit make one big unit?" Being off by a factor of 10 gives a number that still looks believable.
+**Off by ten still looks like a price.** Unit conversions cause a lot of bugs. Before you divide or multiply, ask "how many of the small unit make one big unit?" Being off by a factor of 10 gives a number that still looks believable.
 
-**AI check:** when an AI converts units, plug in one value whose answer you already know (1250 cents is $12.50).
+When an AI converts units, plug in one value whose answer you already know (1250 cents is $12.50).

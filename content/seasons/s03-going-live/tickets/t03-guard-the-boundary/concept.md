@@ -17,4 +17,4 @@ print("passed")  # passed
 
 Pick examples where a mistake would show: if `double` wrongly did `n + 2`, then `double(2)` would still be 4, but `double(3)` catches it.
 
-**Watch out:** Rules break at their edges. For "X or more", test exactly X *and* the value just below it, not only numbers far away from the edge.
+**X and the value just below it.** Rules break at their edges. For "X or more", test exactly X *and* the value just below it, not only numbers far away from the edge.

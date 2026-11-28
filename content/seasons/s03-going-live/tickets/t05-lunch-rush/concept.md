@@ -15,4 +15,4 @@ print(1004 in sent_set)       # False
 
 Sets have no order and no duplicates, so use them for checking and keep the list when order matters.
 
-**Watch out:** Build the set once, *before* the loop. `x in set(big_list)` inside the loop rebuilds it every time and is just as slow as before.
+**Once, before the loop.** Build the set once, *before* the loop. `x in set(big_list)` inside the loop rebuilds it every time and is just as slow as before.

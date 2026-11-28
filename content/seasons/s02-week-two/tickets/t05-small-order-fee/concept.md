@@ -15,4 +15,4 @@ A single **-** line, and suddenly nobody pays for delivery. The code still runs 
 
 For each **+** or **-** line, ask: is this part of what the description says the PR does? If yes, is it correct? If not, why is it here?
 
-**Watch out:** The riskiest lines are often the small "while I was in there" changes next to the main feature. Nobody is looking for bugs there, so give them as much attention as the new code.
+**While I was in there.** The riskiest lines are often the small "while I was in there" changes next to the main feature. Nobody is looking for bugs there, so give them as much attention as the new code.

@@ -18,6 +18,6 @@ print(sorted(pairs, key=by_count, reverse=True)[0])  # ('margherita', 41)
 
 A key can return a tuple too: Python compares the first items, and only looks at the second ones on a tie. `(-count, dish)` puts big counts first, then names A-Z.
 
-**Watch out:** `sorted(counts)` sorts the dictionary's KEYS only, plain strings. `for dish, count in ["margherita"]` then tries to unpack the 10 letters of "margherita" into two names: `ValueError: too many values to unpack`.
+**Sorting a dictionary gives keys.** `sorted(counts)` sorts the dictionary's KEYS only, plain strings. `for dish, count in ["margherita"]` then tries to unpack the 10 letters of "margherita" into two names: `ValueError: too many values to unpack`.
 
-**AI check:** when an AI explains an error, compare its story with the traceback's last line and the line it points at. If they don't match, trust the traceback.
+When an AI explains an error, compare its story with the traceback's last line and the line it points at. If they don't match, trust the traceback.

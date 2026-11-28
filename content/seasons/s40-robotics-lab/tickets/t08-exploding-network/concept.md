@@ -16,6 +16,6 @@ print(round(math.tanh(50.0), 3), round(math.tanh(150.0), 3))   # 1.0 1.0
 Inputs in centimetres (around 100) push every hidden unit to exactly 1 or -1, where it can't tell boxes apart. Scale inputs to around -1..2 first.
 2. **Learning rate.** Too big and each step overshoots by more than the last: the loss grows until it's infinite, then `nan`.
 
-**Watch out:** an exploding loss isn't a crash. Python carries on with `inf` and `nan`, and the network just outputs nonsense.
+An exploding loss isn't a crash. Python carries on with `inf` and `nan`, and the network just outputs nonsense.
 
-**AI check:** before trusting an AI's training setup, look at the input ranges and plot the loss curve. It should fall, not climb.
+**Input ranges and the loss curve.** Before trusting an AI's training setup, look at the input ranges and plot the loss curve. It should fall, not climb.

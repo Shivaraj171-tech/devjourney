@@ -23,4 +23,4 @@ ZeroDivisionError: integer division or modulo by zero
 
 The wording after the colon can vary between Python versions (`division by zero` vs `integer division or modulo by zero`); the error *type* before it is what matters.
 
-**Watch out:** The line that crashes isn't always where the mistake is. Ask *why* that value reached that line: maybe a check exists, but it runs too late to help.
+**A check that runs too late.** The line that crashes isn't always where the mistake is. Ask *why* that value reached that line: maybe a check exists, but it runs too late to help.

@@ -16,4 +16,4 @@ for m in minutes:
 print(late)  # [50, 70]
 ```
 
-**Watch out:** A vague prompt plus a confident answer is the worst mix: you get code that runs but solves a different problem. If you can't write down what "done" looks like, the AI can't either.
+**Write down what done looks like.** A vague prompt plus a confident answer is the worst mix: you get code that runs but solves a different problem. If you can't write down what "done" looks like, the AI can't either.

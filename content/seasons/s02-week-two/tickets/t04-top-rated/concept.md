@@ -16,4 +16,4 @@ print(len(items) > 0 and items[0] == "pizza")  # False
 
 `and` stops as soon as it finds a `False`, so in the last line `items[0]` never runs and there's no crash. This is called *short-circuiting*.
 
-**Watch out:** When a rule says "both", make sure *every* part is actually in your condition. And remember that the order of the parts matters: the left side is checked first.
+**"Both" means both.** When a rule says "both", make sure *every* part is actually in your condition. And remember that the order of the parts matters: the left side is checked first.
