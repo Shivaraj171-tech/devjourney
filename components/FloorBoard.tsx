@@ -98,7 +98,7 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
       className={expanded ? "bg-panel px-4 py-4 sm:px-5" : "px-4 py-3 sm:px-5"}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h2 className="min-w-0 flex-1">
+        <h2 className="min-w-0 flex-1 basis-full sm:basis-auto">
           <button
             type="button"
             onClick={onToggle}
@@ -125,7 +125,7 @@ export default function FloorBoard({ floor, season, rooms, floorOpen, expanded, 
         )}
         {extra}
       </div>
-      {!expanded && !floorOpen && preview && <p className="mt-0.5 ml-12 max-w-3xl text-sm text-slate-300" data-testid="floor-preview">{preview}</p>}
+      {!expanded && !floorOpen && preview && <p className="mt-0.5 max-w-3xl sm:ml-12 text-sm text-slate-300" data-testid="floor-preview">{preview}</p>}
 
       <div id={boardId} hidden={!expanded}>
         {done.length === 0 ? (
@@ -257,7 +257,7 @@ function RoomRow({ room, big = false, exam = false, prefix, hidden = false }: { 
           )}
         </div>
       </div>
-      <Icon name={state === "done" ? "spike" : "lock"} className={`h-5 w-5 ${state === "done" ? "text-pass" : "text-slate-300"}`} />
+      {state !== "open" && <Icon name={state === "done" ? "spike" : "lock"} className={`h-5 w-5 ${state === "done" ? "text-pass" : "text-slate-300"}`} />}
       <span className="sr-only">({stateText})</span>
     </div>
   );
