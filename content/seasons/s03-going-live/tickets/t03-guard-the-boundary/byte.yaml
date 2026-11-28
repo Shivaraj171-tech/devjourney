@@ -5,7 +5,7 @@ suggestion:
   replace: "def test_exactly_25_dollars_is_free():\n    fee = delivery_fee(2500)\n    assert fee == 0, f\"exactly $25.00 should be free, got {fee}\""
   correct: true
   partial: true
-  says: "Here's the test that would have caught my `>` slip: exactly $25.00 must be free. 🤖"
+  says: "Here's the test that would have caught my `>` slip: exactly $25.00 must be free."
   explain: >-
     Right as far as it goes: it catches Byte's `>` bug. But a threshold typo that makes delivery free
     from $24.00 passes it too. Which amount just below $25.00 would catch that?

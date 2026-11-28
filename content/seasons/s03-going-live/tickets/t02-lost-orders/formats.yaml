@@ -1,8 +1,7 @@
 parsons:
   - goal: >-
       `late_orders(deliveries)` gets a list of `(order_id, minutes)` pairs and returns the ids of
-      the orders that took MORE THAN 45 minutes, in order. Two of the lines are Byte's slips:
-      leave them out.
+      the orders that took MORE THAN 45 minutes, in order. Byte slipped two extra lines into the pile. They don't belong.
     lines:
       - "def late_orders(deliveries):"
       - "    late = []"

@@ -3,7 +3,7 @@ author: "Byte 🤖"
 description: |
   Per Maya's request, orders under $10.00 now pay a $1.50 small-order fee, shown as its own line in the checkout summary.
   New function `small_order_fee` in `app/delivery.py`, plus the new line and total in `order_summary`.
-  While I was in there I also tidied up `delivery_fee` a little. Lines marked + are new or changed. Thank you for reviewing! 🤖
+  While I was in there I also tidied up `delivery_fee` a little. Lines marked + are new or changed. Thanks for reviewing.
 files: [app/delivery.py, app/summary.py]
 issues:
   - file: app/delivery.py

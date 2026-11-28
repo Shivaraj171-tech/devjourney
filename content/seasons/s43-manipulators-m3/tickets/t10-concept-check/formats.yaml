@@ -17,8 +17,7 @@ predict:
     explain: "det J ~ l1 l2 q2 for a small q2: ten times closer to straight, ten times faster joints."
 parsons:
   - goal: >-
-      Write `torques(J, F)`: τ = Jᵀ F for a Jacobian given as a list of rows (m × n), one torque per joint. One
-      line is Byte's slip: leave it out.
+      Write `torques(J, F)`: τ = Jᵀ F for a Jacobian given as a list of rows (m × n), one torque per joint. One line is from Byte. Skip it.
     lines:
       - "def torques(J, F):"
       - "    n = len(J[0])"

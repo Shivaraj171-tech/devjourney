@@ -4,7 +4,7 @@ suggestion:
   find: "    subtotal = 0\n    discount = 0\n    delivery = 0\n    total = 0"
   replace: "    subtotal = cart_subtotal(prices)\n    discount = discount_amount(subtotal, promo_code)\n    delivery = delivery_fee(subtotal - discount)\n    total = subtotal - discount + delivery"
   correct: false
-  says: "Filled in all four amounts for you, using the helpers you imported."
+  says: "Filled in all four amounts for you, using the helpers you imported. Done."
   explain: >-
     Three of the four lines are right, but delivery is worked out on the subtotal AFTER the
     discount. The docstring says "Delivery is based on the subtotal before the discount", and

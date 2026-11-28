@@ -10,7 +10,7 @@ suggestion:
       - "Accept: J + λI can't be singular, so the steps can't explode any more."
       - "Accept: it's the same formula, written more efficiently for square Jacobians."
     answer: 0
-  says: "Damping done: add λ to the diagonal so the matrix is never singular. One line!"
+  says: "Damping done: add λ to the diagonal so the matrix is never singular. One line."
   explain: >-
     Not damped least squares. J + λI shifts J's DIAGONAL entries, not its singular values, so it can still be
     singular (an entry of -λ cancels), it changes the step's direction in arbitrary ways, and it's undefined for a

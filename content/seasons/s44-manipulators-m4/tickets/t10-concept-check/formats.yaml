@@ -15,7 +15,7 @@ predict:
 parsons:
   - goal: >-
       Write `ik_step(q, target)`: one robust numerical IK step, with `fk(q)`, `jac(q)`, `dls(J, e, lam)` and
-      `clamp(dq, m)` available. One line is Byte's slip: leave it out.
+      `clamp(dq, m)` available. One extra line, courtesy of Byte. It stays out.
     lines:
       - "def ik_step(q, target):"
       - "    e = [t - p for t, p in zip(target, fk(q))]"

@@ -10,7 +10,7 @@ suggestion:
       - "It also drops the `:.2f` on the next line, so 1250 would show as `$12.5`."
       - "It should be `// 100`, so the labels come out in whole dollars like the menu."
     answer: 0
-  says: "Cents to dollars is / 100, not / 10. Fixed! 🤖"
+  says: "Cents to dollars is / 100, not / 10. One character. Fixed."
   explain: >-
     Byte is right this time. A dollar is 100 cents, so `cents / 100` turns 1250 into 12.5, and the
     `:.2f` on the next line (which Byte didn't touch) still shows it as `$12.50`. Checking an AI's

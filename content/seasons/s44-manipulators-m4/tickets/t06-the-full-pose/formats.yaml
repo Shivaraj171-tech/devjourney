@@ -19,7 +19,7 @@ predict:
 parsons:
   - goal: >-
       Write `newton_pose_step(q, T_sd)`: one full-pose Newton step for the UR5e. `pose(q)`, `T_inv`, `T_mul`,
-      `log_SE3`, `body_jacobian(q)` and `solve` exist. One line is Byte's slip: leave it out.
+      `log_SE3`, `body_jacobian(q)` and `solve` exist. One line is a near miss from Byte. Leave it out.
     lines:
       - "def newton_pose_step(q, T_sd):"
       - "    V_b = log_SE3(T_mul(T_inv(pose(q)), T_sd))"

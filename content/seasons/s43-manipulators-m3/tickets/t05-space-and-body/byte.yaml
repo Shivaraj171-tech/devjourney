@@ -10,7 +10,7 @@ suggestion:
       - "Accept: the only problem was which corner [p]R sat in, and a transpose fixes the corner."
       - "Accept: an adjoint is symmetric, so transposing it can't hurt."
     answer: 0
-  says: "The tests want [p]R in the bottom-left and mine has it top-right. One transpose and it's in the right place!"
+  says: "The tests want [p]R in the bottom-left and mine has it top-right. One transpose and it's in the right place."
   explain: >-
     The corner is right now, but the transpose turned every R block into Rᵀ and [p]R into Rᵀ[p]ᵀ = -Rᵀ[p]. It
     happens to pass at poses where R is the identity... and nowhere else. Build the blocks you mean: top = [R, 0],

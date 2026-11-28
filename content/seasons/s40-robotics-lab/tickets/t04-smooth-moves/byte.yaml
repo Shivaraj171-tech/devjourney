@@ -10,7 +10,7 @@ suggestion:
       - "Reject: the path now starts one step in (the start pose is gone), and the 12° jumps are untouched."
       - "Reject: (i + 1) / steps can be bigger than 1, so Grabby overshoots the goal."
     answer: 1
-  says: "Off-by-one! Shift t by one and the last pose lands exactly on the goal. Tiny change, big win."
+  says: "Off-by-one. Shift t by one and the last pose lands exactly on the goal. One-line change."
   explain: >-
     The end is fixed, but now the first pose is already 1/steps of the way: the start pose is never sent,
     and there are still only `steps` poses. And `steps_needed` still ignores the elbow, so long moves jump

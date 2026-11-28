@@ -15,7 +15,7 @@ predict:
 parsons:
   - goal: >-
       Write `elbow_angle(x, z, l1, l2, up)`: the elbow angle q2 by the law of cosines, safe at full reach (math is
-      imported). One line is Byte's slip: leave it out.
+      imported). Byte's version left one line in the pile that you won't need.
     lines:
       - "def elbow_angle(x, z, l1, l2, up):"
       - "    c2 = (x * x + z * z - l1 * l1 - l2 * l2) / (2 * l1 * l2)"

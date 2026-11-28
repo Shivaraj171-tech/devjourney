@@ -21,8 +21,7 @@ predict:
       flange in opposite directions about the same axis, and cancel: a hint of what ticket 6 calls a singularity.
 parsons:
   - goal: >-
-      Write `vee_spin(Rd, R)`: the base-frame angular velocity from Ṙ and R (`mul` and `transpose` exist). One
-      line is Byte's slip: leave it out.
+      Write `vee_spin(Rd, R)`: the base-frame angular velocity from Ṙ and R (`mul` and `transpose` exist). One of these is Byte's line. The answer doesn't need it.
     lines:
       - "def vee_spin(Rd, R):"
       - "    W = mul(Rd, transpose(R))"

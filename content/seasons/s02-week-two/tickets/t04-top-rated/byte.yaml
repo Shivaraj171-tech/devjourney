@@ -4,7 +4,7 @@ suggestion:
   find: "    return average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
   replace: "    return len(ratings) >= TOP_RATED_MIN_RATINGS and average_rating(ratings) >= TOP_RATED_MIN_AVERAGE"
   correct: true
-  says: "After Wednesday, safety first! Enough ratings AND a high average, and an empty list can't crash it."
+  says: "After Wednesday, safety first. Enough ratings AND a high average, and an empty list can't crash it."
   explain: >-
     Byte is right. Both rules from the docstring are there, using the existing constants, and the count
     comes first: `and` stops at the first False, so `average_rating` never sees an empty list. One

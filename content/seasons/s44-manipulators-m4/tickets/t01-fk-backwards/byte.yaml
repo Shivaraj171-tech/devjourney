@@ -5,7 +5,7 @@ suggestion:
   replace: "    if r > outer + tol or r < inner - tol:  # outside the ring, either side\n        return 0\n"
   correct: true
   partial: true
-  says: "Forgot the hole in the middle of the ring! A target too close to the shoulder can't be reached either."
+  says: "I forgot the hole in the middle of the ring. A target too close to the shoulder can't be reached either."
   explain: >-
     Right as far as it goes: the inner edge was missing, and boxes at the shoulder are now skipped. But the
     edges themselves still return 2: stretched out (or folded back) the two elbows are the same pose, ONE

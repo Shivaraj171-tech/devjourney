@@ -12,7 +12,7 @@ suggestion:
       - "The `f` is back, but something else on the line changed too, so customers would see a different greeting."
       - "An f-string can't hold `{name}`, so it would crash."
     answer: 1
-  says: "Missing `f`! Without it, Python prints `{name}` as plain text. Fixed. 🤖"
+  says: "Missing `f`. Without it, Python prints `{name}` as plain text. Fixed."
   explain: >-
     The `f` is right, but Byte retyped the whole line and dropped the comma: customers would now see
     "Welcome back to Orbit Orders Sam!". When an AI rewrites a line, compare ALL of it with what it

@@ -1,7 +1,7 @@
 parsons:
   - goal: >-
       Write `screws(frames)`: from the DH frames at home ([frame 0, ..., frame n], each a 4x4), one revolute screw
-      per joint. `cross(a, b)` exists. One line is Byte's slip: leave it out.
+      per joint. `cross(a, b)` exists. One line came from Byte's draft and doesn't belong.
     lines:
       - "def screws(frames):"
       - "    out = []"

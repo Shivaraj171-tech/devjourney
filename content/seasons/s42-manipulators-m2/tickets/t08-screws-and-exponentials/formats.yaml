@@ -18,7 +18,7 @@ predict:
 parsons:
   - goal: >-
       Write `G(w, th)` for a unit axis w: the 3x3 matrix with e^([S] th)'s translation = G v. `skew(w)` and
-      `mm(A, B)` (3x3 product) exist. One line is Byte's slip: leave it out.
+      `mm(A, B)` (3x3 product) exist. Byte's draft had one line too many. Find it and leave it out.
     lines:
       - "def G(w, th):"
       - "    K = skew(w)"

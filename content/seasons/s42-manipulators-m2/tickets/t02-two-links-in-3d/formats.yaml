@@ -21,7 +21,7 @@ trace:
 parsons:
   - goal: >-
       Write `frames_in_base(links)`: the running product of 4x4 link transforms, one base-frame pose per link.
-      `mul(A, B)` multiplies two 4x4s and `I` is the identity. One line is Byte's slip: leave it out.
+      `mul(A, B)` multiplies two 4x4s and `I` is the identity. One extra line, from Byte. It isn't needed.
     lines:
       - "def frames_in_base(links):"
       - "    T, out = I, []"

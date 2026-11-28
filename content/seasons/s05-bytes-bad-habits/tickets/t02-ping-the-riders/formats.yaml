@@ -2,7 +2,7 @@ parsons:
   - goal: >-
       Riders carry at most 4 items per bag. `bags_needed(items)` returns how many bags an order
       of `items` items needs: take 4 items away for every bag, while there are items left.
-      Two of the lines are Byte's slips: leave them out.
+      Two of these lines are Byte's, and both are wrong.
     lines:
       - "def bags_needed(items):"
       - "    bags = 0"

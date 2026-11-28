@@ -1,8 +1,7 @@
 parsons:
   - goal: >-
       Write `matmul(A, B)` with plain loops: entry (i, j) of the result is row i of A dotted with column j
-      of B. It must work for non-square shapes too (a 2x3 times a 3x2). Two lines are Byte's slips: leave
-      them out.
+      of B. It must work for non-square shapes too (a 2x3 times a 3x2). Two lines are decoys from Byte's first draft.
     lines:
       - "def matmul(A, B):"
       - "    C = []"

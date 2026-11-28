@@ -19,7 +19,7 @@ predict:
 parsons:
   - goal: >-
       Write `radii(eigenvalues)`: the ellipsoid's radii from the eigenvalues of J J^T, guarding against tiny
-      negative rounding errors (math is imported). One line is Byte's slip: leave it out.
+      negative rounding errors (math is imported). One line is Byte's guess. Leave it out.
     lines:
       - "def radii(eigenvalues):"
       - "    out = []"

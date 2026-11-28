@@ -1,11 +1,11 @@
 title: "Send an apology text for late orders"
 author: "Byte 🤖"
 description: |
-  Hi team! 👋 Leo asked for an apology SMS when an order is late, so here it is.
+  Leo asked for an apology SMS when an order is late. Here it is.
   `apology_sms` works out the refund with `refunds.refund_for_delay`, the standard
   refund helper in `app/refunds.py`, and adds the voucher from `late_voucher`.
   On-time orders get no text (`None`).
-  The module imports cleanly and I've double-checked every function name. 🤖✅
+  The module imports cleanly and I've double-checked every function name.
 files: [app/apology.py]
 issues:
   - file: app/apology.py

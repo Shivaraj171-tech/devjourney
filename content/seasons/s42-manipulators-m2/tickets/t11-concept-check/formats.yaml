@@ -19,7 +19,7 @@ predict:
 parsons:
   - goal: >-
       Write `fk(links)`: multiply a list of 4x4 link transforms from the base outwards and return the last
-      pose. `mul(A, B)` and the identity `I` exist. One line is Byte's slip: leave it out.
+      pose. `mul(A, B)` and the identity `I` exist. There's a spare line in the pile, and it's Byte's. Don't use it.
     lines:
       - "def fk(links):"
       - "    T = I"

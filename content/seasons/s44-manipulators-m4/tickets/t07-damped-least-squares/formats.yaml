@@ -18,7 +18,7 @@ predict:
 parsons:
   - goal: >-
       Write `dls(J, e, lam)`: the damped least-squares step for a list-of-rows J (`matmul`, `transpose`,
-      `mat_vec` and `solve` exist). One line is Byte's slip: leave it out.
+      `mat_vec` and `solve` exist). Byte left one wrong line in the mix.
     lines:
       - "def dls(J, e, lam):"
       - "    A = matmul(J, transpose(J))"

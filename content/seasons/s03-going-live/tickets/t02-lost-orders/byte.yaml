@@ -11,7 +11,7 @@ suggestion:
     - Only the dictionary key is fixed; the Order inside keeps its text id.
     - The id is a number again before the Order is built, so both match.
     answer: 2
-  says: JSON turned your keys into text. I convert each id back with int() before the Order is built. 🔑
+  says: "JSON turned your keys into text. I convert each id back with int() before the Order is built."
   explain: 'Byte is right. JSON keys are always text, so the loop gets "1001". Converting it once, at the top of
     the loop, means the Order is built with 1001 and stored under 1001: loaded[1001] works and order.order_id is
     a number again, just as it was before saving.'

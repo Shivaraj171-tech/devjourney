@@ -30,8 +30,7 @@ trace:
       elbow: det = -0.4 x 0.4 - 0 = -0.16, nonzero, so the gripper can move every way.
 parsons:
   - goal: >-
-      Write `jac(q1, q2)`: the two-link Jacobian with l1 = 0.5, l2 = 0.4 (math is imported). One line is Byte's
-      slip: leave it out.
+      Write `jac(q1, q2)`: the two-link Jacobian with l1 = 0.5, l2 = 0.4 (math is imported). Byte mixed one wrong line in.
     lines:
       - "def jac(q1, q2):"
       - "    s1, c1 = math.sin(q1), math.cos(q1)"

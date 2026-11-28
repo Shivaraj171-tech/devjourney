@@ -2,7 +2,7 @@ parsons:
   - goal: >-
       Write `update(q, reward, best_next, done)`: the Q-learning update with ALPHA = 0.5 and GAMMA = 0.9.
       The target is the reward plus the discounted best next value, except when the episode is over:
-      then it is just the reward. Return the new Q. Two lines are Byte's slips: leave them out.
+      then it is just the reward. Return the new Q. Byte added two lines of its own. Leave both out.
     lines:
       - "def update(q, reward, best_next, done):"
       - "    target = reward"

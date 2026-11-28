@@ -41,7 +41,7 @@ suggestion:
   find: "    return int(subtotal_cents * percent)\n\n\ndef total_with_tip(prices, percent):\n    \"\"\"Return the cart total in cents with the tip added.\n\n    prices is the cart: a list of prices in cents. The checkout screen\n    shows the cart again afterwards, so the cart itself must not change.\n    \"\"\"\n    tip = tip_amount(cart_subtotal(prices), percent)\n    prices.append(tip)\n    return cart_subtotal(prices)"
   replace: "    return subtotal_cents * percent // 100\n\n\ndef total_with_tip(prices, percent):\n    \"\"\"Return the cart total in cents with the tip added.\n\n    prices is the cart: a list of prices in cents. The checkout screen\n    shows the cart again afterwards, so the cart itself must not change.\n    \"\"\"\n    tip = tip_amount(cart_subtotal(prices), percent)\n    return cart_subtotal(prices) + tip"
   correct: true
-  says: "Sorry about that PR! The tip is now a real percent, and it goes in the total, not in the customer's cart."
+  says: "That PR was mine, sorry. The tip is now a real percent, and it goes in the total, not in the customer's cart."
   explain: >-
     Byte is right this time. `subtotal_cents * percent // 100` takes 15% and rounds down (a $20.00 order
     gets a $3.00 tip, not $300.00), and `cart_subtotal(prices) + tip` works out the total without

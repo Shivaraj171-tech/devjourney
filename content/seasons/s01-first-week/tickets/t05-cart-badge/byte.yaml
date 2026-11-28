@@ -10,7 +10,7 @@ suggestion:
       - "`append` changes the cart list in place, and `len` counts its items."
       - "`len(cart)` adds up the prices, so the badge would show cents, not items."
     answer: 1
-  says: "Both done! `.append()` puts the price on the end, and `len(cart)` is the badge number. 🛒"
+  says: "Both done. `.append()` puts the price on the end, and `len(cart)` is the badge number."
   explain: >-
     Byte is right. `cart.append(price_cents)` changes the list you were given (that's why add_item
     doesn't need to return anything), and `len(cart)` counts the items, which is the number on the
