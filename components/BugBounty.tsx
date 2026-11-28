@@ -86,7 +86,7 @@ function Facts({ card, state, xp }: { card: BountyCard; state: BountyState; xp: 
     <span className="text-sm text-slate-300">
       Mystery bug, about {card.estimatedMinutes} min,{" "}
       <span className="font-semibold text-ink tabular-nums" data-testid="bounty-xp">
-        {state === "done" ? `+${xp} XP earned` : `${card.xp} XP`}
+        {state === "done" ? `+${xp} XP` : `${card.xp} XP`}
       </span>
     </span>
   );

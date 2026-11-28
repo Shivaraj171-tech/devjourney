@@ -53,7 +53,7 @@ export default function TodayCard({ playerName, next, nextFloor, nextIsExam = fa
 
       <div className="min-w-0 md:order-1 md:pt-2">
         <h2 className="font-display text-2xl font-bold text-ink sm:text-3xl">Your day at Orbit Orders</h2>
-        <ul className="mt-4 space-y-2.5 text-[15px]" aria-label="Your day">
+        <ul className="mt-4 grid grid-cols-2 gap-x-5 gap-y-3 text-[15px] sm:grid-cols-1 sm:gap-y-2.5" aria-label="Your day">
           <Fact icon={<Icon name="flame" className={streak > 0 ? "text-orange-300" : "text-slate-300"} />} testId="today-streak">
             {streak > 0 ? `${streak}-day streak` : "No streak yet. Start one today"}
           </Fact>

@@ -169,7 +169,7 @@ test("every bounty can be solved: starter fails, the fix passes", async ({ page 
   const p = await readProgress(page);
   for (const b of bounties) expect(p.tickets[b.id].solved, b.id).toBe(true);
   await page.goto("/");
-  await expect(page.getByTestId("bounty-progress")).toContainText(`${bounties.length}/${bounties.length} solved`);
+  await expect(page.getByTestId("bounty-progress")).toContainText(`${bounties.length} of ${bounties.length} solved`);
   for (const b of bounties) {
     await expect(page.getByTestId(`bounty-${b.id}`).getByTestId("bounty-reveal")).toContainText(b.bugKind!);
   }

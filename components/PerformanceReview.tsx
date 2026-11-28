@@ -64,7 +64,7 @@ export default function PerformanceReviewView({ floorLabel, season, tickets, nex
         </dd>
         <dt className="text-slate-300">About</dt>
         <dd className="text-ink">
-          {r.complete ? "Your performance review" : "A mid-season check-in"}, {floorLabel}
+          {r.complete ? "Performance review" : "Mid-season check-in"}, {floorLabel}
         </dd>
       </dl>
 
