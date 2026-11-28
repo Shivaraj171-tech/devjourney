@@ -18,4 +18,4 @@ Inputs in centimetres (around 100) push every hidden unit to exactly 1 or -1, wh
 
 An exploding loss isn't a crash. Python carries on with `inf` and `nan`, and the network just outputs nonsense.
 
-**Input ranges and the loss curve.** Before trusting an AI's training setup, look at the input ranges and plot the loss curve. It should fall, not climb.
+**Ranges and the loss curve.** Before trusting an AI's training setup, look at the input ranges and plot the loss curve. It should fall, not climb.

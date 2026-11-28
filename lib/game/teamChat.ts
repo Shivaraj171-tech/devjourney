@@ -110,13 +110,23 @@ export function teamChat(input: ChatInput): ChatMessage[] {
     if (input.flow >= 3) {
       msgs.push({ id: "flow", from: "sam", text: `${input.flow} clean merges in a row? ok who's helping you` });
     } else if (input.last?.clean) {
-      msgs.push({ id: `clean-${last.id}`, from: "sam", text: "first try, no hints? show me how. i'll pretend i knew." });
+      const text = pick(["first try, no hints? show me how. i'll pretend i knew.", "no hints? i used three on mine. don't tell maya."], last.id);
+      msgs.push({ id: `clean-${last.id}`, from: "sam", text });
     } else if ((input.last?.hintsUsed ?? 0) > 0) {
       msgs.push({ id: `hints-${last.id}`, from: "maya", text: "You used a hint. Good. Ask at minute ten, not at 6 p.m." });
     } else if (input.xp > input.samXp) {
-      msgs.push({ id: "rival-ahead", from: "sam", text: "you passed me on the leaderboard? on a weekday? rematch tomorrow." });
+      const text = pick(["you passed me on the leaderboard? on a weekday? rematch tomorrow.", "ok you're ahead. i'm choosing to find this motivating."], last.id);
+      msgs.push({ id: "rival-ahead", from: "sam", text });
     } else {
-      msgs.push({ id: "rival-behind", from: "sam", text: `i'm ${input.samXp - input.xp} XP ahead. not that i check. i check hourly.` });
+      const gap = input.samXp - input.xp;
+      const text = pick(
+        [
+          `i'm ${gap} XP ahead. not that i check. i check hourly.`,
+          `${gap} XP ahead of you. also every test customer called Sam is me, and i'd like a refund.`,
+        ],
+        last.id,
+      );
+      msgs.push({ id: "rival-behind", from: "sam", text });
     }
   }
 
